@@ -66,3 +66,11 @@ project(":server") {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     }
 }
+
+project(":panna-shared") {
+    apply plugin: "kotlin"
+
+    dependencies {
+        api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    }
+}

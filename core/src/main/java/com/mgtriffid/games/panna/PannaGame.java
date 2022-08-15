@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta;
+package com.mgtriffid.games.panna;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.graphics.Texture;

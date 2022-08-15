@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta;
+package com.mgtriffid.games.panna;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;

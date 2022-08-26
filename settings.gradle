@@ -1,1 +1,1 @@
-include 'desktop', 'core', 'server', 'panna-shared'
+include 'desktop', 'core', 'panna-server', 'panna-shared', 'cotta-server'

@@ -9,6 +9,6 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("cotta");
-		new Lwjgl3Application(new PannaGame(), config);
+		new Lwjgl3Application(new PannaGdxGame(), config);
 	}
 }

@@ -1,8 +1,11 @@
 package com.mgtriffid.games.cotta
 
+import com.mgtriffid.games.cotta.core.CottaGame
 import java.lang.Thread.sleep
 
-class CottaServer {
+class CottaServer(
+    private val game: CottaGame
+) {
     var nextTickAt = now()
 
     fun start() {
@@ -13,7 +16,7 @@ class CottaServer {
     }
 
     private fun integrate() {
-        println("New tick")
+        game.update()
     }
 
     private fun waitUntilNextTick() {

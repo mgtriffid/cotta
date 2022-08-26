@@ -65,6 +65,8 @@ project(":panna-server") {
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-server")
+        implementation project(":cotta-core")
+        implementation project(":panna-shared")
     }
 }
 
@@ -73,10 +75,20 @@ project(":panna-shared") {
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        implementation project(":cotta-core")
     }
 }
 
 project(":cotta-server") {
+    apply plugin: "kotlin"
+
+    dependencies {
+        api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        implementation project(":cotta-core")
+    }
+}
+
+project(":cotta-core") {
     apply plugin: "kotlin"
 
     dependencies {

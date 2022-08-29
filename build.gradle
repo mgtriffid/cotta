@@ -56,6 +56,9 @@ project(":core") {
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        implementation project(":panna-shared")
+        implementation project(":cotta-client")
+        implementation project(":cotta-core")
     }
 }
 
@@ -93,5 +96,14 @@ project(":cotta-core") {
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    }
+}
+
+project(":cotta-client") {
+    apply plugin: "kotlin"
+
+    dependencies {
+        api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        implementation project(":cotta-core")
     }
 }

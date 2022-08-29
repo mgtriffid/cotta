@@ -1,2 +1,2 @@
 include 'desktop', 'core', 'panna-server', 'panna-shared',
-        'cotta-server', 'cotta-core'
+        'cotta-server', 'cotta-core', 'cotta-client'

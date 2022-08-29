@@ -8,11 +8,13 @@ import com.badlogic.gdx.utils.ScreenUtils;
 public class PannaGdxGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture img;
+	PannaClient pannaClient;
 	
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
+		pannaClient = new PannaClient();
 	}
 
 	@Override
@@ -25,6 +27,7 @@ public class PannaGdxGame extends ApplicationAdapter {
 		// which will first take care of real state, then of state plus predicted state, then finally of interpolated
 		// state that is useful for rendering. Something like that. Perhaps after we introduce some graphics it will be
 		// easier to develop something that would satisfy needs of most of LibGDX-oriented game developers.
+		pannaClient.update();
 		ScreenUtils.clear(1, 0, 0, 1);
 		batch.begin();
 		batch.draw(img, 0, 0);

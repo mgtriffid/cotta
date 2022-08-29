@@ -7,8 +7,10 @@ class CottaServer(
     private val game: CottaGame
 ) {
     var nextTickAt = now()
+    private val purgatory = ServerCodePurgatory(game)
 
     fun start() {
+        purgatory.state = game.initialState()
         while (true) {
             integrate()
             waitUntilNextTick()
@@ -16,7 +18,9 @@ class CottaServer(
     }
 
     private fun integrate() {
-        game.update()
+        val nonPlayerInput = purgatory.getNonPlayerInput()
+        purgatory.state = game.applyInput(purgatory.state, nonPlayerInput)
+        println(purgatory.state)
     }
 
     private fun waitUntilNextTick() {

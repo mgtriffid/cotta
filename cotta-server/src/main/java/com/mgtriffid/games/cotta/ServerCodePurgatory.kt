@@ -1,6 +1,8 @@
 package com.mgtriffid.games.cotta
 
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.network.CottaNetwork
+import com.mgtriffid.games.cotta.network.CottaServerNetwork
 
 /**
  * Temporary class that hosts code which is yet to be settled somewhere. Let's call this "nowhere" and
@@ -9,11 +11,22 @@ import com.mgtriffid.games.cotta.core.CottaGame
  * belongs to Panna game.
  */
 class ServerCodePurgatory(
-    val game: CottaGame
+    private val game: CottaGame,
+    private val network: CottaNetwork
 ) {
     lateinit var state: Any
+    lateinit var serverNetwork: CottaServerNetwork
 
     fun getNonPlayerInput(): Any {
         return game.calculateNonPlayerInput(state)
+    }
+
+    fun getPlayerInputs(): Any {
+        return emptyMap<Any, Any>()
+    }
+
+    fun initializeNetwork() {
+        serverNetwork = network.createServerNetwork()
+        serverNetwork.initialize()
     }
 }

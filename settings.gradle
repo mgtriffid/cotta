@@ -1,2 +1,3 @@
 include 'desktop', 'core', 'panna-server', 'panna-shared',
-        'cotta-server', 'cotta-core', 'cotta-client'
+        'cotta-server', 'cotta-core', 'cotta-client',
+        'cotta-network', 'cotta-network-kryonet'

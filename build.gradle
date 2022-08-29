@@ -70,6 +70,8 @@ project(":panna-server") {
         implementation project(":cotta-server")
         implementation project(":cotta-core")
         implementation project(":panna-shared")
+        implementation project(":cotta-network-kryonet")
+        implementation project(":cotta-network")
     }
 }
 
@@ -88,6 +90,7 @@ project(":cotta-server") {
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
+        implementation project(":cotta-network")
     }
 }
 
@@ -105,5 +108,19 @@ project(":cotta-client") {
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
+        implementation project(":cotta-network")
+    }
+}
+
+project(":cotta-network") {
+    apply plugin: "kotlin"
+}
+
+project(":cotta-network-kryonet") {
+    apply plugin: "kotlin"
+
+    dependencies {
+        implementation project(":cotta-network")
+        api "com.github.crykn:kryonet:2.22.7"
     }
 }

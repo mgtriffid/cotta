@@ -15,6 +15,7 @@ public class PannaGdxGame extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
 		pannaClient = new PannaClient();
+		pannaClient.initialize();
 	}
 
 	@Override

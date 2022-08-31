@@ -1,12 +1,15 @@
 package com.mgtriffid.games.panna
 
 import com.mgtriffid.games.cotta.client.CottaClient
+import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.panna.shared.PannaGame
 
 class PannaClient {
-    val cottaClient = CottaClient(PannaGame())
+    private val cottaClient = CottaClient(PannaGame(), KryonetCottaNetwork())
+
+    fun initialize() = cottaClient.initialize()
 
     fun update() {
-        println("Panna client updated")
+        cottaClient.update()
     }
 }

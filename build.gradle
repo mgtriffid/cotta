@@ -50,6 +50,7 @@ project(":desktop") {
     }
 }
 
+// TODO maybe rename to "panna-client"?
 project(":core") {
     apply plugin: "kotlin"
 
@@ -59,6 +60,8 @@ project(":core") {
         implementation project(":panna-shared")
         implementation project(":cotta-client")
         implementation project(":cotta-core")
+        implementation project(":cotta-network-kryonet")
+        implementation project(":cotta-network")
     }
 }
 
@@ -123,4 +126,8 @@ project(":cotta-network-kryonet") {
         implementation project(":cotta-network")
         api "com.github.crykn:kryonet:2.22.7"
     }
+}
+
+project(":cotta-gdx") {
+    apply plugin: "kotlin"
 }

@@ -24,6 +24,7 @@ class CottaServer(
         val playerInput = purgatory.getPlayerInputs()
         val nonPlayerInput = purgatory.getNonPlayerInput()
         purgatory.state = game.applyInput(purgatory.state, nonPlayerInput)
+        purgatory.sendDataToClients()
         println(purgatory.state)
     }
 

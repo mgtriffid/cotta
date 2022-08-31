@@ -16,4 +16,9 @@ class KryonetCottaServerNetwork : CottaServerNetwork {
     private fun configureListener() {
 
     }
+
+    override fun dispatch(data: String) {
+        // todo not to all but to specific
+        server.sendToAllUDP(data)
+    }
 }

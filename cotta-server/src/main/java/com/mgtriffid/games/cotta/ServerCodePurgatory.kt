@@ -29,4 +29,13 @@ class ServerCodePurgatory(
         serverNetwork = network.createServerNetwork()
         serverNetwork.initialize()
     }
+
+    fun sendDataToClients() {
+        val data = getData()
+        serverNetwork.dispatch(data)
+    }
+
+    private fun getData(): String { // TODO not String but some special thing
+        return "keke hello data from server"
+    }
 }

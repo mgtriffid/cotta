@@ -75,6 +75,7 @@ project(":panna-server") {
         implementation project(":panna-shared")
         implementation project(":cotta-network-kryonet")
         implementation project(":cotta-network")
+        implementation project(":panna-lobby")
     }
 }
 
@@ -130,4 +131,13 @@ project(":cotta-network-kryonet") {
 
 project(":cotta-gdx") {
     apply plugin: "kotlin"
+}
+
+project(":panna-lobby") {
+    apply plugin: "kotlin"
+
+    dependencies {
+        implementation "com.sparkjava:spark-kotlin:1.0.0-alpha"
+        implementation "com.google.code.gson:gson:2.8.6"
+    }
 }

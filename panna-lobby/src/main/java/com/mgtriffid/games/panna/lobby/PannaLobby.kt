@@ -4,9 +4,10 @@ import com.google.gson.Gson
 import spark.Request
 import spark.Response
 import spark.Spark
+import spark.Spark.before
 import spark.Spark.get
 import spark.Spark.post
-import spark.kotlin.halt
+import spark.Spark.halt
 import java.util.*
 
 
@@ -31,6 +32,14 @@ class PannaLobby {
         Spark.exception(
             Exception::class.java
         ) { exception: Exception, request: Request?, response: Response? -> exception.printStackTrace() }
+        before(
+            "/rooms/*",
+            this::authFilter
+        )
+        before(
+            "/rooms",
+            this::authFilter
+        )
         post(
             "/login",
             { req, res ->
@@ -52,7 +61,11 @@ class PannaLobby {
         )
         get(
             "/rooms/:roomId",
-            { req, _ -> rooms.rooms[RoomId(req.params("roomId"))]?.let { RoomDto(req.params("roomId"), it.map) } },
+            { req, _ ->
+                rooms.rooms[RoomId(req.params("roomId"))]?.let {
+                    RoomDto(req.params("roomId"), it.map)
+                }
+            },
             gson::toJson
         )
         post(
@@ -65,6 +78,12 @@ class PannaLobby {
             },
             gson::toJson
         )
+    }
+
+    private fun authFilter(req: Request, resp: Response) {
+        if (sessions[req.headers("token")?.let(::SessionToken)] == null) {
+            halt(401, "Unauthorized")
+        }
     }
 }
 

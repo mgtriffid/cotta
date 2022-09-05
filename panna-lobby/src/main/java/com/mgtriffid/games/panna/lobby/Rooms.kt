@@ -1,11 +1,13 @@
 package com.mgtriffid.games.panna.lobby
 
+import java.util.UUID
+
 class Rooms {
     val rooms: MutableMap<RoomId, Room> = HashMap()
     init {
-        rooms[RoomId("room1")] = Room("Playgrounds")
-        rooms[RoomId("room2")] = Room("ZTN")
-        rooms[RoomId("room3")] = Room("Aerowalk")
+        rooms[RoomId(UUID.randomUUID().toString())] = Room("Playgrounds")
+        rooms[RoomId(UUID.randomUUID().toString())] = Room("ZTN")
+        rooms[RoomId(UUID.randomUUID().toString())] = Room("Aerowalk")
     }
 }
 

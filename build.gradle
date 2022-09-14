@@ -62,6 +62,7 @@ project(":core") {
         implementation project(":cotta-core")
         implementation project(":cotta-network-kryonet")
         implementation project(":cotta-network")
+        implementation "com.github.kittinunf.fuel:fuel:2.3.1"
     }
 }
 

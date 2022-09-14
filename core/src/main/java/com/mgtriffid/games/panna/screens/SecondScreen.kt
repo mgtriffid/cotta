@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.panna.PannaGdxGame
 
-class FirstScreen(
-    val game: PannaGdxGame
-) : ScreenAdapter() {
+class SecondScreen(private val game: PannaGdxGame) : ScreenAdapter() {
 
     var batch: SpriteBatch? = null
     lateinit var img: Texture
@@ -30,13 +28,13 @@ class FirstScreen(
         // easier to develop something that would satisfy needs of most of LibGDX-oriented game developers.
         actuallyDraw()
         if (Gdx.input.justTouched()) {
-            game.screen = SecondScreen(game)
+            game.screen = FirstScreen(game)
             dispose()
         }
     }
 
     private fun actuallyDraw() {
-        ScreenUtils.clear(1f, 0f, 0f, 1f)
+        ScreenUtils.clear(0f, 0f, 1f, 1f)
         batch!!.begin()
         batch!!.draw(img, 0f, 0f)
         batch!!.end()

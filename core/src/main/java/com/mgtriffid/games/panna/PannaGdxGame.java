@@ -1,13 +1,13 @@
 package com.mgtriffid.games.panna;
 
 import com.badlogic.gdx.Game;
-import com.mgtriffid.games.panna.screens.FirstScreen;
+import com.mgtriffid.games.panna.screens.MenuScreen;
 
 public class PannaGdxGame extends Game {
 
 	@Override
 	public void create () {
-		setScreen(new FirstScreen(this));
+		setScreen(new MenuScreen(this));
 	}
 
 	@Override

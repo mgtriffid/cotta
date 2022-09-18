@@ -26,9 +26,11 @@ class MenuScreen(
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
     lateinit var button: Button
+    lateinit var backgroundTexture: Texture
 
     override fun show() {
         prepareStage()
+        backgroundTexture = Texture("menu_bg.png")
     }
 
     private fun prepareStage() {
@@ -82,6 +84,9 @@ class MenuScreen(
     override fun render(delta: Float) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         stage.act(delta)
+        stage.batch.begin()
+        stage.batch.draw(backgroundTexture, 0f, 0f)
+        stage.batch.end()
         stage.draw()
     }
 }

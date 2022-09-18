@@ -17,6 +17,7 @@ import java.util.*
 class PannaLobby {
     private val rooms: Rooms = Rooms()
     private val users: Users = Users()
+    private val characters: Characters = Characters()
     private val sessions = Sessions()
 
     fun start() {
@@ -87,7 +88,8 @@ class PannaLobby {
         get(
             "/characters",
             { req, _ ->
-
+                val username = getUser(req)
+                characters.forUser(username).map { it.toCharacterDto() }
             }
         )
     }
@@ -104,6 +106,19 @@ class PannaLobby {
 
     private fun getUser(req: Request): Username = getUserOrNull(req) ?: throw halt(401, "Unauthorized")
 }
+
+private fun PannaCharacter.toCharacterDto() = CharacterDto(
+    name = name.name,
+    color = ColorDto(color.r, color.g, color.b)
+)
+
+data class CharacterDto(val name: String, val color: ColorDto)
+
+data class ColorDto(
+    val r: Int,
+    val g: Int,
+    val b: Int
+)
 
 data class RoomsDto(
     val items: List<RoomDto>

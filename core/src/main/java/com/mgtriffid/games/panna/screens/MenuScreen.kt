@@ -6,19 +6,23 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.NinePatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Button
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle
+import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.TextField
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.mgtriffid.games.panna.PannaGdxGame
+import org.w3c.dom.Text
 
 class MenuScreen(
     private val game: PannaGdxGame
@@ -34,6 +38,7 @@ class MenuScreen(
     }
 
     private fun prepareStage() {
+        prepareTextFieldNinePatch()
         stage = Stage()
         Gdx.input.inputProcessor = stage
 
@@ -46,7 +51,7 @@ class MenuScreen(
             Color.YELLOW,
             null,
             null,
-            null
+            prepareTextFieldNinePatch()
         )
         val loginInput = TextField("", textFieldStyle)
         table.add(loginInput)
@@ -88,5 +93,10 @@ class MenuScreen(
         stage.batch.draw(backgroundTexture, 0f, 0f)
         stage.batch.end()
         stage.draw()
+    }
+
+    private fun prepareTextFieldNinePatch(): NinePatchDrawable {
+        val ninePatch: NinePatch = NinePatch(Texture("textfield_9patch_atlas.png"), 8, 8, 8, 8)
+        return NinePatchDrawable(ninePatch)
     }
 }

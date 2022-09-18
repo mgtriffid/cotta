@@ -16,6 +16,7 @@ import java.util.*
  */
 class PannaLobby {
     private val rooms: Rooms = Rooms()
+    private val users: Users = Users()
     private val sessions = Sessions()
 
     fun start() {
@@ -45,11 +46,13 @@ class PannaLobby {
         )
         post(
             "/login",
-            { req, res ->
-                val (user, pass) = gson.fromJson(req.body(), LoginDto::class.java)
-                if (pass.startsWith(user)) {
+            { req, _ ->
+                val loginDto = gson.fromJson(req.body(), LoginDto::class.java)
+                val username = Username(loginDto.username)
+                val password = Password(loginDto.password)
+                if (users.auth(username, password)) {
                     val token = UUID.randomUUID().toString()
-                    sessions[SessionToken(token)] = Username(user)
+                    sessions[SessionToken(token)] = username
                     SuccessfulLoginResponse(token)
                 } else {
                     halt(401, "Login failed")
@@ -80,6 +83,12 @@ class PannaLobby {
                 CreateRoomDtoResponse(id)
             },
             gson::toJson
+        )
+        get(
+            "/characters",
+            { req, _ ->
+
+            }
         )
     }
 
@@ -122,8 +131,6 @@ data class LoginDto(
 data class SessionToken(
     val token: String
 )
-
-data class Username(val username: String)
 
 data class SuccessfulLoginResponse(val token: String)
 

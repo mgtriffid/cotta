@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -17,12 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.TextField
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
-import com.github.kittinunf.fuel.core.Body
-import com.github.kittinunf.fuel.core.FuelError
-import com.github.kittinunf.fuel.core.Parameters
-import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.core.ResponseResultHandler
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.mgtriffid.games.panna.PannaGdxGame
@@ -71,7 +64,7 @@ class MenuScreen(
         button.addListener(object : InputListener() {
             override fun touchDown(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int): Boolean {
                 Gdx.app.log("MenuScreen", "Button clicked")
-                "http://127.0.0.1:4567/login".httpPost().body("{\n  \"username\": \"odnako\",\n  \"password\": \"odnako123\"\n}\n")
+                "http://127.0.0.1:4567/login".httpPost().body("{\n  \"username\": \"${loginInput.text}\",\n  \"password\": \"${passwordInput.text}\"\n}\n")
                 .responseString { req, resp, result ->
                     when (result) {
                         is Result.Success -> println(result.get())
@@ -82,8 +75,6 @@ class MenuScreen(
             }
         })
         button.style = buttonStyle
-
-        // how to call HTTP and add a callback
 
         table.add(button)
     }

@@ -13,10 +13,10 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Button
-import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.ui.Table
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.ui.TextField
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
@@ -87,6 +87,7 @@ class MenuScreen(
         table.add(passwordLabel)
         val passwordInput = TextField("", Styles.textFieldStyle)
         passwordInput.isPasswordMode = true
+        passwordInput.setPasswordCharacter('*')
         table.add(passwordInput).width(300f).height(50f).pad(10f)
         table.row()
         val upTexture = Texture("blue_button_up.png")
@@ -94,10 +95,11 @@ class MenuScreen(
 
         val upRegion = TextureRegion(upTexture)
         val downRegion = TextureRegion(downTexture)
-        val buttonStyle = ButtonStyle()
+        val buttonStyle = TextButton.TextButtonStyle()
         buttonStyle.up = TextureRegionDrawable(upRegion)
         buttonStyle.down = TextureRegionDrawable(downRegion)
-        button = Button()
+        buttonStyle.font = Styles.formInputLabelStyle.font
+        button = TextButton("login", buttonStyle)
         button.addListener(object : InputListener() {
             override fun touchDown(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int): Boolean {
                 Gdx.app.log("MenuScreen", "Button clicked")
@@ -112,9 +114,8 @@ class MenuScreen(
                 return true
             }
         })
-        button.style = buttonStyle
 
-        table.add(button)
+        table.add(button).colspan(2)
     }
 
     private fun buildStatusPanel() {

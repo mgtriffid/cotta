@@ -51,6 +51,7 @@ class PannaLobby {
                 val loginDto = gson.fromJson(req.body(), LoginDto::class.java)
                 val username = Username(loginDto.username)
                 val password = Password(loginDto.password)
+                Thread.sleep(1400)
                 if (users.auth(username, password)) {
                     val token = UUID.randomUUID().toString()
                     sessions[SessionToken(token)] = username
@@ -89,8 +90,10 @@ class PannaLobby {
             "/characters",
             { req, _ ->
                 val username = getUser(req)
+                Thread.sleep(1400)
                 characters.forUser(username).map { it.toCharacterDto() }
-            }
+            },
+            gson::toJson
         )
     }
 

@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.ui.TextField
 import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle
+import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
@@ -34,16 +35,19 @@ class MenuScreen(
     lateinit var stage: Stage
     lateinit var button: Button
     lateinit var backgroundTexture: Texture
+    lateinit var cursorTexture: Texture
     lateinit var statusPanel: Table
+    lateinit var characterListWindow: Window
     private val menuState = MenuState()
     private var authToken: AuthToken = AuthToken.NotAuthorized
 
     object Styles {
         val formInputLabelStyle = LabelStyle(BitmapFont(), Color.WHITE)
+        // todo ensure these are not static
         val textFieldStyle = TextFieldStyle(
             BitmapFont(),
             Color.YELLOW,
-            null,
+            TextureRegionDrawable(Texture("cursor.png")),
             null,
             NinePatchDrawable(
                 NinePatch(
@@ -75,6 +79,7 @@ class MenuScreen(
 
         buildLoginForm()
         buildStatusPanel()
+        buildCharactersList()
     }
 
     private fun buildLoginForm() {
@@ -106,7 +111,6 @@ class MenuScreen(
         button = TextButton("login", buttonStyle)
         button.addListener(object : ClickListener() {
             override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
-                Gdx.app.log("MenuScreen", "Button clicked")
                 menuState.startAuthorization()
                 "http://127.0.0.1:4567/login".httpPost()
                     .body("{\n  \"username\": \"${loginInput.text}\",\n  \"password\": \"${passwordInput.text}\"\n}\n")
@@ -124,6 +128,18 @@ class MenuScreen(
         })
 
         table.add(button).colspan(2)
+    }
+
+    private fun buildCharactersList() {
+        characterListWindow = Window("Characters list", Window.WindowStyle(
+            BitmapFont(),
+            Color.WHITE,
+            null
+        ))
+        characterListWindow.debug = true
+        characterListWindow.isMovable = true
+        characterListWindow.padTop(20f)
+        stage.addActor(characterListWindow)
     }
 
     private fun retrieveCharacterList() {

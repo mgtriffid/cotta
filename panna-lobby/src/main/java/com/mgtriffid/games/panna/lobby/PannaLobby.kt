@@ -2,6 +2,7 @@ package com.mgtriffid.games.panna.lobby
 
 import com.google.gson.Gson
 import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
+import mu.KotlinLogging
 import spark.Request
 import spark.Response
 import spark.Spark
@@ -9,8 +10,10 @@ import spark.Spark.before
 import spark.Spark.get
 import spark.Spark.post
 import spark.Spark.halt
+import java.lang.IllegalArgumentException
 import java.util.*
 
+private val logger = KotlinLogging.logger {}
 /**
  * This is by no means production ready! be sure to replace security with proper mature solution like Spring Security,
  * or Apache Shiro, or something.
@@ -22,6 +25,7 @@ class PannaLobby {
     private val sessions = Sessions()
 
     fun start() {
+        logger.info { "Initializing endpoints" }
         initializeEndpoints()
     }
 
@@ -90,16 +94,10 @@ class PannaLobby {
         get(
             "/characters",
             { req, _ ->
-                println("GET /characters")
-                try {
-                    val username = getUser(req)
-                    println("Username: $username")
-                    Thread.sleep(1400)
-                    characters.forUser(username).map { it.toCharacterDto() }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    throw e
-                }
+                logger.info { "GET /characters" }
+                val username = getUser(req)
+                Thread.sleep(1400)
+                characters.forUser(username).map { it.toCharacterDto() }
             },
             gson::toJson
         )
@@ -115,7 +113,9 @@ class PannaLobby {
         return req.headers("token")?.let(::SessionToken)?.let { sessions[it] }
     }
 
-    private fun getUser(req: Request): Username = getUserOrNull(req) ?: throw halt(401, "Unauthorized")
+    private fun getUser(req: Request): Username = getUserOrNull(req)?.also {
+        logger.info { "Resolved user '${it.username}'" }
+    } ?: throw halt(401, "Unauthorized")
 }
 
 private fun PannaCharacter.toCharacterDto() = CharacterDto(

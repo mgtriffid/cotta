@@ -28,8 +28,10 @@ import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.mgtriffid.games.panna.PannaGdxGame
 import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
+import mu.KotlinLogging
 import java.lang.IllegalStateException
 
+private val logger = KotlinLogging.logger {}
 // One day I will learn how to do MVC / MVVM / MVP / BBC / FTM / OMG / QGD but now let it be a mess
 class MenuScreen(
     private val game: PannaGdxGame
@@ -179,6 +181,7 @@ class MenuScreen(
     }
 
     private fun rememberToken(result: SuccessfulLoginResponse) {
+        logger.info { "Token is ${result.token}" }
         authToken = AuthToken.Authorized(result.token)
     }
 
@@ -228,11 +231,12 @@ class MenuScreen(
         }
 
         fun startRetrievingCharacterList() {
-            println("Retrieving character list")
+            logger.info { "Retrieving character list" }
             state = State.RETRIEVING_CHARACTER_LIST
         }
 
         fun authorizationFailed() {
+            logger.info { "Authorization failed" }
             state = State.AUTHORIZATION_FAILED
         }
 

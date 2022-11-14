@@ -3,6 +3,7 @@ package com.mgtriffid.games.panna
 import com.mgtriffid.games.cotta.CottaServer
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.panna.shared.PannaGame
+import org.slf4j.LoggerFactory
 
 class PannaServer {
     fun start() {

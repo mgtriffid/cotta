@@ -1,6 +1,7 @@
 package com.mgtriffid.games.panna.lobby
 
 import com.google.gson.Gson
+import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
 import spark.Request
 import spark.Response
 import spark.Spark
@@ -89,9 +90,16 @@ class PannaLobby {
         get(
             "/characters",
             { req, _ ->
-                val username = getUser(req)
-                Thread.sleep(1400)
-                characters.forUser(username).map { it.toCharacterDto() }
+                println("GET /characters")
+                try {
+                    val username = getUser(req)
+                    println("Username: $username")
+                    Thread.sleep(1400)
+                    characters.forUser(username).map { it.toCharacterDto() }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    throw e
+                }
             },
             gson::toJson
         )
@@ -149,8 +157,6 @@ data class LoginDto(
 data class SessionToken(
     val token: String
 )
-
-data class SuccessfulLoginResponse(val token: String)
 
 fun RoomOwner.humanReadable() : String = when (this) {
     RoomOwner.Server -> "Server"

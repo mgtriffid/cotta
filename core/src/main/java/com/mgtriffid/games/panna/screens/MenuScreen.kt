@@ -25,9 +25,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
+import com.google.gson.Gson
 import com.mgtriffid.games.panna.PannaGdxGame
+import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
 import java.lang.IllegalStateException
 
+// One day I will learn how to do MVC / MVVM / MVP / BBC / FTM / OMG / QGD but now let it be a mess
 class MenuScreen(
     private val game: PannaGdxGame
 ) : ScreenAdapter() {
@@ -40,6 +43,8 @@ class MenuScreen(
     lateinit var characterListWindow: Window
     private val menuState = MenuState()
     private var authToken: AuthToken = AuthToken.NotAuthorized
+
+    private val gson = Gson()
 
     object Styles {
         val formInputLabelStyle = LabelStyle(BitmapFont(), Color.WHITE)
@@ -117,7 +122,7 @@ class MenuScreen(
                     .responseString { req, resp, result ->
                         when (result) {
                             is Result.Success -> {
-                                rememberToken(result.value)
+                                rememberToken(gson.fromJson(result.value, SuccessfulLoginResponse::class.java))
                                 retrieveCharacterList()
                             }
 
@@ -139,6 +144,15 @@ class MenuScreen(
         characterListWindow.debug = true
         characterListWindow.isMovable = true
         characterListWindow.padTop(20f)
+        characterListWindow.isResizable = false
+        characterListWindow.setSize(800f, 450f)
+        characterListWindow.isMovable = false
+        characterListWindow.setPosition(240f, 135f)
+        val charactersTable = Table()
+        charactersTable.debug = true
+        charactersTable.pad(5f)
+        characterListWindow.add(charactersTable)
+        characterListWindow.isVisible = false
         stage.addActor(characterListWindow)
     }
 
@@ -149,17 +163,28 @@ class MenuScreen(
                 is AuthToken.Authorized -> {
                     menuState.startRetrievingCharacterList()
                     "http://127.0.0.1:4567/characters".httpGet().header("token" to it.token)
+                        .responseString { _, resp, result ->
+                            when (result) {
+                                is Result.Success -> {
+                                    menuState.characterListRetrieved()
+                                }
+
+                                is Result.Failure -> menuState.failedToRetrieveCharactersList()
+                            }
+                        }
+
                 }
             }
         }
     }
 
-    private fun rememberToken(result: String) {
-        authToken = AuthToken.Authorized(result)
+    private fun rememberToken(result: SuccessfulLoginResponse) {
+        authToken = AuthToken.Authorized(result.token)
     }
 
     private fun buildStatusPanel() {
         statusPanel = Table()
+        statusPanel.debug = true
         statusPanel.setFillParent(true)
         val statusPanelTextLabel = Label("neuzhto", Styles.formInputLabelStyle)
         statusPanel.add(statusPanelTextLabel)
@@ -168,21 +193,25 @@ class MenuScreen(
             override fun act(delta: Float): Boolean {
                 when (menuState.state) {
                     State.IDLE -> {
-                        statusPanelTextLabel.isVisible = false
+                        statusPanel.isVisible = false
                     }
-
                     State.AUTHORIZATION -> {
-                        statusPanelTextLabel.isVisible = true
+                        statusPanel.isVisible = true
                         statusPanelTextLabel.setText("Authorizing...")
                     }
-
                     State.RETRIEVING_CHARACTER_LIST -> {
-                        statusPanelTextLabel.isVisible = true
+                        statusPanel.isVisible = true
                         statusPanelTextLabel.setText("Retrieving character list...")
                     }
-
+                    State.RETRIEVED_CHARACTER_LIST -> {
+                        statusPanel.isVisible = false
+                    }
+                    State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> {
+                        statusPanel.isVisible = true
+                        statusPanelTextLabel.setText("Failed to retrieve characters list")
+                    }
                     State.AUTHORIZATION_FAILED -> {
-                        statusPanelTextLabel.isVisible = true
+                        statusPanel.isVisible = true
                         statusPanelTextLabel.setText("Authorization failed")
                     }
                 }
@@ -206,10 +235,23 @@ class MenuScreen(
         fun authorizationFailed() {
             state = State.AUTHORIZATION_FAILED
         }
+
+        fun characterListRetrieved() {
+            state = State.RETRIEVED_CHARACTER_LIST
+        }
+
+        fun failedToRetrieveCharactersList() {
+            state = State.FAILED_TO_RETRIEVE_CHARACTERS_LIST
+        }
     }
 
     enum class State {
-        IDLE, AUTHORIZATION, RETRIEVING_CHARACTER_LIST, AUTHORIZATION_FAILED
+        IDLE,
+        AUTHORIZATION,
+        RETRIEVING_CHARACTER_LIST,
+        AUTHORIZATION_FAILED,
+        RETRIEVED_CHARACTER_LIST,
+        FAILED_TO_RETRIEVE_CHARACTERS_LIST,
     }
 }
 

@@ -97,6 +97,7 @@ class MenuScreen(
         val loginInput = TextField("", Styles.textFieldStyle)
         val loginLabel = Label("login", Styles.formInputLabelStyle)
         table.add(loginLabel)
+        // TODO use pref size
         table.add(loginInput).width(300f).height(50f).pad(10f)
         table.row()
         val passwordLabel = Label("password", Styles.formInputLabelStyle)
@@ -186,36 +187,41 @@ class MenuScreen(
     }
 
     private fun buildStatusPanel() {
+//        statusPanelDialog = Dialog()
+
         statusPanel = Table()
         statusPanel.debug = true
-        statusPanel.setFillParent(true)
+        statusPanel.setPosition(100f, 100f)
+        statusPanel.setSize(400f, 140f)
         val statusPanelTextLabel = Label("neuzhto", Styles.formInputLabelStyle)
-        statusPanel.add(statusPanelTextLabel)
+        statusPanel.add(statusPanelTextLabel).expandX()
         stage.addActor(statusPanel)
+        val setVisible: (Boolean) -> Unit = { value -> statusPanel.isVisible = value }
+        val setText: (String) -> Unit = { text -> statusPanelTextLabel.setText(text) }
         statusPanelTextLabel.addAction(object : Action() {
             override fun act(delta: Float): Boolean {
                 when (menuState.state) {
                     State.IDLE -> {
-                        statusPanel.isVisible = false
+                        setVisible(false)
                     }
                     State.AUTHORIZATION -> {
-                        statusPanel.isVisible = true
-                        statusPanelTextLabel.setText("Authorizing...")
+                        setVisible(true)
+                        setText("Authorizing...")
                     }
                     State.RETRIEVING_CHARACTER_LIST -> {
-                        statusPanel.isVisible = true
-                        statusPanelTextLabel.setText("Retrieving character list...")
+                        setVisible(true)
+                        setText("Retrieving character list...")
                     }
                     State.RETRIEVED_CHARACTER_LIST -> {
-                        statusPanel.isVisible = false
+                        setVisible(false)
                     }
                     State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> {
-                        statusPanel.isVisible = true
-                        statusPanelTextLabel.setText("Failed to retrieve characters list")
+                        setVisible(true)
+                        setText("Failed to retrieve characters list")
                     }
                     State.AUTHORIZATION_FAILED -> {
-                        statusPanel.isVisible = true
-                        statusPanelTextLabel.setText("Authorization failed")
+                        setVisible(true)
+                        setText("Authorization failed")
                     }
                 }
                 return false

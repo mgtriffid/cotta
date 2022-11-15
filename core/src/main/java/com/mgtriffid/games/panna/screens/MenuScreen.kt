@@ -33,15 +33,22 @@ import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
 // One day I will learn how to do MVC / MVVM / MVP / BBC / FTM / OMG / QGD but now let it be a mess
+// TODO implement "dispose" method
 class MenuScreen(
     private val game: PannaGdxGame
 ) : ScreenAdapter() {
+
+    object UiConfig {
+        const val statusPanelHeight = 140
+        const val statusPanelWidth = 400
+    }
+
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
     lateinit var button: Button
     lateinit var backgroundTexture: Texture
     lateinit var cursorTexture: Texture
-    lateinit var statusPanel: Table
+    lateinit var statusPanelWindow: Window
     lateinit var characterListWindow: Window
     private val menuState = MenuState()
     private var authToken: AuthToken = AuthToken.NotAuthorized
@@ -187,16 +194,22 @@ class MenuScreen(
     }
 
     private fun buildStatusPanel() {
-//        statusPanelDialog = Dialog()
-
-        statusPanel = Table()
-        statusPanel.debug = true
-        statusPanel.setPosition(100f, 100f)
-        statusPanel.setSize(400f, 140f)
+        statusPanelWindow = Window("status_panel", Window.WindowStyle(
+            BitmapFont(),
+            Color.WHITE,
+            TextureRegionDrawable(Texture("status_panel_bg.png"))
+        ))
+        statusPanelWindow.titleTable.isVisible = false
+        statusPanelWindow.debug = true
+        statusPanelWindow.setPosition(
+            game.config.width.toFloat() / 2 - UiConfig.statusPanelWidth / 2,
+            game.config.height.toFloat() / 2 - UiConfig.statusPanelHeight / 2
+        )
+        statusPanelWindow.setSize(UiConfig.statusPanelWidth.toFloat(), UiConfig.statusPanelHeight.toFloat())
         val statusPanelTextLabel = Label("neuzhto", Styles.formInputLabelStyle)
-        statusPanel.add(statusPanelTextLabel).expandX()
-        stage.addActor(statusPanel)
-        val setVisible: (Boolean) -> Unit = { value -> statusPanel.isVisible = value }
+        statusPanelWindow.add(statusPanelTextLabel).expandX()
+
+        val setVisible: (Boolean) -> Unit = { value -> statusPanelWindow.isVisible = value }
         val setText: (String) -> Unit = { text -> statusPanelTextLabel.setText(text) }
         statusPanelTextLabel.addAction(object : Action() {
             override fun act(delta: Float): Boolean {
@@ -206,7 +219,7 @@ class MenuScreen(
                     }
                     State.AUTHORIZATION -> {
                         setVisible(true)
-                        setText("Authorizing...")
+                        setText("Authorization...")
                     }
                     State.RETRIEVING_CHARACTER_LIST -> {
                         setVisible(true)
@@ -227,6 +240,7 @@ class MenuScreen(
                 return false
             }
         })
+        stage.addActor(statusPanelWindow)
     }
 
     inner class MenuState {

@@ -5,6 +5,12 @@ import com.mgtriffid.games.panna.screens.MenuScreen;
 
 public class PannaGdxGame extends Game {
 
+	public final PannaConfig config;
+
+	public PannaGdxGame(PannaConfig pannaConfig) {
+		this.config = pannaConfig;
+	}
+
 	@Override
 	public void create () {
 		setScreen(new MenuScreen(this));

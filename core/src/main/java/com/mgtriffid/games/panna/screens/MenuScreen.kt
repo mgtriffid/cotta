@@ -32,6 +32,7 @@ import mu.KotlinLogging
 import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
+
 // One day I will learn how to do MVC / MVVM / MVP / BBC / FTM / OMG / QGD but now let it be a mess
 // TODO implement "dispose" method
 class MenuScreen(
@@ -45,7 +46,7 @@ class MenuScreen(
 
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
-    lateinit var button: Button
+    lateinit var loginButton: Button
     lateinit var backgroundTexture: Texture
     lateinit var cursorTexture: Texture
     lateinit var statusPanelWindow: Window
@@ -57,6 +58,7 @@ class MenuScreen(
 
     object Styles {
         val formInputLabelStyle = LabelStyle(BitmapFont(), Color.WHITE)
+
         // todo ensure these are not static
         val textFieldStyle = TextFieldStyle(
             BitmapFont(),
@@ -123,9 +125,11 @@ class MenuScreen(
         buttonStyle.up = TextureRegionDrawable(upRegion)
         buttonStyle.down = TextureRegionDrawable(downRegion)
         buttonStyle.font = Styles.formInputLabelStyle.font
-        button = TextButton("login", buttonStyle)
-        button.addListener(object : ClickListener() {
+        loginButton = TextButton("login", buttonStyle)
+        loginButton.addListener(object : ClickListener() {
             override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
+                logger.debug { "Login button clicked" }
+                super.touchUp(event, x, y, pointer, button)
                 menuState.startAuthorization()
                 "http://127.0.0.1:4567/login".httpPost()
                     .body("{\n  \"username\": \"${loginInput.text}\",\n  \"password\": \"${passwordInput.text}\"\n}\n")
@@ -139,18 +143,21 @@ class MenuScreen(
                             is Result.Failure -> menuState.authorizationFailed()
                         }
                     }
+                logger.debug { "touchUp processing of loginButton complete" }
             }
         })
 
-        table.add(button).colspan(2)
+        table.add(loginButton).colspan(2)
     }
 
     private fun buildCharactersList() {
-        characterListWindow = Window("Characters list", Window.WindowStyle(
-            BitmapFont(),
-            Color.WHITE,
-            null
-        ))
+        characterListWindow = Window(
+            "Characters list", Window.WindowStyle(
+                BitmapFont(),
+                Color.WHITE,
+                null
+            )
+        )
         characterListWindow.debug = true
         characterListWindow.isMovable = true
         characterListWindow.padTop(20f)
@@ -189,16 +196,18 @@ class MenuScreen(
     }
 
     private fun rememberToken(result: SuccessfulLoginResponse) {
-        logger.info { "Token is ${result.token}" }
+        logger.info { "Token is '${result.token}'" }
         authToken = AuthToken.Authorized(result.token)
     }
 
     private fun buildStatusPanel() {
-        statusPanelWindow = Window("status_panel", Window.WindowStyle(
-            BitmapFont(),
-            Color.WHITE,
-            TextureRegionDrawable(Texture("status_panel_bg.png"))
-        ))
+        statusPanelWindow = Window(
+            "status_panel", Window.WindowStyle(
+                BitmapFont(),
+                Color.WHITE,
+                TextureRegionDrawable(Texture("status_panel_bg.png"))
+            )
+        )
         statusPanelWindow.titleTable.isVisible = false
         statusPanelWindow.debug = true
         statusPanelWindow.setPosition(
@@ -206,32 +215,44 @@ class MenuScreen(
             game.config.height.toFloat() / 2 - UiConfig.statusPanelHeight / 2
         )
         statusPanelWindow.setSize(UiConfig.statusPanelWidth.toFloat(), UiConfig.statusPanelHeight.toFloat())
+        addStatusText()
+        addDialogOkayTextButton()
+        addDialogCancelTextButton()
+        stage.addActor(statusPanelWindow)
+    }
+
+    private fun addStatusText() {
         val statusPanelTextLabel = Label("neuzhto", Styles.formInputLabelStyle)
         statusPanelWindow.add(statusPanelTextLabel).expandX()
 
         val setVisible: (Boolean) -> Unit = { value -> statusPanelWindow.isVisible = value }
         val setText: (String) -> Unit = { text -> statusPanelTextLabel.setText(text) }
-        statusPanelTextLabel.addAction(object : Action() {
+        val value = object : Action() {
             override fun act(delta: Float): Boolean {
                 when (menuState.state) {
                     State.IDLE -> {
                         setVisible(false)
                     }
+
                     State.AUTHORIZATION -> {
                         setVisible(true)
                         setText("Authorization...")
                     }
+
                     State.RETRIEVING_CHARACTER_LIST -> {
                         setVisible(true)
                         setText("Retrieving character list...")
                     }
+
                     State.RETRIEVED_CHARACTER_LIST -> {
                         setVisible(false)
                     }
+
                     State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> {
                         setVisible(true)
                         setText("Failed to retrieve characters list")
                     }
+
                     State.AUTHORIZATION_FAILED -> {
                         setVisible(true)
                         setText("Authorization failed")
@@ -239,44 +260,122 @@ class MenuScreen(
                 }
                 return false
             }
+        }
+        statusPanelTextLabel.addAction(value)
+    }
+
+    private fun addDialogOkayTextButton() {
+        val upTexture = Texture("red_button_up.png")
+        val downTexture = Texture("red_button_down.png")
+
+        val upRegion = TextureRegion(upTexture)
+        val downRegion = TextureRegion(downTexture)
+        val buttonStyle = TextButton.TextButtonStyle()
+        buttonStyle.up = TextureRegionDrawable(upRegion)
+        buttonStyle.down = TextureRegionDrawable(downRegion)
+        buttonStyle.font = Styles.formInputLabelStyle.font
+
+        statusPanelWindow.row()
+        val textButton = TextButton("Okay", buttonStyle)
+        val setVisible: (Boolean) -> Unit = { value -> textButton.isVisible = value }
+        val setText: (String) -> Unit = { text -> textButton.setText(text) }
+        textButton.addAction(object : Action() {
+            override fun act(delta: Float): Boolean {
+                when (menuState.state) {
+                    State.IDLE -> {
+                        setVisible(false)
+                    }
+                    State.AUTHORIZATION -> {
+                        setVisible(false)
+                    }
+
+                    State.RETRIEVING_CHARACTER_LIST -> {
+                        setVisible(false)
+                        setText("Retrieving character list...")
+                    }
+
+                    State.RETRIEVED_CHARACTER_LIST -> {
+                        setVisible(false)
+                    }
+
+                    State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> {
+                        setVisible(true)
+                    }
+
+                    State.AUTHORIZATION_FAILED -> {
+                        setVisible(true)
+                    }
+                }
+                return false
+            }
         })
-        stage.addActor(statusPanelWindow)
+        textButton.addListener(object : ClickListener() {
+            override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
+                super.touchUp(event, x, y, pointer, button)
+                menuState.idle()
+            }
+        })
+        statusPanelWindow.add(textButton)
     }
 
-    inner class MenuState {
-        var state = State.IDLE
+private fun addDialogCancelTextButton() {
+    val upTexture = Texture("red_button_up.png")
+    val downTexture = Texture("red_button_down.png")
 
-        fun startAuthorization() {
-            state = State.AUTHORIZATION
-        }
+    val upRegion = TextureRegion(upTexture)
+    val downRegion = TextureRegion(downTexture)
+    val buttonStyle = TextButton.TextButtonStyle()
+    buttonStyle.up = TextureRegionDrawable(upRegion)
+    buttonStyle.down = TextureRegionDrawable(downRegion)
+    buttonStyle.font = Styles.formInputLabelStyle.font
 
-        fun startRetrievingCharacterList() {
-            logger.info { "Retrieving character list" }
-            state = State.RETRIEVING_CHARACTER_LIST
-        }
+    statusPanelWindow.row()
+    val textButton = TextButton("Cancel", buttonStyle)
+    statusPanelWindow.add(textButton)
+}
 
-        fun authorizationFailed() {
-            logger.info { "Authorization failed" }
-            state = State.AUTHORIZATION_FAILED
-        }
+inner class MenuState {
+    var state = State.IDLE
 
-        fun characterListRetrieved() {
-            state = State.RETRIEVED_CHARACTER_LIST
-        }
-
-        fun failedToRetrieveCharactersList() {
-            state = State.FAILED_TO_RETRIEVE_CHARACTERS_LIST
-        }
+    fun idle() {
+        logger.debug { "Resetting menu back to IDLE" }
+        state = State.IDLE
     }
 
-    enum class State {
-        IDLE,
-        AUTHORIZATION,
-        RETRIEVING_CHARACTER_LIST,
-        AUTHORIZATION_FAILED,
-        RETRIEVED_CHARACTER_LIST,
-        FAILED_TO_RETRIEVE_CHARACTERS_LIST,
+    fun startAuthorization() {
+        logger.debug { "Starting authorization" }
+        state = State.AUTHORIZATION
     }
+
+    fun startRetrievingCharacterList() {
+        logger.info { "Retrieving character list" }
+        state = State.RETRIEVING_CHARACTER_LIST
+    }
+
+    fun authorizationFailed() {
+        logger.debug { "Authorization failed" }
+        state = State.AUTHORIZATION_FAILED
+    }
+
+    fun characterListRetrieved() {
+        logger.debug { "Character list retrieved" }
+        state = State.RETRIEVED_CHARACTER_LIST
+    }
+
+    fun failedToRetrieveCharactersList() {
+        logger.debug { "Failed to retrieve character list" }
+        state = State.FAILED_TO_RETRIEVE_CHARACTERS_LIST
+    }
+}
+
+enum class State {
+    IDLE,
+    AUTHORIZATION,
+    RETRIEVING_CHARACTER_LIST,
+    AUTHORIZATION_FAILED,
+    RETRIEVED_CHARACTER_LIST,
+    FAILED_TO_RETRIEVE_CHARACTERS_LIST,
+}
 }
 
 sealed class AuthToken {

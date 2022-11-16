@@ -36,7 +36,6 @@ private val logger = KotlinLogging.logger {}
 const val UI_DEBUG = false
 
 // One day I will learn how to do MVC / MVVM / MVP / BBC / FTM / OMG / QGD but now let it be a mess
-// TODO implement "dispose" method
 class MenuScreen(
     private val game: PannaGdxGame
 ) : ScreenAdapter() {
@@ -46,10 +45,10 @@ class MenuScreen(
         const val statusPanelWidth = 400
     }
 
+    lateinit var textures: MenuTextures
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
     lateinit var loginButton: Button
-    lateinit var backgroundTexture: Texture
     lateinit var statusPanelWindow: Window
     lateinit var characterListWindow: Window
     private val menuState = MenuState()
@@ -59,32 +58,18 @@ class MenuScreen(
 
     object Styles {
         val formInputLabelStyle = LabelStyle(BitmapFont(), Color.WHITE)
-
-        // todo ensure these are not static
-        val textFieldStyle = TextFieldStyle(
-            BitmapFont(),
-            Color.YELLOW,
-            TextureRegionDrawable(Texture("cursor.png")),
-            null,
-            NinePatchDrawable(
-                NinePatch(
-                    Texture("textfield_9patch_atlas.png"),
-                    8, 8, 8, 8
-                )
-            )
-        )
     }
 
     override fun show() {
+        textures = MenuTextures()
         prepareStage()
-        backgroundTexture = Texture("menu_bg.png")
     }
 
     override fun render(delta: Float) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         stage.act(delta)
         stage.batch.begin()
-        stage.batch.draw(backgroundTexture, 0f, 0f)
+        stage.batch.draw(textures.background, 0f, 0f)
         stage.batch.end()
         stage.draw()
     }
@@ -104,28 +89,36 @@ class MenuScreen(
         table.setFillParent(true)
         table.debug = UI_DEBUG
         stage.addActor(table)
-        val loginInput = TextField("", Styles.textFieldStyle)
         val loginLabel = Label("login", Styles.formInputLabelStyle)
         table.add(loginLabel)
         // TODO use pref size
+        val textFieldStyle = TextFieldStyle(
+            BitmapFont(),
+            Color.YELLOW,
+            TextureRegionDrawable(textures.textInputCursor),
+            null,
+            NinePatchDrawable(
+                NinePatch(
+                    textures.textInput9Patch,
+                    8, 8, 8, 8
+                )
+            )
+        )
+        val loginInput = TextField(
+            "", textFieldStyle
+        )
         table.add(loginInput).width(300f).height(50f).pad(10f)
         table.row()
         val passwordLabel = Label("password", Styles.formInputLabelStyle)
         table.add(passwordLabel)
-        val passwordInput = TextField("", Styles.textFieldStyle)
+        val passwordInput = TextField(
+            "", textFieldStyle
+        )
         passwordInput.isPasswordMode = true
         passwordInput.setPasswordCharacter('*')
         table.add(passwordInput).width(300f).height(50f).pad(10f)
         table.row()
-        val upTexture = Texture("blue_button_up.png")
-        val downTexture = Texture("blue_button_down.png")
-
-        val upRegion = TextureRegion(upTexture)
-        val downRegion = TextureRegion(downTexture)
-        val buttonStyle = TextButton.TextButtonStyle()
-        buttonStyle.up = TextureRegionDrawable(upRegion)
-        buttonStyle.down = TextureRegionDrawable(downRegion)
-        buttonStyle.font = Styles.formInputLabelStyle.font
+        val buttonStyle = getLoginButtonStyle()
         loginButton = TextButton("login", buttonStyle)
         loginButton.addListener(object : ClickListener() {
             override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
@@ -219,7 +212,7 @@ class MenuScreen(
             "", Window.WindowStyle(
                 BitmapFont(),
                 Color.WHITE,
-                TextureRegionDrawable(Texture("status_panel_bg.png"))
+                TextureRegionDrawable(textures.statusPanelBackground)
             )
         )
         statusPanelWindow.titleTable.isVisible = false
@@ -283,15 +276,7 @@ class MenuScreen(
     }
 
     private fun addDialogOkayTextButton(stack: Stack) {
-        val upTexture = Texture("red_button_up.png")
-        val downTexture = Texture("red_button_down.png")
-
-        val upRegion = TextureRegion(upTexture)
-        val downRegion = TextureRegion(downTexture)
-        val buttonStyle = TextButton.TextButtonStyle()
-        buttonStyle.up = TextureRegionDrawable(upRegion)
-        buttonStyle.down = TextureRegionDrawable(downRegion)
-        buttonStyle.font = Styles.formInputLabelStyle.font
+        val buttonStyle = getDialogButtonStyle()
 
         val textButton = TextButton("Okay", buttonStyle)
         stack.add(textButton)
@@ -336,16 +321,32 @@ class MenuScreen(
         })
     }
 
-    private fun addDialogCancelTextButton(stack: Stack) {
-        val upTexture = Texture("red_button_up.png")
-        val downTexture = Texture("red_button_down.png")
+    private fun getLoginButtonStyle(): TextButton.TextButtonStyle {
+        return getButtonStyle(
+            upTexture = textures.loginButtonUpTexture,
+            downTexture = textures.loginButtonDownTexture
+        )
+    }
 
+    private fun getDialogButtonStyle(): TextButton.TextButtonStyle {
+        return getButtonStyle(
+            upTexture = textures.dialogButtonUpTexture,
+            downTexture = textures.dialogButtonDownTexture
+        )
+    }
+
+    private fun getButtonStyle(upTexture: Texture, downTexture: Texture): TextButton.TextButtonStyle {
         val upRegion = TextureRegion(upTexture)
         val downRegion = TextureRegion(downTexture)
         val buttonStyle = TextButton.TextButtonStyle()
         buttonStyle.up = TextureRegionDrawable(upRegion)
         buttonStyle.down = TextureRegionDrawable(downRegion)
         buttonStyle.font = Styles.formInputLabelStyle.font
+        return buttonStyle
+    }
+
+    private fun addDialogCancelTextButton(stack: Stack) {
+        val buttonStyle = getDialogButtonStyle()
 
         val textButton = TextButton("Cancel", buttonStyle)
         stack.add(textButton)
@@ -380,6 +381,10 @@ class MenuScreen(
                 return false
             }
         })
+    }
+
+    override fun dispose() {
+        textures.dispose()
     }
 
     enum class State {

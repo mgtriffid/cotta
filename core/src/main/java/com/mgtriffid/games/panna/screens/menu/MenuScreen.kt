@@ -1,4 +1,4 @@
-package com.mgtriffid.games.panna.screens
+package com.mgtriffid.games.panna.screens.menu
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Button
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
+import com.badlogic.gdx.scenes.scene2d.ui.Stack
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.ui.TextField
@@ -32,6 +33,7 @@ import mu.KotlinLogging
 import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
+const val UI_DEBUG = false
 
 // One day I will learn how to do MVC / MVVM / MVP / BBC / FTM / OMG / QGD but now let it be a mess
 // TODO implement "dispose" method
@@ -48,7 +50,6 @@ class MenuScreen(
     lateinit var stage: Stage
     lateinit var loginButton: Button
     lateinit var backgroundTexture: Texture
-    lateinit var cursorTexture: Texture
     lateinit var statusPanelWindow: Window
     lateinit var characterListWindow: Window
     private val menuState = MenuState()
@@ -101,7 +102,7 @@ class MenuScreen(
     private fun buildLoginForm() {
         val table = Table()
         table.setFillParent(true)
-        table.debug = true
+        table.debug = UI_DEBUG
         stage.addActor(table)
         val loginInput = TextField("", Styles.textFieldStyle)
         val loginLabel = Label("login", Styles.formInputLabelStyle)
@@ -159,7 +160,7 @@ class MenuScreen(
             )
         )
         characterListWindow.debug = true
-        characterListWindow.isMovable = true
+        characterListWindow.isMovable = false
         characterListWindow.padTop(20f)
         characterListWindow.isResizable = false
         characterListWindow.setSize(800f, 450f)
@@ -170,6 +171,20 @@ class MenuScreen(
         charactersTable.pad(5f)
         characterListWindow.add(charactersTable)
         characterListWindow.isVisible = false
+        val setVisible = { visible: Boolean -> characterListWindow.isVisible = visible }
+        characterListWindow.addAction(object : Action() {
+            override fun act(delta: Float): Boolean {
+                when (menuState.state) {
+                    State.IDLE -> setVisible(false)
+                    State.AUTHORIZATION -> setVisible(false)
+                    State.RETRIEVING_CHARACTER_LIST -> setVisible(false)
+                    State.AUTHORIZATION_FAILED -> setVisible(false)
+                    State.RETRIEVED_CHARACTER_LIST -> setVisible(true)
+                    State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> setVisible(false)
+                }
+                return false
+            }
+        })
         stage.addActor(characterListWindow)
     }
 
@@ -189,7 +204,6 @@ class MenuScreen(
                                 is Result.Failure -> menuState.failedToRetrieveCharactersList()
                             }
                         }
-
                 }
             }
         }
@@ -202,23 +216,27 @@ class MenuScreen(
 
     private fun buildStatusPanel() {
         statusPanelWindow = Window(
-            "status_panel", Window.WindowStyle(
+            "", Window.WindowStyle(
                 BitmapFont(),
                 Color.WHITE,
                 TextureRegionDrawable(Texture("status_panel_bg.png"))
             )
         )
         statusPanelWindow.titleTable.isVisible = false
-        statusPanelWindow.debug = true
+        statusPanelWindow.debug = UI_DEBUG
         statusPanelWindow.setPosition(
             game.config.width.toFloat() / 2 - UiConfig.statusPanelWidth / 2,
             game.config.height.toFloat() / 2 - UiConfig.statusPanelHeight / 2
         )
         statusPanelWindow.setSize(UiConfig.statusPanelWidth.toFloat(), UiConfig.statusPanelHeight.toFloat())
         addStatusText()
-        addDialogOkayTextButton()
-        addDialogCancelTextButton()
+        val stack = Stack()
+        addDialogOkayTextButton(stack)
+        addDialogCancelTextButton(stack)
+        statusPanelWindow.row()
+        statusPanelWindow.add(stack)
         stage.addActor(statusPanelWindow)
+
     }
 
     private fun addStatusText() {
@@ -264,7 +282,7 @@ class MenuScreen(
         statusPanelTextLabel.addAction(value)
     }
 
-    private fun addDialogOkayTextButton() {
+    private fun addDialogOkayTextButton(stack: Stack) {
         val upTexture = Texture("red_button_up.png")
         val downTexture = Texture("red_button_down.png")
 
@@ -275,8 +293,8 @@ class MenuScreen(
         buttonStyle.down = TextureRegionDrawable(downRegion)
         buttonStyle.font = Styles.formInputLabelStyle.font
 
-        statusPanelWindow.row()
         val textButton = TextButton("Okay", buttonStyle)
+        stack.add(textButton)
         val setVisible: (Boolean) -> Unit = { value -> textButton.isVisible = value }
         val setText: (String) -> Unit = { text -> textButton.setText(text) }
         textButton.addAction(object : Action() {
@@ -285,6 +303,7 @@ class MenuScreen(
                     State.IDLE -> {
                         setVisible(false)
                     }
+
                     State.AUTHORIZATION -> {
                         setVisible(false)
                     }
@@ -315,70 +334,65 @@ class MenuScreen(
                 menuState.idle()
             }
         })
-        statusPanelWindow.add(textButton)
     }
 
-private fun addDialogCancelTextButton() {
-    val upTexture = Texture("red_button_up.png")
-    val downTexture = Texture("red_button_down.png")
+    private fun addDialogCancelTextButton(stack: Stack) {
+        val upTexture = Texture("red_button_up.png")
+        val downTexture = Texture("red_button_down.png")
 
-    val upRegion = TextureRegion(upTexture)
-    val downRegion = TextureRegion(downTexture)
-    val buttonStyle = TextButton.TextButtonStyle()
-    buttonStyle.up = TextureRegionDrawable(upRegion)
-    buttonStyle.down = TextureRegionDrawable(downRegion)
-    buttonStyle.font = Styles.formInputLabelStyle.font
+        val upRegion = TextureRegion(upTexture)
+        val downRegion = TextureRegion(downTexture)
+        val buttonStyle = TextButton.TextButtonStyle()
+        buttonStyle.up = TextureRegionDrawable(upRegion)
+        buttonStyle.down = TextureRegionDrawable(downRegion)
+        buttonStyle.font = Styles.formInputLabelStyle.font
 
-    statusPanelWindow.row()
-    val textButton = TextButton("Cancel", buttonStyle)
-    statusPanelWindow.add(textButton)
-}
+        val textButton = TextButton("Cancel", buttonStyle)
+        stack.add(textButton)
+        val setVisible: (Boolean) -> Unit = { value -> textButton.isVisible = value }
+        textButton.addAction(object : Action() {
+            override fun act(delta: Float): Boolean {
+                when (menuState.state) {
+                    State.IDLE -> {
+                        setVisible(false)
+                    }
 
-inner class MenuState {
-    var state = State.IDLE
+                    State.AUTHORIZATION -> {
+                        setVisible(true)
+                    }
 
-    fun idle() {
-        logger.debug { "Resetting menu back to IDLE" }
-        state = State.IDLE
+                    State.RETRIEVING_CHARACTER_LIST -> {
+                        setVisible(true)
+                    }
+
+                    State.RETRIEVED_CHARACTER_LIST -> {
+                        setVisible(false)
+                    }
+
+                    State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> {
+                        setVisible(false)
+                    }
+
+                    State.AUTHORIZATION_FAILED -> {
+                        setVisible(false)
+                    }
+                }
+                return false
+            }
+        })
     }
 
-    fun startAuthorization() {
-        logger.debug { "Starting authorization" }
-        state = State.AUTHORIZATION
+    enum class State {
+        IDLE,
+        AUTHORIZATION,
+        RETRIEVING_CHARACTER_LIST,
+        AUTHORIZATION_FAILED,
+        RETRIEVED_CHARACTER_LIST,
+        FAILED_TO_RETRIEVE_CHARACTERS_LIST,
     }
 
-    fun startRetrievingCharacterList() {
-        logger.info { "Retrieving character list" }
-        state = State.RETRIEVING_CHARACTER_LIST
+    sealed class AuthToken {
+        object NotAuthorized : AuthToken()
+        data class Authorized(val token: String) : AuthToken()
     }
-
-    fun authorizationFailed() {
-        logger.debug { "Authorization failed" }
-        state = State.AUTHORIZATION_FAILED
-    }
-
-    fun characterListRetrieved() {
-        logger.debug { "Character list retrieved" }
-        state = State.RETRIEVED_CHARACTER_LIST
-    }
-
-    fun failedToRetrieveCharactersList() {
-        logger.debug { "Failed to retrieve character list" }
-        state = State.FAILED_TO_RETRIEVE_CHARACTERS_LIST
-    }
-}
-
-enum class State {
-    IDLE,
-    AUTHORIZATION,
-    RETRIEVING_CHARACTER_LIST,
-    AUTHORIZATION_FAILED,
-    RETRIEVED_CHARACTER_LIST,
-    FAILED_TO_RETRIEVE_CHARACTERS_LIST,
-}
-}
-
-sealed class AuthToken {
-    object NotAuthorized : AuthToken()
-    data class Authorized(val token: String) : AuthToken()
 }

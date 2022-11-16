@@ -1,7 +1,7 @@
 package com.mgtriffid.games.panna;
 
 import com.badlogic.gdx.Game;
-import com.mgtriffid.games.panna.screens.MenuScreen;
+import com.mgtriffid.games.panna.screens.menu.MenuScreen;
 
 public class PannaGdxGame extends Game {
 

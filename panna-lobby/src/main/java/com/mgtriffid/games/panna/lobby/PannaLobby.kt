@@ -3,6 +3,7 @@ package com.mgtriffid.games.panna.lobby
 import com.google.gson.Gson
 import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
 import mu.KotlinLogging
+import spark.Filter
 import spark.Request
 import spark.Response
 import spark.Spark
@@ -10,10 +11,12 @@ import spark.Spark.before
 import spark.Spark.get
 import spark.Spark.post
 import spark.Spark.halt
-import java.lang.IllegalArgumentException
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
+private const val DEBUGGING_DELAYS = false
+private const val ARTIFICIAL_DELAY = 200L
+
 /**
  * This is by no means production ready! be sure to replace security with proper mature solution like Spring Security,
  * or Apache Shiro, or something.
@@ -44,11 +47,11 @@ class PannaLobby {
         ) { exception: Exception, request: Request?, response: Response? -> exception.printStackTrace() }
         before(
             "/rooms/*",
-            this::authFilter
+            this.authFilter
         )
         before(
             "/rooms",
-            this::authFilter
+            this.authFilter
         )
         post(
             "/login",
@@ -56,7 +59,7 @@ class PannaLobby {
                 val loginDto = gson.fromJson(req.body(), LoginDto::class.java)
                 val username = Username(loginDto.username)
                 val password = Password(loginDto.password)
-                Thread.sleep(1400)
+                if (DEBUGGING_DELAYS) Thread.sleep(ARTIFICIAL_DELAY)
                 if (users.auth(username, password)) {
                     val token = UUID.randomUUID().toString()
                     sessions[SessionToken(token)] = username
@@ -96,15 +99,15 @@ class PannaLobby {
             { req, _ ->
                 logger.info { "GET /characters" }
                 val username = getUser(req)
-                Thread.sleep(1400)
+                if (DEBUGGING_DELAYS) Thread.sleep(ARTIFICIAL_DELAY)
                 characters.forUser(username).map { it.toCharacterDto() }
             },
             gson::toJson
         )
     }
 
-    private fun authFilter(req: Request, resp: Response) {
-        if (req.headers("token")?.let(::SessionToken)?.let { sessions[it] } == null) {
+    val authFilter = Filter { request, _ ->
+        if (request.headers("token")?.let(::SessionToken)?.let { sessions[it] } == null) {
             halt(401, "Unauthorized")
         }
     }

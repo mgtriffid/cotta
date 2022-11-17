@@ -4,33 +4,30 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.NinePatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Action
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.scenes.scene2d.ui.Button
+import com.badlogic.gdx.scenes.scene2d.ui.Container
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.ui.Stack
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
-import com.badlogic.gdx.scenes.scene2d.ui.TextField
-import com.badlogic.gdx.scenes.scene2d.ui.TextField.TextFieldStyle
 import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.mgtriffid.games.panna.PannaGdxGame
+import com.mgtriffid.games.panna.screens.menu.MenuScreen.UiConfig.CHARACTER_CELL_HEIGHT
+import com.mgtriffid.games.panna.screens.menu.MenuScreen.UiConfig.CHARACTER_CELL_WIDTH
+import com.mgtriffid.games.panna.screens.menu.components.LoginForm
+import com.mgtriffid.games.panna.screens.menu.components.getButtonStyle
 import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
 import mu.KotlinLogging
-import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
 const val UI_DEBUG = false
@@ -41,14 +38,17 @@ class MenuScreen(
 ) : ScreenAdapter() {
 
     object UiConfig {
-        const val statusPanelHeight = 140
-        const val statusPanelWidth = 400
+        const val STATUS_PANEL_WIDTH = 400f
+        const val STATUS_PANEL_HEIGHT = 140f
+        const val CHARACTERS_TABLE_WIDTH = 800f
+        const val CHARACTERS_TABLE_HEIGHT = 450f
+        const val CHARACTER_CELL_WIDTH = 180f
+        const val CHARACTER_CELL_HEIGHT = 180f
     }
 
     lateinit var textures: MenuTextures
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
-    lateinit var loginButton: Button
     lateinit var statusPanelWindow: Window
     lateinit var characterListWindow: Window
     private val menuState = MenuState()
@@ -84,64 +84,24 @@ class MenuScreen(
         buildCharactersList()
     }
 
-    private fun buildLoginForm() {
-        val table = Table()
-        table.setFillParent(true)
-        table.debug = UI_DEBUG
-        stage.addActor(table)
-        val loginLabel = Label("login", Styles.formInputLabelStyle)
-        table.add(loginLabel)
-        // TODO use pref size
-        val textFieldStyle = TextFieldStyle(
-            BitmapFont(),
-            Color.YELLOW,
-            TextureRegionDrawable(textures.textInputCursor),
-            null,
-            NinePatchDrawable(
-                NinePatch(
-                    textures.textInput9Patch,
-                    8, 8, 8, 8
-                )
-            )
-        )
-        val loginInput = TextField(
-            "", textFieldStyle
-        )
-        table.add(loginInput).width(300f).height(50f).pad(10f)
-        table.row()
-        val passwordLabel = Label("password", Styles.formInputLabelStyle)
-        table.add(passwordLabel)
-        val passwordInput = TextField(
-            "", textFieldStyle
-        )
-        passwordInput.isPasswordMode = true
-        passwordInput.setPasswordCharacter('*')
-        table.add(passwordInput).width(300f).height(50f).pad(10f)
-        table.row()
-        val buttonStyle = getLoginButtonStyle()
-        loginButton = TextButton("login", buttonStyle)
-        loginButton.addListener(object : ClickListener() {
-            override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
-                logger.debug { "Login button clicked" }
-                super.touchUp(event, x, y, pointer, button)
-                menuState.startAuthorization()
-                "http://127.0.0.1:4567/login".httpPost()
-                    .body("{\n  \"username\": \"${loginInput.text}\",\n  \"password\": \"${passwordInput.text}\"\n}\n")
-                    .responseString { req, resp, result ->
-                        when (result) {
-                            is Result.Success -> {
-                                rememberToken(gson.fromJson(result.value, SuccessfulLoginResponse::class.java))
-                                retrieveCharacterList()
-                            }
-
-                            is Result.Failure -> menuState.authorizationFailed()
+    fun buildLoginForm() {
+        val loginForm = LoginForm(textures)
+        loginForm.onClick = {
+            menuState.startAuthorization()
+            "http://127.0.0.1:4567/login".httpPost()
+                .body("{\n  \"username\": \"${loginInput.text}\",\n  \"password\": \"${passwordInput.text}\"\n}\n")
+                .responseString { req, resp, result ->
+                    when (result) {
+                        is Result.Success -> {
+                            rememberToken(gson.fromJson(result.value, SuccessfulLoginResponse::class.java))
+                            retrieveCharacterList()
                         }
-                    }
-                logger.debug { "touchUp processing of loginButton complete" }
-            }
-        })
 
-        table.add(loginButton).colspan(2)
+                        is Result.Failure -> menuState.authorizationFailed()
+                    }
+                }
+        }
+        stage.addActor(loginForm.table)
     }
 
     private fun buildCharactersList() {
@@ -156,13 +116,20 @@ class MenuScreen(
         characterListWindow.isMovable = false
         characterListWindow.padTop(20f)
         characterListWindow.isResizable = false
-        characterListWindow.setSize(800f, 450f)
+        characterListWindow.setSize(UiConfig.CHARACTERS_TABLE_WIDTH, UiConfig.CHARACTERS_TABLE_HEIGHT)
         characterListWindow.isMovable = false
         characterListWindow.setPosition(240f, 135f)
         val charactersTable = Table()
         charactersTable.debug = true
         charactersTable.pad(5f)
         characterListWindow.add(charactersTable)
+        val container = Container<Stack>()
+        container.width(CHARACTER_CELL_WIDTH)
+        container.height(CHARACTER_CELL_HEIGHT)
+        val stack = Stack()
+        container.actor = stack
+
+        charactersTable.add(container)
         characterListWindow.isVisible = false
         val setVisible = { visible: Boolean -> characterListWindow.isVisible = visible }
         characterListWindow.addAction(object : Action() {
@@ -218,10 +185,10 @@ class MenuScreen(
         statusPanelWindow.titleTable.isVisible = false
         statusPanelWindow.debug = UI_DEBUG
         statusPanelWindow.setPosition(
-            game.config.width.toFloat() / 2 - UiConfig.statusPanelWidth / 2,
-            game.config.height.toFloat() / 2 - UiConfig.statusPanelHeight / 2
+            game.config.width.toFloat() / 2 - UiConfig.STATUS_PANEL_WIDTH / 2,
+            game.config.height.toFloat() / 2 - UiConfig.STATUS_PANEL_HEIGHT / 2
         )
-        statusPanelWindow.setSize(UiConfig.statusPanelWidth.toFloat(), UiConfig.statusPanelHeight.toFloat())
+        statusPanelWindow.setSize(UiConfig.STATUS_PANEL_WIDTH, UiConfig.STATUS_PANEL_HEIGHT)
         addStatusText()
         val stack = Stack()
         addDialogOkayTextButton(stack)
@@ -321,28 +288,11 @@ class MenuScreen(
         })
     }
 
-    private fun getLoginButtonStyle(): TextButton.TextButtonStyle {
-        return getButtonStyle(
-            upTexture = textures.loginButtonUpTexture,
-            downTexture = textures.loginButtonDownTexture
-        )
-    }
-
     private fun getDialogButtonStyle(): TextButton.TextButtonStyle {
         return getButtonStyle(
             upTexture = textures.dialogButtonUpTexture,
             downTexture = textures.dialogButtonDownTexture
         )
-    }
-
-    private fun getButtonStyle(upTexture: Texture, downTexture: Texture): TextButton.TextButtonStyle {
-        val upRegion = TextureRegion(upTexture)
-        val downRegion = TextureRegion(downTexture)
-        val buttonStyle = TextButton.TextButtonStyle()
-        buttonStyle.up = TextureRegionDrawable(upRegion)
-        buttonStyle.down = TextureRegionDrawable(downRegion)
-        buttonStyle.font = Styles.formInputLabelStyle.font
-        return buttonStyle
     }
 
     private fun addDialogCancelTextButton(stack: Stack) {

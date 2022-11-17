@@ -6,17 +6,12 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Action
-import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Container
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.ui.Stack
 import com.badlogic.gdx.scenes.scene2d.ui.Table
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.ui.Window
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
@@ -25,7 +20,7 @@ import com.mgtriffid.games.panna.PannaGdxGame
 import com.mgtriffid.games.panna.screens.menu.MenuScreen.UiConfig.CHARACTER_CELL_HEIGHT
 import com.mgtriffid.games.panna.screens.menu.MenuScreen.UiConfig.CHARACTER_CELL_WIDTH
 import com.mgtriffid.games.panna.screens.menu.components.LoginForm
-import com.mgtriffid.games.panna.screens.menu.components.getButtonStyle
+import com.mgtriffid.games.panna.screens.menu.components.StatusDialogWindow
 import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
 import mu.KotlinLogging
 
@@ -47,9 +42,9 @@ class MenuScreen(
     }
 
     lateinit var textures: MenuTextures
+
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
-    lateinit var statusPanelWindow: Window
     lateinit var characterListWindow: Window
     private val menuState = MenuState()
     private var authToken: AuthToken = AuthToken.NotAuthorized
@@ -84,7 +79,7 @@ class MenuScreen(
         buildCharactersList()
     }
 
-    fun buildLoginForm() {
+    private fun buildLoginForm() {
         val loginForm = LoginForm(textures)
         loginForm.onClick = {
             menuState.startAuthorization()
@@ -175,162 +170,13 @@ class MenuScreen(
     }
 
     private fun buildStatusPanel() {
-        statusPanelWindow = Window(
-            "", Window.WindowStyle(
-                BitmapFont(),
-                Color.WHITE,
-                TextureRegionDrawable(textures.statusPanelBackground)
-            )
+        stage.addActor(
+            StatusDialogWindow(
+                menuState = menuState,
+                textures = textures,
+                config = game.config
+            ).statusPanelWindow
         )
-        statusPanelWindow.titleTable.isVisible = false
-        statusPanelWindow.debug = UI_DEBUG
-        statusPanelWindow.setPosition(
-            game.config.width.toFloat() / 2 - UiConfig.STATUS_PANEL_WIDTH / 2,
-            game.config.height.toFloat() / 2 - UiConfig.STATUS_PANEL_HEIGHT / 2
-        )
-        statusPanelWindow.setSize(UiConfig.STATUS_PANEL_WIDTH, UiConfig.STATUS_PANEL_HEIGHT)
-        addStatusText()
-        val stack = Stack()
-        addDialogOkayTextButton(stack)
-        addDialogCancelTextButton(stack)
-        statusPanelWindow.row()
-        statusPanelWindow.add(stack)
-        stage.addActor(statusPanelWindow)
-
-    }
-
-    private fun addStatusText() {
-        val statusPanelTextLabel = Label("neuzhto", Styles.formInputLabelStyle)
-        statusPanelWindow.add(statusPanelTextLabel).expandX()
-
-        val setVisible: (Boolean) -> Unit = { value -> statusPanelWindow.isVisible = value }
-        val setText: (String) -> Unit = { text -> statusPanelTextLabel.setText(text) }
-        val value = object : Action() {
-            override fun act(delta: Float): Boolean {
-                when (menuState.state) {
-                    State.IDLE -> {
-                        setVisible(false)
-                    }
-
-                    State.AUTHORIZATION -> {
-                        setVisible(true)
-                        setText("Authorization...")
-                    }
-
-                    State.RETRIEVING_CHARACTER_LIST -> {
-                        setVisible(true)
-                        setText("Retrieving character list...")
-                    }
-
-                    State.RETRIEVED_CHARACTER_LIST -> {
-                        setVisible(false)
-                    }
-
-                    State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> {
-                        setVisible(true)
-                        setText("Failed to retrieve characters list")
-                    }
-
-                    State.AUTHORIZATION_FAILED -> {
-                        setVisible(true)
-                        setText("Authorization failed")
-                    }
-                }
-                return false
-            }
-        }
-        statusPanelTextLabel.addAction(value)
-    }
-
-    private fun addDialogOkayTextButton(stack: Stack) {
-        val buttonStyle = getDialogButtonStyle()
-
-        val textButton = TextButton("Okay", buttonStyle)
-        stack.add(textButton)
-        val setVisible: (Boolean) -> Unit = { value -> textButton.isVisible = value }
-        val setText: (String) -> Unit = { text -> textButton.setText(text) }
-        textButton.addAction(object : Action() {
-            override fun act(delta: Float): Boolean {
-                when (menuState.state) {
-                    State.IDLE -> {
-                        setVisible(false)
-                    }
-
-                    State.AUTHORIZATION -> {
-                        setVisible(false)
-                    }
-
-                    State.RETRIEVING_CHARACTER_LIST -> {
-                        setVisible(false)
-                        setText("Retrieving character list...")
-                    }
-
-                    State.RETRIEVED_CHARACTER_LIST -> {
-                        setVisible(false)
-                    }
-
-                    State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> {
-                        setVisible(true)
-                    }
-
-                    State.AUTHORIZATION_FAILED -> {
-                        setVisible(true)
-                    }
-                }
-                return false
-            }
-        })
-        textButton.addListener(object : ClickListener() {
-            override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
-                super.touchUp(event, x, y, pointer, button)
-                menuState.idle()
-            }
-        })
-    }
-
-    private fun getDialogButtonStyle(): TextButton.TextButtonStyle {
-        return getButtonStyle(
-            upTexture = textures.dialogButtonUpTexture,
-            downTexture = textures.dialogButtonDownTexture
-        )
-    }
-
-    private fun addDialogCancelTextButton(stack: Stack) {
-        val buttonStyle = getDialogButtonStyle()
-
-        val textButton = TextButton("Cancel", buttonStyle)
-        stack.add(textButton)
-        val setVisible: (Boolean) -> Unit = { value -> textButton.isVisible = value }
-        textButton.addAction(object : Action() {
-            override fun act(delta: Float): Boolean {
-                when (menuState.state) {
-                    State.IDLE -> {
-                        setVisible(false)
-                    }
-
-                    State.AUTHORIZATION -> {
-                        setVisible(true)
-                    }
-
-                    State.RETRIEVING_CHARACTER_LIST -> {
-                        setVisible(true)
-                    }
-
-                    State.RETRIEVED_CHARACTER_LIST -> {
-                        setVisible(false)
-                    }
-
-                    State.FAILED_TO_RETRIEVE_CHARACTERS_LIST -> {
-                        setVisible(false)
-                    }
-
-                    State.AUTHORIZATION_FAILED -> {
-                        setVisible(false)
-                    }
-                }
-                return false
-            }
-        })
     }
 
     override fun dispose() {

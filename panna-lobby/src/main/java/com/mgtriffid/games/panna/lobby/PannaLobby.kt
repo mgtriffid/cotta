@@ -1,6 +1,9 @@
 package com.mgtriffid.games.panna.lobby
 
 import com.google.gson.Gson
+import com.mgtriffid.games.panna.shared.lobby.CharacterDto
+import com.mgtriffid.games.panna.shared.lobby.CharactersResponse
+import com.mgtriffid.games.panna.shared.lobby.ColorDto
 import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
 import mu.KotlinLogging
 import spark.Filter
@@ -100,7 +103,7 @@ class PannaLobby {
                 logger.info { "GET /characters" }
                 val username = getUser(req)
                 if (DEBUGGING_DELAYS) Thread.sleep(ARTIFICIAL_DELAY)
-                characters.forUser(username).map { it.toCharacterDto() }
+                CharactersResponse(characters.forUser(username).map { it.toCharacterDto() })
             },
             gson::toJson
         )
@@ -124,14 +127,6 @@ class PannaLobby {
 private fun PannaCharacter.toCharacterDto() = CharacterDto(
     name = name.name,
     color = ColorDto(color.r, color.g, color.b)
-)
-
-data class CharacterDto(val name: String, val color: ColorDto)
-
-data class ColorDto(
-    val r: Int,
-    val g: Int,
-    val b: Int
 )
 
 data class RoomsDto(

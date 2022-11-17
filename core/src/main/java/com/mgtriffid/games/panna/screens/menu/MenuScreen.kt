@@ -21,6 +21,10 @@ import com.mgtriffid.games.panna.screens.menu.MenuScreen.UiConfig.CHARACTER_CELL
 import com.mgtriffid.games.panna.screens.menu.MenuScreen.UiConfig.CHARACTER_CELL_WIDTH
 import com.mgtriffid.games.panna.screens.menu.components.LoginForm
 import com.mgtriffid.games.panna.screens.menu.components.StatusDialogWindow
+import com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterListModel
+import com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterListWindow
+import com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterModel
+import com.mgtriffid.games.panna.shared.lobby.CharactersResponse
 import com.mgtriffid.games.panna.shared.lobby.SuccessfulLoginResponse
 import mu.KotlinLogging
 
@@ -45,6 +49,7 @@ class MenuScreen(
 
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
+    private val characterListModel = CharacterListModel()
     lateinit var characterListWindow: Window
     private val menuState = MenuState()
     private var authToken: AuthToken = AuthToken.NotAuthorized
@@ -100,34 +105,10 @@ class MenuScreen(
     }
 
     private fun buildCharactersList() {
-        characterListWindow = Window(
-            "Characters list", Window.WindowStyle(
-                BitmapFont(),
-                Color.WHITE,
-                null
-            )
-        )
-        characterListWindow.debug = true
-        characterListWindow.isMovable = false
-        characterListWindow.padTop(20f)
-        characterListWindow.isResizable = false
-        characterListWindow.setSize(UiConfig.CHARACTERS_TABLE_WIDTH, UiConfig.CHARACTERS_TABLE_HEIGHT)
-        characterListWindow.isMovable = false
-        characterListWindow.setPosition(240f, 135f)
-        val charactersTable = Table()
-        charactersTable.debug = true
-        charactersTable.pad(5f)
-        characterListWindow.add(charactersTable)
-        val container = Container<Stack>()
-        container.width(CHARACTER_CELL_WIDTH)
-        container.height(CHARACTER_CELL_HEIGHT)
-        val stack = Stack()
-        container.actor = stack
-
-        charactersTable.add(container)
-        characterListWindow.isVisible = false
-        val setVisible = { visible: Boolean -> characterListWindow.isVisible = visible }
-        characterListWindow.addAction(object : Action() {
+        val characterListWindow = CharacterListWindow(characterListModel)
+        characterListWindow.window.isVisible = false
+        val setVisible = { visible: Boolean -> characterListWindow.window.isVisible = visible }
+        characterListWindow.window.addAction(object : Action() {
             override fun act(delta: Float): Boolean {
                 when (menuState.state) {
                     State.IDLE -> setVisible(false)
@@ -140,7 +121,7 @@ class MenuScreen(
                 return false
             }
         })
-        stage.addActor(characterListWindow)
+        stage.addActor(characterListWindow.window)
     }
 
     private fun retrieveCharacterList() {
@@ -154,6 +135,7 @@ class MenuScreen(
                             when (result) {
                                 is Result.Success -> {
                                     menuState.characterListRetrieved()
+                                    updateCharacterListModel(gson.fromJson(result.value, CharactersResponse::class.java))
                                 }
 
                                 is Result.Failure -> menuState.failedToRetrieveCharactersList()
@@ -167,6 +149,13 @@ class MenuScreen(
     private fun rememberToken(result: SuccessfulLoginResponse) {
         logger.info { "Token is '${result.token}'" }
         authToken = AuthToken.Authorized(result.token)
+    }
+
+    private fun updateCharacterListModel(result: CharactersResponse) {
+        characterListModel.updateCharacters(result.characters.map { CharacterModel(
+            name = it.name,
+            color = CharacterModel.CharacterColor(it.color.r, it.color.g, it.color.b)
+        ) })
     }
 
     private fun buildStatusPanel() {

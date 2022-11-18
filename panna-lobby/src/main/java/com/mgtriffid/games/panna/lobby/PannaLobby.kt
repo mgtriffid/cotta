@@ -17,8 +17,8 @@ import spark.Spark.halt
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
-private const val DEBUGGING_DELAYS = false
-private const val ARTIFICIAL_DELAY = 200L
+private const val DEBUGGING_DELAYS = true
+private const val ARTIFICIAL_DELAY = 1200L
 
 /**
  * This is by no means production ready! be sure to replace security with proper mature solution like Spring Security,

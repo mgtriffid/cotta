@@ -1,12 +1,15 @@
 package com.mgtriffid.games.panna.screens.menu
 
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 
 /**
  * Constructor is expensive!
  */
 
 class MenuTextures {
+    val selection = Texture("selection.png")
+    val character = Texture("character.png")
     val background = Texture("menu_bg.png")
     val statusPanelBackground = Texture("status_panel_bg.png")
     val loginButtonUpTexture = Texture("blue_button_up.png")

@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.screens.menu.components
 
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.NinePatch
@@ -63,7 +64,7 @@ class LoginForm(
                 override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
                     logger.debug { "Login button clicked" }
                     super.touchUp(event, x, y, pointer, button)
-                    onClick()
+                    if (button == Input.Buttons.LEFT) onClick()
                     logger.debug { "touchUp processing of loginButton complete" }
                 }
             })

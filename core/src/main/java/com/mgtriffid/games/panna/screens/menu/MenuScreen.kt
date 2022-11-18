@@ -7,18 +7,13 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Action
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.scenes.scene2d.ui.Container
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
-import com.badlogic.gdx.scenes.scene2d.ui.Stack
-import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.mgtriffid.games.panna.PannaGdxGame
-import com.mgtriffid.games.panna.screens.menu.MenuScreen.UiConfig.CHARACTER_CELL_HEIGHT
-import com.mgtriffid.games.panna.screens.menu.MenuScreen.UiConfig.CHARACTER_CELL_WIDTH
 import com.mgtriffid.games.panna.screens.menu.components.LoginForm
 import com.mgtriffid.games.panna.screens.menu.components.StatusDialogWindow
 import com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterListModel
@@ -105,7 +100,7 @@ class MenuScreen(
     }
 
     private fun buildCharactersList() {
-        val characterListWindow = CharacterListWindow(characterListModel)
+        val characterListWindow = CharacterListWindow(characterListModel, textures)
         characterListWindow.window.isVisible = false
         val setVisible = { visible: Boolean -> characterListWindow.window.isVisible = visible }
         characterListWindow.window.addAction(object : Action() {
@@ -134,11 +129,16 @@ class MenuScreen(
                         .responseString { _, resp, result ->
                             when (result) {
                                 is Result.Success -> {
+                                    val charactersResponse = gson.fromJson(result.value, CharactersResponse::class.java)
+                                    logger.debug { "Got ${charactersResponse.characters} characters in response" }
+                                    updateCharacterListModel(charactersResponse)
                                     menuState.characterListRetrieved()
-                                    updateCharacterListModel(gson.fromJson(result.value, CharactersResponse::class.java))
                                 }
 
-                                is Result.Failure -> menuState.failedToRetrieveCharactersList()
+                                is Result.Failure -> {
+                                    logger.warn(result.getException()) { "Could not retrieve character list" }
+                                    menuState.failedToRetrieveCharactersList()
+                                }
                             }
                         }
                 }

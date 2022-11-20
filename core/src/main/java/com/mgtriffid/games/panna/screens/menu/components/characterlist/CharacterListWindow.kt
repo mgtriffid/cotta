@@ -68,9 +68,13 @@ class CharacterListWindow(
         }
     }
 
+    /**
+     * Re-creates the whole character table, including selection frames.
+     */
     private fun updateCharactersInTable(characters: List<CharacterModel>) {
         logger.debug { "Updating characters table with ${characters.size} characters" }
         // for cells that correspond to these characters, first update drawable
+        selectionFrames.forEach { it.overlay.addAction(Actions.removeActor())}
         selectionFrames.clear()
         characters.forEachIndexed { index, character ->
             val cell = cells[index]

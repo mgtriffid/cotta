@@ -26,7 +26,6 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 const val UI_DEBUG = false
 
-// One day I will learn how to do MVC / MVVM / MVP / BBC / FTM / OMG / QGD but now let it be a mess
 class MenuScreen(
     private val game: PannaGdxGame
 ) : ScreenAdapter() {
@@ -45,7 +44,6 @@ class MenuScreen(
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
     private val characterListModel = CharacterListModel()
-    lateinit var characterListWindow: Window
     private val menuState = MenuState()
     private var authToken: AuthToken = AuthToken.NotAuthorized
 

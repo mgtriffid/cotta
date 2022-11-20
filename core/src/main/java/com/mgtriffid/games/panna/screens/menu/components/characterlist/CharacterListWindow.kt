@@ -6,13 +6,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.ui.Container
-import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton
 import com.badlogic.gdx.scenes.scene2d.ui.Stack
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.mgtriffid.games.panna.screens.menu.MenuScreen
 import com.mgtriffid.games.panna.screens.menu.MenuTextures
@@ -47,23 +45,27 @@ class CharacterListWindow(
         charactersTable.pad(5f)
         window.add(charactersTable)
         for (i in 0..3) {
-            val cell = createCell(i)
+            val cell = createCell()
             charactersTable.add(cell)
             cells.add(cell)
         }
         charactersTable.row()
         for (i in 4..7) {
-            val cell = createCell(i)
+            val cell = createCell()
             charactersTable.add(cell)
             cells.add(cell)
         }
+        registerModelListeners()
+        logger.debug { "Listener onUpdateCharacters configured" }
+    }
+
+    private fun registerModelListeners() {
         characterListModel.onUpdateCharacters = { characters -> updateCharactersInTable(characters) }
         characterListModel.onUpdateSelectedCharacterIndex = { before, after ->
             logger.debug { "onUpdateSelectedCharacterIndex listener invoked, before = $before, after = $after, selectionFrames.size = ${selectionFrames.size}" }
             before?.let { selectionFrames.getOrNull(it)?.hide() }
             after?.let { selectionFrames.getOrNull(it)?.show() }
         }
-        logger.debug { "Listener onUpdateCharacters configured" }
     }
 
     private fun updateCharactersInTable(characters: List<CharacterModel>) {
@@ -87,7 +89,7 @@ class CharacterListWindow(
 
             })
             stack.add(imageButton)
-            val selectionFrame = SelectionFrame()
+            val selectionFrame = SelectionFrame(menuTextures.selection)
             selectionFrames.add(selectionFrame)
             stack.add(selectionFrame.overlay)
         }
@@ -95,11 +97,9 @@ class CharacterListWindow(
             val cell = cells[index]
             cell.actor?.addAction(Actions.removeActor())
         }
-        // second update listener to make it select certain character
-        // for other cells remove images from them and make them invisible
     }
 
-    private fun createCell(index: Int): Container<Stack> {
+    private fun createCell(): Container<Stack> {
         val container = Container<Stack>()
         container.width(MenuScreen.UiConfig.CHARACTER_CELL_WIDTH)
         container.height(MenuScreen.UiConfig.CHARACTER_CELL_HEIGHT)
@@ -112,20 +112,4 @@ class CharacterListWindow(
         return container
     }
 
-    inner class SelectionFrame {
-        val frameImage = Image(menuTextures.selection)
-        val overlay = Table()
-
-        init {
-            frameImage.isVisible = false
-            overlay.add(frameImage).bottom().left()
-        }
-
-        fun hide() {
-            frameImage.isVisible = false
-        }
-        fun show() {
-            frameImage.isVisible = true
-        }
-    }
 }

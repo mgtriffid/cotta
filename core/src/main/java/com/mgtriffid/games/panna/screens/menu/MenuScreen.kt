@@ -100,6 +100,7 @@ class MenuScreen(
     private fun buildCharactersList() {
         val characterListWindow = CharacterListWindow(characterListModel, textures)
         characterListWindow.window.isVisible = false
+        characterListWindow.onClose = menuState::idle
         val setVisible = { visible: Boolean -> characterListWindow.window.isVisible = visible }
         characterListWindow.window.addAction(object : Action() {
             override fun act(delta: Float): Boolean {

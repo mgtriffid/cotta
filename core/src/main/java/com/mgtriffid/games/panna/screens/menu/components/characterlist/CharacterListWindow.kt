@@ -23,6 +23,7 @@ class CharacterListWindow(
     private val characterListModel: CharacterListModel,
     private val menuTextures: MenuTextures
 ) {
+    var onClose: () -> Unit = {}
     val window: Window = Window(
         "Characters list", Window.WindowStyle(
             BitmapFont(),
@@ -46,6 +47,13 @@ class CharacterListWindow(
             TextureRegionDrawable(menuTextures.xButtonUp),
             TextureRegionDrawable(menuTextures.xButtonDown)
         )
+        xButton.addListener(object : ClickListener() {
+            override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
+                logger.debug("Close character window clicked")
+                super.touchUp(event, x, y, pointer, button)
+                if (button == Input.Buttons.LEFT) onClose()
+            }
+        })
         window.titleTable.debug = true
         window.titleTable.add(xButton).pad(2f)
         window.padTop(28f)

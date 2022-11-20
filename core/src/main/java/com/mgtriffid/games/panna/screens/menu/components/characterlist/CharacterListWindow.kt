@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Container
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton
 import com.badlogic.gdx.scenes.scene2d.ui.Stack
 import com.badlogic.gdx.scenes.scene2d.ui.Table
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
@@ -29,17 +30,29 @@ class CharacterListWindow(
             null
         )
     )
-    val cells = ArrayList<Container<Stack>>()
-    val selectionFrames = ArrayList<SelectionFrame>()
+    private val cells = ArrayList<Container<Stack>>()
+    private val selectionFrames = ArrayList<SelectionFrame>()
 
     init {
-        window.debug = true
-        window.isMovable = false
-        window.padTop(20f)
-        window.isResizable = false
-        window.setSize(MenuScreen.UiConfig.CHARACTERS_TABLE_WIDTH, MenuScreen.UiConfig.CHARACTERS_TABLE_HEIGHT)
-        window.isMovable = false
-        window.setPosition(240f, 135f)
+        createWindow()
+        val table = createTableAndCells()
+        createCloseButton(table)
+        registerModelListeners()
+        logger.debug { "Listener onUpdateCharacters configured" }
+    }
+
+    private fun createCloseButton(charactersTable: Table) {
+        val xButton = ImageButton(
+            TextureRegionDrawable(menuTextures.xButtonUp),
+            TextureRegionDrawable(menuTextures.xButtonDown)
+        )
+        window.titleTable.debug = true
+        window.titleTable.add(xButton).pad(2f)
+        window.padTop(28f)
+        charactersTable.row()
+    }
+
+    private fun createTableAndCells(): Table {
         val charactersTable = Table()
         charactersTable.debug = true
         charactersTable.pad(5f)
@@ -55,8 +68,17 @@ class CharacterListWindow(
             charactersTable.add(cell)
             cells.add(cell)
         }
-        registerModelListeners()
-        logger.debug { "Listener onUpdateCharacters configured" }
+        return charactersTable
+    }
+
+    private fun createWindow() {
+        window.debug = true
+        window.isMovable = false
+        window.padTop(20f)
+        window.isResizable = false
+        window.setSize(MenuScreen.UiConfig.CHARACTERS_TABLE_WIDTH, MenuScreen.UiConfig.CHARACTERS_TABLE_HEIGHT)
+        window.isMovable = false
+        window.setPosition(240f, 135f)
     }
 
     private fun registerModelListeners() {

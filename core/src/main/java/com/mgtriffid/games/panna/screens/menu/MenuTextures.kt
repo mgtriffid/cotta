@@ -8,25 +8,26 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
  */
 
 class MenuTextures {
-    val selection = Texture("selection.png")
-    val character = Texture("character.png")
-    val background = Texture("menu_bg.png")
-    val statusPanelBackground = Texture("status_panel_bg.png")
-    val loginButtonUpTexture = Texture("blue_button_up.png")
-    val loginButtonDownTexture = Texture("blue_button_down.png")
-    val dialogButtonUpTexture = Texture("red_button_up.png")
-    val dialogButtonDownTexture = Texture("red_button_down.png")
-    val textInputCursor = Texture("cursor.png")
-    val textInput9Patch = Texture("textfield_9patch_atlas.png")
+    val selection = createTexture("selection.png")
+    val character = createTexture("character.png")
+    val xButtonUp = createTexture("x_button_up.png")
+    val xButtonDown = createTexture("x_button_down.png")
+    val background = createTexture("menu_bg.png")
+    val statusPanelBackground = createTexture("status_panel_bg.png")
+    val loginButtonUpTexture = createTexture("blue_button_up.png")
+    val loginButtonDownTexture = createTexture("blue_button_down.png")
+    val dialogButtonUpTexture = createTexture("red_button_up.png")
+    val dialogButtonDownTexture = createTexture("red_button_down.png")
+    val textInputCursor = createTexture("cursor.png")
+    val textInput9Patch = createTexture("textfield_9patch_atlas.png")
+
+    private val textures = ArrayList<Texture>()
 
     fun dispose() {
-        background.dispose()
-        statusPanelBackground.dispose()
-        loginButtonUpTexture.dispose()
-        loginButtonDownTexture.dispose()
-        dialogButtonUpTexture.dispose()
-        dialogButtonDownTexture.dispose()
-        textInputCursor.dispose()
-        textInput9Patch.dispose()
+        textures.forEach { it.dispose() }
+    }
+
+    private fun createTexture(internalPath: String): Texture {
+        return Texture(internalPath)
     }
 }

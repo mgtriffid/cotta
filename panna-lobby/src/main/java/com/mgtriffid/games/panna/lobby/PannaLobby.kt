@@ -17,7 +17,7 @@ import spark.Spark.halt
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
-private const val DEBUGGING_DELAYS = true
+private const val DEBUGGING_DELAYS = false
 private const val ARTIFICIAL_DELAY = 1200L
 
 /**

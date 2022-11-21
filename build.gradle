@@ -58,6 +58,7 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":panna-shared")
+        implementation project(":panna-graphics")
         implementation project(":cotta-client")
         implementation project(":cotta-core")
         implementation project(":cotta-network-kryonet")
@@ -87,6 +88,32 @@ project(":panna-shared") {
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
+    }
+}
+
+project(":panna-graphics") {
+    apply plugin: "kotlin"
+
+    dependencies {
+        api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        implementation project(":cotta-core")
+        // TODO cleanup
+        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        api "com.badlogicgames.gdx:gdx:$gdxVersion"
+    }
+}
+
+project(":panna-devutils") {
+    apply plugin: "kotlin"
+
+    dependencies {
+        api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        implementation project(":cotta-core")
+        implementation project(":panna-graphics")
+        api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     }
 }
 

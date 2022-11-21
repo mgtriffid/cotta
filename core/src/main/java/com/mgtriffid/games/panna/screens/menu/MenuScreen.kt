@@ -4,16 +4,22 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Action
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.ui.Window
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.mgtriffid.games.panna.PannaGdxGame
+import com.mgtriffid.games.panna.graphics.actors.AnimatedImage
+import com.mgtriffid.games.panna.graphics.animation.Animation
+import com.mgtriffid.games.panna.graphics.animation.FrameConfig
 import com.mgtriffid.games.panna.screens.menu.components.LoginForm
 import com.mgtriffid.games.panna.screens.menu.components.StatusDialogWindow
 import com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterListModel
@@ -69,7 +75,7 @@ class MenuScreen(
 
     private fun prepareStage() {
         stage = Stage()
-
+        stage.addActor(AnimatedImage(createAnimation()))
         Gdx.input.inputProcessor = stage
 
         buildLoginForm()
@@ -183,5 +189,16 @@ class MenuScreen(
     sealed class AuthToken {
         object NotAuthorized : AuthToken()
         data class Authorized(val token: String) : AuthToken()
+    }
+
+    private fun createAnimation(): Animation {
+        val textureSheet = Texture(
+            "characters-free-sprites/Woodcutter/Woodcutter_idle.png"
+        )
+        val regions = TextureRegion.split(
+            textureSheet, 48, 48
+        )
+        val frameRegions = regions.flatMap { it.toList() }
+        return Animation(frameRegions.map { FrameConfig(250, it) })
     }
 }

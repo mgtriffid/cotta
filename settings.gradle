@@ -1,4 +1,7 @@
-include 'desktop', 'core', 'panna-server', 'panna-shared', 'panna-lobby',
+include 'desktop', 'core',
+        'panna-server',
+        'panna-shared', 'panna-lobby', 'panna-graphics',
+        'panna-devutils',
         'cotta-server', 'cotta-core', 'cotta-client',
         'cotta-network', 'cotta-network-kryonet',
         'cotta-gdx'

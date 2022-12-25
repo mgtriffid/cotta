@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta
 
-import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.network.CottaNetwork
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 
@@ -11,14 +10,13 @@ import com.mgtriffid.games.cotta.network.CottaServerNetwork
  * belongs to Panna game.
  */
 class ServerCodePurgatory(
-    private val game: CottaGame,
     private val network: CottaNetwork
 ) {
     lateinit var state: Any
     lateinit var serverNetwork: CottaServerNetwork
 
     fun getNonPlayerInput(): Any {
-        return game.calculateNonPlayerInput(state)
+        TODO()
     }
 
     fun getPlayerInputs(): Any {
@@ -27,12 +25,10 @@ class ServerCodePurgatory(
 
     fun initializeNetwork() {
         serverNetwork = network.createServerNetwork()
-        serverNetwork.initialize()
     }
 
     fun sendDataToClients() {
         val data = getData()
-        serverNetwork.dispatch(data)
     }
 
     private fun getData(): String { // TODO not String but some special thing

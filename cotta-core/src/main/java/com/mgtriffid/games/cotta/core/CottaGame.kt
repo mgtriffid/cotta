@@ -1,8 +1,13 @@
 package com.mgtriffid.games.cotta.core
 
+// Implement this to configure your actual game
 interface CottaGame {
-    fun update()
-    fun initialState(): Any // TODO not Any!
-    fun calculateNonPlayerInput(state: Any): Any
-    fun applyInput(state: Any, input: Any) : Any
+    // First, how this game actually works:
+    // how to run
+    // how to start
+    // what's the type of input
+
+
+    // Second, how to make this game networked:
+    // things like interest management go here
 }

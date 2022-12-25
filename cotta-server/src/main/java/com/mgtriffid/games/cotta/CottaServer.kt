@@ -2,36 +2,29 @@ package com.mgtriffid.games.cotta
 
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.network.CottaNetwork
-import java.lang.Thread.sleep
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 class CottaServer(
-    private val game: CottaGame,
-    private val network: CottaNetwork
+    private val network: CottaNetwork,
+    private val game: CottaGame
 ) {
-    var nextTickAt = now()
-    private val purgatory = ServerCodePurgatory(game, network)
+    private val instances: MutableMap<GameInstanceId, CottaGameInstance> = HashMap()
 
-    fun start() {
-        purgatory.state = game.initialState()
-        purgatory.initializeNetwork()
-        while (true) {
-            integrate()
-            waitUntilNextTick()
-        }
+    fun initializeInstances() {
+        // TODO make multithreaded
+        val instance = createGameInstance()
+        instances[GameInstanceId(0)] = instance
+        // start a thread that will just run
+        val thread = Thread { instance.run() }
+        thread.name = "game-main-loop-thread-0"
+        thread.start()
     }
 
-    private fun integrate() {
-        val playerInput = purgatory.getPlayerInputs()
-        val nonPlayerInput = purgatory.getNonPlayerInput()
-        purgatory.state = game.applyInput(purgatory.state, nonPlayerInput)
-        purgatory.sendDataToClients()
-        println(purgatory.state)
+    private fun createGameInstance(): CottaGameInstance {
+        // Pass network
+        // Pass actually everything
+        return CottaGameInstanceImpl()
     }
-
-    private fun waitUntilNextTick() {
-        nextTickAt += 20L
-        (nextTickAt - now()).takeIf { it > 0 }?.let { sleep(it) }
-    }
-
-    private fun now() = System.currentTimeMillis()
 }

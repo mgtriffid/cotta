@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.core.entities.components
+package com.mgtriffid.games.cotta.core.entities.workload.components
 
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 

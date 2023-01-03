@@ -9,4 +9,5 @@ interface Entities {
 
     fun createEntity(): Entity
     fun get(id: Int): Entity
+    fun all(): Collection<Entity>
 }

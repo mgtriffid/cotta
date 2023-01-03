@@ -18,6 +18,10 @@ class EntitiesImpl : Entities {
         return entities[id] ?: throw EntityNotExistsException("Entity $id does not exist")
     }
 
+    override fun all(): Collection<Entity> {
+        return entities.values
+    }
+
     fun deepCopy(): EntitiesImpl {
         val ret = EntitiesImpl()
         ret.idGenerator = idGenerator

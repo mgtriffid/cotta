@@ -1,10 +1,9 @@
 package com.mgtriffid.games.cotta.core.entities
 
-import com.mgtriffid.games.cotta.core.entities.components.PositionTestComponent
+import com.mgtriffid.games.cotta.core.entities.workload.components.PositionTestComponent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class EntitiesTest {
@@ -103,6 +102,24 @@ class EntitiesTest {
         assertEquals(
             1,
             cottaState.entities(tick).get(entityId).getComponent(PositionTestComponent::class).x
+        )
+    }
+
+    @Test
+    fun `should be possible to advance like 100 times`() {
+        val cottaState = CottaState.getInstance()
+        val entities = cottaState.entities()
+        val entity = entities.createEntity()
+        entity.addComponent(PositionTestComponent.create(1, 1))
+        val entityId = entity.id
+
+        repeat(100) {
+            cottaState.advance()
+        }
+
+        assertEquals(
+            1,
+            cottaState.entities().get(entityId).getComponent(PositionTestComponent::class).x
         )
     }
 }

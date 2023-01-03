@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.network.CottaNetwork
+import com.mgtriffid.games.cotta.server.impl.CottaGameInstanceImpl
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

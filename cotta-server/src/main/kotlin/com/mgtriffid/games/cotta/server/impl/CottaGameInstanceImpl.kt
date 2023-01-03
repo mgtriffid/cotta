@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.server
+package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
@@ -6,13 +6,10 @@ import com.mgtriffid.games.cotta.core.input.NonPlayersInput
 import com.mgtriffid.games.cotta.core.input.PlayersInput
 import com.mgtriffid.games.cotta.core.input.impl.GameInputImpl
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
+import com.mgtriffid.games.cotta.server.CottaGameInstance
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
-
-interface CottaGameInstance {
-    fun run()
-}
 
 class CottaGameInstanceImpl(
     val game: CottaGame,
@@ -42,10 +39,6 @@ class CottaGameInstanceImpl(
         // simulation after fetching input
         // effects after simulation
         // no actually effects within simulation, they are effects FFS
-        // when do we dispatch effects? On this tick or on the next tick?
-        // If it's, say, hitscan. On current tick Orbb shoots Bones with a railgun dealing 85.
-        // Now imagine it's not deterministically 85, it's some random thing. This "random" part is likely a non-player
-        // input thing. For example we may have an algorithm for pseudorandom that acts on entities and some seed.
     }
 
     private fun fetchInput() {

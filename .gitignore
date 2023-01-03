@@ -58,26 +58,6 @@ com_crashlytics_export_strings.xml
 /html/nbproject/private/
 /ios/nbproject/private/
 
-/build/
-/android/build/
-/core/build/
-/desktop/build/
-/html/build/
-/ios/build/
-/cotta-annotations/build/
-/cotta-annotations-processor/build/
-/cotta-client/build/
-/cotta-core/build/
-/cotta-gdx/build/
-/cotta-network-api/build/
-/cotta-network-kryonet/build/
-/cotta-server/build/
-/panna-devutils/build/
-/panna-graphics/build/
-/panna-lobby/build/
-/panna-server/build/
-/panna-shared/build/
-
 /nbbuild/
 /android/nbbuild/
 /core/nbbuild/
@@ -113,6 +93,19 @@ gradle-app.setting
 /desktop/build/
 /html/build/
 /ios/build/
+/cotta-annotations/build/
+/cotta-annotations-processor/build/
+/cotta-client/build/
+/cotta-core/build/
+/cotta-gdx/build/
+/cotta-network-api/build/
+/cotta-network-kryonet/build/
+/cotta-server/build/
+/panna-devutils/build/
+/panna-graphics/build/
+/panna-lobby/build/
+/panna-server/build/
+/panna-shared/build/
 
 ## OS Specific
 .DS_Store

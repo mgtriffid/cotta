@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:1.7.10-1.0.6"
     }
 }
 
@@ -127,14 +127,31 @@ project(":cotta-server") {
     }
 }
 
-project(":cotta-core") {
+project(":cotta-annotations") {
+    apply plugin: "kotlin"
+}
+
+project(":cotta-annotations-processor") {
     apply plugin: "kotlin"
 
+    dependencies {
+        implementation project(":cotta-annotations")
+        implementation "com.google.devtools.ksp:symbol-processing-api:1.7.10-1.0.6"
+    }
+}
+
+project(":cotta-core") {
+    apply plugin: "kotlin"
+    apply plugin: "com.google.devtools.ksp"
+            "    "
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         api "org.slf4j:slf4j-api:2.0.3"
         api "ch.qos.logback:logback-classic:1.4.4"
         api "io.github.microutils:kotlin-logging-jvm:3.0.4"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:5.9.1"
+        implementation project(":cotta-annotations")
+        ksp project(":cotta-annotations-processor")
     }
 }
 

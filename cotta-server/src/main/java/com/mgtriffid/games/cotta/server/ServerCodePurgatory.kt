@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta
+package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.network.CottaNetwork
 import com.mgtriffid.games.cotta.network.CottaServerNetwork

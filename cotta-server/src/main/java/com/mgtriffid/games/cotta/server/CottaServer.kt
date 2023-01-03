@@ -1,6 +1,7 @@
-package com.mgtriffid.games.cotta
+package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.network.CottaNetwork
 import mu.KotlinLogging
 
@@ -13,7 +14,7 @@ class CottaServer(
     private val instances: MutableMap<GameInstanceId, CottaGameInstance> = HashMap()
 
     fun initializeInstances() {
-        // TODO make multithreaded
+        // TODO make multi-threaded
         val instance = createGameInstance()
         instances[GameInstanceId(0)] = instance
         // start a thread that will just run
@@ -25,6 +26,9 @@ class CottaServer(
     private fun createGameInstance(): CottaGameInstance {
         // Pass network
         // Pass actually everything
-        return CottaGameInstanceImpl()
+        return CottaGameInstanceImpl(
+            game,
+            CottaStateImpl(8)
+        )
     }
 }

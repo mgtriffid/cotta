@@ -27,6 +27,7 @@ class ServerSimulationImpl: ServerSimulation {
     }
 
     override fun tick() {
+        state.advance()
         for (system in systems) {
             if (system is EntityProcessingCottaSystem) {
                 for (entity in state.entities().all()) {
@@ -39,7 +40,6 @@ class ServerSimulationImpl: ServerSimulation {
                 }
             }
         }
-        state.advance()
         effectBus.clear()
     }
 }

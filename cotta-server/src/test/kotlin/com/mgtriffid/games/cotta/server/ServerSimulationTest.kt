@@ -2,9 +2,16 @@ package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
+import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
+import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
+import com.mgtriffid.games.cotta.server.workload.components.VelocityTestComponent
 import com.mgtriffid.games.cotta.server.workload.systems.BlankTestSystem
-import com.mgtriffid.games.cotta.server.workload.systems.HealthRegenerationEffectsConsumer
-import com.mgtriffid.games.cotta.server.workload.systems.RegenerationSystem
+import com.mgtriffid.games.cotta.server.workload.systems.EntityShotTestEffectConsumer
+import com.mgtriffid.games.cotta.server.workload.systems.HealthRegenerationTestEffectsConsumer
+import com.mgtriffid.games.cotta.server.workload.systems.MovementTestSystem
+import com.mgtriffid.games.cotta.server.workload.systems.PlayerInputProcessingSystem
+import com.mgtriffid.games.cotta.server.workload.systems.RegenerationTestSystem
+import com.mgtriffid.games.cotta.server.workload.systems.ShotFiredTestEffectConsumer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -35,9 +42,9 @@ class ServerSimulationTest {
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = ServerSimulation.getInstance()
-        val regenerationSystem = RegenerationSystem(serverSimulation.effectBus())
-        serverSimulation.registerSystem(regenerationSystem)
-        serverSimulation.registerSystem(HealthRegenerationEffectsConsumer(state))
+        val regenerationTestSystem = RegenerationTestSystem(serverSimulation.effectBus())
+        serverSimulation.registerSystem(regenerationTestSystem)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer(state))
         serverSimulation.setState(state)
 
         serverSimulation.tick()
@@ -55,9 +62,9 @@ class ServerSimulationTest {
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = ServerSimulation.getInstance()
-        val regenerationSystem = RegenerationSystem(serverSimulation.effectBus())
-        serverSimulation.registerSystem(regenerationSystem)
-        serverSimulation.registerSystem(HealthRegenerationEffectsConsumer(state))
+        val regenerationTestSystem = RegenerationTestSystem(serverSimulation.effectBus())
+        serverSimulation.registerSystem(regenerationTestSystem)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer(state))
         serverSimulation.setState(state)
 
         serverSimulation.tick()
@@ -82,8 +89,40 @@ class ServerSimulationTest {
     }
 
     @Test
-    @Disabled
     fun `should consume input`() {
+        val state = CottaState.getInstance()
+        val damageable = state.entities().createEntity()
+        val damageableId = damageable.id
+        damageable.addComponent(HealthTestComponent.create(20))
+        damageable.addComponent(LinearPositionTestComponent.create(0))
+        damageable.addComponent(VelocityTestComponent.create(2))
 
+        val damageDealer = state.entities().createEntity()
+        val input = PlayerInputTestComponent.create()
+        damageDealer.addComponent(input)
+        val serverSimulation = ServerSimulation.getInstance()
+        serverSimulation.registerSystem(PlayerInputProcessingSystem(serverSimulation.effectBus()))
+        serverSimulation.registerSystem(ShotFiredTestEffectConsumer(
+            serverSimulation.effectBus(),
+            state
+        ))
+        serverSimulation.registerSystem(MovementTestSystem())
+        serverSimulation.registerSystem(EntityShotTestEffectConsumer(state))
+        serverSimulation.setState(state)
+
+        serverSimulation.tick()
+        serverSimulation.tick()
+        input.aim = 4
+        input.shoot = true
+        serverSimulation.tick()
+        input.aim = 4
+        input.shoot = false
+
+        serverSimulation.tick()
+
+        assertEquals(
+            15,
+            state.entities().get(damageableId).getComponent(HealthTestComponent::class).health
+        )
     }
 }

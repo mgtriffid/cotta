@@ -24,8 +24,8 @@ class ServerSimulationTest {
         state.entities().createEntity()
         val system = BlankTestSystem(0)
         val serverSimulation = ServerSimulation.getInstance()
-        serverSimulation.registerSystem(system)
         serverSimulation.setState(state)
+        serverSimulation.registerSystem(system)
 
         serverSimulation.tick()
 
@@ -42,10 +42,10 @@ class ServerSimulationTest {
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = ServerSimulation.getInstance()
+        serverSimulation.setState(state)
         val regenerationTestSystem = RegenerationTestSystem(serverSimulation.effectBus())
         serverSimulation.registerSystem(regenerationTestSystem)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer(state))
-        serverSimulation.setState(state)
 
         serverSimulation.tick()
 
@@ -62,10 +62,10 @@ class ServerSimulationTest {
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = ServerSimulation.getInstance()
+        serverSimulation.setState(state)
         val regenerationTestSystem = RegenerationTestSystem(serverSimulation.effectBus())
         serverSimulation.registerSystem(regenerationTestSystem)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer(state))
-        serverSimulation.setState(state)
 
         serverSimulation.tick()
         serverSimulation.tick()
@@ -101,6 +101,7 @@ class ServerSimulationTest {
         val input = PlayerInputTestComponent.create()
         damageDealer.addComponent(input)
         val serverSimulation = ServerSimulation.getInstance()
+        serverSimulation.setState(state)
         serverSimulation.registerSystem(PlayerInputProcessingSystem(serverSimulation.effectBus()))
         serverSimulation.registerSystem(ShotFiredTestEffectConsumer(
             serverSimulation.effectBus(),
@@ -108,7 +109,6 @@ class ServerSimulationTest {
         ))
         serverSimulation.registerSystem(MovementTestSystem())
         serverSimulation.registerSystem(EntityShotTestEffectConsumer(state))
-        serverSimulation.setState(state)
 
         serverSimulation.tick()
         serverSimulation.tick()

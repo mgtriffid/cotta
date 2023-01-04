@@ -4,7 +4,11 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingCottaSystem
 
-class BlankTestSystem(var counter: Int): EntityProcessingCottaSystem {
+class BlankTestSystem: EntityProcessingCottaSystem {
+    companion object {
+        var counter: Int = 0
+    }
+
     override fun update(e: Entity) {
         counter++
     }

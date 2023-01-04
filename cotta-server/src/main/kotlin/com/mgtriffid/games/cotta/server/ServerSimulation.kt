@@ -22,8 +22,6 @@ interface ServerSimulation {
     /**
      * Registers a system for execution. Systems are invoked in the order of registration.
      */
-    fun registerSystem(system: CottaSystem)
-
     fun <T: CottaSystem> registerSystem(systemClass: KClass<T>)
 
     fun tick()

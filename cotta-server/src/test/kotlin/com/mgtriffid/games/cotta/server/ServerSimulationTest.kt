@@ -19,23 +19,6 @@ import org.junit.jupiter.api.Test
 class ServerSimulationTest {
 
     @Test
-    fun `should invoke systems`() {
-        val state = CottaState.getInstance()
-        state.entities().createEntity()
-        val system = BlankTestSystem(0)
-        val serverSimulation = ServerSimulation.getInstance()
-        serverSimulation.setState(state)
-        serverSimulation.registerSystem(system)
-
-        serverSimulation.tick()
-
-        assertEquals(
-            1,
-            system.counter
-        )
-    }
-
-    @Test
     fun `systems should listen to effects`() {
         val state = CottaState.getInstance()
         val entity = state.entities().createEntity()
@@ -43,9 +26,8 @@ class ServerSimulationTest {
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = ServerSimulation.getInstance()
         serverSimulation.setState(state)
-        val regenerationTestSystem = RegenerationTestSystem(serverSimulation.effectBus())
-        serverSimulation.registerSystem(regenerationTestSystem)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer(state))
+        serverSimulation.registerSystem(RegenerationTestSystem::class)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
 
         serverSimulation.tick()
 
@@ -63,9 +45,8 @@ class ServerSimulationTest {
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = ServerSimulation.getInstance()
         serverSimulation.setState(state)
-        val regenerationTestSystem = RegenerationTestSystem(serverSimulation.effectBus())
-        serverSimulation.registerSystem(regenerationTestSystem)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer(state))
+        serverSimulation.registerSystem(RegenerationTestSystem::class)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
 
         serverSimulation.tick()
         serverSimulation.tick()
@@ -102,13 +83,10 @@ class ServerSimulationTest {
         damageDealer.addComponent(input)
         val serverSimulation = ServerSimulation.getInstance()
         serverSimulation.setState(state)
-        serverSimulation.registerSystem(PlayerInputProcessingSystem(serverSimulation.effectBus()))
-        serverSimulation.registerSystem(ShotFiredTestEffectConsumer(
-            serverSimulation.effectBus(),
-            state
-        ))
-        serverSimulation.registerSystem(MovementTestSystem())
-        serverSimulation.registerSystem(EntityShotTestEffectConsumer(state))
+        serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
+        serverSimulation.registerSystem(ShotFiredTestEffectConsumer::class)
+        serverSimulation.registerSystem(MovementTestSystem::class)
+        serverSimulation.registerSystem(EntityShotTestEffectConsumer::class)
 
         serverSimulation.tick()
         serverSimulation.tick()
@@ -123,6 +101,22 @@ class ServerSimulationTest {
         assertEquals(
             15,
             state.entities().get(damageableId).getComponent(HealthTestComponent::class).health
+        )
+    }
+
+    @Test
+    fun `should invoke systems`() {
+        val state = CottaState.getInstance()
+        state.entities().createEntity()
+        val serverSimulation = ServerSimulation.getInstance()
+        serverSimulation.setState(state)
+        serverSimulation.registerSystem(BlankTestSystem::class)
+
+        serverSimulation.tick()
+
+        assertEquals(
+            1,
+            BlankTestSystem.counter
         )
     }
 }

@@ -9,6 +9,7 @@ import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.impl.invokers.SimpleSystemInvoker
 import com.mgtriffid.games.cotta.server.impl.invokers.SystemInvoker
 import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 
 class ServerSimulationImpl: ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
@@ -26,12 +27,8 @@ class ServerSimulationImpl: ServerSimulation {
         this.state = state
     }
 
-    override fun registerSystem(system: CottaSystem) {
-        systemInvokers.add(SimpleSystemInvoker(system, state, effectBus))
-    }
-
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
-
+        systemInvokers.add(createInvoker(systemClass))
     }
 
     override fun tick() {
@@ -40,5 +37,22 @@ class ServerSimulationImpl: ServerSimulation {
             invoker()
         }
         effectBus.clear()
+    }
+
+    private fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
+        val ctor = systemClass.primaryConstructor ?: throw IllegalArgumentException(
+            "Class ${systemClass.qualifiedName} must have a primary constructor"
+        )
+        val parameters = ctor.parameters
+        val parameterValues = parameters.map {
+            (it.type.classifier as? KClass<*>)?.let {
+                when (it) {
+                    EffectBus::class -> effectBus
+                    CottaState::class -> state
+                    else -> null
+                }
+            }
+        }
+        return SimpleSystemInvoker(ctor.call(*parameterValues.toTypedArray()) as CottaSystem, state, effectBus)
     }
 }

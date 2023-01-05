@@ -2,13 +2,13 @@ package com.mgtriffid.games.panna.shared.game.systems
 
 import com.mgtriffid.games.cotta.core.annotations.NonPlayerInputGenerator
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.systems.EntityProcessingCottaSystem
+import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.panna.shared.game.MovementDirection
 import com.mgtriffid.games.panna.shared.game.components.BossInputComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 
 @NonPlayerInputGenerator
-class BossInputGeneratingSystem: EntityProcessingCottaSystem {
+class BossInputGeneratingSystem: EntityProcessingSystem {
     // processes all Entities that have BossInputComponent on them
     // should set that component
     override fun update(e: Entity) {

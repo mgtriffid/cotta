@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.server.workload.components.VelocityTestComponen
 import com.mgtriffid.games.cotta.server.workload.systems.BlankTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.EntityShotTestEffectConsumer
 import com.mgtriffid.games.cotta.server.workload.systems.HealthRegenerationTestEffectsConsumer
+import com.mgtriffid.games.cotta.server.workload.systems.LagCompensatedShotFiredTestEffectConsumer
 import com.mgtriffid.games.cotta.server.workload.systems.MovementTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.PlayerInputProcessingSystem
 import com.mgtriffid.games.cotta.server.workload.systems.RegenerationTestSystem
@@ -60,7 +61,21 @@ class ServerSimulationTest {
     @Test
     @Disabled
     fun `should be able to return all effects that happened`() {
+        val state = CottaState.getInstance()
+        val entity = state.entities().createEntity()
+        val entityId = entity.id
+        entity.addComponent(HealthTestComponent.create(0))
+        val serverSimulation = ServerSimulation.getInstance()
+        serverSimulation.setState(state)
+        serverSimulation.registerSystem(RegenerationTestSystem::class)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
 
+        serverSimulation.tick()
+
+        assertEquals(
+            1,
+            state.entities().get(entityId).getComponent(HealthTestComponent::class).health
+        )
     }
 
     @Test
@@ -90,6 +105,46 @@ class ServerSimulationTest {
 
         serverSimulation.tick()
         serverSimulation.tick()
+        input.aim = 4
+        input.shoot = true
+        serverSimulation.tick()
+        input.aim = 4
+        input.shoot = false
+
+        serverSimulation.tick()
+
+        assertEquals(
+            15,
+            state.entities().get(damageableId).getComponent(HealthTestComponent::class).health
+        )
+    }
+
+    @Test
+    fun `should compensate lags`() {
+        val playerId = 0
+        val state = CottaState.getInstance()
+        val damageable = state.entities().createEntity()
+        val damageableId = damageable.id
+        damageable.addComponent(HealthTestComponent.create(20))
+        damageable.addComponent(LinearPositionTestComponent.create(0))
+        damageable.addComponent(VelocityTestComponent.create(2))
+
+        val damageDealer = state.entities().createEntity()
+        val damageDealerId = damageDealer.id
+        val input = PlayerInputTestComponent.create()
+        damageDealer.addComponent(input)
+        val serverSimulation = ServerSimulation.getInstance()
+        serverSimulation.setState(state)
+        serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
+        serverSimulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
+        serverSimulation.registerSystem(MovementTestSystem::class)
+        serverSimulation.registerSystem(EntityShotTestEffectConsumer::class)
+        repeat(6) {
+            serverSimulation.tick()
+        }
+
+        serverSimulation.setEntityOwner(damageDealerId, playerId)
+        serverSimulation.setPlayerSawTick(playerId, 2L)
         input.aim = 4
         input.shoot = true
         serverSimulation.tick()

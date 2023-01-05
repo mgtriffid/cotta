@@ -1,10 +1,9 @@
 package com.mgtriffid.games.cotta.server.workload.systems
 
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.systems.CottaSystem
-import com.mgtriffid.games.cotta.core.systems.EntityProcessingCottaSystem
+import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 
-class BlankTestSystem: EntityProcessingCottaSystem {
+class BlankTestSystem: EntityProcessingSystem {
     companion object {
         var counter: Int = 0
     }

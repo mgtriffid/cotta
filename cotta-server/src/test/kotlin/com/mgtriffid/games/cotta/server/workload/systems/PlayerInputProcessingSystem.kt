@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestCompo
 import com.mgtriffid.games.cotta.server.workload.effects.ShotFiredTestEffect
 
 class PlayerInputProcessingSystem(private val effectBus: EffectBus) : InputProcessingSystem {
+
     override fun update(e: Entity) {
         if (e.hasComponent(PlayerInputTestComponent::class)) {
             val input = e.getComponent(PlayerInputTestComponent::class)
@@ -16,3 +17,5 @@ class PlayerInputProcessingSystem(private val effectBus: EffectBus) : InputProce
         }
     }
 }
+// when effectBus.fire then it should pass the context from this entity down to the effect.
+// context is being created

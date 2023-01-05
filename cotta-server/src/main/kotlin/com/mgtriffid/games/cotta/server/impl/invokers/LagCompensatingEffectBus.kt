@@ -7,8 +7,8 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 // TODO better placing
 // TODO separate publisher and the whole EffectBus
 class LagCompensatingEffectBus(
-    val effectBus: EffectBus,
-    val sawTickHolder: LagCompensatingInputProcessingSystemInvoker.SawTickHolder
+    private val effectBus: EffectBus,
+    private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
 ): EffectBus {
     private val ticksForEffects: MutableMap<CottaEffect, Long?> = HashMap()
 

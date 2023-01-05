@@ -21,7 +21,7 @@ class InvokersFactoryImpl(
     private val entityOwners: HashMap<Int, Int>,
     private val playersSawTicks: HashMap<Int, Long>
 ) : InvokersFactory {
-    private val sawTickHolder = LagCompensatingInputProcessingSystemInvoker.SawTickHolder(null)
+    private val sawTickHolder = SawTickHolder(null)
     private val lagCompensatingEffectBus = LagCompensatingEffectBus(effectBus, sawTickHolder)
 
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
@@ -35,20 +35,7 @@ class InvokersFactoryImpl(
             (param.type.classifier as? KClass<*>)?.let {
                 when (it) {
                     EffectBus::class -> effectBus
-                    Entities::class -> object : Entities {
-                        override fun createEntity(): Entity {
-                            return state.entities().createEntity()
-                        }
-
-                        override fun get(id: Int): Entity {
-                            return state.entities().get(id)
-                        }
-
-                        override fun all(): Collection<Entity> {
-                            return state.entities().all()
-                        }
-                    }
-
+                    Entities::class -> LatestEntities(state)
                     else -> null
                 }
             }
@@ -67,7 +54,7 @@ class InvokersFactoryImpl(
         if (shouldUseContextWhileConsumingEffects) {
             return buildLagCompensatingEffectsConsumerInvoker(systemClass)
         }
-        return SimpleEffectsConsumerSystemInvoker(ctor.call(*parameterValues.toTypedArray()) as CottaSystem, effectBus)
+        return SimpleEffectsConsumerSystemInvoker(ctor.call(*parameterValues.toTypedArray()) as EffectsConsumer, effectBus)
     }
 
     private fun <T : CottaSystem> getConstructor(systemClass: KClass<T>) =
@@ -84,20 +71,7 @@ class InvokersFactoryImpl(
             (param.type.classifier as? KClass<*>)?.let {
                 when (it) {
                     EffectBus::class -> lagCompensatingEffectBus
-                    Entities::class -> object : Entities {
-                        override fun createEntity(): Entity {
-                            return state.entities().createEntity()
-                        }
-
-                        override fun get(id: Int): Entity {
-                            return state.entities().get(id)
-                        }
-
-                        override fun all(): Collection<Entity> {
-                            return state.entities().all()
-                        }
-                    }
-
+                    Entities::class -> LatestEntities(state)
                     else -> null
                 }
             }
@@ -123,20 +97,8 @@ class InvokersFactoryImpl(
         val parameterValues = parameters.map { param ->
             (param.type.classifier as? KClass<*>)?.let {
                 when (it) {
-                    EffectBus::class -> effectBus
-                    Entities::class -> object : Entities {
-                        override fun createEntity(): Entity {
-                            return state.entities().createEntity()
-                        }
-
-                        override fun get(id: Int): Entity {
-                            return state.entities().get(id)
-                        }
-
-                        override fun all(): Collection<Entity> {
-                            return state.entities(atTick = sawTickHolder.tick ?: state.currentTick()).all()
-                        }
-                    }
+                    EffectBus::class -> lagCompensatingEffectBus
+                    Entities::class -> ReadingFromPreviousTickEntities(sawTickHolder, state)
 
                     else -> null
                 }
@@ -148,4 +110,37 @@ class InvokersFactoryImpl(
             sawTickHolder
         )
     }
+
+    private class LatestEntities(private val state: CottaState) : Entities {
+        override fun createEntity(): Entity {
+            return state.entities().createEntity()
+        }
+
+        override fun get(id: Int): Entity {
+            return state.entities().get(id)
+        }
+
+        override fun all(): Collection<Entity> {
+            return state.entities().all()
+        }
+    }
+
+    private class ReadingFromPreviousTickEntities(
+        private val sawTickHolder: SawTickHolder,
+        private val state: CottaState
+    ): Entities {
+        override fun createEntity(): Entity {
+            return state.entities().createEntity()
+        }
+
+        override fun get(id: Int): Entity {
+            return state.entities(atTick = sawTickHolder.tick ?: state.currentTick()).get(id)
+        }
+
+        override fun all(): Collection<Entity> {
+            return state.entities(atTick = sawTickHolder.tick ?: state.currentTick()).all()
+        }
+    }
+
+    data class SawTickHolder(var tick: Long?)
 }

@@ -8,12 +8,10 @@ class LagCompensatingInputProcessingSystemInvoker(
     private val state: CottaState,
     private val system: InputProcessingSystem,
     private val entityOwnerSawTickProvider: EntityOwnerSawTickProvider,
-    private val sawTickHolder: SawTickHolder
+    private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
 ): SystemInvoker {
     override fun invoke() {
-        for (entity in state.entities().all()) {
-            process(entity)
-        }
+        state.entities().all().forEach(::process)
     }
 
     private fun process(entity: Entity) {
@@ -26,5 +24,4 @@ class LagCompensatingInputProcessingSystemInvoker(
         fun getSawTickByEntityId(entityId: Int): Long?
     }
 
-    data class SawTickHolder(var tick: Long?)
 }

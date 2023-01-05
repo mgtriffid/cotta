@@ -1,18 +1,18 @@
 package com.mgtriffid.games.cotta.server.impl.invokers
 
+import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.EffectsConsumer
-import com.mgtriffid.games.cotta.core.systems.CottaSystem
 
 class SimpleEffectsConsumerSystemInvoker(
-    private val system: CottaSystem,
+    private val consumer: EffectsConsumer,
     private val effectBus: EffectBus
 ) : SystemInvoker {
     override fun invoke() {
-        if (system is EffectsConsumer) {
-            effectBus.effects().forEach {
-                system.handleEffect(it)
-            }
-        }
+        effectBus.effects().forEach(::process)
+    }
+
+    private fun process(it: CottaEffect) {
+        consumer.handleEffect(it)
     }
 }

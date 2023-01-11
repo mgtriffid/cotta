@@ -26,6 +26,8 @@ class ServerSimulationImpl: ServerSimulation {
 
     private val effectBus = EffectBus.getInstance()
 
+    private val clientsGhosts = ClientsGhosts()
+
     private lateinit var state: CottaState
     private lateinit var invokersFactory: InvokersFactory
 
@@ -52,10 +54,15 @@ class ServerSimulationImpl: ServerSimulation {
     override fun tick() {
         state.advance()
         processEnterGameIntents()
+        putInputIntoEntities()
         for (invoker in systemInvokers) {
             invoker()
         }
         effectBus.clear()
+    }
+
+    private fun putInputIntoEntities() {
+        // here be taking input and stuffing it into InputComponents of corresponding entities
     }
 
     override fun setEntityOwner(entityId: Int, playerId: PlayerId) {
@@ -69,6 +76,7 @@ class ServerSimulationImpl: ServerSimulation {
     override fun enterGame(intent: EnterGameIntent): PlayerId {
         val playerId = playerIdGenerator.nextId()
         enterGameIntents.add(Pair(intent, playerId))
+        clientsGhosts.addGhost(playerId)
         return playerId
     }
 
@@ -79,9 +87,18 @@ class ServerSimulationImpl: ServerSimulation {
             metaEntities[playerId] = metaEntity.id
             entityOwners[metaEntity.id] = playerId
             it.first.params // TODO use parameters to add certain components, figure it out
-            // mark this as ready to being sent
+            sendMetaEntity(playerId, metaEntity.id)
+            sendStates(playerId)
         }
         enterGameIntents.clear()
+    }
+
+    private fun sendMetaEntity(playerId: PlayerId, metaEntityId: Int) {
+
+    }
+
+    private fun sendStates(playerId: PlayerId) {
+
     }
 
     private fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {

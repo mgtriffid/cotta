@@ -54,14 +54,7 @@ class CottaGameInstanceImpl(
     }
 
     private fun fetchInput() {
-        val playersInput = fetchFromNetwork()
-        val nonPlayersInput = calculateNonPlayerInput()
-        val gameInput = GameInputImpl(playersInput, nonPlayersInput)
-        stuffInputIntoEntities()
-    }
 
-    private fun stuffInputIntoEntities() {
-        // puts input from a thing that is kinda foreign to the simulation to actual entities in the simulation
     }
 
     private fun simulate() {

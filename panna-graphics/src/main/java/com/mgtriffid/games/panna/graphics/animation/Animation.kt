@@ -12,7 +12,6 @@ class Animation(
     fun frameAt(time: Long): TextureRegion {
         val withinAnimation = (time - started) % animationLength
         var acc = 0
-        var index = 0
         for (frame in frames) {
             acc += frame.durationMillis
             if (acc >= withinAnimation) return frame.texture

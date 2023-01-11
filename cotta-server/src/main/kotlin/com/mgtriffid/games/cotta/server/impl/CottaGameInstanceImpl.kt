@@ -6,8 +6,11 @@ import com.mgtriffid.games.cotta.core.input.NonPlayersInput
 import com.mgtriffid.games.cotta.core.input.PlayersInput
 import com.mgtriffid.games.cotta.core.input.impl.GameInputImpl
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
+import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.CottaGameInstance
+import com.mgtriffid.games.cotta.server.ServerSimulation
 import mu.KotlinLogging
+import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
@@ -17,8 +20,11 @@ class CottaGameInstanceImpl(
 ): CottaGameInstance {
     @Volatile var running = true
 
+    private val serverSimulation = ServerSimulation.getInstance()
+
     override fun run() {
         initializeState()
+        registerSystems()
         val loop = FixedRateLoopBody(
             tickLengthMs = 20L,
             startsAt = System.currentTimeMillis()
@@ -30,6 +36,11 @@ class CottaGameInstanceImpl(
 
     private fun initializeState() {
         game.initializeServerState(state)
+        serverSimulation.setState(state)
+    }
+
+    private fun registerSystems() {
+        game.serverSystems.forEach { serverSimulation.registerSystem(it as KClass<CottaSystem>) }
     }
 
     private fun tick() {
@@ -39,6 +50,7 @@ class CottaGameInstanceImpl(
         // simulation after fetching input
         // effects after simulation
         // no actually effects within simulation, they are effects FFS
+        dispatchDataToClients()
     }
 
     private fun fetchInput() {
@@ -48,17 +60,22 @@ class CottaGameInstanceImpl(
         stuffInputIntoEntities()
     }
 
+    private fun stuffInputIntoEntities() {
+        // puts input from a thing that is kinda foreign to the simulation to actual entities in the simulation
+    }
+
     private fun simulate() {
+        // processing entering game, adding meta-entities "Player". Adding where?
+        // Using input to actually process the game
+    }
+
+    private fun dispatchDataToClients() {
 
     }
 
     private fun fetchFromNetwork(): PlayersInput {
         logger.debug { "Fetching input from network" }
         return object: PlayersInput {}
-    }
-
-    private fun stuffInputIntoEntities() {
-
     }
 
     private fun calculateNonPlayerInput(): NonPlayersInput {

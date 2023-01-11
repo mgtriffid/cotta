@@ -14,7 +14,6 @@ import com.mgtriffid.games.cotta.server.workload.systems.PlayerInputProcessingSy
 import com.mgtriffid.games.cotta.server.workload.systems.RegenerationTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.ShotFiredTestEffectConsumer
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class ServerSimulationTest {
@@ -59,32 +58,6 @@ class ServerSimulationTest {
     }
 
     @Test
-    @Disabled
-    fun `should be able to return all effects that happened`() {
-        val state = CottaState.getInstance()
-        val entity = state.entities().createEntity()
-        val entityId = entity.id
-        entity.addComponent(HealthTestComponent.create(0))
-        val serverSimulation = ServerSimulation.getInstance()
-        serverSimulation.setState(state)
-        serverSimulation.registerSystem(RegenerationTestSystem::class)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
-
-        serverSimulation.tick()
-
-        assertEquals(
-            1,
-            state.entities().get(entityId).getComponent(HealthTestComponent::class).health
-        )
-    }
-
-    @Test
-    @Disabled
-    fun `should be able to serialize state diff`() {
-
-    }
-
-    @Test
     fun `should consume input`() {
         val state = CottaState.getInstance()
         val damageable = state.entities().createEntity()
@@ -121,7 +94,7 @@ class ServerSimulationTest {
 
     @Test
     fun `should compensate lags`() {
-        val playerId = 0
+        val playerId = PlayerId(0)
         val state = CottaState.getInstance()
         val damageable = state.entities().createEntity()
         val damageableId = damageable.id

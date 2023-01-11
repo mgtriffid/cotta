@@ -25,6 +25,7 @@ interface ServerSimulation {
     fun <T: CottaSystem> registerSystem(systemClass: KClass<T>)
 
     fun tick()
-    fun setEntityOwner(damageDealerId: Int, playerId: Int)
-    fun setPlayerSawTick(playerId: Int, tick: Long)
+    fun setEntityOwner(entityId: Int, playerId: PlayerId)
+    fun setPlayerSawTick(playerId: PlayerId, tick: Long)
+    fun enterGame(intent: EnterGameIntent): PlayerId
 }

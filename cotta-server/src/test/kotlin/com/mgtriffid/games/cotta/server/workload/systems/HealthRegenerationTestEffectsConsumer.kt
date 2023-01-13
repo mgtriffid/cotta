@@ -7,7 +7,6 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
 
-// TODO smarter DI
 class HealthRegenerationTestEffectsConsumer(private val entities: Entities) : EffectsConsumer {
     override fun handleEffect(e: CottaEffect) {
         if (e is HealthRegenerationTestEffect) {

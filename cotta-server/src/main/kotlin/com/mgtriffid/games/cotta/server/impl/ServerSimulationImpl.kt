@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server.impl
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
+import com.mgtriffid.games.cotta.server.DataToBeSentToClients
 import com.mgtriffid.games.cotta.server.EnterGameIntent
 import com.mgtriffid.games.cotta.server.PlayerId
 import com.mgtriffid.games.cotta.server.ServerSimulation
@@ -25,8 +26,6 @@ class ServerSimulationImpl: ServerSimulation {
     private val metaEntities = HashMap<PlayerId, Int>()
 
     private val effectBus = EffectBus.getInstance()
-
-    private val clientsGhosts = ClientsGhosts()
 
     private lateinit var state: CottaState
     private lateinit var invokersFactory: InvokersFactory
@@ -52,13 +51,13 @@ class ServerSimulationImpl: ServerSimulation {
     }
 
     override fun tick() {
+        effectBus.clear()
         state.advance()
         processEnterGameIntents()
         putInputIntoEntities()
         for (invoker in systemInvokers) {
             invoker()
         }
-        effectBus.clear()
     }
 
     private fun putInputIntoEntities() {
@@ -76,8 +75,13 @@ class ServerSimulationImpl: ServerSimulation {
     override fun enterGame(intent: EnterGameIntent): PlayerId {
         val playerId = playerIdGenerator.nextId()
         enterGameIntents.add(Pair(intent, playerId))
-        clientsGhosts.addGhost(playerId)
         return playerId
+    }
+
+    override fun getDataToBeSentToClients(): DataToBeSentToClients {
+        return DataToBeSentToClientsImpl(
+            effects = effectBus.effects()
+        )
     }
 
     private fun processEnterGameIntents() {
@@ -87,18 +91,8 @@ class ServerSimulationImpl: ServerSimulation {
             metaEntities[playerId] = metaEntity.id
             entityOwners[metaEntity.id] = playerId
             it.first.params // TODO use parameters to add certain components, figure it out
-            sendMetaEntity(playerId, metaEntity.id)
-            sendStates(playerId)
         }
         enterGameIntents.clear()
-    }
-
-    private fun sendMetaEntity(playerId: PlayerId, metaEntityId: Int) {
-
-    }
-
-    private fun sendStates(playerId: PlayerId) {
-
     }
 
     private fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {

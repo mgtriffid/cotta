@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.VelocityTestComponent
+import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.systems.BlankTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.EntityShotTestEffectConsumer
 import com.mgtriffid.games.cotta.server.workload.systems.HealthRegenerationTestEffectsConsumer
@@ -20,11 +21,11 @@ class ServerSimulationTest {
 
     @Test
     fun `systems should listen to effects`() {
-        val state = CottaState.getInstance()
+        val state = getCottaState()
         val entity = state.entities().createEntity()
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
-        val serverSimulation = ServerSimulation.getInstance()
+        val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
@@ -39,11 +40,11 @@ class ServerSimulationTest {
 
     @Test
     fun `effects should be processed within given tick once`() {
-        val state = CottaState.getInstance()
+        val state = getCottaState()
         val entity = state.entities().createEntity()
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
-        val serverSimulation = ServerSimulation.getInstance()
+        val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
@@ -59,7 +60,7 @@ class ServerSimulationTest {
 
     @Test
     fun `should consume input`() {
-        val state = CottaState.getInstance()
+        val state = getCottaState()
         val damageable = state.entities().createEntity()
         val damageableId = damageable.id
         damageable.addComponent(HealthTestComponent.create(20))
@@ -69,7 +70,7 @@ class ServerSimulationTest {
         val damageDealer = state.entities().createEntity()
         val input = PlayerInputTestComponent.create()
         damageDealer.addComponent(input)
-        val serverSimulation = ServerSimulation.getInstance()
+        val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
         serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
         serverSimulation.registerSystem(ShotFiredTestEffectConsumer::class)
@@ -95,7 +96,7 @@ class ServerSimulationTest {
     @Test
     fun `should compensate lags`() {
         val playerId = PlayerId(0)
-        val state = CottaState.getInstance()
+        val state = getCottaState()
         val damageable = state.entities().createEntity()
         val damageableId = damageable.id
         damageable.addComponent(HealthTestComponent.create(20))
@@ -106,7 +107,7 @@ class ServerSimulationTest {
         val damageDealerId = damageDealer.id
         val input = PlayerInputTestComponent.create()
         damageDealer.addComponent(input)
-        val serverSimulation = ServerSimulation.getInstance()
+        val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
         serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
         serverSimulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
@@ -134,9 +135,9 @@ class ServerSimulationTest {
 
     @Test
     fun `should invoke systems`() {
-        val state = CottaState.getInstance()
+        val state = getCottaState()
         state.entities().createEntity()
-        val serverSimulation = ServerSimulation.getInstance()
+        val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
         serverSimulation.registerSystem(BlankTestSystem::class)
 
@@ -147,4 +148,27 @@ class ServerSimulationTest {
             BlankTestSystem.counter
         )
     }
+
+    @Test
+    fun `should return effects that are to be returned to clients`() {
+        val state = getCottaState()
+        val entity = state.entities().createEntity()
+        val entityId = entity.id
+        entity.addComponent(HealthTestComponent.create(0))
+        val serverSimulation = getServerSimulation()
+        serverSimulation.setState(state)
+        serverSimulation.registerSystem(RegenerationTestSystem::class)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
+
+        serverSimulation.tick()
+
+        assertEquals(
+            HealthRegenerationTestEffect(entityId, 1),
+            serverSimulation.getDataToBeSentToClients().effects.first()
+        )
+    }
+
+    private fun getCottaState() = CottaState.getInstance()
+
+    private fun getServerSimulation() = ServerSimulation.getInstance()
 }

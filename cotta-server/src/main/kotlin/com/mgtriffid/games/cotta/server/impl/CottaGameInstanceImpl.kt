@@ -58,12 +58,11 @@ class CottaGameInstanceImpl(
     }
 
     private fun simulate() {
-        // processing entering game, adding meta-entities "Player". Adding where?
-        // Using input to actually process the game
+        serverSimulation.tick()
     }
 
     private fun dispatchDataToClients() {
-
+        serverSimulation.getDataToBeSentToClients()
     }
 
     private fun fetchFromNetwork(): PlayersInput {

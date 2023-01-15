@@ -5,4 +5,6 @@ import com.mgtriffid.games.panna.shared.game.MovementDirection
 
 data class WalkingComponent(
     var movementDirection: MovementDirection
-): Component
+): Component<WalkingComponent> {
+    override fun copy(): WalkingComponent = WalkingComponent(movementDirection)
+}

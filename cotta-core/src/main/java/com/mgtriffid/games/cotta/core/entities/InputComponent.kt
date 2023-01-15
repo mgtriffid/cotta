@@ -1,3 +1,3 @@
 package com.mgtriffid.games.cotta.core.entities
 
-interface InputComponent: Component
+interface InputComponent<T: InputComponent<T>>: Component<T>

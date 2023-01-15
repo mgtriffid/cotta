@@ -2,7 +2,7 @@ package com.mgtriffid.games.cotta.server.workload.components
 
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 
-interface PlayerInputTestComponent : InputComponent {
+interface PlayerInputTestComponent : InputComponent<PlayerInputTestComponent> {
     companion object {
         fun create(): PlayerInputTestComponent = PlayerInputTestComponentImpl(
             aim = 0,
@@ -11,6 +11,7 @@ interface PlayerInputTestComponent : InputComponent {
     }
     var aim: Int
     var shoot: Boolean
+    override fun copy(): PlayerInputTestComponent = PlayerInputTestComponentImpl(aim, shoot)
 }
 
 private data class PlayerInputTestComponentImpl(

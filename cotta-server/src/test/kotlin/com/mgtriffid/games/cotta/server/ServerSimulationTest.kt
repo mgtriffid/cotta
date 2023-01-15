@@ -168,6 +168,44 @@ class ServerSimulationTest {
         )
     }
 
+    @Test
+    fun `should prepare inputs to be sent to clients`() {
+        val playerId = PlayerId(0)
+        val state = getCottaState()
+        val damageDealer = state.entities().createEntity()
+        val damageDealerId = damageDealer.id
+        val input = PlayerInputTestComponent.create()
+        damageDealer.addComponent(input)
+        val serverSimulation = getServerSimulation()
+        serverSimulation.setState(state)
+        serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
+        serverSimulation.setEntityOwner(damageDealerId, playerId)
+        serverSimulation.setPlayerSawTick(playerId, 2L)
+        input.aim = 4
+        input.shoot = true
+        serverSimulation.tick()
+        val dataToBeSentToClients = serverSimulation.getDataToBeSentToClients()
+        assertEquals(
+            4,
+            (dataToBeSentToClients.inputs[damageDealerId]?.first() as PlayerInputTestComponent).aim
+        )
+        assertEquals(
+            true,
+            (dataToBeSentToClients.inputs[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+        )
+        input.aim = 4
+        input.shoot = false
+        assertEquals(
+            4,
+            (dataToBeSentToClients.inputs[damageDealerId]?.first() as PlayerInputTestComponent).aim
+        )
+        assertEquals(
+            true,
+            (dataToBeSentToClients.inputs[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+        )
+    }
+
+
     private fun getCottaState() = CottaState.getInstance()
 
     private fun getServerSimulation() = ServerSimulation.getInstance()

@@ -2,6 +2,8 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.DataToBeSentToClients
 import com.mgtriffid.games.cotta.server.EnterGameIntent
@@ -15,7 +17,7 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class ServerSimulationImpl: ServerSimulation {
+class ServerSimulationImpl : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
     private val entityOwners = HashMap<Int, PlayerId>()
@@ -80,8 +82,19 @@ class ServerSimulationImpl: ServerSimulation {
 
     override fun getDataToBeSentToClients(): DataToBeSentToClients {
         return DataToBeSentToClientsImpl(
-            effects = effectBus.effects()
+            effects = effectBus.effects(),
+            inputs = gatherInputs()
         )
+    }
+
+    // O(scary)
+    private fun gatherInputs(): Map<Int, Set<InputComponent<*>>> {
+        return state.entities().all().map { entity ->
+            val impl = entity as? EntityImpl
+            if (impl == null) { null} else {
+                entity.id to entity.components.filterIsInstance<InputComponent<*>>().map { it.copy() }.toSet()
+            }
+        }.filterNotNull().toMap()
     }
 
     private fun processEnterGameIntents() {

@@ -62,7 +62,10 @@ class CottaGameInstanceImpl(
     }
 
     private fun dispatchDataToClients() {
-        serverSimulation.getDataToBeSentToClients()
+        logger.info { "Preparing data to sent to clients" }
+        // TODO consider passing tick as a parameter here because it's confusing right now: tick goes through EVERYTHING
+        // but implicitly
+        val data = serverSimulation.getDataToBeSentToClients()
     }
 
     private fun fetchFromNetwork(): PlayersInput {

@@ -3,8 +3,10 @@ package com.mgtriffid.games.cotta.server
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.network.CottaNetwork
+import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.server.impl.CottaGameInstanceImpl
 import mu.KotlinLogging
+import kotlin.math.log
 
 private val logger = KotlinLogging.logger {}
 
@@ -25,11 +27,12 @@ class CottaServer(
     }
 
     private fun createGameInstance(): CottaGameInstance {
-        // Pass network
-        // Pass actually everything
+        logger.info { "Initializing game instance" }
+
         return CottaGameInstanceImpl(
             game,
-            CottaStateImpl(8)
+            CottaStateImpl(8),
+            network.createServerNetwork()
         )
     }
 }

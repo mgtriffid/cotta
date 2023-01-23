@@ -177,10 +177,16 @@ project(":cotta-network-kryonet") {
     dependencies {
         implementation project(":cotta-network-api")
         api "com.github.crykn:kryonet:2.22.7"
+        api "io.github.microutils:kotlin-logging-jvm:3.0.4"
+        implementation project(":cotta-utils")
     }
 }
 
 project(":cotta-gdx") {
+    apply plugin: "kotlin"
+}
+
+project(":cotta-utils") {
     apply plugin: "kotlin"
 }
 

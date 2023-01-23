@@ -5,8 +5,9 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
+import com.mgtriffid.games.cotta.server.ComponentDeltas
 import com.mgtriffid.games.cotta.server.DataToBeSentToClients
-import com.mgtriffid.games.cotta.server.EnterGameIntent
+import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.PlayerId
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.impl.invokers.InvokersFactory
@@ -81,13 +82,17 @@ class ServerSimulationImpl : ServerSimulation {
     }
 
     override fun getDataToBeSentToClients(): DataToBeSentToClients {
+        // what about last N states? Perhaps we need state not entities
         return DataToBeSentToClientsImpl(
             effects = effectBus.effects(),
-            inputs = gatherInputs()
+            inputs = gatherInputs(),
+            state = state,
+            deltas = object : ComponentDeltas {}
         )
     }
 
     // O(scary)
+    // TODO track the registry of all entities having InputComponents
     private fun gatherInputs(): Map<Int, Set<InputComponent<*>>> {
         return state.entities().all().map { entity ->
             val impl = entity as? EntityImpl

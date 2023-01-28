@@ -30,4 +30,5 @@ interface ServerSimulation {
     fun setPlayerSawTick(playerId: PlayerId, tick: Long)
     fun enterGame(intent: EnterGameIntent): PlayerId
     fun getDataToBeSentToClients(): DataToBeSentToClients
+    fun setInputForUpcomingTick(input: IncomingInput)
 }

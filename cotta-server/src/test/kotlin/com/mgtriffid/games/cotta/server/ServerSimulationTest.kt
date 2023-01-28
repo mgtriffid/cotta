@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
@@ -68,6 +69,7 @@ class ServerSimulationTest {
         damageable.addComponent(VelocityTestComponent.create(2))
 
         val damageDealer = state.entities().createEntity()
+        val damageDealerId = damageDealer.id
         val input = PlayerInputTestComponent.create()
         damageDealer.addComponent(input)
         val serverSimulation = getServerSimulation()
@@ -79,11 +81,25 @@ class ServerSimulationTest {
 
         serverSimulation.tick()
         serverSimulation.tick()
+        serverSimulation.setInputForUpcomingTick(object: IncomingInput {
+            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+                return mapOf(
+                    damageDealerId to setOf(input)
+                )
+            }
+        })
         input.aim = 4
         input.shoot = true
         serverSimulation.tick()
         input.aim = 4
         input.shoot = false
+        serverSimulation.setInputForUpcomingTick(object: IncomingInput {
+            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+                return mapOf(
+                    damageDealerId to setOf(input)
+                )
+            }
+        })
 
         serverSimulation.tick()
 
@@ -119,12 +135,25 @@ class ServerSimulationTest {
 
         serverSimulation.setEntityOwner(damageDealerId, playerId)
         serverSimulation.setPlayerSawTick(playerId, 2L)
+        serverSimulation.setInputForUpcomingTick(object: IncomingInput {
+            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+                return mapOf(
+                    damageDealerId to setOf(input)
+                )
+            }
+        })
         input.aim = 4
         input.shoot = true
         serverSimulation.tick()
         input.aim = 4
         input.shoot = false
-
+        serverSimulation.setInputForUpcomingTick(object: IncomingInput {
+            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+                return mapOf(
+                    damageDealerId to setOf(input)
+                )
+            }
+        })
         serverSimulation.tick()
 
         assertEquals(

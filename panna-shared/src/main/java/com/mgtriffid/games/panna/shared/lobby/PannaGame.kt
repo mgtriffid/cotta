@@ -2,9 +2,7 @@ package com.mgtriffid.games.panna.shared.lobby
 
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.panna.shared.game.MovementDirection
-import com.mgtriffid.games.panna.shared.game.components.BossInputComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
 import kotlin.reflect.KClass

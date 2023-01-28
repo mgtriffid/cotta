@@ -10,6 +10,7 @@ import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.server.CottaGameInstance
 import com.mgtriffid.games.cotta.server.DataToBeSentToClients
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
+import com.mgtriffid.games.cotta.server.IncomingInput
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import mu.KotlinLogging
@@ -70,6 +71,12 @@ class CottaGameInstanceImpl(
             val playerId = serverSimulation.enterGame(it)
             clientsGhosts.addGhost(playerId)
         }
+        val input = fetchIncomingInput(network)
+        serverSimulation.setInputForUpcomingTick(input)
+    }
+
+    private fun fetchIncomingInput(network: CottaServerNetwork): IncomingInput {
+        TODO("Not yet implemented")
     }
 
     private fun simulate() {

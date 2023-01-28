@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.effects.EffectBus
+import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
@@ -8,6 +9,7 @@ import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.ComponentDeltas
 import com.mgtriffid.games.cotta.server.DataToBeSentToClients
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
+import com.mgtriffid.games.cotta.server.IncomingInput
 import com.mgtriffid.games.cotta.server.PlayerId
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.impl.invokers.InvokersFactory
@@ -27,7 +29,11 @@ class ServerSimulationImpl : ServerSimulation {
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
     private val metaEntities = HashMap<PlayerId, Int>()
-
+    private var inputForUpcomingTick: IncomingInput = object: IncomingInput {
+        override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+            return emptyMap()
+        }
+    }
     private val effectBus = EffectBus.getInstance()
 
     private lateinit var state: CottaState
@@ -37,6 +43,7 @@ class ServerSimulationImpl : ServerSimulation {
         return effectBus
     }
 
+    // TODO add validation to call this exactly once
     override fun setState(state: CottaState) {
         this.state = state
         // TODO decouple
@@ -53,6 +60,10 @@ class ServerSimulationImpl : ServerSimulation {
         systemInvokers.add(createInvoker(systemClass))
     }
 
+    override fun setInputForUpcomingTick(input: IncomingInput) {
+        inputForUpcomingTick = input
+    }
+
     override fun tick() {
         effectBus.clear()
         state.advance()
@@ -64,7 +75,14 @@ class ServerSimulationImpl : ServerSimulation {
     }
 
     private fun putInputIntoEntities() {
-        // here be taking input and stuffing it into InputComponents of corresponding entities
+        inputForUpcomingTick.inputsForEntities().forEach { (entityId, components) ->
+            components.forEach { component: InputComponent<*> ->
+                if (state.entities().get(entityId).hasComponent(component::class)) {
+                    state.entities().get(entityId).removeComponent(component::class)
+                    state.entities().get(entityId).addComponent(component as Component<*>)
+                }
+            }
+        }
     }
 
     override fun setEntityOwner(entityId: Int, playerId: PlayerId) {

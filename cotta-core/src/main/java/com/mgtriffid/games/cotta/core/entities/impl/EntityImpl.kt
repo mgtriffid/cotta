@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.entities.impl
 
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import kotlin.reflect.KClass
 
@@ -16,7 +17,7 @@ class EntityImpl(override val id: Int) : Entity {
         return components.first { clazz.isInstance(it) } as T
     }
 
-    override fun <T : Component<T>> addComponent(component: T) {
+    override fun addComponent(component: Component<*>) {
         components.add(component)
     }
 
@@ -29,6 +30,7 @@ class EntityImpl(override val id: Int) : Entity {
         ret.components.addAll(components.map {
             when (it) {
                 is MutableComponent<*> -> it.copy()
+                is InputComponent<*> -> it.copy()
                 else -> it
             }
         })

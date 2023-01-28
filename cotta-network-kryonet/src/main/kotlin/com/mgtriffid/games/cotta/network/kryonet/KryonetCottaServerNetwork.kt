@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 class KryonetCottaServerNetwork : CottaServerNetwork {
     lateinit var server: Server
-    private val enterGameIntentQueue = ConcurrentLinkedQueue<EnterGameIntent>()
+    private val enterGameIntents = ConcurrentLinkedQueue<EnterGameIntent>()
 
     override fun initialize() {
         server = Server()
@@ -21,11 +21,13 @@ class KryonetCottaServerNetwork : CottaServerNetwork {
     }
 
     override fun drainEnterGameIntents(): Collection<EnterGameIntent> {
-        return enterGameIntentQueue.drain()
+        return enterGameIntents.drain()
     }
 
     private fun configureListener() {
-
+        val listener = ServerListener(
+            enterGameIntents = enterGameIntents
+        )
     }
 
     /*override*/ fun dispatch(data: String) {

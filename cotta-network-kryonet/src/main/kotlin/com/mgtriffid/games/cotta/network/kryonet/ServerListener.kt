@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 private val logger = KotlinLogging.logger {}
 
 class ServerListener(
-    private val enterGameIntentsQueue: ConcurrentLinkedQueue<EnterGameIntent>
+    private val enterGameIntents: ConcurrentLinkedQueue<EnterGameIntent>
 ) : Listener {
     override fun connected(connection: Connection?) {
         super.connected(connection)
@@ -27,7 +27,7 @@ class ServerListener(
     override fun received(connection: Connection?, obj: Any?) {
         when (obj) {
             is EnterTheGameDto -> {
-                enterGameIntentsQueue.add(deserialize(obj))
+                enterGameIntents.add(deserialize(obj))
             }
             is RegularDuringGameDto -> {
                 // here goes some brutal deserialization

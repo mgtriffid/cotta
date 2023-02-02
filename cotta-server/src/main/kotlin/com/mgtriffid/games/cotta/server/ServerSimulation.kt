@@ -29,6 +29,6 @@ interface ServerSimulation {
     fun setEntityOwner(entityId: Int, playerId: PlayerId)
     fun setPlayerSawTick(playerId: PlayerId, tick: Long)
     fun enterGame(intent: EnterGameIntent): PlayerId
-    fun getDataToBeSentToClients(): DataToBeSentToClients
+    fun getDataToBeSentToClients(): DataForClients
     fun setInputForUpcomingTick(input: IncomingInput)
 }

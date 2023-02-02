@@ -8,8 +8,7 @@ import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.server.CottaGameInstance
-import com.mgtriffid.games.cotta.server.DataToBeSentToClients
-import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
+import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.IncomingInput
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
@@ -89,12 +88,16 @@ class CottaGameInstanceImpl(
           TODO consider passing tick as a parameter here because it's confusing right now:
             tick goes through EVERYTHING but implicitly
          */
-        val data = serverSimulation.getDataToBeSentToClients()
+        val data = getDataForClients()
         send(data)
     }
 
-    private fun send(data: DataToBeSentToClients) {
+    private fun send(data: DataForClients) {
         serverToClientDataChannel.send(data)
+    }
+
+    private fun getDataForClients(): DataForClients {
+        TODO()
     }
 
     private fun fetchFromNetwork(): PlayersInput {

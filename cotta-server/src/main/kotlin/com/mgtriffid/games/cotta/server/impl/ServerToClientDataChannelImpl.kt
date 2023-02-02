@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.server.DataToBeSentToClients
+import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 
 class ServerToClientDataChannelImpl(
@@ -15,7 +15,7 @@ class ServerToClientDataChannelImpl(
     // you predicted it as id `predicted_1`, we gave it id `543`, now we match all input you give for that entity,
     // and when we send you this entity back, your job is to start treating `543` as the id, not `predicted_1`.
 
-    override fun send(data: DataToBeSentToClients) {
+    override fun send(data: DataForClients) {
         val tick = tickProvider()
         clientsGhosts.data.forEach {
             it.value.send(data, tick)
@@ -24,6 +24,8 @@ class ServerToClientDataChannelImpl(
     }
 
     private fun actuallySendData(clientGhosts: ClientsGhosts, tick: Long) {
+
+        // need to know what to send to particular Ghost
         // we use plugged-in serialization for now. Even though it should be different, for development we use just any
         // hacky serialization and say "developer should provide a way to serialize".
         // we also don't use deltas for now.

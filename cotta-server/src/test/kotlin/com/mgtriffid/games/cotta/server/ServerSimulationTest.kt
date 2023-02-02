@@ -193,7 +193,7 @@ class ServerSimulationTest {
 
         assertEquals(
             HealthRegenerationTestEffect(entityId, 1),
-            serverSimulation.getDataToBeSentToClients().effects.first()
+            serverSimulation.getDataToBeSentToClients().effects(state.currentTick()).first()
         )
     }
 
@@ -216,21 +216,21 @@ class ServerSimulationTest {
         val dataToBeSentToClients = serverSimulation.getDataToBeSentToClients()
         assertEquals(
             4,
-            (dataToBeSentToClients.inputs[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataToBeSentToClients.inputs(state.currentTick())[damageDealerId]?.first() as PlayerInputTestComponent).aim
         )
         assertEquals(
             true,
-            (dataToBeSentToClients.inputs[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            (dataToBeSentToClients.inputs(state.currentTick())[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
         input.aim = 4
         input.shoot = false
         assertEquals(
             4,
-            (dataToBeSentToClients.inputs[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataToBeSentToClients.inputs(state.currentTick())[damageDealerId]?.first() as PlayerInputTestComponent).aim
         )
         assertEquals(
             true,
-            (dataToBeSentToClients.inputs[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            (dataToBeSentToClients.inputs(state.currentTick())[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
     }
 

@@ -6,8 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
-import com.mgtriffid.games.cotta.server.ComponentDeltas
-import com.mgtriffid.games.cotta.server.DataToBeSentToClients
+import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.IncomingInput
 import com.mgtriffid.games.cotta.server.PlayerId
@@ -99,13 +98,10 @@ class ServerSimulationImpl : ServerSimulation {
         return playerId
     }
 
-    override fun getDataToBeSentToClients(): DataToBeSentToClients {
-        // what about last N states? Perhaps we need state not entities
-        return DataToBeSentToClientsImpl(
+    override fun getDataToBeSentToClients(): DataForClients {
+        return DataForClientsImpl(
             effects = effectBus.effects(),
-            inputs = gatherInputs(),
-            state = state,
-            deltas = object : ComponentDeltas {}
+            inputs = gatherInputs()
         )
     }
 

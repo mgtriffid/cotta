@@ -244,5 +244,5 @@ class ServerSimulationTest {
 
     private fun getCottaState() = CottaState.getInstance(tickProvider)
 
-    private fun getServerSimulation() = ServerSimulation.getInstance(tickProvider = tickProvider)
+    private fun getServerSimulation() = ServerSimulation.getInstance(tickProvider = tickProvider, historyLength = 8)
 }

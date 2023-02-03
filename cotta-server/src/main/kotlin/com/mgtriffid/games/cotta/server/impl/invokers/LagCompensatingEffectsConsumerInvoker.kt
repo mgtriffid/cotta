@@ -4,7 +4,7 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.effects.EffectsConsumer
 
 class LagCompensatingEffectsConsumerInvoker(
-    private val effectBus: LagCompensatingEffectBusImpl,
+    private val effectBus: LagCompensatingEffectBus,
     private val consumer: EffectsConsumer,
     private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
 ) : SystemInvoker {

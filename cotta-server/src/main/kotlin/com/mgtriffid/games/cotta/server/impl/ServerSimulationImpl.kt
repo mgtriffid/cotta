@@ -12,7 +12,10 @@ import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.IncomingInput
 import com.mgtriffid.games.cotta.server.PlayerId
 import com.mgtriffid.games.cotta.server.ServerSimulation
+import com.mgtriffid.games.cotta.server.impl.invokers.HistoricalLagCompensatingEffectBus
 import com.mgtriffid.games.cotta.server.impl.invokers.InvokersFactory
+import com.mgtriffid.games.cotta.server.impl.invokers.InvokersFactoryImpl
+import com.mgtriffid.games.cotta.server.impl.invokers.LagCompensatingEffectBusImpl
 import com.mgtriffid.games.cotta.server.impl.invokers.SystemInvoker
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicInteger
@@ -21,7 +24,8 @@ import kotlin.reflect.KClass
 private val logger = KotlinLogging.logger {}
 
 class ServerSimulationImpl(
-    private val tickProvider: TickProvider
+    private val tickProvider: TickProvider,
+    private val historyLength: Int
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
@@ -40,6 +44,7 @@ class ServerSimulationImpl(
 
     private lateinit var state: CottaState
     private lateinit var invokersFactory: InvokersFactory
+    private val effectsHistory = EffectsHistory(historyLength = historyLength)
 
     override fun effectBus(): EffectBus {
         return effectBus
@@ -48,13 +53,19 @@ class ServerSimulationImpl(
     // TODO add validation to call this exactly once
     override fun setState(state: CottaState) {
         this.state = state
+        val sawTickHolder = InvokersFactoryImpl.SawTickHolder(null)
         // TODO decouple
         this.invokersFactory = InvokersFactory.getInstance(
-            effectBus,
+            HistoricalLagCompensatingEffectBus(
+                history = effectsHistory,
+                impl = LagCompensatingEffectBusImpl(effectBus, sawTickHolder),
+                tickProvider = tickProvider
+            ),
             state,
             entityOwners,
             playersSawTicks,
-            tickProvider
+            tickProvider,
+            sawTickHolder
         )
     }
 

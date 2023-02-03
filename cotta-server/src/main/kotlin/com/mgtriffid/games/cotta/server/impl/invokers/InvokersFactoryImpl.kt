@@ -11,6 +11,7 @@ import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.cotta.server.PlayerId
+import com.mgtriffid.games.cotta.server.impl.EffectsHistory
 import com.mgtriffid.games.cotta.server.impl.invokers.LagCompensatingInputProcessingSystemInvoker.EntityOwnerSawTickProvider
 import kotlin.reflect.KClass
 import kotlin.reflect.full.hasAnnotation
@@ -18,15 +19,13 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 
 class InvokersFactoryImpl(
-    private val effectBus: EffectBus,
+    private val lagCompensatingEffectBus: LagCompensatingEffectBus,
     private val state: CottaState,
     private val entityOwners: HashMap<Int, PlayerId>,
     private val playersSawTicks: HashMap<PlayerId, Long>,
-    private val tickProvider: TickProvider
+    private val tickProvider: TickProvider,
+    private val sawTickHolder: SawTickHolder
 ) : InvokersFactory {
-    private val sawTickHolder = SawTickHolder(null)
-    private val lagCompensatingEffectBus = LagCompensatingEffectBusImpl(effectBus, sawTickHolder)
-
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
         val shouldPropagateLagCompensationContext = systemClass.isSubclassOf(InputProcessingSystem::class)
         if (shouldPropagateLagCompensationContext) {
@@ -37,7 +36,7 @@ class InvokersFactoryImpl(
         val parameterValues = parameters.map { param ->
             (param.type.classifier as? KClass<*>)?.let {
                 when (it) {
-                    EffectBus::class -> effectBus
+                    EffectBus::class -> lagCompensatingEffectBus
                     Entities::class -> LatestEntities(state)
                     else -> null
                 }
@@ -57,7 +56,7 @@ class InvokersFactoryImpl(
         if (shouldUseContextWhileConsumingEffects) {
             return buildLagCompensatingEffectsConsumerInvoker(systemClass)
         }
-        return SimpleEffectsConsumerSystemInvoker(ctor.call(*parameterValues.toTypedArray()) as EffectsConsumer, effectBus)
+        return SimpleEffectsConsumerSystemInvoker(ctor.call(*parameterValues.toTypedArray()) as EffectsConsumer, lagCompensatingEffectBus)
     }
 
     private fun <T : CottaSystem> getConstructor(systemClass: KClass<T>) =

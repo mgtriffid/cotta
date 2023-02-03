@@ -10,7 +10,13 @@ import kotlin.reflect.KClass
 
 interface ServerSimulation {
     companion object {
-        fun getInstance(tickProvider: TickProvider): ServerSimulation = ServerSimulationImpl(tickProvider)
+        fun getInstance(
+            tickProvider: TickProvider,
+            historyLength: Int
+        ): ServerSimulation = ServerSimulationImpl(
+            tickProvider,
+            historyLength
+        )
     }
 
     // TODO use DI instead. Of some kind.
@@ -24,7 +30,7 @@ interface ServerSimulation {
     /**
      * Registers a system for execution. Systems are invoked in the order of registration.
      */
-    fun <T: CottaSystem> registerSystem(systemClass: KClass<T>)
+    fun <T : CottaSystem> registerSystem(systemClass: KClass<T>)
 
     fun tick()
     fun setEntityOwner(entityId: Int, playerId: PlayerId)

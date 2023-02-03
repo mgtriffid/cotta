@@ -1,10 +1,11 @@
 package com.mgtriffid.games.cotta.server.impl
 
+import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 
 class ServerToClientDataChannelImpl(
-    private val tickProvider: () -> Long,
+    private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts
 ) : ServerToClientDataChannel {
 
@@ -16,7 +17,7 @@ class ServerToClientDataChannelImpl(
     // and when we send you this entity back, your job is to start treating `543` as the id, not `predicted_1`.
 
     override fun send(data: DataForClients) {
-        val tick = tickProvider()
+        val tick = tick.tick
         clientsGhosts.data.forEach {
             it.value.send(data, tick)
         }

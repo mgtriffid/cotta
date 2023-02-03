@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.effects.EffectsConsumer
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
@@ -20,10 +21,11 @@ class InvokersFactoryImpl(
     private val effectBus: EffectBus,
     private val state: CottaState,
     private val entityOwners: HashMap<Int, PlayerId>,
-    private val playersSawTicks: HashMap<PlayerId, Long>
+    private val playersSawTicks: HashMap<PlayerId, Long>,
+    private val tickProvider: TickProvider
 ) : InvokersFactory {
     private val sawTickHolder = SawTickHolder(null)
-    private val lagCompensatingEffectBus = LagCompensatingEffectBus(effectBus, sawTickHolder)
+    private val lagCompensatingEffectBus = LagCompensatingEffectBusImpl(effectBus, sawTickHolder)
 
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
         val shouldPropagateLagCompensationContext = systemClass.isSubclassOf(InputProcessingSystem::class)
@@ -99,7 +101,7 @@ class InvokersFactoryImpl(
             (param.type.classifier as? KClass<*>)?.let {
                 when (it) {
                     EffectBus::class -> lagCompensatingEffectBus
-                    Entities::class -> ReadingFromPreviousTickEntities(sawTickHolder, state)
+                    Entities::class -> ReadingFromPreviousTickEntities(sawTickHolder, state, tickProvider)
 
                     else -> null
                 }
@@ -128,18 +130,19 @@ class InvokersFactoryImpl(
 
     private class ReadingFromPreviousTickEntities(
         private val sawTickHolder: SawTickHolder,
-        private val state: CottaState
+        private val state: CottaState,
+        private val tickProvider: TickProvider
     ): Entities {
         override fun createEntity(): Entity {
             return state.entities().createEntity()
         }
 
         override fun get(id: Int): Entity {
-            return state.entities(atTick = sawTickHolder.tick ?: state.currentTick()).get(id)
+            return state.entities(atTick = sawTickHolder.tick ?: tickProvider.tick).get(id)
         }
 
         override fun all(): Collection<Entity> {
-            return state.entities(atTick = sawTickHolder.tick ?: state.currentTick()).all()
+            return state.entities(atTick = sawTickHolder.tick ?: tickProvider.tick).all()
         }
     }
 

@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.DataForClients
@@ -19,7 +20,9 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class ServerSimulationImpl : ServerSimulation {
+class ServerSimulationImpl(
+    private val tickProvider: TickProvider
+) : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
     private val entityOwners = HashMap<Int, PlayerId>()
@@ -50,7 +53,8 @@ class ServerSimulationImpl : ServerSimulation {
             effectBus,
             state,
             entityOwners,
-            playersSawTicks
+            playersSawTicks,
+            tickProvider
         )
     }
 
@@ -101,7 +105,8 @@ class ServerSimulationImpl : ServerSimulation {
     override fun getDataToBeSentToClients(): DataForClients {
         return DataForClientsImpl(
             effects = effectBus.effects(),
-            inputs = gatherInputs()
+            inputs = gatherInputs(),
+            state = state
         )
     }
 

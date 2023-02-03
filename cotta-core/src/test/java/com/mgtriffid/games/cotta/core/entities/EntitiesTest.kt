@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.core.entities
 
+import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.workload.components.PositionTestComponent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -10,7 +11,7 @@ class EntitiesTest {
 
     @Test
     fun `should return hasComponent of true after component added`() {
-        val cottaState = CottaState.getInstance()
+        val cottaState = CottaState.getInstance(AtomicLongTickProvider())
         val entities = cottaState.entities()
         val entity = entities.createEntity()
         entity.addComponent(PositionTestComponent.create(0, 0))
@@ -20,7 +21,7 @@ class EntitiesTest {
 
     @Test
     fun `should return component with correct values after added`() {
-        val cottaState = CottaState.getInstance()
+        val cottaState = CottaState.getInstance(AtomicLongTickProvider())
         val entities = cottaState.entities()
         val entity = entities.createEntity()
         entity.addComponent(PositionTestComponent.create(1, 1))
@@ -30,7 +31,7 @@ class EntitiesTest {
 
     @Test
     fun `should say hasComponent is false if it was removed`() {
-        val cottaState = CottaState.getInstance()
+        val cottaState = CottaState.getInstance(AtomicLongTickProvider())
         val entities = cottaState.entities()
         val entity = entities.createEntity()
         entity.addComponent(PositionTestComponent.create(0, 0))
@@ -41,7 +42,7 @@ class EntitiesTest {
 
     @Test
     fun `cottaState should use the same Entities if called repeatedly`() {
-        val cottaState = CottaState.getInstance()
+        val cottaState = CottaState.getInstance(AtomicLongTickProvider())
         val entities = cottaState.entities()
         val entity = entities.createEntity()
         entity.addComponent(PositionTestComponent.create(1, 1))
@@ -55,7 +56,7 @@ class EntitiesTest {
 
     @Test
     fun `should have the same value for components after advancing a tick`() {
-        val cottaState = CottaState.getInstance()
+        val cottaState = CottaState.getInstance(AtomicLongTickProvider())
         val entities = cottaState.entities()
         val entity = entities.createEntity()
         entity.addComponent(PositionTestComponent.create(1, 1))
@@ -71,7 +72,7 @@ class EntitiesTest {
 
     @Test
     fun `should remember previous value after advancing`() {
-        val cottaState = CottaState.getInstance()
+        val cottaState = CottaState.getInstance(AtomicLongTickProvider())
         val entities = cottaState.entities()
         val entity = entities.createEntity()
         entity.addComponent(PositionTestComponent.create(1, 1))
@@ -88,7 +89,7 @@ class EntitiesTest {
 
     @Test
     fun `should remember previous value after advancing and altering value`() {
-        val cottaState = CottaState.getInstance()
+        val cottaState = CottaState.getInstance(AtomicLongTickProvider())
         val entities = cottaState.entities()
         val entity = entities.createEntity()
         entity.addComponent(PositionTestComponent.create(1, 1))
@@ -107,7 +108,7 @@ class EntitiesTest {
 
     @Test
     fun `should be possible to advance like 100 times`() {
-        val cottaState = CottaState.getInstance()
+        val cottaState = CottaState.getInstance(AtomicLongTickProvider())
         val entities = cottaState.entities()
         val entity = entities.createEntity()
         entity.addComponent(PositionTestComponent.create(1, 1))

@@ -2,6 +2,8 @@ package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
@@ -16,9 +18,13 @@ import com.mgtriffid.games.cotta.server.workload.systems.PlayerInputProcessingSy
 import com.mgtriffid.games.cotta.server.workload.systems.RegenerationTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.ShotFiredTestEffectConsumer
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class ServerSimulationTest {
+    private lateinit var tickProvider: TickProvider
+    @BeforeEach
+    fun setUp() { tickProvider = AtomicLongTickProvider() }
 
     @Test
     fun `systems should listen to effects`() {
@@ -235,7 +241,7 @@ class ServerSimulationTest {
     }
 
 
-    private fun getCottaState() = CottaState.getInstance()
+    private fun getCottaState() = CottaState.getInstance(tickProvider)
 
-    private fun getServerSimulation() = ServerSimulation.getInstance()
+    private fun getServerSimulation() = ServerSimulation.getInstance(tickProvider = tickProvider)
 }

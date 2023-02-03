@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.server
 
+import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.server.impl.ClientsGhosts
 import com.mgtriffid.games.cotta.server.impl.ServerToClientDataChannelImpl
 
@@ -8,10 +9,10 @@ interface ServerToClientDataChannel {
 
     companion object {
         fun getInstance(
-            tickProvider: () -> Long,
+            tickProvider: TickProvider,
             clientsGhosts: ClientsGhosts
         ): ServerToClientDataChannel = ServerToClientDataChannelImpl(
-            tickProvider = tickProvider,
+            tick = tickProvider,
             clientsGhosts = clientsGhosts
         )
     }

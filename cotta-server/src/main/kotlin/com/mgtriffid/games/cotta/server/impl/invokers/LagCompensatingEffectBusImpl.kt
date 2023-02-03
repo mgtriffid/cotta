@@ -6,10 +6,14 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 // TODO better naming
 // TODO better placing
 // TODO separate publisher and the whole EffectBus
-class LagCompensatingEffectBus(
+interface LagCompensatingEffectBus : EffectBus {
+    fun getTickForEffect(effect: CottaEffect): Long?
+}
+
+class LagCompensatingEffectBusImpl(
     private val effectBus: EffectBus,
     private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
-): EffectBus {
+): LagCompensatingEffectBus {
     private val ticksForEffects: MutableMap<CottaEffect, Long?> = HashMap()
 
     override fun fire(effect: CottaEffect) {
@@ -26,5 +30,5 @@ class LagCompensatingEffectBus(
         ticksForEffects.clear()
     }
 
-    fun getTickForEffect(effect: CottaEffect) = ticksForEffects[effect]
+    override fun getTickForEffect(effect: CottaEffect) = ticksForEffects[effect]
 }

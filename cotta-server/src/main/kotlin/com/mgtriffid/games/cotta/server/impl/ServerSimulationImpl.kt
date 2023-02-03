@@ -93,8 +93,8 @@ class ServerSimulationImpl(
             components.forEach { component: InputComponent<*> ->
                 if (state.entities().get(entityId).hasComponent(component::class)) {
                     state.entities().get(entityId).removeComponent(component::class)
-                    state.entities().get(entityId).addComponent(component as Component<*>)
                 }
+                state.entities().get(entityId).addComponent(component as Component<*>)
             }
         }
     }

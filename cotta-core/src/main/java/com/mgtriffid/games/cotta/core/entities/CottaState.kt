@@ -6,7 +6,6 @@ interface CottaState {
     companion object {
         fun getInstance(tickProvider: TickProvider): CottaState = CottaStateImpl(8, tickProvider)
     }
-    fun currentTick(): Long
     fun entities(): Entities
     fun entities(atTick: Long): Entities
     fun advance()

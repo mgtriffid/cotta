@@ -17,10 +17,6 @@ class CottaStateImpl(
         entitiesArray[0] = Entities.getInstance()
     }
 
-    override fun currentTick(): Long {
-        return tick.tick
-    }
-
     override fun entities(): Entities = entities(tick.tick)
 
     override fun entities(atTick: Long): Entities {

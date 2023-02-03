@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test
 
 class ServerSimulationTest {
     private lateinit var tickProvider: TickProvider
+
     @BeforeEach
     fun setUp() { tickProvider = AtomicLongTickProvider() }
 
@@ -199,7 +200,7 @@ class ServerSimulationTest {
 
         assertEquals(
             HealthRegenerationTestEffect(entityId, 1),
-            serverSimulation.getDataToBeSentToClients().effects(state.currentTick()).first()
+            serverSimulation.getDataToBeSentToClients().effects(tick = tickProvider.tick).first()
         )
     }
 
@@ -222,21 +223,21 @@ class ServerSimulationTest {
         val dataToBeSentToClients = serverSimulation.getDataToBeSentToClients()
         assertEquals(
             4,
-            (dataToBeSentToClients.inputs(state.currentTick())[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
         )
         assertEquals(
             true,
-            (dataToBeSentToClients.inputs(state.currentTick())[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
         input.aim = 4
         input.shoot = false
         assertEquals(
             4,
-            (dataToBeSentToClients.inputs(state.currentTick())[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
         )
         assertEquals(
             true,
-            (dataToBeSentToClients.inputs(state.currentTick())[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
     }
 

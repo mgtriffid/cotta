@@ -115,7 +115,7 @@ class ServerSimulationImpl(
 
     override fun getDataToBeSentToClients(): DataForClients {
         return DataForClientsImpl(
-            effects = effectBus.effects(),
+            effectsHistory = effectsHistory,
             inputs = gatherInputs(),
             state = state
         )

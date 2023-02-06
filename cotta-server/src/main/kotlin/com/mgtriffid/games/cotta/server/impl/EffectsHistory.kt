@@ -18,6 +18,12 @@ class EffectsHistory(
         historyItem.sawTicksForEffects[effect] = sawTick
     }
 
+    fun forTick(tick: Long): Collection<CottaEffect> {
+        val item = data[(tick % historyLength).toInt()]
+        if (tick != item.tick) return emptyList()
+        return item.effects
+    }
+
     class EffectsHistoryItem {
         val effects = ArrayList<CottaEffect>()
         var tick: Long? = null

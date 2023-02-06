@@ -4,16 +4,15 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.InputComponent
-import com.mgtriffid.games.cotta.server.ComponentDeltasProvider
 import com.mgtriffid.games.cotta.server.DataForClients
 
 data class DataForClientsImpl(
-    val effects: Collection<CottaEffect>,
+    val effectsHistory: EffectsHistory,
     val inputs: Map<Int, Set<InputComponent<*>>>,
     val state: CottaState
 ) : DataForClients {
     override fun effects(tick: Long): Collection<CottaEffect> {
-        return effects // TODO care about tick
+        return effectsHistory.forTick(tick) // TODO care about tick
     }
 
     override fun inputs(tick: Long): Map<Int, Set<InputComponent<*>>> {

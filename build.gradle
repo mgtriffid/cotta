@@ -26,6 +26,9 @@ allprojects {
         ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
         gdxControllersVersion = '2.2.1'
+
+        gsonVersion = '2.10.1'
+        junitVersion = '5.9.1'
     }
 
     repositories {
@@ -123,8 +126,9 @@ project(":cotta-server") {
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
+        implementation project(":cotta-utils")
         implementation project(":cotta-network-api")
-        testImplementation "org.junit.jupiter:junit-jupiter-engine:5.9.1"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     }
 }
@@ -151,7 +155,7 @@ project(":cotta-core") {
         api "org.slf4j:slf4j-api:2.0.3"
         api "ch.qos.logback:logback-classic:1.4.4"
         api "io.github.microutils:kotlin-logging-jvm:3.0.4"
-        testImplementation "org.junit.jupiter:junit-jupiter-engine:5.9.1"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation project(":cotta-annotations")
         ksp project(":cotta-annotations-processor")
     }
@@ -169,6 +173,13 @@ project(":cotta-client") {
 
 project(":cotta-network-api") {
     apply plugin: "kotlin"
+    dependencies {
+        implementation project(":cotta-core")
+        implementation project(":cotta-annotations")
+        implementation "com.google.code.gson:gson:$gsonVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    }
 }
 
 project(":cotta-network-kryonet") {
@@ -195,7 +206,7 @@ project(":panna-lobby") {
 
     dependencies {
         implementation "com.sparkjava:spark-kotlin:1.0.0-alpha"
-        implementation "com.google.code.gson:gson:2.8.6"
+        implementation "com.google.code.gson:gson:$gsonVersion"
         implementation project(":panna-shared")
         implementation project(":cotta-core")
     }

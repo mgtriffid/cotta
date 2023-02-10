@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPacket
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 
@@ -21,14 +22,69 @@ class ServerToClientDataChannelImpl(
         clientsGhosts.data.forEach {
             it.value.send(data, tick)
         }
-        actuallySendData(clientsGhosts, tick)
+        actuallySendData(clientsGhosts)
     }
 
-    private fun actuallySendData(clientGhosts: ClientsGhosts, tick: Long) {
+    private fun actuallySendData(clientGhosts: ClientsGhosts) {
+        clientGhosts.data.forEach { (_, ghost) ->
+            val packets = ghost.drainQueue()
+            packets.map {
+                when (it) {
+                    is ServerToClientGameDataPacket.StatePacket -> {
+                        //language=JSON
+                        """{
+  "entities": [
+    {
+      "entityId": "123",
+      "components": [
+        {
+          "name": "PositionComponent",
+          "data": {
+            "x": 10,
+            "y": 20
+          }
+        }
+      ]
+    }
+  ]
+}
+                         """
+                    }
+                    is ServerToClientGameDataPacket.DeltaPacket -> {
+                        //language=JSON5
+                        """{
+                            "removedEntityIds": [123, 456, 789],
+                            "addedEntities": [
+    {
+      "entityId": "123",
+      "components": [
+        {
+          "name": "PositionComponent",
+          "data": {
+            "x": 10,
+            "y": 20
+          }
+        }
+      ]
+    }
+  ],
+  "modifiedEntities": [
+  {"entityId": "8", "components": [
+    {
+      "name": "PositionComponent",
+      "change": "MODIFIED", // or "ADDED" or "REMOVED"
+      "data": {
+        "x": "12"
+      }
+    }
+  ]}
+  ]
+}
+                        """.trimIndent()
+                    }
+                }
+            }
 
-        // need to know what to send to particular Ghost
-        // we use plugged-in serialization for now. Even though it should be different, for development we use just any
-        // hacky serialization and say "developer should provide a way to serialize".
-        // we also don't use deltas for now.
+        }
     }
 }

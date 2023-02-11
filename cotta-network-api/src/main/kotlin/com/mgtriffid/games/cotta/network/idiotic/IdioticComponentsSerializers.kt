@@ -1,24 +1,18 @@
-package com.mgtriffid.games.cotta.network
+package com.mgtriffid.games.cotta.network.idiotic
 
 import com.mgtriffid.games.cotta.ComponentData
-import com.mgtriffid.games.cotta.core.entities.Component
-import kotlin.IllegalArgumentException
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 
-class IdioticSerializationDeserialization {
+class IdioticComponentsSerializers {
     private val serializers = HashMap<KClass<*>, Serializer<*>>()
 
-    fun <C : Any> registerComponentClass(kClass: KClass<C>) {
-        if (!kClass.isSubclassOf(Component::class)) {
-            throw IllegalArgumentException("${kClass.qualifiedName} is not a Component class")
-        }
+    fun <C: Any> registerComponentClass(kClass: KClass<C>) {
         val companion = kClass.companionObject
             ?: throw IllegalArgumentException("${kClass.qualifiedName} does not have a companion object")
         val companionInstance = kClass.companionObjectInstance ?: throw IllegalArgumentException("Could not find companion instance")
@@ -64,10 +58,6 @@ class IdioticSerializationDeserialization {
         return (serializers[kClass] as Serializer<T>).serialize(component)
     }
 
-    private fun findFactoryMethod(kClass: KClass<*>) {
-        TODO()
-    }
-
     fun <T : Any> deserialize(serialized: Map<String, Any?>, kClass: KClass<T>): T {
         return (serializers[kClass] as Serializer<T>).deserialize(serialized, kClass)
     }
@@ -76,4 +66,5 @@ class IdioticSerializationDeserialization {
         fun serialize(any: T): Map<String, Any?>
         fun deserialize(data: Map<String, Any?>, kClass: KClass<T>): T
     }
+
 }

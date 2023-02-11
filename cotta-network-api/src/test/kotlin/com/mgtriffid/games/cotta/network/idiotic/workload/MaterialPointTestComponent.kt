@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.network.workload
+package com.mgtriffid.games.cotta.network.idiotic.workload
 
 import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.MutableComponent

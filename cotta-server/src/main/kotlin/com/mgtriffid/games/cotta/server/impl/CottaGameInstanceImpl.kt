@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.input.NonPlayersInput
@@ -77,7 +78,9 @@ class CottaGameInstanceImpl(
     }
 
     private fun fetchIncomingInput(network: CottaServerNetwork): IncomingInput {
-        TODO("Not yet implemented")
+        return object: IncomingInput {
+            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> = emptyMap()
+        }
     }
 
     private fun simulate() {
@@ -90,7 +93,7 @@ class CottaGameInstanceImpl(
           TODO consider passing tick as a parameter here because it's confusing right now:
             tick goes through EVERYTHING but implicitly
          */
-        val data = getDataForClients()
+        val data = serverSimulation.getDataToBeSentToClients()
         send(data)
     }
 

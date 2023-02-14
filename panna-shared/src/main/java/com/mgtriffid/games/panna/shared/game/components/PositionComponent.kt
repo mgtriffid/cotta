@@ -20,5 +20,5 @@ data class PositionComponent(
         LEFT, RIGHT
     }
 
-    override fun copy(): PositionComponent = this.copy()
+    override fun copy(): PositionComponent = this.copy(x = x, y = y, orientation = orientation)
 }

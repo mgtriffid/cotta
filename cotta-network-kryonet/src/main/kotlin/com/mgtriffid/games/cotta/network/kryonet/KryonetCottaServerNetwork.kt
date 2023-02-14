@@ -7,27 +7,32 @@ import com.mgtriffid.games.cotta.network.ClientConnection
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.utils.drain
+import mu.KotlinLogging
 import java.util.concurrent.ConcurrentLinkedQueue
+
+private val logger = KotlinLogging.logger {}
 
 class KryonetCottaServerNetwork : CottaServerNetwork {
     lateinit var server: Server
     private val enterGameIntents = ConcurrentLinkedQueue<EnterGameIntent>()
 
     override fun initialize() {
+        logger.info { "Initializing ${KryonetCottaServerNetwork::class.simpleName}..." }
         server = Server()
         configureListener()
         server.bind(16001, 16002)
         server.start()
     }
 
-    override fun drainEnterGameIntents(): Collection<EnterGameIntent> {
-        return enterGameIntents.drain()
-    }
-
     private fun configureListener() {
         val listener = ServerListener(
             enterGameIntents = enterGameIntents
         )
+        server.addListener(listener)
+    }
+
+    override fun drainEnterGameIntents(): Collection<EnterGameIntent> {
+        return enterGameIntents.drain()
     }
 
     /*override*/ fun dispatch(data: String) {

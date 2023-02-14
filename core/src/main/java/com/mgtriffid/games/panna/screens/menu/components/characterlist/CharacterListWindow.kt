@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.mgtriffid.games.panna.screens.menu.MenuScreen
 import com.mgtriffid.games.panna.screens.menu.MenuTextures
+import com.mgtriffid.games.panna.screens.menu.components.getButtonStyle
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -23,7 +24,8 @@ class CharacterListWindow(
     private val characterListModel: CharacterListModel,
     private val menuTextures: MenuTextures
 ) {
-    var onClose: () -> Unit = {}
+    var onClose: () -> Unit = { logger.warn { "Missing model listener onClose" } }
+    var onEnter: () -> Unit = { logger.warn { "Missing model listener onEnter" } }
     val window: Window = Window(
         "Characters list", Window.WindowStyle(
             BitmapFont(),
@@ -38,6 +40,7 @@ class CharacterListWindow(
         createWindow()
         val table = createTableAndCells()
         createCloseButton(table)
+        createEnterButton(table)
         registerModelListeners()
         logger.debug { "Listener onUpdateCharacters configured" }
     }
@@ -60,6 +63,23 @@ class CharacterListWindow(
         charactersTable.row()
     }
 
+    private fun createEnterButton(charactersTable: Table) {
+        val buttonStyle = getButtonStyle(
+            upTexture = menuTextures.dialogButtonUpTexture,
+            downTexture = menuTextures.dialogButtonDownTexture
+        )
+
+        val button = TextButton("Enter", buttonStyle)
+        button.addListener(object : ClickListener() {
+            override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
+                logger.debug("Enter the game clicked")
+                super.touchUp(event, x, y, pointer, button)
+                if (button == Input.Buttons.LEFT) onEnter()
+            }
+        })
+        charactersTable.add(button)
+    }
+
     private fun createTableAndCells(): Table {
         val charactersTable = Table()
         charactersTable.debug = true
@@ -76,6 +96,7 @@ class CharacterListWindow(
             charactersTable.add(cell)
             cells.add(cell)
         }
+        charactersTable.row()
         return charactersTable
     }
 

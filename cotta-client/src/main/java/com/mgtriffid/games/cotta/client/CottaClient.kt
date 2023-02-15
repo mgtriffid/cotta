@@ -1,5 +1,11 @@
 package com.mgtriffid.games.cotta.client
 
-import com.mgtriffid.games.cotta.network.CottaNetwork
+import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
 
-class CottaClient
+interface CottaClient {
+    companion object {
+        fun getInstance(): CottaClient = CottaClientImpl()
+    }
+
+    fun tick()
+}

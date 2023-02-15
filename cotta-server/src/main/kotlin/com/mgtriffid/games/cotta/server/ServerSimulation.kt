@@ -19,11 +19,11 @@ interface ServerSimulation {
         )
     }
 
-    // TODO use DI instead. Of some kind.
+    // TODO use DI instead. Of some kind. Maybe.
     fun effectBus(): EffectBus
 
     /**
-     * Should be called exactly once.
+     * Should be called exactly once. TODO reconsider how this is configured.
      */
     fun setState(state: CottaState)
 

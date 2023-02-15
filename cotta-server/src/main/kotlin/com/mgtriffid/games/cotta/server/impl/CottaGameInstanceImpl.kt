@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
@@ -40,7 +41,7 @@ class CottaGameInstanceImpl(
         initializeState()
         registerSystems()
         val loop = FixedRateLoopBody(
-            tickLengthMs = 20L,
+            tickLengthMs = TICK_LENGTH,
             startsAt = System.currentTimeMillis()
         ) {
             tick()

@@ -107,6 +107,7 @@ class MenuScreen(
         val characterListWindow = CharacterListWindow(characterListModel, textures)
         characterListWindow.window.isVisible = false
         characterListWindow.onClose = menuState::idle
+        characterListWindow.onEnter = ::setGameScreen
         val setVisible = { visible: Boolean -> characterListWindow.window.isVisible = visible }
         characterListWindow.window.addAction(object : Action() {
             override fun act(delta: Float): Boolean {
@@ -171,6 +172,10 @@ class MenuScreen(
                 config = game.config
             ).statusPanelWindow
         )
+    }
+
+    private fun setGameScreen() {
+        game.screen = GameScreen(game)
     }
 
     override fun dispose() {

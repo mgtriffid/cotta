@@ -1,13 +1,18 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPacket
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 class ServerToClientDataChannelImpl(
     private val tick: TickProvider,
-    private val clientsGhosts: ClientsGhosts
+    private val clientsGhosts: ClientsGhosts,
+    private val network: CottaServerNetwork
 ) : ServerToClientDataChannel {
 
     // Here we don't care much about data that comes _from_ client and about their sawTick values.
@@ -84,6 +89,8 @@ class ServerToClientDataChannelImpl(
                     }
                 }
             }
+            logger.debug { "About to send data to connection ${ghost.connectionId.id}" }
+            network.send(ghost.connectionId, "abcdef mofo")
 
         }
     }

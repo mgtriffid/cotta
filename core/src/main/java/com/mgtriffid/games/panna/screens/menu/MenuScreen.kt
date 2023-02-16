@@ -50,7 +50,7 @@ class MenuScreen(
     // here we have a scene with buttons and also some way to initiate connection
     lateinit var stage: Stage
     private val characterListModel = CharacterListModel()
-    private val menuState = MenuState()
+    lateinit var menuState: MenuState
     private var authToken: AuthToken = AuthToken.NotAuthorized
 
     private val gson = Gson()
@@ -61,6 +61,7 @@ class MenuScreen(
 
     override fun show() {
         textures = MenuTextures()
+        menuState = MenuState()
         prepareStage()
     }
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
+import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.panna.PannaGdxGame
 import mu.KotlinLogging
 
@@ -25,7 +26,7 @@ class GameScreen(
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
 
-        cottaGame = CottaClient.getInstance()
+        cottaGame = CottaClient.getInstance(KryonetCottaNetwork().createClientNetwork())
         nextTickAt = now()
     }
 

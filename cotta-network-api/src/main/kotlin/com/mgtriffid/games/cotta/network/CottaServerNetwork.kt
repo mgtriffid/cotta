@@ -10,5 +10,7 @@ interface CottaServerNetwork {
 
     fun initialize() // questionnable
 
-    fun drainEnterGameIntents(): Collection<EnterGameIntent>
+    fun drainEnterGameIntents(): Collection<Pair<ConnectionId, EnterGameIntent>>
+
+    fun send(connectionId: ConnectionId, any: Any)
 }

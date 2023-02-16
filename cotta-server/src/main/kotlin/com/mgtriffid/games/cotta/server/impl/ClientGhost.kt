@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.Entities
+import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.protocol.CottaServerToClientPayload
 import com.mgtriffid.games.cotta.network.protocol.serialization.Delta
 import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPacket
@@ -13,8 +14,8 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 private const val DELTAS_BUFFER_LENGTH = 128
-
-class ClientGhost {
+// TODO inject history length
+class ClientGhost(val connectionId: ConnectionId) {
 
     private var stateKnownToClient: Long? = null
     private val queueToSend = ConcurrentLinkedQueue<ServerToClientGameDataPacket>()
@@ -25,8 +26,8 @@ class ClientGhost {
     }
 
     private fun sendHistoricalDataIfNeeded(data: DataForClients, tick: Long) {
-        sendState(data.entities(tick - 8), tick - 8)
-        for (t in (tick - 7) until tick) {
+        sendState(data.entities(tick - 7), tick - 7)
+        for (t in (tick - 6) until tick) {
             sendDelta(data, t)
         }
     }

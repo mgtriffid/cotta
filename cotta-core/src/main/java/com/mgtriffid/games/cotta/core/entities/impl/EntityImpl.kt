@@ -36,4 +36,8 @@ class EntityImpl(override val id: Int) : Entity {
         })
         return ret
     }
+
+    override fun components(): Collection<Component<*>> {
+        return components.toList()
+    }
 }

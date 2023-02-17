@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.panna.PannaGdxGame
+import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -15,7 +16,7 @@ private val logger = KotlinLogging.logger {}
 class GameScreen(
     private val game: PannaGdxGame
 ) : ScreenAdapter() {
-    private lateinit var cottaGame: CottaClient
+    private lateinit var cottaClient: CottaClient
 
     var batch: SpriteBatch? = null
     lateinit var img: Texture
@@ -26,7 +27,10 @@ class GameScreen(
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
 
-        cottaGame = CottaClient.getInstance(KryonetCottaNetwork().createClientNetwork())
+        cottaClient = CottaClient.getInstance(
+            game = PannaGame(),
+            network = KryonetCottaNetwork().createClientNetwork()
+        )
         nextTickAt = now()
     }
 
@@ -35,7 +39,7 @@ class GameScreen(
         actuallyDraw()
 
         if (nextTickAt <= now()) {
-            cottaGame.tick()
+            cottaClient.tick()
             nextTickAt += TICK_LENGTH
         }
     }

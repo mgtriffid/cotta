@@ -91,6 +91,7 @@ project(":panna-shared") {
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
+        implementation project(":cotta-annotations")
     }
 }
 

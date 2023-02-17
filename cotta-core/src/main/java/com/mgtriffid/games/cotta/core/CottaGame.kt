@@ -11,6 +11,7 @@ interface CottaGame {
     val serverSystems: List<KClass<*>>
     // how to start
     fun initializeServerState(state: CottaState)
+    val componentClasses: List<KClass<*>>
 
     // what's the type of input
 

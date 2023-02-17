@@ -2,23 +2,19 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.network.ConnectionId
-import com.mgtriffid.games.cotta.network.protocol.CottaServerToClientPayload
 import com.mgtriffid.games.cotta.network.protocol.serialization.Delta
-import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPacket
+import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
 import com.mgtriffid.games.cotta.network.protocol.serialization.StateSnapshot
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.utils.drain
-import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 private const val DELTAS_BUFFER_LENGTH = 128
 // TODO inject history length
 class ClientGhost(val connectionId: ConnectionId) {
 
     private var stateKnownToClient: Long? = null
-    private val queueToSend = ConcurrentLinkedQueue<ServerToClientGameDataPacket>()
+    private val queueToSend = ConcurrentLinkedQueue<ServerToClientGameDataPiece>()
 
     fun send(data: DataForClients, tick: Long) {
         sendHistoricalDataIfNeeded(data, tick)
@@ -43,12 +39,12 @@ class ClientGhost(val connectionId: ConnectionId) {
         // and for these we calculate precisely components that were changed in at least one field
         val changedEntities = curr.filter { c -> prev.any { p -> p.id == c.id } }
         val delta = Delta(removedEntitiesIds, addedEntities, changedEntities, tick)
-        queueToSend.add(ServerToClientGameDataPacket.DeltaPacket(delta, tick))
+        queueToSend.add(ServerToClientGameDataPiece.DeltaPiece(delta, tick))
     }
 
     private fun sendState(entities: Entities, tick: Long) {
         queueToSend.add(
-            ServerToClientGameDataPacket.StatePacket(
+            ServerToClientGameDataPiece.StatePiece(
                 stateSnapshot = StateSnapshot(entities = entities.all().toSet()),
                 tick = tick
             )

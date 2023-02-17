@@ -1,5 +1,6 @@
 sourceCompatibility = 1.8
-sourceSets.main.java.srcDirs = [ "src/main/kotlin" ]
+sourceSets.main.kotlin.srcDirs = [ "src/main/kotlin" ]
+sourceSets.main.java.srcDirs = [ "src/main/java" ]
 sourceSets.test.kotlin.srcDirs = [ "src/test/kotlin" ]
 
 test {

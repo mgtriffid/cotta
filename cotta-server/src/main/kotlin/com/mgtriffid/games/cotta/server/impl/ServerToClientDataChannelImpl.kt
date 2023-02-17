@@ -2,7 +2,13 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
-import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPacket
+import com.mgtriffid.games.cotta.network.idiotic.ComponentDto
+import com.mgtriffid.games.cotta.network.idiotic.EntityDeltaDto
+import com.mgtriffid.games.cotta.network.idiotic.EntityDto
+import com.mgtriffid.games.cotta.network.idiotic.IdioticSerializationDeserialization
+import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDeltaDto
+import com.mgtriffid.games.cotta.network.idiotic.ServerToClientStateDto
+import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import mu.KotlinLogging
@@ -12,7 +18,8 @@ private val logger = KotlinLogging.logger {}
 class ServerToClientDataChannelImpl(
     private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts,
-    private val network: CottaServerNetwork
+    private val network: CottaServerNetwork,
+    private val serialization: IdioticSerializationDeserialization
 ) : ServerToClientDataChannel {
 
     // Here we don't care much about data that comes _from_ client and about their sawTick values.
@@ -33,65 +40,56 @@ class ServerToClientDataChannelImpl(
     private fun actuallySendData(clientGhosts: ClientsGhosts) {
         clientGhosts.data.forEach { (_, ghost) ->
             val packets = ghost.drainQueue()
-            packets.map {
-                when (it) {
-                    is ServerToClientGameDataPacket.StatePacket -> {
-                        //language=JSON
-                        """{
-  "entities": [
-    {
-      "entityId": "123",
-      "components": [
-        {
-          "name": "PositionComponent",
-          "data": {
-            "x": 10,
-            "y": 20
-          }
-        }
-      ]
-    }
-  ]
-}
-                         """
-                    }
-                    is ServerToClientGameDataPacket.DeltaPacket -> {
-                        //language=JSON5
-                        """{
-                            "removedEntityIds": [123, 456, 789],
-                            "addedEntities": [
-    {
-      "entityId": "123",
-      "components": [
-        {
-          "name": "PositionComponent",
-          "data": {
-            "x": 10,
-            "y": 20
-          }
-        }
-      ]
-    }
-  ],
-  "modifiedEntities": [
-  {"entityId": "8", "components": [
-    {
-      "name": "PositionComponent",
-      "change": "MODIFIED", // or "ADDED" or "REMOVED"
-      "data": {
-        "x": "12"
-      }
-    }
-  ]}
-  ]
-}
-                        """.trimIndent()
-                    }
-                }
-            }
             logger.debug { "About to send data to connection ${ghost.connectionId.id}" }
-            network.send(ghost.connectionId, "abcdef mofo")
+            packets.forEach {
+                network.send(ghost.connectionId, it.toStatePacket())
+            }
+        }
+    }
 
+    private fun ServerToClientGameDataPiece.toStatePacket() = when (this) {
+        is ServerToClientGameDataPiece.StatePiece -> {
+            val ret = ServerToClientStateDto()
+            ret.entities = this.stateSnapshot.entities.map { entity ->
+                val dto = EntityDto()
+                dto.entityId = entity.id
+                dto.components = entity.components().map { component ->
+                    val c = ComponentDto()
+                    c.name = component::class.simpleName
+                    c.data = serialization.serialize(component)
+                    c
+                }
+                dto
+            }
+            ret
+        }
+
+        is ServerToClientGameDataPiece.DeltaPiece -> {
+            val ret = ServerToClientDeltaDto()
+            ret.addedEntities = ArrayList(this.delta.addedEntities.map { entity ->
+                val dto = EntityDto()
+                dto.entityId = entity.id
+                dto.components = entity.components().map { component ->
+                    val c = ComponentDto()
+                    c.name = component::class.simpleName
+                    c.data = serialization.serialize(component)
+                    c
+                }
+                dto
+            })
+            ret.removedEntityIds = ArrayList(this.delta.removedEntitiesIds.toList())
+            ret.modifiedEntities = ArrayList(this.delta.changedEntities.map { entity ->
+                val dto = EntityDeltaDto()
+                dto.entityId = entity.id
+                dto.components = entity.components().map { component ->
+                    val c = ComponentDto()
+                    c.name = component::class.simpleName
+                    c.data = serialization.serialize(component)
+                    c
+                }
+                dto
+            })
+            ret
         }
     }
 }

@@ -12,7 +12,9 @@ class PannaGame : CottaGame {
 
     override fun initializeServerState(state: CottaState) {
         val entity = state.entities().createEntity()
-        entity.addComponent(PositionComponent(300f, 200f, PositionComponent.Orientation.RIGHT))
-        entity.addComponent(WalkingComponent(MovementDirection.IDLE))
+        entity.addComponent(PositionComponent.create(300, 200))
+//        entity.addComponent(WalkingComponent(MovementDirection.IDLE))
     }
+
+    override val componentClasses = listOf(PositionComponent::class)
 }

@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.shared.game.components
 
+import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 // very much mutable, we need to send only deltas
@@ -11,14 +12,20 @@ import com.mgtriffid.games.cotta.core.entities.MutableComponent
 // second we have a version that only has val accessors and no var accessors - that's for historic data
 // third we have a serializer and a deserializer somehow
 // and deltas, deltas!
-data class PositionComponent(
-    var x: Float,
-    var y: Float,
-    var orientation: Orientation
-) : MutableComponent<PositionComponent> {
-    enum class Orientation {
-        LEFT, RIGHT
+interface PositionComponent : MutableComponent<PositionComponent> {
+    companion object {
+        fun create(xPos: Int, yPos: Int): PositionComponent {
+            return PositionComponentImpl(xPos, yPos)
+        }
     }
 
-    override fun copy(): PositionComponent = this.copy(x = x, y = y, orientation = orientation)
+    @ComponentData var xPos: Int
+    @ComponentData
+    var yPos: Int
+}
+private data class PositionComponentImpl(
+    override var xPos: Int,
+    override var yPos: Int
+) : PositionComponent {
+    override fun copy(): PositionComponent = this.copy(xPos = xPos, yPos = yPos)
 }

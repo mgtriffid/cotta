@@ -8,4 +8,5 @@ interface Entity {
     fun <T: Component<T>> getComponent(clazz: KClass<T>): T
     fun addComponent(component: Component<*>)
     fun <T: Component<T>> removeComponent(clazz: KClass<T>)
+    fun components(): Collection<Component<*>>
 }

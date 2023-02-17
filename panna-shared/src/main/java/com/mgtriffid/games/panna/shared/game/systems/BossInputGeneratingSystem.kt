@@ -12,6 +12,7 @@ class BossInputGeneratingSystem: EntityProcessingSystem {
     // processes all Entities that have BossInputComponent on them
     // should set that component
     override fun update(e: Entity) {
+/*
         if (e.hasComponent(BossInputComponent::class)) {
             val position = e.getComponent(PositionComponent::class)
             val direction = when {
@@ -26,5 +27,6 @@ class BossInputGeneratingSystem: EntityProcessingSystem {
             input.jump = false
             input.spellCast = null
         }
+*/
     }
 }

@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.network.idiotic.EntityDeltaDto
 import com.mgtriffid.games.cotta.network.idiotic.EntityDto
 import com.mgtriffid.games.cotta.network.idiotic.IdioticSerializationDeserialization
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDeltaDto
+import com.mgtriffid.games.cotta.network.idiotic.ServerToClientPacket
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientStateDto
 import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
 import com.mgtriffid.games.cotta.server.DataForClients
@@ -47,49 +48,53 @@ class ServerToClientDataChannelImpl(
         }
     }
 
-    private fun ServerToClientGameDataPiece.toStatePacket() = when (this) {
-        is ServerToClientGameDataPiece.StatePiece -> {
-            val ret = ServerToClientStateDto()
-            ret.entities = this.stateSnapshot.entities.map { entity ->
-                val dto = EntityDto()
-                dto.entityId = entity.id
-                dto.components = entity.components().map { component ->
-                    val c = ComponentDto()
-                    c.name = component::class.simpleName
-                    c.data = serialization.serialize(component)
-                    c
+    private fun ServerToClientGameDataPiece.toStatePacket() {
+        val packet = ServerToClientPacket()
+        packet.tick = tick
+        packet.data = when (this) {
+            is ServerToClientGameDataPiece.StatePiece -> {
+                val ret = ServerToClientStateDto()
+                ret.entities = this.stateSnapshot.entities.map { entity ->
+                    val dto = EntityDto()
+                    dto.entityId = entity.id
+                    dto.components = entity.components().map { component ->
+                        val c = ComponentDto()
+                        c.name = component::class.simpleName
+                        c.data = serialization.serialize(component)
+                        c
+                    }
+                    dto
                 }
-                dto
+                ret
             }
-            ret
-        }
 
-        is ServerToClientGameDataPiece.DeltaPiece -> {
-            val ret = ServerToClientDeltaDto()
-            ret.addedEntities = ArrayList(this.delta.addedEntities.map { entity ->
-                val dto = EntityDto()
-                dto.entityId = entity.id
-                dto.components = entity.components().map { component ->
-                    val c = ComponentDto()
-                    c.name = component::class.simpleName
-                    c.data = serialization.serialize(component)
-                    c
-                }
-                dto
-            })
-            ret.removedEntityIds = ArrayList(this.delta.removedEntitiesIds.toList())
-            ret.modifiedEntities = ArrayList(this.delta.changedEntities.map { entity ->
-                val dto = EntityDeltaDto()
-                dto.entityId = entity.id
-                dto.components = entity.components().map { component ->
-                    val c = ComponentDto()
-                    c.name = component::class.simpleName
-                    c.data = serialization.serialize(component)
-                    c
-                }
-                dto
-            })
-            ret
+            is ServerToClientGameDataPiece.DeltaPiece -> {
+                val ret = ServerToClientDeltaDto()
+                ret.addedEntities = ArrayList(this.delta.addedEntities.map { entity ->
+                    val dto = EntityDto()
+                    dto.entityId = entity.id
+                    dto.components = entity.components().map { component ->
+                        val c = ComponentDto()
+                        c.name = component::class.simpleName
+                        c.data = serialization.serialize(component)
+                        c
+                    }
+                    dto
+                })
+                ret.removedEntityIds = ArrayList(this.delta.removedEntitiesIds.toList())
+                ret.modifiedEntities = ArrayList(this.delta.changedEntities.map { entity ->
+                    val dto = EntityDeltaDto()
+                    dto.entityId = entity.id
+                    dto.components = entity.components().map { component ->
+                        val c = ComponentDto()
+                        c.name = component::class.simpleName
+                        c.data = serialization.serialize(component)
+                        c
+                    }
+                    dto
+                })
+                ret
+            }
         }
     }
 }

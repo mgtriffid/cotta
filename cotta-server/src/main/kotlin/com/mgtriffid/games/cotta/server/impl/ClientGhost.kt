@@ -39,14 +39,14 @@ class ClientGhost(val connectionId: ConnectionId) {
         // and for these we calculate precisely components that were changed in at least one field
         val changedEntities = curr.filter { c -> prev.any { p -> p.id == c.id } }
         val delta = Delta(removedEntitiesIds, addedEntities, changedEntities, tick)
-        queueToSend.add(ServerToClientGameDataPiece.DeltaPiece(delta, tick))
+        queueToSend.add(ServerToClientGameDataPiece.DeltaPiece(tick, delta))
     }
 
     private fun sendState(entities: Entities, tick: Long) {
         queueToSend.add(
             ServerToClientGameDataPiece.StatePiece(
-                stateSnapshot = StateSnapshot(entities = entities.all().toSet()),
-                tick = tick
+                tick = tick,
+                stateSnapshot = StateSnapshot(entities = entities.all().toSet())
             )
         )
     }

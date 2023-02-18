@@ -11,6 +11,7 @@ import com.mgtriffid.games.cotta.network.idiotic.ComponentDto
 import com.mgtriffid.games.cotta.network.idiotic.EntityDeltaDto
 import com.mgtriffid.games.cotta.network.idiotic.EntityDto
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDeltaDto
+import com.mgtriffid.games.cotta.network.idiotic.ServerToClientPacket
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientStateDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
 
@@ -34,4 +35,5 @@ fun Kryo.registerClasses() {
     register(EntityDeltaDto::class.java)
     register(ServerToClientStateDto::class.java)
     register(ServerToClientDeltaDto::class.java)
+    register(ServerToClientPacket::class.java)
 }

@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.network.protocol.serialization
 
 sealed class ServerToClientGameDataPiece {
     abstract val tick: Long
-    data class DeltaPiece(val delta: Delta, override val tick: Long): ServerToClientGameDataPiece()
-    data class StatePiece(val stateSnapshot: StateSnapshot, override val tick: Long): ServerToClientGameDataPiece()
+    // TODO no reason to have tick in DeltaPiece and Delta
+    data class DeltaPiece(override val tick: Long, val delta: Delta): ServerToClientGameDataPiece()
+    data class StatePiece(override val tick: Long, val stateSnapshot: StateSnapshot): ServerToClientGameDataPiece()
 }

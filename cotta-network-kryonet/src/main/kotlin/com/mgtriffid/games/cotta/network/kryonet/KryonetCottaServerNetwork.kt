@@ -1,7 +1,5 @@
 package com.mgtriffid.games.cotta.network.kryonet
 
-import com.esotericsoftware.kryonet.Connection
-import com.esotericsoftware.kryonet.Listener
 import com.esotericsoftware.kryonet.Server
 import com.mgtriffid.games.cotta.network.ClientConnection
 import com.mgtriffid.games.cotta.network.ConnectionId
@@ -39,11 +37,6 @@ class KryonetCottaServerNetwork : CottaServerNetwork {
 
     override fun send(connectionId: ConnectionId, any: Any) {
         server.sendToUDP(connectionId.id, any)
-    }
-
-    /*override*/ fun dispatch(data: String) {
-        // todo not to all but to specific
-        server.sendToAllUDP(data)
     }
 
     override fun connections(): Set<ClientConnection> {

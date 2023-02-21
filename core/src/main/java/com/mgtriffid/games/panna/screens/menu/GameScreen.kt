@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
+import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaGdxGame
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
@@ -56,5 +57,3 @@ class GameScreen(
         batch!!.end()
     }
 }
-
-private fun now() = System.currentTimeMillis()

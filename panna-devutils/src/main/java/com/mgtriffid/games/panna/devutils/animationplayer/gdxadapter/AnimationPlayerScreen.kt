@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.ScreenUtils
+import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.graphics.animation.Animation
 import com.mgtriffid.games.panna.graphics.animation.FrameConfig
 
@@ -37,6 +38,4 @@ class AnimationPlayerScreen : ScreenAdapter() {
         val frameRegions = regions.flatMap { it.toList() }
         animation = Animation(frameRegions.map { FrameConfig(250, it) })
     }
-
-    private fun now() = System.currentTimeMillis()
 }

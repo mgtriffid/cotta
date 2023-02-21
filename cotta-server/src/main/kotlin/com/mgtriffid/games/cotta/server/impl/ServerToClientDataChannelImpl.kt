@@ -48,7 +48,7 @@ class ServerToClientDataChannelImpl(
         }
     }
 
-    private fun ServerToClientGameDataPiece.toStatePacket() {
+    private fun ServerToClientGameDataPiece.toStatePacket(): ServerToClientPacket {
         val packet = ServerToClientPacket()
         packet.tick = tick
         packet.data = when (this) {
@@ -96,5 +96,6 @@ class ServerToClientDataChannelImpl(
                 ret
             }
         }
+        return packet
     }
 }

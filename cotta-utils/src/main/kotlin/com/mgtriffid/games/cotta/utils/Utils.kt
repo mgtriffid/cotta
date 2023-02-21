@@ -11,3 +11,5 @@ fun <T> ConcurrentLinkedQueue<T>.drain(): Collection<T> {
     }
     return ret
 }
+
+fun now() = System.currentTimeMillis()

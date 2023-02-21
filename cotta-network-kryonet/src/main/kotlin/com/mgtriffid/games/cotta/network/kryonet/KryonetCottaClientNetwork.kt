@@ -9,11 +9,14 @@ import com.mgtriffid.games.cotta.network.idiotic.EntityDto
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDeltaDto
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDto
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientPacket
+import com.mgtriffid.games.cotta.network.idiotic.ServerToClientStateDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
 import com.mgtriffid.games.cotta.network.protocol.serialization.Delta
 import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
+import com.mgtriffid.games.cotta.network.protocol.serialization.StateSnapshot
 import com.mgtriffid.games.cotta.utils.drain
 import mu.KotlinLogging
+import java.lang.IllegalArgumentException
 import java.util.concurrent.ConcurrentLinkedQueue
 
 private val logger = KotlinLogging.logger {}
@@ -57,21 +60,29 @@ class KryonetCottaClientNetwork: CottaClientNetwork {
                     tick = packet.tick,
                     delta = Delta(
                         removedEntitiesIds = it.removedEntityIds.toSet(),
-                        addedEntities = it.addedEntities.map { entityDto ->
+                        addedEntities = emptyList()/*it.addedEntities.map { entityDto ->
                             entityDto.toEntity()
-                        },
-                        changedEntities = it.modifiedEntities.toEntities(),
+                        }*/,
+                        changedEntities = emptyList()/*it.modifiedEntities.toEntities()*/,
                         tick = packet.tick
                     )
                 )
             }
-            else -> TODO()
+            is ServerToClientStateDto -> {
+                ServerToClientGameDataPiece.StatePiece(
+                    tick = packet.tick,
+                    stateSnapshot = StateSnapshot(
+                        entities = emptySet()
+                    )
+                )
+            }
+            else -> throw IllegalArgumentException("Noone expects")
         }
     }
 }
 
 private fun EntityDto.toEntity(): Entity {
-    TODO("Not yet implemented")
+    TODO()
 }
 
 /* TODO no need to actually convert to Entity, because we don't need conversion to Entity. We need a recipe saying how

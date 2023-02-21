@@ -156,6 +156,7 @@ project(":cotta-core") {
         api "org.slf4j:slf4j-api:2.0.3"
         api "ch.qos.logback:logback-classic:1.4.4"
         api "io.github.microutils:kotlin-logging-jvm:3.0.4"
+        api project(":cotta-utils")
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation project(":cotta-annotations")
         ksp project(":cotta-annotations-processor")

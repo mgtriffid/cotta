@@ -11,9 +11,9 @@ import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDto
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientPacket
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientStateDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
-import com.mgtriffid.games.cotta.network.protocol.serialization.Delta
-import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
-import com.mgtriffid.games.cotta.network.protocol.serialization.StateSnapshot
+import com.mgtriffid.games.cotta.core.serialization.Delta
+import com.mgtriffid.games.cotta.core.serialization.ServerToClientGameDataPiece
+import com.mgtriffid.games.cotta.core.serialization.StateSnapshot
 import com.mgtriffid.games.cotta.utils.drain
 import mu.KotlinLogging
 import java.lang.IllegalArgumentException

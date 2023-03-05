@@ -160,6 +160,7 @@ project(":cotta-core") {
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation project(":cotta-annotations")
         ksp project(":cotta-annotations-processor")
+        implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     }
 }
 

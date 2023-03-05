@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.core
 
+import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import kotlin.reflect.KClass
@@ -11,7 +12,7 @@ interface CottaGame {
     val serverSystems: List<KClass<*>>
     // how to start
     fun initializeServerState(state: CottaState)
-    val componentClasses: List<KClass<*>>
+    val componentClasses: List<KClass<out Component<*>>>
 
     // what's the type of input
 

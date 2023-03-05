@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.idiotic.IdioticSerializationDeserialization
 import com.mgtriffid.games.cotta.server.impl.ClientsGhosts
@@ -14,11 +15,13 @@ interface ServerToClientDataChannel {
             tickProvider: TickProvider,
             clientsGhosts: ClientsGhosts,
             network: CottaServerNetwork,
+            stateSnapper: StateSnapper,
             serialization: IdioticSerializationDeserialization
         ): ServerToClientDataChannel = ServerToClientDataChannelImpl(
             tick = tickProvider,
             clientsGhosts = clientsGhosts,
             network = network,
+            stateSnapper = stateSnapper,
             serialization = serialization
         )
     }

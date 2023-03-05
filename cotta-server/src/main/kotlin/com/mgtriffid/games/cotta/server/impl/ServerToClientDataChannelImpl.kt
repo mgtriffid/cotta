@@ -9,7 +9,8 @@ import com.mgtriffid.games.cotta.network.idiotic.IdioticSerializationDeserializa
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDeltaDto
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientPacket
 import com.mgtriffid.games.cotta.network.idiotic.ServerToClientStateDto
-import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
+import com.mgtriffid.games.cotta.core.serialization.ServerToClientGameDataPiece
+import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import mu.KotlinLogging
@@ -20,6 +21,7 @@ class ServerToClientDataChannelImpl(
     private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts,
     private val network: CottaServerNetwork,
+    private val stateSnapper: StateSnapper,
     private val serialization: IdioticSerializationDeserialization
 ) : ServerToClientDataChannel {
 
@@ -32,19 +34,18 @@ class ServerToClientDataChannelImpl(
 
     override fun send(data: DataForClients) {
         val tick = tick.tick
-        clientsGhosts.data.forEach {
-            it.value.send(data, tick)
+        clientsGhosts.data.forEach { (playerId, ghost) ->
+            val whatToSend = ghost.whatToSend(tick)
+            whatToSend.necessaryData.forEach { (tick, kind) ->
+                network.send(ghost.connectionId, packData(tick, kind, data))
+            }
         }
-        actuallySendData(clientsGhosts)
     }
 
-    private fun actuallySendData(clientGhosts: ClientsGhosts) {
-        clientGhosts.data.forEach { (_, ghost) ->
-            val packets = ghost.drainQueue()
-            logger.debug { "About to send data to connection ${ghost.connectionId.id}" }
-            packets.forEach {
-                network.send(ghost.connectionId, it.toStatePacket())
-            }
+    private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients) {
+        val snappedData: Any = when (kindOfData) {
+            KindOfData.STATE -> stateSnapper.snapState(data.entities(tick))
+            KindOfData.DELTA -> stateSnapper.snapDelta(prev = data.entities(tick - 1), curr = data.entities(tick))
         }
     }
 

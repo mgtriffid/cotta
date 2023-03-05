@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.network.protocol.serialization
+package com.mgtriffid.games.cotta.core.serialization
 
 sealed class ServerToClientGameDataPiece {
     abstract val tick: Long

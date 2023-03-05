@@ -2,23 +2,59 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.network.ConnectionId
-import com.mgtriffid.games.cotta.network.protocol.serialization.Delta
-import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
-import com.mgtriffid.games.cotta.network.protocol.serialization.StateSnapshot
+import com.mgtriffid.games.cotta.core.serialization.Delta
+import com.mgtriffid.games.cotta.core.serialization.ServerToClientGameDataPiece
+import com.mgtriffid.games.cotta.core.serialization.StateSnapshot
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.utils.drain
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
-private const val DELTAS_BUFFER_LENGTH = 128
+private const val MAX_LAG_COMP_DEPTH_TICKS = 8
+
 // TODO inject history length
 class ClientGhost(val connectionId: ConnectionId) {
 
     private var stateKnownToClient: Long? = null
     private val queueToSend = ConcurrentLinkedQueue<ServerToClientGameDataPiece>()
+    private val logOfSentData = TreeMap<Long, KindOfData>()
 
     fun send(data: DataForClients, tick: Long) {
         sendHistoricalDataIfNeeded(data, tick)
         sendDelta(data, tick)
+    }
+
+    // 20
+    fun whatToSend(tick: Long): WhatToSend {
+        // 15
+        val lastKnownToClient = lastKnownToClient()
+
+        return if (tick - lastKnownToClient > MAX_LAG_COMP_DEPTH_TICKS) {
+            object : WhatToSend {
+                override val necessaryData: Map<Long, KindOfData>
+                    get() = mapOf((tick - MAX_LAG_COMP_DEPTH_TICKS) to KindOfData.STATE) +
+                            ((tick - MAX_LAG_COMP_DEPTH_TICKS + 1)..tick).associateWith { KindOfData.DELTA }
+
+            }
+        } else {
+            object : WhatToSend {
+                override val necessaryData = ((lastKnownToClient + 1)..(tick)).associateWith {
+                    KindOfData.DELTA
+                }
+            }
+        }.also {
+            logOfSentData.putAll(it.necessaryData)
+            val size = logOfSentData.size
+            if (size > 128) {
+                repeat(size - 128) {
+                    logOfSentData.remove(logOfSentData.firstKey())
+                }
+            }
+        }
+    }
+
+    private fun lastKnownToClient(): Long {
+        return logOfSentData.takeIf { it.isNotEmpty() }?.lastKey() ?: -1
     }
 
     private fun sendHistoricalDataIfNeeded(data: DataForClients, tick: Long) {
@@ -51,14 +87,18 @@ class ClientGhost(val connectionId: ConnectionId) {
         )
     }
 
-    private fun stateKnownToClientIsObsolete() : Boolean {
+    private fun stateKnownToClientIsObsolete(): Boolean {
         return stateKnownToClient == null
     }
 
     fun drainQueue() = queueToSend.drain()
+}
 
-    private enum class WhatWasSent {
-        STATE,
-        DELTA
-    }
+interface WhatToSend {
+    val necessaryData: Map<Long, KindOfData>
+}
+
+enum class KindOfData {
+    STATE,
+    DELTA
 }

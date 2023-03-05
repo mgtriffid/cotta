@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.network
 
-import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
+import com.mgtriffid.games.cotta.core.serialization.ServerToClientGameDataPiece
 
 interface CottaClientNetwork {
     fun initialize()

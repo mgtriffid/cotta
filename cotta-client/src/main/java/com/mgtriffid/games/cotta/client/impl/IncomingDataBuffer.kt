@@ -1,8 +1,8 @@
 package com.mgtriffid.games.cotta.client.impl
 
-import com.mgtriffid.games.cotta.network.protocol.serialization.Delta
-import com.mgtriffid.games.cotta.network.protocol.serialization.ServerToClientGameDataPiece
-import com.mgtriffid.games.cotta.network.protocol.serialization.StateSnapshot
+import com.mgtriffid.games.cotta.core.serialization.Delta
+import com.mgtriffid.games.cotta.core.serialization.ServerToClientGameDataPiece
+import com.mgtriffid.games.cotta.core.serialization.StateSnapshot
 import mu.KotlinLogging
 import java.util.*
 import kotlin.math.min

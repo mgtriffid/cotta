@@ -20,8 +20,7 @@ interface PositionComponent : MutableComponent<PositionComponent> {
     }
 
     @ComponentData var xPos: Int
-    @ComponentData
-    var yPos: Int
+    @ComponentData var yPos: Int
 }
 private data class PositionComponentImpl(
     override var xPos: Int,

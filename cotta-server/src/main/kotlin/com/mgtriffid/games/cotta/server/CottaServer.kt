@@ -1,8 +1,10 @@
 package com.mgtriffid.games.cotta.server
 
+import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
+import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
 import com.mgtriffid.games.cotta.network.CottaNetwork
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.server.impl.CottaGameInstanceImpl
@@ -32,6 +34,7 @@ class CottaServer(
 
         return CottaGameInstanceImpl(
             game,
+            CottaEngineImpl(),
             network.createServerNetwork()
         )
     }

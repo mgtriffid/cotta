@@ -70,7 +70,7 @@ class CottaClientImpl(
 
     private fun fetchData() {
         val data = network.drainIncomingData()
-        data.forEach ( incomingDataBuffer::store )
+        data.forEach { incomingDataBuffer.store() }
         // take data from queues and put it into buffers, deserialize, etc.
         // data can be of two kinds (so far): state packets, delta packets.
         // it also can be absent

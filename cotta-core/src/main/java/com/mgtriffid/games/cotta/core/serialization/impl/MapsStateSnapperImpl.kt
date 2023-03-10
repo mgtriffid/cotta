@@ -6,12 +6,8 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
 import com.mgtriffid.games.cotta.core.registry.ComponentSpec
-import com.mgtriffid.games.cotta.core.serialization.ChangedEntityRecipe
-import com.mgtriffid.games.cotta.core.serialization.ComponentDeltaRecipe
+import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.ComponentRecipe
-import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.EntityRecipe
-import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import kotlin.IllegalStateException
 import kotlin.reflect.KCallable
@@ -24,16 +20,16 @@ import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.hasAnnotation
 
-class MapsStateSnapperImpl : StateSnapper {
+class MapsStateSnapperImpl : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val snappers = HashMap<ComponentKey, ComponentSnapper<*>>()
     private val deltaSnappers = HashMap<ComponentKey, ComponentDeltaSnapper<*>>()
 
-    private val keyByClass = HashMap<KClass<*>, ComponentKey>()
+    private val keyByClass = HashMap<KClass<*>, StringComponentKey>()
     private val classByKey = HashMap<ComponentKey, KClass<*>>()
     private val factoryMethodsByClass = HashMap<ComponentKey, KCallable<*>>()
 
     fun <T : Component<T>> registerComponent(kClass: KClass<T>, spec: ComponentSpec) {
-        keyByClass[kClass] = spec.key
+        keyByClass[kClass] = spec.key as StringComponentKey // hack, the fact that maps8 and componentregistry are connected leaks in here but okay
         registerSnapper(kClass, spec)
         registerDeltaSnapper(kClass, spec)
     }
@@ -66,7 +62,7 @@ class MapsStateSnapperImpl : StateSnapper {
         factoryMethodsByClass[spec.key] = factoryMethod
 
         snappers[spec.key] = ComponentSnapper(
-            key = spec.key,
+            key = spec.key as StringComponentKey,
             factoryMethod = factoryMethod,
             factoryInstanceParameter = factoryInstanceParameter,
             companionInstance = companionInstance,
@@ -81,12 +77,12 @@ class MapsStateSnapperImpl : StateSnapper {
         }.filterIsInstance<KMutableProperty1<C, *>>()
         val fieldsByName = fields.associateBy { it.name }
         deltaSnappers[spec.key] = ComponentDeltaSnapper(
-            key = spec.key, fieldsByName = fieldsByName
+            key = spec.key as StringComponentKey, fieldsByName = fieldsByName
         )
     }
 
     private inner class ComponentSnapper<C : Component<C>>(
-        val key: ComponentKey,
+        val key: StringComponentKey,
         val factoryMethod: KCallable<C>,
         val factoryInstanceParameter: KParameter,
         val companionInstance: Any,
@@ -95,7 +91,7 @@ class MapsStateSnapperImpl : StateSnapper {
     ) {
         private val valueParameters: Collection<KParameter> = valueParametersToNames.keys
 
-        fun packComponent(obj: C): ComponentRecipe<C> {
+        fun packComponent(obj: C): MapComponentRecipe<C> {
             return MapComponentRecipe(componentKey = key, data = fieldsByName.mapValues { (_, field) ->
                 field.get(obj) ?: throw IllegalStateException("Nullable fields are not allowed")
             })
@@ -113,7 +109,8 @@ class MapsStateSnapperImpl : StateSnapper {
     }
 
     private inner class ComponentDeltaSnapper<C : Component<C>>(
-        private val key: ComponentKey, private val fieldsByName: Map<String, KMutableProperty1<C, *>>
+        private val key: StringComponentKey,
+        private val fieldsByName: Map<String, KMutableProperty1<C, *>>
     ) {
         fun packDelta(prev: C, curr: C): MapComponentDeltaRecipe<C> {
             return MapComponentDeltaRecipe(
@@ -136,43 +133,35 @@ class MapsStateSnapperImpl : StateSnapper {
         }
     }
 
-    private inner class MapComponentRecipe<C : Component<C>>(
-        val componentKey: ComponentKey, val data: Map<String, Any>
-    ) : ComponentRecipe<C>
-
-    private inner class MapComponentDeltaRecipe<C : Component<C>>(
-        val componentKey: ComponentKey, val data: Map<String, Any>
-    ) : ComponentDeltaRecipe<C>
-
-    private fun getKey(obj: Component<*>): ComponentKey {
+    private fun getKey(obj: Component<*>): StringComponentKey {
         val kClass = obj::class
         return keyByClass[kClass] ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
     }
 
-    override fun snapState(entities: Entities): StateRecipe {
-        return MapStateRecipe(entities.all().map { e ->
+    override fun snapState(entities: Entities): MapsStateRecipe {
+        return MapsStateRecipe(entities.all().map { e ->
             packEntity(e)
         })
     }
 
     private fun packEntity(e: Entity) =
-        MapEntityRecipe(entityId = e.id, components = e.components().map { packComponent(it) })
+        MapsEntityRecipe(entityId = e.id, components = e.components().map { packComponent(it) })
 
     // TODO shit wtf is this mess with unsafe casts
-    private fun <C : Component<C>> packComponent(obj: Any): ComponentRecipe<C> {
+    private fun <C : Component<C>> packComponent(obj: Any): MapComponentRecipe<C> {
         obj as C
         return (snappers[getKey(obj)] as ComponentSnapper<C>).packComponent(obj)
     }
 
-    override fun snapDelta(prev: Entities, curr: Entities): DeltaRecipe {
+    override fun snapDelta(prev: Entities, curr: Entities): MapsDeltaRecipe {
         return snapDelta(prev.all(), curr.all())
     }
 
-    private fun snapDelta(prev: Collection<Entity>, curr: Collection<Entity>): DeltaRecipe {
+    private fun snapDelta(prev: Collection<Entity>, curr: Collection<Entity>): MapsDeltaRecipe {
         val removedIds = prev.map { it.id }.toSet() - curr.map { it.id }.toSet()
         val addedEntities = curr.filter { c -> prev.none { p -> p.id == c.id } }
         val changedEntities = curr.filter { c -> prev.any { p -> p.id == c.id } }
-        return MapDeltaRecipe(
+        return MapsDeltaRecipe(
             addedEntities = addedEntities.map(::packEntity), changedEntities = changedEntities.map {
                 packEntityDelta(prev = prev.find { p -> it.id == p.id }
                     ?: throw IllegalStateException("Suddenly prev entity not found but it has to be here"), curr = it)
@@ -180,7 +169,7 @@ class MapsStateSnapperImpl : StateSnapper {
         )
     }
 
-    private fun packEntityDelta(prev: Entity, curr: Entity): MapChangedEntityRecipe {
+    private fun packEntityDelta(prev: Entity, curr: Entity): MapsChangedEntityRecipe {
         val prevComponents = prev.components()
         val currComponents = curr.components()
         val removedComponents = prevComponents.map(::getKey).filter { key ->
@@ -193,7 +182,7 @@ class MapsStateSnapperImpl : StateSnapper {
             prevComponents.find { pc -> getKey(pc) == getKey(cc) }
         }.filterValues { it != null } as Map<Component<*>, Component<*>>
 
-        return MapChangedEntityRecipe(
+        return MapsChangedEntityRecipe(
             entityId = curr.id,
             changedComponents = changedComponents.map { (cc, pc) ->
                 packComponentDelta(pc, cc)
@@ -203,30 +192,9 @@ class MapsStateSnapperImpl : StateSnapper {
         )
     }
 
-    private fun <C: Component<C>> packComponentDelta(c1: Component<*>, c0: Component<*>): ComponentDeltaRecipe<C> {
+    private fun <C: Component<C>> packComponentDelta(c1: Component<*>, c0: Component<*>): MapComponentDeltaRecipe<C> {
         val prev = c0 as C // I apologize
         val curr = c1 as C
         return (deltaSnappers[getKey(curr)]!! as ComponentDeltaSnapper<C>).packDelta(prev, curr)
     }
-
-    private inner class MapStateRecipe(
-        override val entities: List<EntityRecipe>
-    ) : StateRecipe
-
-    private inner class MapDeltaRecipe(
-        override val addedEntities: List<EntityRecipe>,
-        override val changedEntities: List<ChangedEntityRecipe>,
-        override val removedEntitiesIds: Set<Int>
-    ) : DeltaRecipe
-
-    private inner class MapChangedEntityRecipe(
-        override val entityId: Int,
-        override val changedComponents: List<ComponentDeltaRecipe<*>>,
-        override val addedComponents: List<ComponentRecipe<*>>,
-        override val removedComponents: List<ComponentKey>
-    ) : ChangedEntityRecipe
-
-    private inner class MapEntityRecipe(
-        override val entityId: Int, override val components: List<ComponentRecipe<*>>
-    ) : EntityRecipe
 }

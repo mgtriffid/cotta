@@ -3,27 +3,17 @@ package com.mgtriffid.games.cotta.network.kryonet
 import com.esotericsoftware.kryonet.Client
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
-import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
-import com.mgtriffid.games.cotta.network.idiotic.EntityDto
-import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDeltaDto
-import com.mgtriffid.games.cotta.network.idiotic.ServerToClientDto
-import com.mgtriffid.games.cotta.network.idiotic.ServerToClientPacket
-import com.mgtriffid.games.cotta.network.idiotic.ServerToClientStateDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
-import com.mgtriffid.games.cotta.core.serialization.Delta
-import com.mgtriffid.games.cotta.core.serialization.ServerToClientGameDataPiece
-import com.mgtriffid.games.cotta.core.serialization.StateSnapshot
 import com.mgtriffid.games.cotta.utils.drain
 import mu.KotlinLogging
-import java.lang.IllegalArgumentException
 import java.util.concurrent.ConcurrentLinkedQueue
 
 private val logger = KotlinLogging.logger {}
 
 class KryonetCottaClientNetwork: CottaClientNetwork {
     lateinit var client: Client
-    private val packetsQueue = ConcurrentLinkedQueue<ServerToClientPacket>()
+    private val packetsQueue = ConcurrentLinkedQueue<Any>() // TODO
 
     override fun initialize() {
         client = Client()
@@ -37,56 +27,16 @@ class KryonetCottaClientNetwork: CottaClientNetwork {
         client.sendUDP(EnterTheGameDto())
     }
 
-    override fun drainIncomingData(): Collection<ServerToClientGameDataPiece> {
-        return packetsQueue.drain().map(::deserialize)
+    override fun drainIncomingData(): Collection<Any> {
+        return packetsQueue.drain()
     }
 
     private fun configureListener() {
         val listener = object : Listener {
             override fun received(connection: Connection?, obj: Any?) {
                 logger.debug { "Received $obj" }
-                when (obj) {
-                    is ServerToClientPacket -> packetsQueue.add(obj)
-                }
             }
         }
         client.addListener(listener)
     }
-
-    private fun deserialize(packet: ServerToClientPacket): ServerToClientGameDataPiece = packet.data.let {
-        when (it) {
-            is ServerToClientDeltaDto -> {
-                ServerToClientGameDataPiece.DeltaPiece(
-                    tick = packet.tick,
-                    delta = Delta(
-                        removedEntitiesIds = it.removedEntityIds.toSet(),
-                        addedEntities = emptyList()/*it.addedEntities.map { entityDto ->
-                            entityDto.toEntity()
-                        }*/,
-                        changedEntities = emptyList()/*it.modifiedEntities.toEntities()*/,
-                        tick = packet.tick
-                    )
-                )
-            }
-            is ServerToClientStateDto -> {
-                ServerToClientGameDataPiece.StatePiece(
-                    tick = packet.tick,
-                    stateSnapshot = StateSnapshot(
-                        entities = emptySet()
-                    )
-                )
-            }
-            else -> throw IllegalArgumentException("Noone expects")
-        }
-    }
-}
-
-private fun EntityDto.toEntity(): Entity {
-    TODO()
-}
-
-/* TODO no need to actually convert to Entity, because we don't need conversion to Entity. We need a recipe saying how
- to build an entity */
-private fun <E> MutableList<E>.toEntities(): List<Entity> {
-    TODO("Not yet implemented")
 }

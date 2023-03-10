@@ -7,5 +7,5 @@ interface CottaClientNetwork {
 
     fun sendEnterGameIntent()
 
-    fun drainIncomingData(): Collection<ServerToClientGameDataPiece>
+    fun drainIncomingData(): Collection<Any>
 }

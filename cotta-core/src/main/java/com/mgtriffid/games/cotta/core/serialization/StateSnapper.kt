@@ -2,7 +2,7 @@ package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.Entities
 
-interface StateSnapper {
-    fun snapState(entities: Entities): StateRecipe
-    fun snapDelta(prev: Entities, curr: Entities): DeltaRecipe
+interface StateSnapper<SR: StateRecipe, DR: DeltaRecipe> {
+    fun snapState(entities: Entities): SR
+    fun snapDelta(prev: Entities, curr: Entities): DR
 }

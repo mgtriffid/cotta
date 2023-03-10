@@ -12,11 +12,13 @@ private val logger = KotlinLogging.logger {}
 class IncomingDataBuffer {
     private val states = TreeMap<Long, StateSnapshot>()
     private val deltas = TreeMap<Long, Delta>()
-    fun store(serverToClientGameDataPiece: ServerToClientGameDataPiece) {
+    fun store(/*serverToClientGameDataPiece: ServerToClientGameDataPiece*/) {
+/*
         when (serverToClientGameDataPiece) {
             is ServerToClientGameDataPiece.StatePiece -> storeStatePiece(serverToClientGameDataPiece)
             is ServerToClientGameDataPiece.DeltaPiece -> storeDeltaPiece(serverToClientGameDataPiece)
         }
+*/
     }
 
     private fun storeDeltaPiece(serverToClientGameDataPiece: ServerToClientGameDataPiece.DeltaPiece) {

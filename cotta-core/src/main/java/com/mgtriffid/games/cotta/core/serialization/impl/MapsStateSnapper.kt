@@ -7,8 +7,13 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
 import com.mgtriffid.games.cotta.core.registry.ComponentSpec
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
-import com.mgtriffid.games.cotta.core.serialization.ComponentRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
+import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapComponentDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapComponentRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsChangedEntityRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsEntityRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsStateRecipe
 import kotlin.IllegalStateException
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
@@ -20,7 +25,7 @@ import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.hasAnnotation
 
-class MapsStateSnapperImpl : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
+class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val snappers = HashMap<ComponentKey, ComponentSnapper<*>>()
     private val deltaSnappers = HashMap<ComponentKey, ComponentDeltaSnapper<*>>()
 
@@ -91,13 +96,13 @@ class MapsStateSnapperImpl : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     ) {
         private val valueParameters: Collection<KParameter> = valueParametersToNames.keys
 
-        fun packComponent(obj: C): MapComponentRecipe<C> {
+        fun packComponent(obj: C): MapComponentRecipe {
             return MapComponentRecipe(componentKey = key, data = fieldsByName.mapValues { (_, field) ->
                 field.get(obj) ?: throw IllegalStateException("Nullable fields are not allowed")
             })
         }
 
-        fun unpackComponent(recipe: MapComponentRecipe<C>): C {
+        fun unpackComponent(recipe: MapComponentRecipe): C {
             val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
             val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
                 recipe.data[valueParametersToNames[p]]
@@ -112,7 +117,7 @@ class MapsStateSnapperImpl : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         private val key: StringComponentKey,
         private val fieldsByName: Map<String, KMutableProperty1<C, *>>
     ) {
-        fun packDelta(prev: C, curr: C): MapComponentDeltaRecipe<C> {
+        fun packDelta(prev: C, curr: C): MapComponentDeltaRecipe {
             return MapComponentDeltaRecipe(
                 componentKey = key, data = fieldsByName.mapNotNull { (name, field) ->
                     val v0 = field.get(prev)
@@ -126,7 +131,7 @@ class MapsStateSnapperImpl : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
             )
         }
 
-        private fun apply(delta: MapComponentDeltaRecipe<C>, target: C) {
+        private fun apply(delta: MapComponentDeltaRecipe, target: C) {
             delta.data.forEach { (name, value) ->
                 (fieldsByName[name]!! as KMutableProperty1<C, Any?>).set(target, value)
             }
@@ -148,7 +153,7 @@ class MapsStateSnapperImpl : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         MapsEntityRecipe(entityId = e.id, components = e.components().map { packComponent(it) })
 
     // TODO shit wtf is this mess with unsafe casts
-    private fun <C : Component<C>> packComponent(obj: Any): MapComponentRecipe<C> {
+    private fun <C : Component<C>> packComponent(obj: Any): MapComponentRecipe {
         obj as C
         return (snappers[getKey(obj)] as ComponentSnapper<C>).packComponent(obj)
     }
@@ -192,7 +197,7 @@ class MapsStateSnapperImpl : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         )
     }
 
-    private fun <C: Component<C>> packComponentDelta(c1: Component<*>, c0: Component<*>): MapComponentDeltaRecipe<C> {
+    private fun <C: Component<C>> packComponentDelta(c1: Component<*>, c0: Component<*>): MapComponentDeltaRecipe {
         val prev = c0 as C // I apologize
         val curr = c1 as C
         return (deltaSnappers[getKey(curr)]!! as ComponentDeltaSnapper<C>).packDelta(prev, curr)

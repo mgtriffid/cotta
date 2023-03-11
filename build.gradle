@@ -149,7 +149,7 @@ project(":cotta-annotations-processor") {
 
 project(":cotta-core") {
     apply plugin: "kotlin"
-    apply plugin: "com.google.devtools.ksp"
+//    apply plugin: "com.google.devtools.ksp"
             "    "
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -159,7 +159,8 @@ project(":cotta-core") {
         api project(":cotta-utils")
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation project(":cotta-annotations")
-        ksp project(":cotta-annotations-processor")
+        implementation "com.esotericsoftware:kryo:5.0.0"
+//        ksp project(":cotta-annotations-processor")
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     }
 }

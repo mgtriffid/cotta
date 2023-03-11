@@ -7,18 +7,17 @@ import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
 import com.mgtriffid.games.cotta.core.registry.RegistrationListener
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsSnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapperImpl
+import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
 import kotlin.reflect.KClass
 
 class CottaEngineImpl : CottaEngine<MapsStateRecipe, MapsDeltaRecipe> {
 
     private val componentsRegistry = ComponentsRegistryImpl()
-    private val stateSnapper = MapsStateSnapperImpl()
+    private val stateSnapper = MapsStateSnapper()
     private val snapsSerialization = MapsSnapsSerialization()
 
     init {

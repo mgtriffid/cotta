@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.core.serialization
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
-import com.mgtriffid.games.cotta.core.serialization.impl.MapComponentDeltaRecipe
 
 interface DeltaRecipe {
     val addedEntities : List<EntityRecipe>
@@ -24,11 +23,11 @@ interface StateRecipe {
 
 interface EntityRecipe {
     val entityId: Int
-    val components: List<ComponentRecipe<*>>
+    val components: List<ComponentRecipe>
 }
 
-interface ComponentRecipe<C: Component<C>>
-interface ComponentDeltaRecipe<C: Component<C>>
+interface ComponentRecipe
+interface ComponentDeltaRecipe
 
 /**
  * Allows to reconstruct the whole state of particular Component. Used to transfer snapshot
@@ -48,7 +47,7 @@ interface ChangedComponentData<T> {
 
 interface ChangedEntityRecipe {
     val entityId: Int
-    val changedComponents: List<ComponentDeltaRecipe<*>>
-    val addedComponents: List<ComponentRecipe<*>>
+    val changedComponents: List<ComponentDeltaRecipe>
+    val addedComponents: List<ComponentRecipe>
     val removedComponents: List<ComponentKey>
 }

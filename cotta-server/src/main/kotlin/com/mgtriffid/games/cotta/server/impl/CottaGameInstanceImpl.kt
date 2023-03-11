@@ -1,22 +1,16 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaEngine
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
-import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.input.NonPlayersInput
 import com.mgtriffid.games.cotta.core.input.PlayersInput
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
-import com.mgtriffid.games.cotta.core.registry.ComponentSpec
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
-import com.mgtriffid.games.cotta.core.registry.RegistrationListener
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapperImpl
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.server.CottaGameInstance

@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
+import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import mu.KotlinLogging
@@ -25,22 +26,33 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe> (
     // did clients see and what entities they did not see. We also care about predicted entities of clients. Yes,
     // when client predicts an entity spawn, we should let it know that "ok bro we have acknowledged your prediction,
     // you predicted it as id `predicted_1`, we gave it id `543`, now we match all input you give for that entity,
-    // and when we send you this entity back, your job is to start treating `543` as the id, not `predicted_1`.
+    // and when we send you this entity back, your job is to start treating `543` as the id, not `predicted_1`".
 
     override fun send(data: DataForClients) {
-        val tick = tick.tick
+        val currentTick = tick.tick
         clientsGhosts.data.forEach { (playerId, ghost) ->
-            val whatToSend = ghost.whatToSend(tick)
+            val whatToSend = ghost.whatToSend(currentTick)
             whatToSend.necessaryData.forEach { (tick, kind) ->
                 network.send(ghost.connectionId, packData(tick, kind, data))
             }
         }
     }
 
-    private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients) {
-        val snappedData: Any = when (kindOfData) {
-            KindOfData.STATE -> stateSnapper.snapState(data.entities(tick))
-            KindOfData.DELTA -> stateSnapper.snapDelta(prev = data.entities(tick - 1), curr = data.entities(tick))
+    private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients): ServerToClientDto {
+        val dto = ServerToClientDto()
+        dto.kindOfData = when (kindOfData) {
+            KindOfData.DELTA -> com.mgtriffid.games.cotta.network.protocol.KindOfData.DELTA
+            KindOfData.STATE -> com.mgtriffid.games.cotta.network.protocol.KindOfData.STATE
         }
+        dto.payload = when (kindOfData) {
+            KindOfData.STATE -> snapsSerialization.serializeStateRecipe(stateSnapper.snapState(data.entities(tick)))
+            KindOfData.DELTA -> snapsSerialization.serializeDeltaRecipe(
+                stateSnapper.snapDelta(
+                    prev = data.entities(tick - 1),
+                    curr = data.entities(tick)
+                )
+            )
+        }
+        return dto
     }
 }

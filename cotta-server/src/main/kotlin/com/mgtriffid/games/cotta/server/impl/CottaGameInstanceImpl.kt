@@ -109,7 +109,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe>(
     }
 
     private fun dispatchDataToClients() {
-        logger.info { "Preparing data to sent to clients" }
+        logger.info { "Preparing data to send to clients" }
         /*
           TODO consider passing tick as a parameter here because it's confusing right now:
             tick goes through EVERYTHING but implicitly

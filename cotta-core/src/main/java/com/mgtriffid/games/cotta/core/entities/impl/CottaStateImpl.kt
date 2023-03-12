@@ -23,9 +23,9 @@ class CottaStateImpl(
         if (atTick > tick.tick) {
             throw EcsRuntimeException("Cannot retrieve entities at tick $atTick: current tick is $tick")
         }
-        if (atTick <= tick.tick - historyLength) {
+        if (atTick < tick.tick - historyLength) {
             throw EcsRuntimeException(
-                "Cannot retrieve entities at tick $atTick: current tick is $tick while history length is $historyLength"
+                "Cannot retrieve entities at tick $atTick: current tick is ${tick.tick} while history length is $historyLength"
             )
         }
         return entitiesArray[(atTick % historyLength).toInt()]!!

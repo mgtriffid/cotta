@@ -4,7 +4,6 @@ import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
-import com.mgtriffid.games.cotta.network.protocol.RegularDuringGameDto
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -29,9 +28,6 @@ class ServerListener(
         when (obj) {
             is EnterTheGameDto -> {
                 enterGameIntents.add(Pair(ConnectionId(connection.id), deserialize(obj)))
-            }
-            is RegularDuringGameDto -> {
-                // here goes some brutal deserialization
             }
         }
     }

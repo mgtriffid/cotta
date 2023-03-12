@@ -7,6 +7,8 @@ import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.CottaNetwork
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
+import com.mgtriffid.games.cotta.network.protocol.KindOfData
+import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 
 class KryonetCottaNetwork : CottaNetwork {
     override fun createServerNetwork(): CottaServerNetwork {
@@ -20,6 +22,9 @@ class KryonetCottaNetwork : CottaNetwork {
 
 fun Kryo.registerClasses() {
     register(EnterTheGameDto::class.java)
+    register(ServerToClientDto::class.java)
+    register(ByteArray::class.java)
+    register(KindOfData::class.java)
     register(ArrayList::class.java, CollectionSerializer<ArrayList<Any?>>())
     register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
     register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())

@@ -19,7 +19,6 @@ import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsChangedEnti
 import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsEntityRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsStateRecipe
-import java.io.ByteArrayOutputStream
 
 class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe> {
     // this is not thread safe
@@ -38,7 +37,7 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
     override fun serializeDeltaRecipe(recipe: MapsDeltaRecipe): ByteArray {
         val output = Output(4096, 1024 * 1024)
         kryo.writeObject(output, recipe.toDto())
-        return output.buffer
+        return output.toBytes()
     }
 
     override fun deserializeDeltaRecipe(bytes: ByteArray): MapsDeltaRecipe {
@@ -46,13 +45,13 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
     }
 
     override fun serializeStateRecipe(recipe: MapsStateRecipe): ByteArray {
-        val output = Output(4096, 1024 * 1024)
+        val output = Output(64, 1024 * 1024)
         kryo.writeObject(output, recipe.toDto())
-        return output.buffer
+        return output.toBytes()
     }
 
     override fun deserializeStateRecipe(bytes: ByteArray): MapsStateRecipe {
-        TODO("Not yet implemented")
+        return kryo.readObject(Input(bytes), MapsStateRecipeDto::class.java).toRecipe()
     }
 }
 

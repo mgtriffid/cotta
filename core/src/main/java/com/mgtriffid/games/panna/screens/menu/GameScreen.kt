@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
+import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaGdxGame
@@ -27,11 +28,14 @@ class GameScreen(
     override fun show() {
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
+        val engine  = CottaEngineImpl()
 
         cottaClient = CottaClient.getInstance(
             game = PannaGame(),
+            engine = engine,
             network = KryonetCottaNetwork().createClientNetwork()
         )
+        cottaClient.initialize()
         nextTickAt = now()
     }
 

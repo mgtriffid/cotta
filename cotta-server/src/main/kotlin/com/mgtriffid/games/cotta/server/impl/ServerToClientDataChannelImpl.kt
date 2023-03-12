@@ -53,6 +53,7 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe> (
                 )
             )
         }
+        dto.tick = tick
         return dto
     }
 }

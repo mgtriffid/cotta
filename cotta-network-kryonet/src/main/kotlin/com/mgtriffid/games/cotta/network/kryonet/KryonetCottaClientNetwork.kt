@@ -5,6 +5,7 @@ import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
+import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.utils.drain
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -12,8 +13,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 private val logger = KotlinLogging.logger {}
 
 class KryonetCottaClientNetwork: CottaClientNetwork {
-    lateinit var client: Client
-    private val packetsQueue = ConcurrentLinkedQueue<Any>() // TODO
+    private lateinit var client: Client
+    private val packetsQueue = ConcurrentLinkedQueue<ServerToClientDto>()
 
     override fun initialize() {
         client = Client()
@@ -27,7 +28,7 @@ class KryonetCottaClientNetwork: CottaClientNetwork {
         client.sendUDP(EnterTheGameDto())
     }
 
-    override fun drainIncomingData(): Collection<Any> {
+    override fun drainIncomingData(): Collection<ServerToClientDto> {
         return packetsQueue.drain()
     }
 
@@ -35,6 +36,9 @@ class KryonetCottaClientNetwork: CottaClientNetwork {
         val listener = object : Listener {
             override fun received(connection: Connection?, obj: Any?) {
                 logger.debug { "Received $obj" }
+                when (obj) {
+                    is ServerToClientDto -> packetsQueue.add(obj)
+                }
             }
         }
         client.addListener(listener)

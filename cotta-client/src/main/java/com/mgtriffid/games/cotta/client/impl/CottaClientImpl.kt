@@ -1,23 +1,35 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.CottaClient
+import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
+import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import com.mgtriffid.games.cotta.utils.now
 import mu.KotlinLogging
-import kotlin.math.log
+import java.lang.IllegalStateException
 
 const val STATE_WAITING_THRESHOLD = 5000L
 
 private val logger = KotlinLogging.logger {}
 
-class CottaClientImpl(
+class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
     val game: CottaGame,
+    val engine: CottaEngine<SR, DR>, // weird type parameterization
     val network: CottaClientNetwork
 ) : CottaClient {
     var connected = false
     private val incomingDataBuffer = IncomingDataBuffer()
     private var state: ClientState = ClientState.Initial
+    private val componentsRegistry = engine.getComponentsRegistry()
+    private val stateSnapper = engine.getStateSnapper()
+    private val snapsSerialization = engine.getSnapsSerialization()
+
+    override fun initialize() {
+        registerComponents()
+    }
 
     override fun tick() {
         logger.info { "Running ${CottaClientImpl::class.simpleName}" }
@@ -70,7 +82,13 @@ class CottaClientImpl(
 
     private fun fetchData() {
         val data = network.drainIncomingData()
-        data.forEach { incomingDataBuffer.store() }
+        data.forEach {
+            when (it.kindOfData) {
+                KindOfData.DELTA -> incomingDataBuffer.storeDelta(it.tick, snapsSerialization.deserializeDeltaRecipe(it.payload))
+                KindOfData.STATE -> incomingDataBuffer.storeState(it.tick, snapsSerialization.deserializeStateRecipe(it.payload))
+                null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
+            }
+        }
         // take data from queues and put it into buffers, deserialize, etc.
         // data can be of two kinds (so far): state packets, delta packets.
         // it also can be absent
@@ -84,6 +102,13 @@ class CottaClientImpl(
     private fun connect() {
         network.initialize()
         network.sendEnterGameIntent()
+    }
+
+    // TODO probably this is wrong place
+    private fun registerComponents() {
+        game.componentClasses.forEach {
+            componentsRegistry.registerComponentClass(it)
+        }
     }
 
     sealed class ClientState {

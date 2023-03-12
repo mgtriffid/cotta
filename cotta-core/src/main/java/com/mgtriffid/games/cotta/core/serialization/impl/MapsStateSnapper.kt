@@ -24,6 +24,7 @@ import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.isSuperclassOf
 
 class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val snappers = HashMap<ComponentKey, ComponentSnapper<*>>()
@@ -140,7 +141,8 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
 
     private fun getKey(obj: Component<*>): StringComponentKey {
         val kClass = obj::class
-        return keyByClass[kClass] ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
+        val registeredClass = keyByClass.keys.first { it.isSuperclassOf(kClass) }
+        return keyByClass[registeredClass] ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
     }
 
     override fun snapState(entities: Entities): MapsStateRecipe {

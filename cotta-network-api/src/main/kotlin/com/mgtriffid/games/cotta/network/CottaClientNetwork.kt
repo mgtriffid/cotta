@@ -1,11 +1,11 @@
 package com.mgtriffid.games.cotta.network
 
-import com.mgtriffid.games.cotta.core.serialization.ServerToClientGameDataPiece
+import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 
 interface CottaClientNetwork {
     fun initialize()
 
     fun sendEnterGameIntent()
 
-    fun drainIncomingData(): Collection<Any>
+    fun drainIncomingData(): Collection<ServerToClientDto>
 }

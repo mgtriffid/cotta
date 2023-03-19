@@ -21,7 +21,8 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
     val game: CottaGame,
     val engine: CottaEngine<SR, DR>, // weird type parameterization
     val network: CottaClientNetwork,
-    val lagCompLimit: Int
+    val lagCompLimit: Int,
+    val bufferLength: Int
 ) : CottaClient {
     var connected = false
     private val incomingDataBuffer = IncomingDataBuffer<SR, DR>()
@@ -63,8 +64,13 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
 
                 is ClientState.Running -> {
                     fetchData()
-                    integrate()
-                    state = ClientState.Running(it.currentTick + 1)
+                    if (deltaAvailableForTick(getCurrentTick())) {
+                        integrate()
+                        state = ClientState.Running(it.currentTick + 1)
+                    } else {
+                        // for now do nothing, later we'll guess and keep track of how
+                        // long ago did we have a state that is trusted
+                    }
                 }
             }
         }
@@ -79,7 +85,6 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
         stateSnapper.unpackStateRecipe(cottaState.entities(atTick = fullStateTick), stateRecipe)
         ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
             cottaState.advance()
-            tickProvider.tick = tick
             stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
         }
     }
@@ -91,7 +96,13 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
 
     private fun integrate() {
         logger.debug { "Integrating" }
-//        TODO()
+        // take input
+        // integrate using rules
+
+        cottaState.advance()
+        val tick = getCurrentTick()
+        logger.debug { "Tick=$tick" }
+        stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
     }
 
     private fun fetchData() {
@@ -114,7 +125,11 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
         val stateArrived = incomingDataBuffer.states.isNotEmpty()
         if (!stateArrived) return false
         val stateTick = incomingDataBuffer.states.lastKey()
-        return incomingDataBuffer.deltas.keys.containsAll(((stateTick + 1)..(stateTick + lagCompLimit)).toList())
+        return incomingDataBuffer.deltas.keys.containsAll(((stateTick + 1)..(stateTick + lagCompLimit + bufferLength)).toList())
+    }
+
+    private fun deltaAvailableForTick(tick: Long): Boolean {
+        return incomingDataBuffer.deltas.containsKey(tick)
     }
 
     private fun connect() {

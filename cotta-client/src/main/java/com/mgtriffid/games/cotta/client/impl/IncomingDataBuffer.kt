@@ -18,9 +18,7 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe> {
     }
 
     private fun cleanUpOldDeltas(tick: Long) {
-        logger.debug { "Cleaning deltas" }
         cleanUp(deltas, tick)
-        logger.debug { "Cleaning deltas completed" }
     }
 
     fun storeState(tick: Long, state: SR) {
@@ -29,9 +27,7 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe> {
     }
 
     private fun cleanUpOldStates(tick: Long) {
-        logger.debug { "Cleaning states" }
         cleanUp(states, tick)
-        logger.debug { "Cleaning states completed" }
     }
 
     private fun cleanUp(data: TreeMap<Long, *>, tick: Long) {

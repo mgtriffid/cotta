@@ -13,6 +13,10 @@ class EntitiesImpl : Entities {
         return EntityImpl(idGenerator.incrementAndGet()).also { entities[it.id] = it }
     }
 
+    override fun createEntity(id: Int): Entity {
+        return EntityImpl(id).also { entities[id] = it }
+    }
+
     @Throws(EntityNotExistsException::class)
     override fun get(id: Int): Entity {
         return entities[id] ?: throw EntityNotExistsException("Entity $id does not exist")
@@ -20,6 +24,10 @@ class EntitiesImpl : Entities {
 
     override fun all(): Collection<Entity> {
         return entities.values
+    }
+
+    override fun remove(id: Int) {
+        entities.remove(id)
     }
 
     fun deepCopy(): EntitiesImpl {

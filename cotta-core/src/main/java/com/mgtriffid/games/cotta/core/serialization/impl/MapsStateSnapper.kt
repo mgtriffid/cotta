@@ -31,13 +31,14 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val deltaSnappers = HashMap<ComponentKey, ComponentDeltaSnapper<*>>()
 
     private val keyByClass = HashMap<KClass<*>, StringComponentKey>()
-    private val classByKey = HashMap<ComponentKey, KClass<*>>()
+    private val classByKey = HashMap<StringComponentKey, KClass<Component<*>>>()
     private val factoryMethodsByClass = HashMap<ComponentKey, KCallable<*>>()
 
     fun <T : Component<T>> registerComponent(kClass: KClass<T>, spec: ComponentSpec) {
         keyByClass[kClass] = spec.key as StringComponentKey // hack, the fact that maps8 and componentregistry are connected leaks in here but okay
         registerSnapper(kClass, spec)
         registerDeltaSnapper(kClass, spec)
+        classByKey[spec.key as StringComponentKey] = kClass as KClass<Component<*>>
     }
 
     private fun <C : Component<C>> registerSnapper(kClass: KClass<C>, spec: ComponentSpec) {
@@ -132,9 +133,9 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
             )
         }
 
-        private fun apply(delta: MapComponentDeltaRecipe, target: C) {
+        fun apply(delta: MapComponentDeltaRecipe, target: Any) {
             delta.data.forEach { (name, value) ->
-                (fieldsByName[name]!! as KMutableProperty1<C, Any?>).set(target, value)
+                (fieldsByName[name]!! as KMutableProperty1<Any, Any?>).set(target, value)
             }
         }
     }
@@ -162,6 +163,54 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
 
     override fun snapDelta(prev: Entities, curr: Entities): MapsDeltaRecipe {
         return snapDelta(prev.all(), curr.all())
+    }
+
+    override fun unpackStateRecipe(entities: Entities, recipe: MapsStateRecipe) {
+        recipe.entities.forEach { entityRecipe -> unpackEntityRecipe(entities, entityRecipe) }
+    }
+
+    private fun unpackEntityRecipe(entities: Entities, recipe: MapsEntityRecipe) {
+        val entity = entities.createEntity(recipe.entityId)
+        recipe.components.forEach { componentRecipe -> entity.addComponent(unpackComponentRecipe(componentRecipe)) }
+    }
+
+    private fun unpackComponentRecipe(recipe: MapComponentRecipe): Component<*> {
+        return snappers[recipe.componentKey]?.unpackComponent(recipe)
+            // mb not the best idea, malformed data should not break client
+            ?: throw IllegalArgumentException("State Snapper not found")
+    }
+
+    private fun unpackComponentDeltaRecipe(component: Any, recipe: MapComponentDeltaRecipe) {
+        (deltaSnappers[recipe.componentKey] ?: throw IllegalArgumentException("Delta Snapper not found")).apply(
+            recipe,
+            component
+        )
+    }
+
+    override fun unpackDeltaRecipe(entities: Entities, recipe: MapsDeltaRecipe) {
+        unpackAddedEntities(entities, recipe.addedEntities)
+        unpackChangedEntities(entities, recipe.changedEntities)
+        recipe.removedEntitiesIds.forEach { entities.remove(it) }
+    }
+
+    private fun unpackAddedEntities(entities: Entities, addedEntities: List<MapsEntityRecipe>) {
+        addedEntities.forEach { unpackEntityRecipe(entities, it) }
+    }
+
+    private fun unpackChangedEntities(entities: Entities, changedEntities: List<MapsChangedEntityRecipe>) {
+        changedEntities.forEach { recipe ->
+            val entity = entities.get(recipe.entityId)
+            recipe.addedComponents.forEach {
+                entity.addComponent(unpackComponentRecipe(it))
+            }
+            recipe.changedComponents.forEach {
+                // cast and fucking pray
+                val kClass = classByKey[it.componentKey]
+                val component = entity.getComponent(kClass as KClass<out Component<*>>)
+                unpackComponentDeltaRecipe(component as Any, it)
+            }
+            recipe.removedComponents.forEach { entity.removeComponent(classByKey[it] as KClass<out Component<*>>) }
+        }
     }
 
     private fun snapDelta(prev: Collection<Entity>, curr: Collection<Entity>): MapsDeltaRecipe {

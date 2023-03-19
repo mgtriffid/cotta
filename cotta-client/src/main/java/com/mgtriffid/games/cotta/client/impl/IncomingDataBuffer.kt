@@ -8,11 +8,11 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger {}
 
-class IncomingDataBuffer {
-    private val states = TreeMap<Long, StateRecipe>()
-    private val deltas = TreeMap<Long, DeltaRecipe>()
+class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe> {
+    val states = TreeMap<Long, SR>()
+    val deltas = TreeMap<Long, DR>()
 
-    fun storeDelta(tick: Long, delta: DeltaRecipe) {
+    fun storeDelta(tick: Long, delta: DR) {
         deltas[tick] = delta
         cleanUpOldDeltas(tick)
     }
@@ -23,7 +23,7 @@ class IncomingDataBuffer {
         logger.debug { "Cleaning deltas completed" }
     }
 
-    fun storeState(tick: Long, state: StateRecipe) {
+    fun storeState(tick: Long, state: SR) {
         states[tick] = state
         cleanUpOldStates(tick)
     }

@@ -10,4 +10,6 @@ interface Entities {
     fun createEntity(): Entity
     fun get(id: Int): Entity
     fun all(): Collection<Entity>
+    fun createEntity(id: Int): Entity
+    fun remove(id: Int)
 }

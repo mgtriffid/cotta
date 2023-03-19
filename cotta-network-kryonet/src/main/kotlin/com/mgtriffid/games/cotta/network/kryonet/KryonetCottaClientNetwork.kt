@@ -37,7 +37,10 @@ class KryonetCottaClientNetwork: CottaClientNetwork {
             override fun received(connection: Connection?, obj: Any?) {
                 logger.debug { "Received $obj" }
                 when (obj) {
-                    is ServerToClientDto -> packetsQueue.add(obj)
+                    is ServerToClientDto -> {
+                        packetsQueue.add(obj)
+                        logger.debug { "Tick ${obj.tick}, kind ${obj.kindOfData}" }
+                    }
                 }
             }
         }

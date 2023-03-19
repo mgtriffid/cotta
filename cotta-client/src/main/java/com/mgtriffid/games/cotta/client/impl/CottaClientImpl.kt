@@ -3,6 +3,8 @@ package com.mgtriffid.games.cotta.client.impl
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
@@ -18,14 +20,17 @@ private val logger = KotlinLogging.logger {}
 class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
     val game: CottaGame,
     val engine: CottaEngine<SR, DR>, // weird type parameterization
-    val network: CottaClientNetwork
+    val network: CottaClientNetwork,
+    val lagCompLimit: Int
 ) : CottaClient {
     var connected = false
-    private val incomingDataBuffer = IncomingDataBuffer()
+    private val incomingDataBuffer = IncomingDataBuffer<SR, DR>()
     private var state: ClientState = ClientState.Initial
     private val componentsRegistry = engine.getComponentsRegistry()
     private val stateSnapper = engine.getStateSnapper()
     private val snapsSerialization = engine.getSnapsSerialization()
+    private val tickProvider = AtomicLongTickProvider()
+    private val cottaState = CottaState.getInstance(tickProvider)
 
     override fun initialize() {
         registerComponents()
@@ -67,12 +72,21 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
 
     private fun setStateFromAuthoritative() {
         logger.debug { "Setting state from authoritative" }
-        // TODO("Not yet implemented")
+        val fullStateTick = incomingDataBuffer.states.lastKey()
+        val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
+        cottaState.setBlank(fullStateTick)
+        tickProvider.tick = fullStateTick
+        stateSnapper.unpackStateRecipe(cottaState.entities(atTick = fullStateTick), stateRecipe)
+        ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
+            cottaState.advance()
+            tickProvider.tick = tick
+            stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
+        }
     }
 
     private fun getCurrentTick(): Long {
 //        TODO("Not yet implemented")
-        return 1L
+        return tickProvider.tick
     }
 
     private fun integrate() {
@@ -95,8 +109,12 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
         // we stuff it in and then make a decision what to do.
     }
 
+    // should not use these anywhere but awaiting game state
     private fun stateAvailable(): Boolean {
-        return true
+        val stateArrived = incomingDataBuffer.states.isNotEmpty()
+        if (!stateArrived) return false
+        val stateTick = incomingDataBuffer.states.lastKey()
+        return incomingDataBuffer.deltas.keys.containsAll(((stateTick + 1)..(stateTick + lagCompLimit)).toList())
     }
 
     private fun connect() {

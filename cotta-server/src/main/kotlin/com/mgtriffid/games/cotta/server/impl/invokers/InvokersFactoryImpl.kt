@@ -125,6 +125,14 @@ class InvokersFactoryImpl(
         override fun all(): Collection<Entity> {
             return state.entities().all()
         }
+
+        override fun remove(id: Int) {
+            throw NotImplementedError("Is not supposed to be called on Server")
+        }
+
+        override fun createEntity(id: Int): Entity {
+            throw NotImplementedError("Is not supposed to be called on Server")
+        }
     }
 
     private class ReadingFromPreviousTickEntities(
@@ -142,6 +150,14 @@ class InvokersFactoryImpl(
 
         override fun all(): Collection<Entity> {
             return state.entities(atTick = sawTickHolder.tick ?: tickProvider.tick).all()
+        }
+
+        override fun createEntity(id: Int): Entity {
+            throw NotImplementedError("Is not supposed to be called on Server")
+        }
+
+        override fun remove(id: Int) {
+            throw NotImplementedError("Is not supposed to be called on Server")
         }
     }
 

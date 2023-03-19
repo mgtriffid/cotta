@@ -13,7 +13,7 @@ interface CottaClient {
             game: CottaGame,
             engine: CottaEngine<SR, DR>,
             network: CottaClientNetwork
-        ): CottaClient = CottaClientImpl(game, engine, network)
+        ): CottaClient = CottaClientImpl(game, engine, network, 8)
     }
 
     fun initialize()

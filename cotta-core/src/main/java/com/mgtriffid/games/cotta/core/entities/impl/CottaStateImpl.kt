@@ -37,6 +37,10 @@ class CottaStateImpl(
         entitiesArray[(tick.tick % historyLength).toInt()] = entities.deepCopy()
     }
 
+    override fun setBlank(tick: Long) {
+        entitiesArray[(tick % historyLength).toInt()] = Entities.getInstance()
+    }
+
     private fun Entities.deepCopy(): Entities {
         return if (this is EntitiesImpl) {
             this.deepCopy()

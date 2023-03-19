@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server.impl
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
@@ -100,7 +101,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe>(
 
     private fun fetchIncomingInput(network: CottaServerNetwork): IncomingInput {
         return object: IncomingInput {
-            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> = emptyMap()
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> = emptyMap()
         }
     }
 

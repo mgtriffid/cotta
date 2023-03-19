@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.server.impl.invokers
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 
 class LagCompensatingInputProcessingSystemInvoker(
@@ -21,7 +22,7 @@ class LagCompensatingInputProcessingSystemInvoker(
     }
 
     interface EntityOwnerSawTickProvider {
-        fun getSawTickByEntityId(entityId: Int): Long?
+        fun getSawTickByEntityId(entityId: EntityId): Long?
     }
 
 }

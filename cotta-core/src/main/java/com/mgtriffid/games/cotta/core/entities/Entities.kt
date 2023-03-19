@@ -8,8 +8,8 @@ interface Entities {
     }
 
     fun createEntity(): Entity
-    fun get(id: Int): Entity
+    fun get(id: EntityId): Entity
     fun all(): Collection<Entity>
-    fun createEntity(id: Int): Entity
-    fun remove(id: Int)
+    fun createEntity(id: EntityId): Entity
+    fun remove(id: EntityId)
 }

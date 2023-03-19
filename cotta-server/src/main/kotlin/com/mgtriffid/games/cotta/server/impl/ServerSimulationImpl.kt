@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server.impl
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
@@ -29,14 +30,14 @@ class ServerSimulationImpl(
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
-    private val entityOwners = HashMap<Int, PlayerId>()
+    private val entityOwners = HashMap<EntityId, PlayerId>()
     private val playersSawTicks = HashMap<PlayerId, Long>()
 
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
-    private val metaEntities = HashMap<PlayerId, Int>()
+    private val metaEntities = HashMap<PlayerId, EntityId>()
     private var inputForUpcomingTick: IncomingInput = object: IncomingInput {
-        override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+        override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
             return emptyMap()
         }
     }
@@ -99,7 +100,7 @@ class ServerSimulationImpl(
         }
     }
 
-    override fun setEntityOwner(entityId: Int, playerId: PlayerId) {
+    override fun setEntityOwner(entityId: EntityId, playerId: PlayerId) {
         entityOwners[entityId] = playerId
     }
 
@@ -123,7 +124,7 @@ class ServerSimulationImpl(
 
     // O(scary)
     // TODO track the registry of all entities having InputComponents
-    private fun gatherInputs(): Map<Int, Set<InputComponent<*>>> {
+    private fun gatherInputs(): Map<EntityId, Set<InputComponent<*>>> {
         return state.entities().all().map { entity ->
             val impl = entity as? EntityImpl
             if (impl == null) { null} else {

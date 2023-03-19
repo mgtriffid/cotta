@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
@@ -91,7 +92,7 @@ class ServerSimulationTest {
         input1.aim = 4
         input1.shoot = true
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
-            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input1)
                 )
@@ -104,7 +105,7 @@ class ServerSimulationTest {
         input2.aim = 4
         input2.shoot = true
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
-            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
                 )
@@ -147,7 +148,7 @@ class ServerSimulationTest {
         input.aim = 4
         input.shoot = true
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
-            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input)
                 )
@@ -159,7 +160,7 @@ class ServerSimulationTest {
         input.aim = 4
         input.shoot = false
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
-            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input)
                 )
@@ -223,7 +224,7 @@ class ServerSimulationTest {
         input1.aim = 4
         input1.shoot = true
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
-            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input1)
                 )
@@ -243,7 +244,7 @@ class ServerSimulationTest {
         input2.aim = 4
         input2.shoot = false
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
-            override fun inputsForEntities(): Map<Int, Set<InputComponent<*>>> {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
                 )

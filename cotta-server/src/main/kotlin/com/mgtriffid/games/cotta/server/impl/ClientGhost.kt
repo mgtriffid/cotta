@@ -86,12 +86,6 @@ class ClientGhost(val connectionId: ConnectionId) {
             )
         )
     }
-
-    private fun stateKnownToClientIsObsolete(): Boolean {
-        return stateKnownToClient == null
-    }
-
-    fun drainQueue() = queueToSend.drain()
 }
 
 interface WhatToSend {

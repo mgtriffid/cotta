@@ -1,24 +1,26 @@
 package com.mgtriffid.games.cotta.core.entities.impl
 
+import com.mgtriffid.games.cotta.core.entities.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.exceptions.EntityNotExistsException
 import java.util.concurrent.atomic.AtomicInteger
 
 class EntitiesImpl : Entities {
     private var idGenerator = AtomicInteger()
-    private val entities = HashMap<Int, Entity>()
+    private val entities = HashMap<EntityId, Entity>()
 
     override fun createEntity(): Entity {
-        return EntityImpl(idGenerator.incrementAndGet()).also { entities[it.id] = it }
+        return EntityImpl(AuthoritativeEntityId(idGenerator.incrementAndGet())).also { entities[it.id] = it }
     }
 
-    override fun createEntity(id: Int): Entity {
+    override fun createEntity(id: EntityId): Entity {
         return EntityImpl(id).also { entities[id] = it }
     }
 
     @Throws(EntityNotExistsException::class)
-    override fun get(id: Int): Entity {
+    override fun get(id: EntityId): Entity {
         return entities[id] ?: throw EntityNotExistsException("Entity $id does not exist")
     }
 
@@ -26,14 +28,14 @@ class EntitiesImpl : Entities {
         return entities.values
     }
 
-    override fun remove(id: Int) {
+    override fun remove(id: EntityId) {
         entities.remove(id)
     }
 
     fun deepCopy(): EntitiesImpl {
         val ret = EntitiesImpl()
         ret.idGenerator = idGenerator
-        entities.forEach { (id: Int, entity: Entity) ->
+        entities.forEach { (id: EntityId, entity: Entity) ->
             ret.entities[id] = (entity as EntityImpl).deepCopy()
         }
         return ret

@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 
 /**
@@ -11,6 +12,6 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
  */
 interface DataForClients {
     fun effects(tick: Long): Collection<CottaEffect>
-    fun inputs(tick: Long): Map<Int, Set<InputComponent<*>>> // immutable
+    fun inputs(tick: Long): Map<EntityId, Set<InputComponent<*>>> // immutable
     fun entities(tick: Long): Entities
 }

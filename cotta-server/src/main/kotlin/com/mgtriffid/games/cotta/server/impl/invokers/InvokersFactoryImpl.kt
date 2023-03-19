@@ -6,12 +6,12 @@ import com.mgtriffid.games.cotta.core.effects.EffectsConsumer
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.cotta.server.PlayerId
-import com.mgtriffid.games.cotta.server.impl.EffectsHistory
 import com.mgtriffid.games.cotta.server.impl.invokers.LagCompensatingInputProcessingSystemInvoker.EntityOwnerSawTickProvider
 import kotlin.reflect.KClass
 import kotlin.reflect.full.hasAnnotation
@@ -21,7 +21,7 @@ import kotlin.reflect.full.primaryConstructor
 class InvokersFactoryImpl(
     private val lagCompensatingEffectBus: LagCompensatingEffectBus,
     private val state: CottaState,
-    private val entityOwners: HashMap<Int, PlayerId>,
+    private val entityOwners: HashMap<EntityId, PlayerId>,
     private val playersSawTicks: HashMap<PlayerId, Long>,
     private val tickProvider: TickProvider,
     private val sawTickHolder: SawTickHolder
@@ -82,7 +82,7 @@ class InvokersFactoryImpl(
             state = state,
             system = ctor.call(*parameterValues.toTypedArray()) as InputProcessingSystem,
             entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
-                override fun getSawTickByEntityId(entityId: Int): Long? {
+                override fun getSawTickByEntityId(entityId: EntityId): Long? {
                     return entityOwners[entityId]?.let { playersSawTicks[it] }
                 }
             },
@@ -118,7 +118,7 @@ class InvokersFactoryImpl(
             return state.entities().createEntity()
         }
 
-        override fun get(id: Int): Entity {
+        override fun get(id: EntityId): Entity {
             return state.entities().get(id)
         }
 
@@ -126,11 +126,11 @@ class InvokersFactoryImpl(
             return state.entities().all()
         }
 
-        override fun remove(id: Int) {
+        override fun remove(id: EntityId) {
             throw NotImplementedError("Is not supposed to be called on Server")
         }
 
-        override fun createEntity(id: Int): Entity {
+        override fun createEntity(id: EntityId): Entity {
             throw NotImplementedError("Is not supposed to be called on Server")
         }
     }
@@ -144,7 +144,7 @@ class InvokersFactoryImpl(
             return state.entities().createEntity()
         }
 
-        override fun get(id: Int): Entity {
+        override fun get(id: EntityId): Entity {
             return state.entities(atTick = sawTickHolder.tick ?: tickProvider.tick).get(id)
         }
 
@@ -152,11 +152,11 @@ class InvokersFactoryImpl(
             return state.entities(atTick = sawTickHolder.tick ?: tickProvider.tick).all()
         }
 
-        override fun createEntity(id: Int): Entity {
+        override fun createEntity(id: EntityId): Entity {
             throw NotImplementedError("Is not supposed to be called on Server")
         }
 
-        override fun remove(id: Int) {
+        override fun remove(id: EntityId) {
             throw NotImplementedError("Is not supposed to be called on Server")
         }
     }

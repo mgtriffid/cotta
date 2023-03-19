@@ -3,7 +3,7 @@ package com.mgtriffid.games.cotta.core.entities
 import kotlin.reflect.KClass
 
 interface Entity {
-    val id: Int
+    val id: EntityId
     fun <T: Component<T>> hasComponent(clazz: KClass<T>) : Boolean
     fun <T: Component<T>> getComponent(clazz: KClass<T>): T
     fun addComponent(component: Component<*>)

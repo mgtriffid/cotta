@@ -131,7 +131,4 @@ fun MapsEntityRecipeDto.toRecipe() = MapsEntityRecipe(
 fun MapsStateRecipeDto.toRecipe() = MapsStateRecipe(
     entities = entities.map { it.toRecipe() }
 )
-
-
 // </editor-fold>
-

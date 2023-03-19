@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.server.impl.invokers
 
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.PlayerId
@@ -15,7 +16,7 @@ interface InvokersFactory {
         fun getInstance(
             lagCompensatingEffectBus: LagCompensatingEffectBus,
             state: CottaState,
-            entityOwners: HashMap<Int, PlayerId>,
+            entityOwners: HashMap<EntityId, PlayerId>,
             playersSawTicks: HashMap<PlayerId, Long>,
             tickProvider: TickProvider,
             sawTickHolder: InvokersFactoryImpl.SawTickHolder

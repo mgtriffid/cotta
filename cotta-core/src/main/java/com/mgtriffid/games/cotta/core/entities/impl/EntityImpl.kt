@@ -2,11 +2,12 @@ package com.mgtriffid.games.cotta.core.entities.impl
 
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import kotlin.reflect.KClass
 
-class EntityImpl(override val id: Int) : Entity {
+class EntityImpl(override val id: EntityId) : Entity {
     val components = ArrayList<Component<*>>()
     override fun <T : Component<T>> hasComponent(clazz: KClass<T>): Boolean {
         return components.any { clazz.isInstance(it) }

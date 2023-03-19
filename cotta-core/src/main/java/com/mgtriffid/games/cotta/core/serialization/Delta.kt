@@ -2,16 +2,17 @@ package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
 
 interface DeltaRecipe {
     val addedEntities : List<EntityRecipe>
     val changedEntities: List<ChangedEntityRecipe>
-    val removedEntitiesIds: Set<Int>
+    val removedEntitiesIds: Set<EntityId>
 }
 
 data class Delta(
-    val removedEntitiesIds: Set<Int>,
+    val removedEntitiesIds: Set<EntityId>,
     val addedEntities: List<Entity>,
     val changedEntities: List<Entity>,
     val tick: Long
@@ -22,7 +23,7 @@ interface StateRecipe {
 }
 
 interface EntityRecipe {
-    val entityId: Int
+    val entityId: EntityId
     val components: List<ComponentRecipe>
 }
 
@@ -46,7 +47,7 @@ interface ChangedComponentData<T> {
 }
 
 interface ChangedEntityRecipe {
-    val entityId: Int
+    val entityId: EntityId
     val changedComponents: List<ComponentDeltaRecipe>
     val addedComponents: List<ComponentRecipe>
     val removedComponents: List<ComponentKey>

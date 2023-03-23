@@ -5,6 +5,6 @@ import com.mgtriffid.games.cotta.core.entities.EntityId;
 import java.util.ArrayList;
 
 public class MapsEntityRecipeDto {
-    public EntityId entityId;
+    public EntityIdDto entityId;
     public ArrayList<MapComponentRecipeDto> components;
 }

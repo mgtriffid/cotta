@@ -5,8 +5,11 @@ import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
+import com.mgtriffid.games.cotta.core.entities.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
+import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapComponentDeltaRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapComponentRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsChangedEntityRecipeDto
@@ -33,7 +36,9 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         kryo.register(ArrayList::class.java, CollectionSerializer<ArrayList<Any?>>())
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
+        kryo.register(EntityIdDto::class.java)
     }
+
     override fun serializeDeltaRecipe(recipe: MapsDeltaRecipe): ByteArray {
         val output = Output(4096, 1024 * 1024)
         kryo.writeObject(output, recipe.toDto())
@@ -72,7 +77,7 @@ fun MapComponentRecipe.toDto(): MapComponentRecipeDto {
 
 fun MapsChangedEntityRecipe.toDto(): MapsChangedEntityRecipeDto {
     val ret = MapsChangedEntityRecipeDto()
-    ret.entityId = entityId
+    ret.entityId = entityId.toDto()
     ret.addedComponents = ArrayList(this.addedComponents.map(MapComponentRecipe::toDto))
     ret.removedComponents = ArrayList(removedComponents.map { it.name })
     ret.changedComponents = ArrayList(this.changedComponents.map(MapComponentDeltaRecipe::toDto))
@@ -83,13 +88,13 @@ fun MapsDeltaRecipe.toDto(): MapsDeltaRecipeDto {
     val ret = MapsDeltaRecipeDto()
     ret.addedEntities = ArrayList(addedEntities.map { it.toDto() })
     ret.changedEntities = ArrayList(changedEntities.map { it.toDto() })
-    ret.removedEntitiesIds = ArrayList(removedEntitiesIds)
+    ret.removedEntitiesIds = ArrayList(removedEntitiesIds.map { it.toDto() })
     return ret
 }
 
 fun MapsEntityRecipe.toDto(): MapsEntityRecipeDto {
     val ret = MapsEntityRecipeDto()
-    ret.entityId = entityId
+    ret.entityId = entityId.toDto()
     ret.components = ArrayList(components.map { it.toDto() })
     return ret
 }
@@ -111,7 +116,7 @@ fun MapComponentRecipeDto.toRecipe() = MapComponentRecipe(
 )
 
 fun MapsChangedEntityRecipeDto.toRecipe() = MapsChangedEntityRecipe(
-    entityId = entityId,
+    entityId = entityId.toEntityId(),
     addedComponents = addedComponents.map { it.toRecipe() },
     changedComponents = changedComponents.map { it.toRecipe() },
     removedComponents = removedComponents.map(::StringComponentKey)
@@ -120,15 +125,26 @@ fun MapsChangedEntityRecipeDto.toRecipe() = MapsChangedEntityRecipe(
 fun MapsDeltaRecipeDto.toRecipe() = MapsDeltaRecipe(
     addedEntities = addedEntities.map { it.toRecipe() },
     changedEntities = changedEntities.map { it.toRecipe() },
-    removedEntitiesIds = removedEntitiesIds.toSet()
+    removedEntitiesIds = removedEntitiesIds.map { it.toEntityId() }. toSet()
 )
 
 fun MapsEntityRecipeDto.toRecipe() = MapsEntityRecipe(
-    entityId = entityId,
+    entityId = entityId.toEntityId(),
     components = components.map { it.toRecipe() }
 )
 
 fun MapsStateRecipeDto.toRecipe() = MapsStateRecipe(
     entities = entities.map { it.toRecipe() }
 )
+
+fun EntityId.toDto(): EntityIdDto {
+    return when (this) {
+        is AuthoritativeEntityId -> EntityIdDto().also { it.id = id }
+        else -> TODO()
+    }
+}
+
+fun EntityIdDto.toEntityId(): EntityId {
+    return AuthoritativeEntityId(id)
+}
 // </editor-fold>

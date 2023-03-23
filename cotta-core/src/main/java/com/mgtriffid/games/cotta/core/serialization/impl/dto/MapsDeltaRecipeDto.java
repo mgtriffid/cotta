@@ -8,5 +8,5 @@ import java.util.ArrayList;
 public class MapsDeltaRecipeDto {
     public ArrayList<MapsEntityRecipeDto> addedEntities;
     public ArrayList<MapsChangedEntityRecipeDto> changedEntities;
-    public ArrayList<EntityId> removedEntitiesIds;
+    public ArrayList<EntityIdDto> removedEntitiesIds;
 }

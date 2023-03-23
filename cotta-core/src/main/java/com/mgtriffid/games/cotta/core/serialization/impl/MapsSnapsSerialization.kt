@@ -58,6 +58,16 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
     override fun deserializeStateRecipe(bytes: ByteArray): MapsStateRecipe {
         return kryo.readObject(Input(bytes), MapsStateRecipeDto::class.java).toRecipe()
     }
+
+    override fun serializeEntityId(entityId: EntityId): ByteArray {
+        val output = Output(64, 1024 * 1024)
+        kryo.writeObject(output, entityId.toDto())
+        return output.toBytes()
+    }
+
+    override fun deserializeEntityId(bytes: ByteArray): EntityId {
+        return kryo.readObject(Input(bytes), EntityIdDto::class.java).toEntityId()
+    }
 }
 
 // <editor-fold desc="Converters">

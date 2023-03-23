@@ -8,8 +8,10 @@ import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
+import com.mgtriffid.games.cotta.server.PlayerId
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import mu.KotlinLogging
+import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
 
@@ -33,16 +35,17 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe> (
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val whatToSend = ghost.whatToSend(currentTick)
             whatToSend.necessaryData.forEach { (tick, kind) ->
-                network.send(ghost.connectionId, packData(tick, kind, data))
+                network.send(ghost.connectionId, packData(tick, kind, data, playerId))
             }
         }
     }
 
-    private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients): ServerToClientDto {
+    private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients, playerId: PlayerId): ServerToClientDto {
         val dto = ServerToClientDto()
         dto.kindOfData = when (kindOfData) {
             KindOfData.DELTA -> com.mgtriffid.games.cotta.network.protocol.KindOfData.DELTA
             KindOfData.STATE -> com.mgtriffid.games.cotta.network.protocol.KindOfData.STATE
+            KindOfData.CLIENT_META_ENTITY_ID -> com.mgtriffid.games.cotta.network.protocol.KindOfData.CLIENT_META_ENTITY_ID
         }
         dto.payload = when (kindOfData) {
             KindOfData.STATE -> snapsSerialization.serializeStateRecipe(stateSnapper.snapState(data.entities(tick)))
@@ -51,6 +54,9 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe> (
                     prev = data.entities(tick - 1),
                     curr = data.entities(tick)
                 )
+            )
+            KindOfData.CLIENT_META_ENTITY_ID -> snapsSerialization.serializeEntityId(
+                data.metaEntities()[playerId] ?: throw IllegalStateException("Meta-entity does not exist for player ${playerId.id}")
             )
         }
         dto.tick = tick

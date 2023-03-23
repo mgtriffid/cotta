@@ -6,50 +6,53 @@ import java.util.*
 private const val MAX_LAG_COMP_DEPTH_TICKS = 8
 
 // TODO inject history length
-class ClientGhost(val connectionId: ConnectionId) {
+class ClientGhost(
+    val connectionId: ConnectionId
+) {
+    private val logOfSentData = HashSet<WhatToSend.WhatToSendItem>()
 
-    private val logOfSentData = TreeMap<Long, KindOfData>()
-
-    // 20
     fun whatToSend(tick: Long): WhatToSend {
-        // 15
         val lastKnownToClient = lastKnownToClient()
 
         return if (tick - lastKnownToClient > MAX_LAG_COMP_DEPTH_TICKS) {
             object : WhatToSend {
-                override val necessaryData: Map<Long, KindOfData>
-                    get() = mapOf((tick - MAX_LAG_COMP_DEPTH_TICKS) to KindOfData.STATE) +
-                            ((tick - MAX_LAG_COMP_DEPTH_TICKS + 1)..tick).associateWith { KindOfData.DELTA }
-
+                override val necessaryData = listOf(
+                    WhatToSend.WhatToSendItem(tick - MAX_LAG_COMP_DEPTH_TICKS, KindOfData.STATE)) +
+                        ((tick - MAX_LAG_COMP_DEPTH_TICKS + 1)..tick).map {
+                            WhatToSend.WhatToSendItem(it, KindOfData.DELTA)
+                        }
             }
         } else {
             object : WhatToSend {
-                override val necessaryData = ((lastKnownToClient + 1)..(tick)).associateWith {
-                    KindOfData.DELTA
+                override val necessaryData = ((lastKnownToClient + 1)..(tick)).map {
+                    WhatToSend.WhatToSendItem(it, KindOfData.DELTA)
                 }
             }
         }.also {
-            logOfSentData.putAll(it.necessaryData)
-            val size = logOfSentData.size
-            if (size > 128) {
-                repeat(size - 128) {
-                    logOfSentData.remove(logOfSentData.firstKey())
-                }
-            }
+            logOfSentData.addAll(it.necessaryData)
+            logOfSentData.removeAll { it.tick < tick - 128 }
         }
     }
 
     private fun lastKnownToClient(): Long {
-        return logOfSentData.takeIf { it.isNotEmpty() }?.lastKey() ?: -1
+        return logOfSentData.filter { when (it.kindOfData) {
+            KindOfData.DELTA, KindOfData.STATE -> true
+            KindOfData.CLIENT_META_ENTITY_ID -> false
+        } }.maxOfOrNull { it.tick } ?: -1
     }
-
 }
 
 interface WhatToSend {
-    val necessaryData: Map<Long, KindOfData>
+    val necessaryData: List<WhatToSendItem>
+
+    data class WhatToSendItem(
+        val tick: Long,
+        val kindOfData: KindOfData
+    )
 }
 
 enum class KindOfData {
     STATE,
-    DELTA
+    DELTA,
+    CLIENT_META_ENTITY_ID
 }

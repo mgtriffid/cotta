@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
@@ -32,6 +33,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
     private val snapsSerialization = engine.getSnapsSerialization()
     private val tickProvider = AtomicLongTickProvider()
     private val cottaState = CottaState.getInstance(tickProvider)
+    private var metaEntityId: EntityId? = null
 
     override fun initialize() {
         registerComponents()
@@ -111,6 +113,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
             when (it.kindOfData) {
                 KindOfData.DELTA -> incomingDataBuffer.storeDelta(it.tick, snapsSerialization.deserializeDeltaRecipe(it.payload))
                 KindOfData.STATE -> incomingDataBuffer.storeState(it.tick, snapsSerialization.deserializeStateRecipe(it.payload))
+                KindOfData.CLIENT_META_ENTITY_ID -> metaEntityId = snapsSerialization.deserializeEntityId(it.payload)
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
             }
         }

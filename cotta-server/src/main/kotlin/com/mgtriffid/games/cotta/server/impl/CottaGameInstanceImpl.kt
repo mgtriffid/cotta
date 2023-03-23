@@ -122,18 +122,4 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe>(
     private fun send(data: DataForClients) {
         serverToClientDataChannel.send(data)
     }
-
-    private fun getDataForClients(): DataForClients {
-        TODO()
-    }
-
-    private fun fetchFromNetwork(): PlayersInput {
-        logger.debug { "Fetching input from network" }
-        return object: PlayersInput {}
-    }
-
-    private fun calculateNonPlayerInput(): NonPlayersInput {
-        logger.debug { "Calculating non-player input" }
-        return object : NonPlayersInput {}
-    }
 }

@@ -14,4 +14,5 @@ interface DataForClients {
     fun effects(tick: Long): Collection<CottaEffect>
     fun inputs(tick: Long): Map<EntityId, Set<InputComponent<*>>> // immutable
     fun entities(tick: Long): Entities
+    fun metaEntities(): Map<PlayerId, EntityId>
 }

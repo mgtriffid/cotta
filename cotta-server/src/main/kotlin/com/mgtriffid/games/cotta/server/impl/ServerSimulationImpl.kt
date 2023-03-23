@@ -118,7 +118,8 @@ class ServerSimulationImpl(
         return DataForClientsImpl(
             effectsHistory = effectsHistory,
             inputs = gatherInputs(),
-            state = state
+            state = state,
+            metaEntities = metaEntities
         )
     }
 

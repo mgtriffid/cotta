@@ -12,8 +12,9 @@ interface CottaClient {
         fun <SR: StateRecipe, DR: DeltaRecipe> getInstance(
             game: CottaGame,
             engine: CottaEngine<SR, DR>,
-            network: CottaClientNetwork
-        ): CottaClient = CottaClientImpl(game, engine, network, 8, 3)
+            network: CottaClientNetwork,
+            input: CottaClientInput
+        ): CottaClient = CottaClientImpl(game, engine, network, input, 8, 3)
     }
 
     fun initialize()

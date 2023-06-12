@@ -3,7 +3,11 @@ package com.mgtriffid.games.panna.shared.lobby
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.panna.shared.game.MovementDirection
+import com.mgtriffid.games.panna.shared.game.components.ColliderComponent
+import com.mgtriffid.games.panna.shared.game.components.HealthComponent
+import com.mgtriffid.games.panna.shared.game.components.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
+import com.mgtriffid.games.panna.shared.game.components.TerrainComponent
 import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
 import kotlin.reflect.KClass
 
@@ -12,9 +16,15 @@ class PannaGame : CottaGame {
 
     override fun initializeServerState(state: CottaState) {
         val entity = state.entities().createEntity()
-        entity.addComponent(PositionComponent.create(300, 200))
+        entity.addComponent(PositionComponent.create(300, 200, ORIENTATION_LEFT))
 //        entity.addComponent(WalkingComponent(MovementDirection.IDLE))
     }
 
-    override val componentClasses = listOf(PositionComponent::class)
+    override val componentClasses = listOf(
+        PositionComponent::class,
+        ColliderComponent::class,
+        TerrainComponent::class,
+//        WalkingComponent::class,
+        HealthComponent::class
+    )
 }

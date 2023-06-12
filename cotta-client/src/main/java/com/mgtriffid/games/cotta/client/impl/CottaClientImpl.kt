@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.CottaClient
+import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
@@ -22,6 +23,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
     val game: CottaGame,
     val engine: CottaEngine<SR, DR>, // weird type parameterization
     val network: CottaClientNetwork,
+    val input: CottaClientInput,
     val lagCompLimit: Int,
     val bufferLength: Int
 ) : CottaClient {
@@ -98,13 +100,29 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
 
     private fun integrate() {
         logger.debug { "Integrating" }
-        // take input
-        // integrate using rules
-
         cottaState.advance()
         val tick = getCurrentTick()
-        logger.debug { "Tick=$tick" }
+        logger.debug { "Tick = $tick" }
+        // input first, only then delta
+        // we need to get our local input
+        // Will it be like "find all Entities that are of this player, then try to call input provider for it"?
+        // Or will it be like "find all Entities that have InputComponent, then call input provider for it"?
+        // BOTH! They should have both InputComponent and ownedBy == this player.
+        // and also somewhere around here should be the effects
+        // and we also need other clients' inputs
+        // and we need to SMEAR this with logs all over the place!
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
+        // now on top of what just happened we also predict shit using local inputs
+        // input is a map of EntityId to (List?) <InputComponent>, we push certain input to Server. For example,
+        // MetaEntityId to "LetDudeEnterTheGame" or our battling dude to (Direction, Shoots, Jumps) = (RIGHT, false)
+        // How do we find those IDs? Need to figure out the signature for that function that takes state and input, then
+        // creates that map of entity to input components. So for example for an FPS game we will take those Entities that
+        // are ours, then we'll find one that has component like FightingDudeComponent, and we'll stuff input into it.
+        // Sensible so far. So the signature is: input(entities: List<Entity>): Map<>. Another option is input(entity: Entity) and it
+        // is called multiple times, according to the number of local entities Player controls.
+        // takeInput()
+        // processPrediction() // here we operate on that predicted state that co-exists with real state
+        // sendInput()
     }
 
     private fun fetchData() {
@@ -117,10 +135,6 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
             }
         }
-        // take data from queues and put it into buffers, deserialize, etc.
-        // data can be of two kinds (so far): state packets, delta packets.
-        // it also can be absent
-        // we stuff it in and then make a decision what to do.
     }
 
     // should not use these anywhere but awaiting game state

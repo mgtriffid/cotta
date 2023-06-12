@@ -5,10 +5,12 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
+import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.cotta.utils.now
+import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
@@ -33,7 +35,8 @@ class GameScreen(
         cottaClient = CottaClient.getInstance(
             game = PannaGame(),
             engine = engine,
-            network = KryonetCottaNetwork().createClientNetwork()
+            network = KryonetCottaNetwork().createClientNetwork(),
+            input = PannaClientGdxInput()
         )
         cottaClient.initialize()
         nextTickAt = now()
@@ -41,12 +44,15 @@ class GameScreen(
 
     override fun render(delta: Float) {
         logger.debug { "${GameScreen::class.simpleName}#render called" }
-        actuallyDraw()
+
+//        accumulateInput()
 
         if (nextTickAt <= now()) {
             cottaClient.tick()
             nextTickAt += TICK_LENGTH
         }
+
+        actuallyDraw()
     }
 
     override fun dispose() {

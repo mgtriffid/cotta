@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import mu.KotlinLogging
@@ -11,6 +12,7 @@ private val logger = KotlinLogging.logger {}
 class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe> {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
+    val metaEntityIds = TreeMap<Long, EntityId>() // not really needed but for the uniformity
 
     fun storeDelta(tick: Long, delta: DR) {
         deltas[tick] = delta

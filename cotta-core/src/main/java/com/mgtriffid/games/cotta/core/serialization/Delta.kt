@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta.core.serialization
 
-import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
 
@@ -9,13 +8,6 @@ interface DeltaRecipe {
     val changedEntities: List<ChangedEntityRecipe>
     val removedEntitiesIds: Set<EntityId>
 }
-
-data class Delta(
-    val removedEntitiesIds: Set<EntityId>,
-    val addedEntities: List<Entity>,
-    val changedEntities: List<Entity>,
-    val tick: Long
-)
 
 interface StateRecipe {
     val entities : List<EntityRecipe>
@@ -35,14 +27,6 @@ interface ComponentDeltaRecipe
  */
 interface FullComponentData<T> {
     fun get(): T
-}
-
-/**
- * Allows to modify part of Component state. For example when something is moved to the left
- * then this allows to transfer change of xPos but leave yPos intact.
- */
-interface ChangedComponentData<T> {
-    fun apply(to: T)
 }
 
 interface ChangedEntityRecipe {

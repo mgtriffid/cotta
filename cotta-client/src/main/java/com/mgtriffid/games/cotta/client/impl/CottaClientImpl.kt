@@ -34,7 +34,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
     private val stateSnapper = engine.getStateSnapper()
     private val snapsSerialization = engine.getSnapsSerialization()
     private val tickProvider = AtomicLongTickProvider()
-    private val cottaState = CottaState.getInstance(tickProvider)
+    val cottaState = CottaState.getInstance(tickProvider)
     private var metaEntityId: EntityId? = null
 
     override fun initialize() {

@@ -31,37 +31,42 @@ class ComponentsRegistryImpl: ComponentsRegistry {
     private val listeners = ArrayList<RegistrationListener>()
 
     override fun <C : Component<C>> registerComponentClass(kClass: KClass<C>) {
+        logger.debug { "Registering class ${kClass.qualifiedName} as component"}
         val descriptor = createSpec(kClass)
         data[descriptor.key] = descriptor
         listeners.forEach { it.onComponentRegistration(kClass, descriptor) }
     }
 
     private fun <C : Component<C>> createSpec(kClass: KClass<C>): ComponentSpec {
-        val classSimpleName = kClass::class.simpleName
+        logger.debug { "Creating a spec for ${kClass.qualifiedName}" }
+        val classSimpleName = kClass.simpleName
             ?: throw IllegalArgumentException("Simple name absent, cannot register the class")
         val componentKey = StringComponentKey(classSimpleName)
 
         val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<ComponentData>() }
+        logger.debug { "Found ${fields.size} fields for ${kClass.qualifiedName}:" }
         val spec: ComponentSpec = ComponentSpecImpl(
             key = componentKey, fields = fields.map { prop ->
-            val mutability = if (prop is KMutableProperty1) {
-                FieldMutability.MUTABLE
-            } else {
-                FieldMutability.IMMUTABLE
+                val mutability = if (prop is KMutableProperty1) {
+                    FieldMutability.MUTABLE
+                } else {
+                    FieldMutability.IMMUTABLE
+                }
+                val type = when (prop.returnType) {
+                    Int::class.createType() -> FieldType.INT
+                    Float::class.createType() -> FieldType.FLOAT
+                    Boolean::class.createType() -> FieldType.BOOLEAN
+                    Long::class.createType() -> FieldType.LONG
+                    Double::class.createType() -> FieldType.DOUBLE
+                    else -> throw IllegalArgumentException("Unexpected type of field ${kClass.qualifiedName}#${prop.name}")
+                }
+                logger.debug { "    Field ${prop.name} of type $type" }
+                FieldSpecImpl(
+                    type = type,
+                    mutability = mutability
+                )
             }
-            val type = when (prop.returnType) {
-                Int::class.createType() -> FieldType.INT
-                Float::class.createType() -> FieldType.FLOAT
-                Boolean::class.createType() -> FieldType.BOOLEAN
-                Long::class.createType() -> FieldType.LONG
-                Double::class.createType() -> FieldType.DOUBLE
-                else -> throw IllegalArgumentException("Unexpected type of field ${kClass.qualifiedName}#${prop.name}")
-            }
-            FieldSpecImpl(
-                type = type,
-                mutability = mutability
-            )
-        })
+        )
 
         return spec
     }

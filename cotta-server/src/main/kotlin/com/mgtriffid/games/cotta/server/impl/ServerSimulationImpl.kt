@@ -36,6 +36,7 @@ class ServerSimulationImpl(
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
     private val metaEntities = HashMap<PlayerId, EntityId>()
+    // TODO stuff this with inputs from clients
     private var inputForUpcomingTick: IncomingInput = object: IncomingInput {
         override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
             return emptyMap()

@@ -6,12 +6,16 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientInput
+import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
+import com.mgtriffid.games.panna.graphics.textures.PannaTextures
+import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
+import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
 
@@ -22,8 +26,10 @@ class GameScreen(
 ) : ScreenAdapter() {
     private lateinit var cottaClient: CottaClient
 
-    var batch: SpriteBatch? = null
+    lateinit var batch: SpriteBatch
     lateinit var img: Texture
+
+    lateinit var textures: PannaTextures
 
     private var nextTickAt: Long = -1
 
@@ -31,6 +37,8 @@ class GameScreen(
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
         val engine  = CottaEngineImpl()
+        textures = PannaTextures()
+        textures.init()
 
         cottaClient = CottaClient.getInstance(
             game = PannaGame(),
@@ -56,14 +64,39 @@ class GameScreen(
     }
 
     override fun dispose() {
-        batch!!.dispose()
+        batch.dispose()
         img.dispose()
     }
 
     private fun actuallyDraw() {
-        ScreenUtils.clear(1f, 0f, 0f, 1f)
-        batch!!.begin()
-        batch!!.draw(img, 0f, 0f)
-        batch!!.end()
+        beginDraw()
+        drawEntities()
+        endDraw()
     }
+
+    private fun drawEntities() {
+        getDrawableEntities().forEach {
+            logger.debug { "Drawing entity $it" }
+            val drawable = it.getComponent(DrawableComponent::class)
+            val position = it.getComponent(PositionComponent::class)
+            val texture = textures[drawable.textureId]
+            batch.draw(texture, position.xPos.toFloat(), position.yPos.toFloat())
+        }
+    }
+
+    private fun getDrawableEntities() = (cottaClient as CottaClientImpl<*, *>).cottaState.entities().all().filter {
+        it.hasComponent(DrawableComponent::class) && it.hasComponent(PositionComponent::class)
+    }
+
+    // <editor-fold desc="Draw lifecycle">
+    private fun endDraw() {
+        batch.end()
+    }
+
+    private fun beginDraw() {
+        ScreenUtils.clear(1f, 0f, 0f, 1f)
+        batch.begin()
+    }
+    // </editor-fold>
+
 }

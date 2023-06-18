@@ -14,6 +14,7 @@ import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsChangedEnti
 import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsEntityRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsStateRecipe
+import mu.KotlinLogging
 import kotlin.IllegalStateException
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
@@ -26,6 +27,8 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSuperclassOf
 
+private val logger = KotlinLogging.logger {}
+
 class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val snappers = HashMap<ComponentKey, ComponentSnapper<*>>()
     private val deltaSnappers = HashMap<ComponentKey, ComponentDeltaSnapper<*>>()
@@ -35,7 +38,8 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val factoryMethodsByClass = HashMap<ComponentKey, KCallable<*>>()
 
     fun <T : Component<T>> registerComponent(kClass: KClass<T>, spec: ComponentSpec) {
-        keyByClass[kClass] = spec.key as StringComponentKey // hack, the fact that maps8 and componentregistry are connected leaks in here but okay
+        logger.debug { "Registering component ${kClass.qualifiedName}, spec has key of ${spec.key}" }
+        keyByClass[kClass] = spec.key as StringComponentKey // hack, the fact that maps and componentregistry are connected leaks in here but okay
         registerSnapper(kClass, spec)
         registerDeltaSnapper(kClass, spec)
         classByKey[spec.key as StringComponentKey] = kClass as KClass<Component<*>>
@@ -100,7 +104,12 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
 
         fun packComponent(obj: C): MapComponentRecipe {
             return MapComponentRecipe(componentKey = key, data = fieldsByName.mapValues { (_, field) ->
-                field.get(obj) ?: throw IllegalStateException("Nullable fields are not allowed")
+                try {
+                    field.get(obj) ?: throw IllegalStateException("Nullable fields are not allowed")
+                } catch (e: Exception) {
+                    logger.debug { "Field: ${field.name}, object: $obj" }
+                    throw e
+                }
             })
         }
 

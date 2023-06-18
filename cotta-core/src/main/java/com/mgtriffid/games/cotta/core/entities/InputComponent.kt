@@ -8,4 +8,5 @@ package com.mgtriffid.games.cotta.core.entities
  * By default is blank _whatever it means_
  * Upon advancing state is either blank or previous version, up to dev
  */
-interface InputComponent<T: InputComponent<T>>: Component<T>
+// TODO doesn't have to be parameterized
+interface InputComponent<T: InputComponent<T>>

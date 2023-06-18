@@ -1,12 +1,10 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.effects.EffectBus
-import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
@@ -91,14 +89,14 @@ class ServerSimulationImpl(
     }
 
     private fun putInputIntoEntities() {
-        inputForUpcomingTick.inputsForEntities().forEach { (entityId, components) ->
-            components.forEach { component: InputComponent<*> ->
-                if (state.entities().get(entityId).hasComponent(component::class)) {
-                    state.entities().get(entityId).removeComponent(component::class)
-                }
-                state.entities().get(entityId).addComponent(component as Component<*>)
+        state.entities().all().filter {
+            it.hasInputComponents()
+        }.forEach { e ->
+            e.inputComponents().forEach { c: KClass<*> ->
+                e.setInputComponent(c, inputForUpcomingTick.inputForEntityAndComponent(e.id, c))
             }
         }
+
     }
 
     override fun setEntityOwner(entityId: EntityId, playerId: PlayerId) {
@@ -118,21 +116,10 @@ class ServerSimulationImpl(
     override fun getDataToBeSentToClients(): DataForClients {
         return DataForClientsImpl(
             effectsHistory = effectsHistory,
-            inputs = gatherInputs(),
+            inputs = inputForUpcomingTick.inputsForEntities(),
             state = state,
             metaEntities = metaEntities
         )
-    }
-
-    // O(scary)
-    // TODO track the registry of all entities having InputComponents
-    private fun gatherInputs(): Map<EntityId, Set<InputComponent<*>>> {
-        return state.entities().all().map { entity ->
-            val impl = entity as? EntityImpl
-            if (impl == null) { null} else {
-                entity.id to entity.components.filterIsInstance<InputComponent<*>>().map { it.copy() }.toSet()
-            }
-        }.filterNotNull().toMap()
     }
 
     private fun processEnterGameIntents() {

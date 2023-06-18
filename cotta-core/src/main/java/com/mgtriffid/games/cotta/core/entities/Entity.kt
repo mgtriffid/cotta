@@ -8,6 +8,11 @@ interface Entity {
     fun <T: Component<T>> hasComponent(clazz: KClass<T>) : Boolean
     fun <T: Component<T>> getComponent(clazz: KClass<T>): T
     fun addComponent(component: Component<*>)
+    fun <T: InputComponent<T>> addInputComponent(clazz: KClass<T>)
+    fun hasInputComponents(): Boolean
+    fun inputComponents(): Collection<KClass<*>>
+    fun setInputComponent(clazz: KClass<*>, component: InputComponent<*>)
+    fun <T: InputComponent<T>> getInputComponent(clazz: KClass<T>): T
     fun <T: Component<T>> removeComponent(clazz: KClass<T>)
     fun components(): Collection<Component<*>>
 

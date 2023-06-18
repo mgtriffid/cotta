@@ -77,6 +77,7 @@ class ServerSimulationTest {
         damageable.addComponent(VelocityTestComponent.create(2))
 
         val damageDealer = state.entities().createEntity()
+        damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val damageDealerId = damageDealer.id
         val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
@@ -88,9 +89,11 @@ class ServerSimulationTest {
         serverSimulation.tick()
         serverSimulation.tick()
 
-        val input1 = PlayerInputTestComponent.create()
-        input1.aim = 4
-        input1.shoot = true
+        val input1 = PlayerInputTestComponent.create(
+            aim = 4,
+            shoot = true
+        )
+
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
@@ -101,9 +104,10 @@ class ServerSimulationTest {
 
         serverSimulation.tick()
 
-        val input2 = PlayerInputTestComponent.create()
-        input2.aim = 4
-        input2.shoot = true
+        val input2 = PlayerInputTestComponent.create(
+            aim = 4,
+            shoot = true
+        )
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
@@ -132,7 +136,8 @@ class ServerSimulationTest {
 
         val damageDealer = state.entities().createEntity()
         val damageDealerId = damageDealer.id
-        val input = PlayerInputTestComponent.create()
+        damageDealer.addInputComponent(PlayerInputTestComponent::class)
+        val input = PlayerInputTestComponent.create(aim = 4, shoot = true)
         val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
         serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
@@ -145,8 +150,6 @@ class ServerSimulationTest {
 
         serverSimulation.setEntityOwner(damageDealerId, playerId)
         serverSimulation.setPlayerSawTick(playerId, 2L)
-        input.aim = 4
-        input.shoot = true
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
@@ -214,15 +217,17 @@ class ServerSimulationTest {
         val playerId = PlayerId(0)
         val state = getCottaState()
         val damageDealer = state.entities().createEntity()
+        damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val damageDealerId = damageDealer.id
         val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
         serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
         serverSimulation.setEntityOwner(damageDealerId, playerId)
         serverSimulation.setPlayerSawTick(playerId, 2L)
-        val input1 = PlayerInputTestComponent.create()
-        input1.aim = 4
-        input1.shoot = true
+        val input1 = PlayerInputTestComponent.create(
+            aim = 4,
+            shoot = true
+        )
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
@@ -240,9 +245,10 @@ class ServerSimulationTest {
             true,
             (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
-        val input2 = PlayerInputTestComponent.create()
-        input2.aim = 4
-        input2.shoot = false
+        val input2 = PlayerInputTestComponent.create(
+            aim = 4,
+            shoot = false
+        )
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(

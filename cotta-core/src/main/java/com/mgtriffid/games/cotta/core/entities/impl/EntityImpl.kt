@@ -7,8 +7,12 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import kotlin.reflect.KClass
 
-class EntityImpl(override val id: EntityId) : Entity {
+class EntityImpl(
+    override val id: EntityId,
+    override val ownedBy: Entity.OwnedBy,
+) : Entity {
     val components = ArrayList<Component<*>>()
+
     override fun <T : Component<T>> hasComponent(clazz: KClass<T>): Boolean {
         return components.any { clazz.isInstance(it) }
     }
@@ -27,7 +31,7 @@ class EntityImpl(override val id: EntityId) : Entity {
     }
 
     fun deepCopy(): Entity {
-        val ret = EntityImpl(id)
+        val ret = EntityImpl(id, ownedBy)
         ret.components.addAll(components.map {
             when (it) {
                 is MutableComponent<*> -> it.copy()

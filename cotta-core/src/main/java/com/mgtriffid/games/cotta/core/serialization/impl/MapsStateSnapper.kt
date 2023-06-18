@@ -162,7 +162,11 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     }
 
     private fun packEntity(e: Entity) =
-        MapsEntityRecipe(entityId = e.id, components = e.components().map { packComponent(it) })
+        MapsEntityRecipe(
+            entityId = e.id,
+            ownedBy = e.ownedBy,
+            components = e.components().map { packComponent(it) }
+        )
 
     // TODO shit wtf is this mess with unsafe casts
     private fun <C : Component<C>> packComponent(obj: Any): MapComponentRecipe {
@@ -179,7 +183,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     }
 
     private fun unpackEntityRecipe(entities: Entities, recipe: MapsEntityRecipe) {
-        val entity = entities.createEntity(recipe.entityId)
+        val entity = entities.createEntity(recipe.entityId, recipe.ownedBy)
         recipe.components.forEach { componentRecipe -> entity.addComponent(unpackComponentRecipe(componentRecipe)) }
     }
 

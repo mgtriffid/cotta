@@ -11,12 +11,12 @@ class EntitiesImpl : Entities {
     private var idGenerator = AtomicInteger()
     private val entities = HashMap<EntityId, Entity>()
 
-    override fun createEntity(): Entity {
-        return EntityImpl(AuthoritativeEntityId(idGenerator.incrementAndGet())).also { entities[it.id] = it }
+    override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
+        return EntityImpl(AuthoritativeEntityId(idGenerator.incrementAndGet()), ownedBy).also { entities[it.id] = it }
     }
 
-    override fun createEntity(id: EntityId): Entity {
-        return EntityImpl(id).also { entities[id] = it }
+    override fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
+        return EntityImpl(id, ownedBy).also { entities[id] = it }
     }
 
     @Throws(EntityNotExistsException::class)

@@ -114,8 +114,8 @@ class InvokersFactoryImpl(
     }
 
     private class LatestEntities(private val state: CottaState) : Entities {
-        override fun createEntity(): Entity {
-            return state.entities().createEntity()
+        override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
+            return state.entities().createEntity(ownedBy)
         }
 
         override fun get(id: EntityId): Entity {
@@ -130,7 +130,7 @@ class InvokersFactoryImpl(
             throw NotImplementedError("Is not supposed to be called on Server")
         }
 
-        override fun createEntity(id: EntityId): Entity {
+        override fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
             throw NotImplementedError("Is not supposed to be called on Server")
         }
     }
@@ -140,8 +140,8 @@ class InvokersFactoryImpl(
         private val state: CottaState,
         private val tickProvider: TickProvider
     ): Entities {
-        override fun createEntity(): Entity {
-            return state.entities().createEntity()
+        override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
+            return state.entities().createEntity(ownedBy)
         }
 
         override fun get(id: EntityId): Entity {
@@ -152,11 +152,12 @@ class InvokersFactoryImpl(
             return state.entities(atTick = sawTickHolder.tick ?: tickProvider.tick).all()
         }
 
-        override fun createEntity(id: EntityId): Entity {
+        override fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
             throw NotImplementedError("Is not supposed to be called on Server")
         }
 
         override fun remove(id: EntityId) {
+            // TODO should be actually handled by a different subclass
             throw NotImplementedError("Is not supposed to be called on Server")
         }
     }

@@ -6,10 +6,12 @@ import com.esotericsoftware.kryo.io.Output
 import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.entities.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityIdDto
+import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityOwnedByDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapComponentDeltaRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapComponentRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsChangedEntityRecipeDto
@@ -33,6 +35,7 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         kryo.register(MapsDeltaRecipeDto::class.java)
         kryo.register(MapsEntityRecipeDto::class.java)
         kryo.register(MapsStateRecipeDto::class.java)
+        kryo.register(EntityOwnedByDto::class.java)
         kryo.register(ArrayList::class.java, CollectionSerializer<ArrayList<Any?>>())
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
@@ -105,6 +108,7 @@ fun MapsDeltaRecipe.toDto(): MapsDeltaRecipeDto {
 fun MapsEntityRecipe.toDto(): MapsEntityRecipeDto {
     val ret = MapsEntityRecipeDto()
     ret.entityId = entityId.toDto()
+    ret.ownedBy = ownedBy.toDto()
     ret.components = ArrayList(components.map { it.toDto() })
     return ret
 }
@@ -140,6 +144,7 @@ fun MapsDeltaRecipeDto.toRecipe() = MapsDeltaRecipe(
 
 fun MapsEntityRecipeDto.toRecipe() = MapsEntityRecipe(
     entityId = entityId.toEntityId(),
+    ownedBy = ownedBy.toOwnedBy(),
     components = components.map { it.toRecipe() }
 )
 
@@ -156,5 +161,28 @@ fun EntityId.toDto(): EntityIdDto {
 
 fun EntityIdDto.toEntityId(): EntityId {
     return AuthoritativeEntityId(id)
+}
+
+fun Entity.OwnedBy.toDto(): EntityOwnedByDto {
+    val ret = EntityOwnedByDto();
+    when (this) {
+        is Entity.OwnedBy.Player -> {
+            ret.ownedBySystem = false
+            ret.playerId = playerId
+        }
+        is Entity.OwnedBy.System -> {
+            ret.ownedBySystem = true
+            ret.playerId = 0
+        }
+    }
+    return ret
+}
+
+fun EntityOwnedByDto.toOwnedBy(): Entity.OwnedBy {
+    return if (ownedBySystem) {
+        Entity.OwnedBy.System
+    } else {
+        Entity.OwnedBy.Player(playerId)
+    }
 }
 // </editor-fold>

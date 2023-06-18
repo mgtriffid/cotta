@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.core.serialization
 
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
 
@@ -15,6 +16,7 @@ interface StateRecipe {
 
 interface EntityRecipe {
     val entityId: EntityId
+    val ownedBy: Entity.OwnedBy
     val components: List<ComponentRecipe>
 }
 

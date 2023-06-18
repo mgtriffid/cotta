@@ -17,6 +17,7 @@ class PannaGame : CottaGame {
     override val serverSystems = emptyList<KClass<*>>()
 
     override fun initializeServerState(state: CottaState) {
+        // Adding a graverobber, owner should be system
         val entity = state.entities().createEntity()
         entity.addComponent(PositionComponent.create(300, 200, ORIENTATION_LEFT))
         entity.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_FOO_ENTITY))

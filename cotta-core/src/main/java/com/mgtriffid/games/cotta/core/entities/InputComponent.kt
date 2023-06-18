@@ -5,7 +5,7 @@ package com.mgtriffid.games.cotta.core.entities
  * entity.addInput(InputComponent::class)
  * Then should be filled with some data
  * entity.getInput(inputComponent).setValue(inputComponentValue)
- * By default is blank
+ * By default is blank _whatever it means_
  * Upon advancing state is either blank or previous version, up to dev
  */
 interface InputComponent<T: InputComponent<T>>: Component<T>

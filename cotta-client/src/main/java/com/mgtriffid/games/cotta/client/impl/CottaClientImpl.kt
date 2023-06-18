@@ -103,6 +103,8 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
         cottaState.advance()
         val tick = getCurrentTick()
         logger.debug { "Tick = $tick" }
+
+        processInput()
         // input first, only then delta
         // we need to get our local input
         // Will it be like "find all Entities that are of this player, then try to call input provider for it"?
@@ -123,6 +125,10 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
         // takeInput()
         // processPrediction() // here we operate on that predicted state that co-exists with real state
         // sendInput()
+    }
+
+    private fun processInput() {
+
     }
 
     private fun fetchData() {

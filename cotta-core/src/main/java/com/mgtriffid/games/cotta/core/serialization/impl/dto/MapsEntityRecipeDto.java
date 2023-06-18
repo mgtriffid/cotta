@@ -6,5 +6,6 @@ import java.util.ArrayList;
 
 public class MapsEntityRecipeDto {
     public EntityIdDto entityId;
+    public EntityOwnedByDto ownedBy;
     public ArrayList<MapComponentRecipeDto> components;
 }

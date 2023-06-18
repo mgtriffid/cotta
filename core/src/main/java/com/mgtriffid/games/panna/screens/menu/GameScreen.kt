@@ -33,27 +33,33 @@ class GameScreen(
 
     private var nextTickAt: Long = -1
 
+    private lateinit var input: PannaClientGdxInput
+
     override fun show() {
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
         val engine  = CottaEngineImpl()
         textures = PannaTextures()
         textures.init()
+        input = PannaClientGdxInput()
 
         cottaClient = CottaClient.getInstance(
             game = PannaGame(),
             engine = engine,
             network = KryonetCottaNetwork().createClientNetwork(),
-            input = PannaClientGdxInput()
+            input = input
         )
         cottaClient.initialize()
         nextTickAt = now()
     }
 
+    /**
+     * This is called rapidly by LibGDX game loop. Think of this as of the main loop body.
+     */
     override fun render(delta: Float) {
         logger.debug { "${GameScreen::class.simpleName}#render called" }
 
-//        accumulateInput()
+        input.accumulate()
 
         if (nextTickAt <= now()) {
             cottaClient.tick()
@@ -77,6 +83,7 @@ class GameScreen(
     private fun drawEntities() {
         getDrawableEntities().forEach {
             logger.debug { "Drawing entity $it" }
+            logger.debug { "Entity is owned by ${it.ownedBy}" }
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
             val texture = textures[drawable.textureId]

@@ -14,11 +14,11 @@ interface PlayerInputTestComponent : InputComponent<PlayerInputTestComponent> {
             shoot = shoot
         )
     }
-    var aim: Int
-    var shoot: Boolean
+    val aim: Int
+    val shoot: Boolean
 }
 
 private data class PlayerInputTestComponentImpl(
-    override var aim: Int,
-    override var shoot: Boolean
+    override val aim: Int,
+    override val shoot: Boolean
 ): PlayerInputTestComponent

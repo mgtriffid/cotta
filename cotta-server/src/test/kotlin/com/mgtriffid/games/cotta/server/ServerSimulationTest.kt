@@ -160,12 +160,14 @@ class ServerSimulationTest {
 
 
         serverSimulation.tick()
-        input.aim = 4
-        input.shoot = false
+        val input2 = PlayerInputTestComponent.create(
+            aim = 4,
+            shoot = false
+        )
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
-                    damageDealerId to setOf(input)
+                    damageDealerId to setOf(input2)
                 )
             }
         })

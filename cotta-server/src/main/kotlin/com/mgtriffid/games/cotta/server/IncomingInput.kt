@@ -10,6 +10,7 @@ import kotlin.reflect.full.companionObjectInstance
 
 interface IncomingInput {
     companion object {
+        // [brainless] TODO remove static thing make it a field of a non-static object
         val factoryFunctions = HashMap<KClass<*>, () -> InputComponent<*>>()
     }
 

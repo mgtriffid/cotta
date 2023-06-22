@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.registry
 
 import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.Component
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import mu.KotlinLogging
 import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
@@ -22,22 +23,31 @@ interface ComponentsRegistry {
     }
 
     fun <C: Component<C>> registerComponentClass(kClass: KClass<C>)
+    fun <C: InputComponent<C>> registerInputComponentClass(kClass: KClass<C>)
 }
 
 class ComponentsRegistryImpl: ComponentsRegistry {
 
     private val data: MutableMap<ComponentKey, ComponentSpec> = HashMap()
 
-    private val listeners = ArrayList<RegistrationListener>()
+    private val componentRegistrationListeners = ArrayList<ComponentRegistrationListener>()
+    private val inputComponentsRegistrationListeners = ArrayList<InputComponentRegistrationListener>()
 
     override fun <C : Component<C>> registerComponentClass(kClass: KClass<C>) {
         logger.debug { "Registering class ${kClass.qualifiedName} as component"}
         val descriptor = createSpec(kClass)
         data[descriptor.key] = descriptor
-        listeners.forEach { it.onComponentRegistration(kClass, descriptor) }
+        componentRegistrationListeners.forEach { it.onComponentRegistration(kClass, descriptor) }
     }
 
-    private fun <C : Component<C>> createSpec(kClass: KClass<C>): ComponentSpec {
+    override fun <C : InputComponent<C>> registerInputComponentClass(kClass: KClass<C>) {
+        logger.debug { "Registering class ${kClass.qualifiedName} as component"}
+        val descriptor = createSpec(kClass)
+        data[descriptor.key] = descriptor
+        inputComponentsRegistrationListeners.forEach { it.onInputComponentRegistration(kClass, descriptor) }
+    }
+
+    private fun createSpec(kClass: KClass<*>): ComponentSpec {
         logger.debug { "Creating a spec for ${kClass.qualifiedName}" }
         val classSimpleName = kClass.simpleName
             ?: throw IllegalArgumentException("Simple name absent, cannot register the class")
@@ -53,6 +63,7 @@ class ComponentsRegistryImpl: ComponentsRegistry {
                     FieldMutability.IMMUTABLE
                 }
                 val type = when (prop.returnType) {
+                    Byte::class.createType() -> FieldType.BYTE
                     Int::class.createType() -> FieldType.INT
                     Float::class.createType() -> FieldType.FLOAT
                     Boolean::class.createType() -> FieldType.BOOLEAN
@@ -71,8 +82,12 @@ class ComponentsRegistryImpl: ComponentsRegistry {
         return spec
     }
 
-    fun addRegistrationListener(listener: RegistrationListener) {
-        listeners.add(listener)
+    fun addRegistrationListener(listener: ComponentRegistrationListener) {
+        componentRegistrationListeners.add(listener)
+    }
+
+    fun addInputComponentRegistrationListener(listener: InputComponentRegistrationListener) {
+        inputComponentsRegistrationListeners.add(listener)
     }
 }
 

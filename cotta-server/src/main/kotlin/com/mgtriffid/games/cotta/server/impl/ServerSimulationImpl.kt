@@ -92,11 +92,10 @@ class ServerSimulationImpl(
         state.entities().all().filter {
             it.hasInputComponents()
         }.forEach { e ->
-            e.inputComponents().forEach { c: KClass<*> ->
+            e.inputComponents().forEach { c ->
                 e.setInputComponent(c, inputForUpcomingTick.inputForEntityAndComponent(e.id, c))
             }
         }
-
     }
 
     override fun setEntityOwner(entityId: EntityId, playerId: PlayerId) {

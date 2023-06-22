@@ -6,27 +6,19 @@ import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import kotlin.reflect.KClass
 
 class PannaClientGdxInput : CottaClientInput {
 
-    val storage = Storage()
+    private val storage = Storage()
     /**
      * Called for each Entity that has ownedBy == current player AND has some InputComponent.
      */
-    override fun input(entity: Entity, metaEntityId: EntityId): List<InputComponent<*>> {
-        when {
-/*
-            entity.id == metaEntityId -> {
-                return listOf(PannaMetaEntityInputComponent(LET_DUDE_ENTER_THE_GAME))
-            }
-*/
-/*
-            entity.hasComponent(BattlingDudeComponent::class) -> {
-                return listOf(getInputFromControl())
-            }
-*/
+    override fun <T : InputComponent<T>> input(entity: Entity, clazz: KClass<T>): T {
+        when(clazz) {
+
         }
-        return emptyList()
+        return TODO()
     }
 
     fun accumulate() {

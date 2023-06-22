@@ -15,7 +15,7 @@ import com.mgtriffid.games.cotta.server.workload.systems.EntityShotTestEffectCon
 import com.mgtriffid.games.cotta.server.workload.systems.HealthRegenerationTestEffectsConsumer
 import com.mgtriffid.games.cotta.server.workload.systems.LagCompensatedShotFiredTestEffectConsumer
 import com.mgtriffid.games.cotta.server.workload.systems.MovementTestSystem
-import com.mgtriffid.games.cotta.server.workload.systems.PlayerInputProcessingSystem
+import com.mgtriffid.games.cotta.server.workload.systems.PlayerInputProcessingTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.RegenerationTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.ShotFiredTestEffectConsumer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -81,7 +81,7 @@ class ServerSimulationTest {
         val damageDealerId = damageDealer.id
         val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
-        serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
+        serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         serverSimulation.registerSystem(ShotFiredTestEffectConsumer::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
         serverSimulation.registerSystem(EntityShotTestEffectConsumer::class)
@@ -140,7 +140,7 @@ class ServerSimulationTest {
         val input = PlayerInputTestComponent.create(aim = 4, shoot = true)
         val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
-        serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
+        serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         serverSimulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
         serverSimulation.registerSystem(EntityShotTestEffectConsumer::class)
@@ -223,7 +223,7 @@ class ServerSimulationTest {
         val damageDealerId = damageDealer.id
         val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
-        serverSimulation.registerSystem(PlayerInputProcessingSystem::class)
+        serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         serverSimulation.setEntityOwner(damageDealerId, playerId)
         serverSimulation.setPlayerSawTick(playerId, 2L)
         val input1 = PlayerInputTestComponent.create(

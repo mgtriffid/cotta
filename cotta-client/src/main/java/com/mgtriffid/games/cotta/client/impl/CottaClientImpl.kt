@@ -5,11 +5,14 @@ import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import com.mgtriffid.games.cotta.utils.now
 import mu.KotlinLogging
@@ -19,20 +22,22 @@ const val STATE_WAITING_THRESHOLD = 5000L
 
 private val logger = KotlinLogging.logger {}
 
-class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
+class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     val game: CottaGame,
-    val engine: CottaEngine<SR, DR>, // weird type parameterization
+    val engine: CottaEngine<SR, DR, IR>, // weird type parameterization
     val network: CottaClientNetwork,
     val input: CottaClientInput,
     val lagCompLimit: Int,
     val bufferLength: Int
 ) : CottaClient {
     var connected = false
-    private val incomingDataBuffer = IncomingDataBuffer<SR, DR>()
+    private val incomingDataBuffer = IncomingDataBuffer<SR, DR, IR>()
     private var state: ClientState = ClientState.Initial
     private val componentsRegistry = engine.getComponentsRegistry()
     private val stateSnapper = engine.getStateSnapper()
     private val snapsSerialization = engine.getSnapsSerialization()
+    private val inputSnapper = engine.getInputSnapper()
+    private val inputSerialization = engine.getInputSerialization()
     private val tickProvider = AtomicLongTickProvider()
     val cottaState = CottaState.getInstance(tickProvider)
     private var metaEntityId: EntityId? = null
@@ -94,7 +99,6 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
     }
 
     private fun getCurrentTick(): Long {
-//        TODO("Not yet implemented")
         return tickProvider.tick
     }
 
@@ -128,7 +132,21 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
     }
 
     private fun processInput() {
-
+        val player = ((cottaState.entities(atTick = getCurrentTick()).all().find {
+            it.id == metaEntityId
+        } ?: return).ownedBy as Entity.OwnedBy.Player)
+        val inputs = cottaState.entities(atTick = getCurrentTick()).all().filter {
+            it.ownedBy == player
+        }.filter {
+            it.hasInputComponents()
+        }.associate { e ->
+            e.id to e.inputComponents().map { clazz -> input.input(e, clazz) }
+        }
+        val inputRecipe = inputSnapper.snapInput(inputs)
+        val inputDto = ClientToServerInputDto()
+        inputDto.tick = getCurrentTick()
+        inputDto.payload = inputSerialization.serializeInputRecipe(inputRecipe)
+        network.sendInput(inputDto)
     }
 
     private fun fetchData() {
@@ -138,6 +156,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe>(
                 KindOfData.DELTA -> incomingDataBuffer.storeDelta(it.tick, snapsSerialization.deserializeDeltaRecipe(it.payload))
                 KindOfData.STATE -> incomingDataBuffer.storeState(it.tick, snapsSerialization.deserializeStateRecipe(it.payload))
                 KindOfData.CLIENT_META_ENTITY_ID -> metaEntityId = snapsSerialization.deserializeEntityId(it.payload)
+                KindOfData.INPUT -> incomingDataBuffer.storeInput(it.tick, inputSerialization.deserializeInputRecipe(it.payload))
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
             }
         }

@@ -12,6 +12,6 @@ class EntityProcessingSystemInvoker(
         state.entities().all().forEach(::process)    }
 
     private fun process(entity: Entity) {
-        system.update(entity)
+        system.process(entity)
     }
 }

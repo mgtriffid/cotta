@@ -11,6 +11,7 @@ interface FieldSpec {
 }
 
 enum class FieldType {
+    BYTE,
     INT,
     FLOAT,
     BOOLEAN,

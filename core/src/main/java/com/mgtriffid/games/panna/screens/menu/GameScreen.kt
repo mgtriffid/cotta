@@ -82,7 +82,7 @@ class GameScreen(
 
     private fun drawEntities() {
         getDrawableEntities().forEach {
-            logger.debug { "Drawing entity $it" }
+            logger.debug { "Drawing entity ${it.id}" }
             logger.debug { "Entity is owned by ${it.ownedBy}" }
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
@@ -91,7 +91,7 @@ class GameScreen(
         }
     }
 
-    private fun getDrawableEntities() = (cottaClient as CottaClientImpl<*, *>).cottaState.entities().all().filter {
+    private fun getDrawableEntities() = (cottaClient as CottaClientImpl<*, *, *>).cottaState.entities().all().filter {
         it.hasComponent(DrawableComponent::class) && it.hasComponent(PositionComponent::class)
     }
 

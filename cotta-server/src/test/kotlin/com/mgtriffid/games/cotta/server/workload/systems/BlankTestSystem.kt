@@ -8,7 +8,7 @@ class BlankTestSystem: EntityProcessingSystem {
         var counter: Int = 0
     }
 
-    override fun update(e: Entity) {
+    override fun process(e: Entity) {
         counter++
     }
 }

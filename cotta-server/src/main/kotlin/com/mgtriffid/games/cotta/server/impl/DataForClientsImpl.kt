@@ -10,7 +10,7 @@ import com.mgtriffid.games.cotta.server.PlayerId
 
 data class DataForClientsImpl(
     val effectsHistory: EffectsHistory,
-    val inputs: Map<EntityId, Set<InputComponent<*>>>,
+    val inputs: Map<EntityId, Collection<InputComponent<*>>>,
     val state: CottaState,
     val metaEntities: Map<PlayerId, EntityId>
 ) : DataForClients {
@@ -18,7 +18,7 @@ data class DataForClientsImpl(
         return effectsHistory.forTick(tick) // TODO care about tick
     }
 
-    override fun inputs(tick: Long): Map<EntityId, Set<InputComponent<*>>> {
+    override fun inputs(tick: Long): Map<EntityId, Collection<InputComponent<*>>> {
         return inputs // TODO care about tick
     }
 

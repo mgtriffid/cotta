@@ -190,7 +190,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private fun unpackComponentRecipe(recipe: MapComponentRecipe): Component<*> {
         return snappers[recipe.componentKey]?.unpackComponent(recipe)
             // mb not the best idea, malformed data should not break client
-            ?: throw IllegalArgumentException("State Snapper not found")
+            ?: throw IllegalArgumentException("Component Snapper not found for component ${recipe.componentKey}")
     }
 
     private fun unpackComponentDeltaRecipe(component: Any, recipe: MapComponentDeltaRecipe) {

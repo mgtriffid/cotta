@@ -17,7 +17,7 @@ class LagCompensatingInputProcessingSystemInvoker(
 
     private fun process(entity: Entity) {
         sawTickHolder.tick = entityOwnerSawTickProvider.getSawTickByEntityId(entityId = entity.id)
-        system.update(entity)
+        system.process(entity)
         sawTickHolder.tick = null
     }
 

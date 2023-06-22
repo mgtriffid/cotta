@@ -14,7 +14,7 @@ interface IncomingInput {
         val factoryFunctions = HashMap<KClass<*>, () -> InputComponent<*>>()
     }
 
-    fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>>
+    fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>>
 
     fun inputForEntityAndComponent(entityId: EntityId, component: KClass<*>): InputComponent<*> {
         return inputsForEntities()[entityId]?.find { component.isInstance(it) }

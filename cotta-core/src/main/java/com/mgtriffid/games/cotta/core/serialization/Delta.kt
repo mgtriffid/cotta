@@ -23,17 +23,20 @@ interface EntityRecipe {
 interface ComponentRecipe
 interface ComponentDeltaRecipe
 
-/**
- * Allows to reconstruct the whole state of particular Component. Used to transfer snapshot
- * of Entity as a whole when it is discovered or spawned.
- */
-interface FullComponentData<T> {
-    fun get(): T
-}
-
 interface ChangedEntityRecipe {
     val entityId: EntityId
     val changedComponents: List<ComponentDeltaRecipe>
     val addedComponents: List<ComponentRecipe>
     val removedComponents: List<ComponentKey>
 }
+
+interface InputRecipe {
+    val entityInputs: List<EntityInputRecipe>
+}
+
+interface EntityInputRecipe {
+    val entityId: EntityId
+    val inputComponents: List<InputComponentRecipe>
+}
+
+interface InputComponentRecipe

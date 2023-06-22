@@ -12,7 +12,7 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
  */
 interface DataForClients {
     fun effects(tick: Long): Collection<CottaEffect>
-    fun inputs(tick: Long): Map<EntityId, Set<InputComponent<*>>> // immutable
+    fun inputs(tick: Long): Map<EntityId, Collection<InputComponent<*>>>
     fun entities(tick: Long): Entities
     fun metaEntities(): Map<PlayerId, EntityId>
 }

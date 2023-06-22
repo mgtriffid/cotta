@@ -12,7 +12,7 @@ class EntityImpl(
     override val ownedBy: Entity.OwnedBy,
 ) : Entity {
     private val components = ArrayList<Component<*>>()
-    private val inputComponents = HashMap<KClass<*>, InputComponent<*>?>()
+    private val inputComponents = HashMap<KClass<out InputComponent<*>>, InputComponent<*>?>()
 
     override fun <T : Component<T>> hasComponent(clazz: KClass<T>): Boolean {
         return components.any { clazz.isInstance(it) }
@@ -35,11 +35,11 @@ class EntityImpl(
         return inputComponents.isNotEmpty()
     }
 
-    override fun inputComponents(): Collection<KClass<*>> {
+    override fun inputComponents(): Collection<KClass<out InputComponent<*>>> {
         return inputComponents.keys
     }
 
-    override fun setInputComponent(clazz: KClass<*>, component: InputComponent<*>) {
+    override fun setInputComponent(clazz: KClass<out InputComponent<*>>, component: InputComponent<*>) {
         inputComponents[clazz] = component
     }
 

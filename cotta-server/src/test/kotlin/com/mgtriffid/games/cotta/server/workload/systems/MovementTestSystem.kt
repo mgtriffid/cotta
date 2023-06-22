@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestCo
 import com.mgtriffid.games.cotta.server.workload.components.VelocityTestComponent
 
 class MovementTestSystem : EntityProcessingSystem {
-    override fun update(e: Entity) {
+    override fun process(e: Entity) {
         if (
             e.hasComponent(LinearPositionTestComponent::class) &&
             e.hasComponent(VelocityTestComponent::class)

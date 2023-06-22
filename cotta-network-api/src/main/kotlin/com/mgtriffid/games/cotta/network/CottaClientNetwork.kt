@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.network
 
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 
 interface CottaClientNetwork {
@@ -8,4 +9,6 @@ interface CottaClientNetwork {
     fun sendEnterGameIntent()
 
     fun drainIncomingData(): Collection<ServerToClientDto>
+
+    fun sendInput(input: ClientToServerInputDto)
 }

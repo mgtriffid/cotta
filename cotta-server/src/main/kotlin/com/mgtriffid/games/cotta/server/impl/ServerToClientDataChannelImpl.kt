@@ -2,10 +2,14 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.InputRecipe
+import com.mgtriffid.games.cotta.core.serialization.InputSerialization
+import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
+import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.PlayerId
@@ -15,12 +19,14 @@ import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
 
-class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe> (
+class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> (
     private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts,
     private val network: CottaServerNetwork,
     private val stateSnapper: StateSnapper<SR, DR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR>
+    private val snapsSerialization: SnapsSerialization<SR, DR>,
+    private val inputSnapper: InputSnapper<IR>,
+    private val inputSerialization: InputSerialization<IR>,
 ) : ServerToClientDataChannel {
 
     // Here we don't care much about data that comes _from_ client and about their sawTick values.
@@ -35,31 +41,51 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe> (
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val whatToSend = ghost.whatToSend(currentTick)
             whatToSend.necessaryData.forEach { (tick, kind) ->
-                network.send(ghost.connectionId, packData(tick, kind, data, playerId))
+                network.sendAll(ghost.connectionId, packData(tick, kind, data, playerId))
             }
         }
     }
 
-    private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients, playerId: PlayerId): ServerToClientDto {
-        val dto = ServerToClientDto()
-        dto.kindOfData = when (kindOfData) {
-            KindOfData.DELTA -> com.mgtriffid.games.cotta.network.protocol.KindOfData.DELTA
-            KindOfData.STATE -> com.mgtriffid.games.cotta.network.protocol.KindOfData.STATE
-            KindOfData.CLIENT_META_ENTITY_ID -> com.mgtriffid.games.cotta.network.protocol.KindOfData.CLIENT_META_ENTITY_ID
-        }
-        dto.payload = when (kindOfData) {
-            KindOfData.STATE -> snapsSerialization.serializeStateRecipe(stateSnapper.snapState(data.entities(tick)))
-            KindOfData.DELTA -> snapsSerialization.serializeDeltaRecipe(
-                stateSnapper.snapDelta(
-                    prev = data.entities(tick - 1),
-                    curr = data.entities(tick)
+    private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients, playerId: PlayerId): Collection<ServerToClientDto> {
+        when (kindOfData) {
+            KindOfData.DELTA -> {
+                val dto = ServerToClientDto()
+                dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.DELTA
+                dto.tick = tick
+                dto.payload = snapsSerialization.serializeDeltaRecipe(
+                    stateSnapper.snapDelta(
+                        prev = data.entities(tick - 1),
+                        curr = data.entities(tick)
+                    )
                 )
-            )
-            KindOfData.CLIENT_META_ENTITY_ID -> snapsSerialization.serializeEntityId(
-                data.metaEntities()[playerId] ?: throw IllegalStateException("Meta-entity does not exist for player ${playerId.id}")
-            )
+                val inputDto = ServerToClientDto()
+                inputDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT
+                inputDto.payload = inputSerialization.serializeInputRecipe(
+                    inputSnapper.snapInput(data.inputs(tick))
+                )
+                inputDto.tick = tick
+                return listOf(dto, inputDto)
+            }
+            KindOfData.STATE -> {
+                val dto = ServerToClientDto()
+                dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.STATE
+                dto.payload = snapsSerialization.serializeStateRecipe(stateSnapper.snapState(data.entities(tick)))
+                dto.tick = tick
+                return listOf(dto)
+            }
+            KindOfData.CLIENT_META_ENTITY_ID -> {
+                val dto = ServerToClientDto()
+                dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CLIENT_META_ENTITY_ID
+                dto.payload = snapsSerialization.serializeEntityId(
+                    data.metaEntities()[playerId] ?: throw IllegalStateException("Meta-entity does not exist for player ${playerId.id}")
+                )
+                dto.tick = tick
+                return listOf(dto)
+            }
         }
-        dto.tick = tick
-        return dto
     }
+}
+
+fun CottaServerNetwork.sendAll(connectionId: ConnectionId, dtos: Collection<ServerToClientDto>) {
+    dtos.forEach { send(connectionId, it) }
 }

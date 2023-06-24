@@ -16,6 +16,7 @@ buildscript {
 
 allprojects {
     apply plugin: "eclipse"
+    apply plugin: "kotlin"
 
     version = '1.0'
     ext {
@@ -40,10 +41,13 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
         maven { url "https://jitpack.io" }
     }
+
+    dependencies {
+        api "io.github.microutils:kotlin-logging-jvm:3.0.4"
+    }
 }
 
 project(":desktop") {
-    apply plugin: "kotlin"
 
     dependencies {
         implementation project(":core")
@@ -55,7 +59,6 @@ project(":desktop") {
 
 // TODO maybe rename to "panna-client"?
 project(":core") {
-    apply plugin: "kotlin"
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
@@ -72,7 +75,6 @@ project(":core") {
 }
 
 project(":panna-server") {
-    apply plugin: "kotlin"
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -86,7 +88,6 @@ project(":panna-server") {
 }
 
 project(":panna-shared") {
-    apply plugin: "kotlin"
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -96,7 +97,6 @@ project(":panna-shared") {
 }
 
 project(":panna-graphics") {
-    apply plugin: "kotlin"
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -110,7 +110,6 @@ project(":panna-graphics") {
 }
 
 project(":panna-devutils") {
-    apply plugin: "kotlin"
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -123,7 +122,6 @@ project(":panna-devutils") {
 }
 
 project(":cotta-server") {
-    apply plugin: "kotlin"
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -136,11 +134,9 @@ project(":cotta-server") {
 }
 
 project(":cotta-annotations") {
-    apply plugin: "kotlin"
 }
 
 project(":cotta-annotations-processor") {
-    apply plugin: "kotlin"
 
     dependencies {
         implementation project(":cotta-annotations")
@@ -149,13 +145,11 @@ project(":cotta-annotations-processor") {
 }
 
 project(":cotta-core") {
-    apply plugin: "kotlin"
 //    apply plugin: "com.google.devtools.ksp"
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         api "org.slf4j:slf4j-api:2.0.3"
         api "ch.qos.logback:logback-classic:1.4.4"
-        api "io.github.microutils:kotlin-logging-jvm:3.0.4"
         api project(":cotta-utils")
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation project(":cotta-annotations")
@@ -166,7 +160,6 @@ project(":cotta-core") {
 }
 
 project(":cotta-client") {
-    apply plugin: "kotlin"
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -176,7 +169,6 @@ project(":cotta-client") {
 }
 
 project(":cotta-network-api") {
-    apply plugin: "kotlin"
     dependencies {
         implementation project(":cotta-core")
         implementation project(":cotta-annotations")
@@ -187,27 +179,22 @@ project(":cotta-network-api") {
 }
 
 project(":cotta-network-kryonet") {
-    apply plugin: "kotlin"
 
     dependencies {
         implementation project(":cotta-network-api")
         implementation project(":cotta-core")
         api "com.github.crykn:kryonet:2.22.7"
-        api "io.github.microutils:kotlin-logging-jvm:3.0.4"
         implementation project(":cotta-utils")
     }
 }
 
 project(":cotta-gdx") {
-    apply plugin: "kotlin"
 }
 
 project(":cotta-utils") {
-    apply plugin: "kotlin"
 }
 
 project(":panna-lobby") {
-    apply plugin: "kotlin"
 
     dependencies {
         implementation "com.sparkjava:spark-kotlin:1.0.0-alpha"

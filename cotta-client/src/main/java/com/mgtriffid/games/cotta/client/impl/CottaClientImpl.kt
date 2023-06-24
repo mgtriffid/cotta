@@ -111,6 +111,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
         processInput()
 
+        inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tick]!!)
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
 
     }
@@ -155,7 +156,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     }
 
     private fun deltaAvailableForTick(tick: Long): Boolean {
-        return incomingDataBuffer.deltas.containsKey(tick)
+        return incomingDataBuffer.deltas.containsKey(tick) && incomingDataBuffer.inputs.containsKey(tick)
     }
 
     private fun connect() {

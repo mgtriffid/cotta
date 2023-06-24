@@ -20,6 +20,6 @@ interface Entity {
     sealed class OwnedBy {
         object System : OwnedBy()
         // if ever becomes mutable be aware of that deepCopy method of EntityImpl
-        data class Player(val playerId: Int) : OwnedBy()
+        data class Player(val playerId: PlayerId) : OwnedBy()
     }
 }

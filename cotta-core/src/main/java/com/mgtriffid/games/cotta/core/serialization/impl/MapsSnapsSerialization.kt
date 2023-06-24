@@ -8,6 +8,7 @@ import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.entities.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityIdDto
@@ -168,7 +169,7 @@ fun Entity.OwnedBy.toDto(): EntityOwnedByDto {
     when (this) {
         is Entity.OwnedBy.Player -> {
             ret.ownedBySystem = false
-            ret.playerId = playerId
+            ret.playerId = playerId.id
         }
         is Entity.OwnedBy.System -> {
             ret.ownedBySystem = true
@@ -182,7 +183,7 @@ fun EntityOwnedByDto.toOwnedBy(): Entity.OwnedBy {
     return if (ownedBySystem) {
         Entity.OwnedBy.System
     } else {
-        Entity.OwnedBy.Player(playerId)
+        Entity.OwnedBy.Player(PlayerId(playerId))
     }
 }
 // </editor-fold>

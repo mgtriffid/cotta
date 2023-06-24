@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.server.DataForClients
-import com.mgtriffid.games.cotta.server.PlayerId
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 
 data class DataForClientsImpl(
     val effectsHistory: EffectsHistory,

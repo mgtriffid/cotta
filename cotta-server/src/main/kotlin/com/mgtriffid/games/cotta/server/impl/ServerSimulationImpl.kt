@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -9,7 +10,7 @@ import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.IncomingInput
-import com.mgtriffid.games.cotta.server.PlayerId
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.impl.invokers.HistoricalLagCompensatingEffectBus
 import com.mgtriffid.games.cotta.server.impl.invokers.InvokersFactory
@@ -123,7 +124,7 @@ class ServerSimulationImpl(
 
     private fun processEnterGameIntents() {
         enterGameIntents.forEach {
-            val metaEntity = state.entities().createEntity()
+            val metaEntity = state.entities().createEntity(ownedBy = OwnedBy.Player(it.second))
             val playerId = it.second
             metaEntities[playerId] = metaEntity.id
             entityOwners[metaEntity.id] = playerId

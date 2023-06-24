@@ -57,6 +57,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
                 is ClientState.AwaitingGameState -> {
                     fetchData()
+                    // TODO ensure that if metaEntity did not come we still can operate
                     if (stateAvailable()) {
                         setStateFromAuthoritative()
                         state = ClientState.Running(getCurrentTick())
@@ -109,26 +110,9 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         logger.debug { "Tick = $tick" }
 
         processInput()
-        // input first, only then delta
-        // we need to get our local input
-        // Will it be like "find all Entities that are of this player, then try to call input provider for it"?
-        // Or will it be like "find all Entities that have InputComponent, then call input provider for it"?
-        // BOTH! They should have both InputComponent and ownedBy == this player.
-        // and also somewhere around here should be the effects
-        // and we also need other clients' inputs
-        // and we need to SMEAR this with logs all over the place!
+
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
-        // now on top of what just happened we also predict shit using local inputs
-        // input is a map of EntityId to (List?) <InputComponent>, we push certain input to Server. For example,
-        // MetaEntityId to "LetDudeEnterTheGame" or our battling dude to (Direction, Shoots, Jumps) = (RIGHT, false)
-        // How do we find those IDs? Need to figure out the signature for that function that takes state and input, then
-        // creates that map of entity to input components. So for example for an FPS game we will take those Entities that
-        // are ours, then we'll find one that has component like FightingDudeComponent, and we'll stuff input into it.
-        // Sensible so far. So the signature is: input(entities: List<Entity>): Map<>. Another option is input(entity: Entity) and it
-        // is called multiple times, according to the number of local entities Player controls.
-        // takeInput()
-        // processPrediction() // here we operate on that predicted state that co-exists with real state
-        // sendInput()
+
     }
 
     private fun processInput() {

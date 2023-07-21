@@ -169,6 +169,9 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         game.componentClasses.forEach {
             componentsRegistry.registerComponentClass(it)
         }
+        game.inputComponentClasses.forEach {
+            componentsRegistry.registerInputComponentClass(it)
+        }
     }
 
     sealed class ClientState {

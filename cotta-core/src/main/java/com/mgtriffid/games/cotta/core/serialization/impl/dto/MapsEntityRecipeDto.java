@@ -8,4 +8,5 @@ public class MapsEntityRecipeDto {
     public EntityIdDto entityId;
     public EntityOwnedByDto ownedBy;
     public ArrayList<MapComponentRecipeDto> components;
+    public ArrayList<String> inputComponents;
 }

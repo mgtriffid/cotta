@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
@@ -33,6 +34,8 @@ interface ServerSimulation {
      * Registers a system for execution. Systems are invoked in the order of registration.
      */
     fun <T : CottaSystem> registerSystem(systemClass: KClass<T>)
+
+    fun setMetaEntitiesInputComponents(components: Set<KClass<out InputComponent<*>>>)
 
     fun tick()
     fun setEntityOwner(entityId: EntityId, playerId: PlayerId)

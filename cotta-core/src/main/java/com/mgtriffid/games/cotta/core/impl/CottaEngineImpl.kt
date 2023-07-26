@@ -46,6 +46,14 @@ class CottaEngineImpl : CottaEngine<MapsStateRecipe, MapsDeltaRecipe, MapsInputR
                 inputSnapper.registerInputComponent(kClass, descriptor)
             }
         })
+        componentsRegistry.addInputComponentRegistrationListener(object : InputComponentRegistrationListener {
+            override fun <T : InputComponent<T>> onInputComponentRegistration(
+                kClass: KClass<T>,
+                descriptor: ComponentSpec
+            ) {
+                stateSnapper.registerInputComponent(kClass, descriptor)
+            }
+        })
     }
 
     override fun getComponentsRegistry(): ComponentsRegistry {

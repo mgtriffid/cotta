@@ -12,6 +12,7 @@ import com.mgtriffid.games.panna.shared.game.components.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.PannaTextureIds
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
+import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
@@ -35,15 +36,20 @@ class PannaGame : CottaGame {
         graverobber.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_FOO_ENTITY))
     }
 
-    override val componentClasses = listOf(
+    override val componentClasses = setOf(
         PositionComponent::class,
         DrawableComponent::class,
         WalkingComponent::class,
         GraverobberNpcComponent::class, // TODO be able to mark as server-only
     )
 
-    override val inputComponentClasses = listOf(
+    override val inputComponentClasses = setOf(
         WalkingInputComponent::class,
+        JoinBattleMetaEntityInputComponent::class,
+    )
+
+    override val metaEntitiesInputComponents = setOf(
+        JoinBattleMetaEntityInputComponent::class
     )
 
     override val serverInputProvider = object: ServerInputProvider {

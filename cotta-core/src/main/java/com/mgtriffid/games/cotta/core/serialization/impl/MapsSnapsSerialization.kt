@@ -111,6 +111,7 @@ fun MapsEntityRecipe.toDto(): MapsEntityRecipeDto {
     ret.entityId = entityId.toDto()
     ret.ownedBy = ownedBy.toDto()
     ret.components = ArrayList(components.map { it.toDto() })
+    ret.inputComponents = ArrayList(inputComponents.map { it.name })
     return ret
 }
 
@@ -146,7 +147,8 @@ fun MapsDeltaRecipeDto.toRecipe() = MapsDeltaRecipe(
 fun MapsEntityRecipeDto.toRecipe() = MapsEntityRecipe(
     entityId = entityId.toEntityId(),
     ownedBy = ownedBy.toOwnedBy(),
-    components = components.map { it.toRecipe() }
+    components = components.map { it.toRecipe() },
+    inputComponents = inputComponents.map(::StringComponentKey)
 )
 
 fun MapsStateRecipeDto.toRecipe() = MapsStateRecipe(

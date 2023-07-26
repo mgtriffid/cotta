@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
 import com.mgtriffid.games.cotta.core.registry.ComponentSpec
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
@@ -34,7 +35,9 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val deltaSnappers = HashMap<ComponentKey, ComponentDeltaSnapper<*>>()
 
     private val keyByClass = HashMap<KClass<*>, StringComponentKey>()
+    private val inputComponentsKeyByClass = HashMap<KClass<*>, StringComponentKey>()
     private val classByKey = HashMap<StringComponentKey, KClass<Component<*>>>()
+    private val inputComponentsClassByKey = HashMap<StringComponentKey, KClass<InputComponent<*>>>()
     private val factoryMethodsByClass = HashMap<ComponentKey, KCallable<*>>()
 
     fun <T : Component<T>> registerComponent(kClass: KClass<T>, spec: ComponentSpec) {
@@ -43,6 +46,12 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         registerSnapper(kClass, spec)
         registerDeltaSnapper(kClass, spec)
         classByKey[spec.key as StringComponentKey] = kClass as KClass<Component<*>>
+    }
+
+    fun <T : InputComponent<T>> registerInputComponent(kClass: KClass<T>, spec: ComponentSpec) {
+        logger.debug { "Registering input component ${kClass.qualifiedName}" }
+        inputComponentsKeyByClass[kClass] = spec.key as StringComponentKey // hack, the fact that maps and componentregistry are connected leaks in here but okay
+        inputComponentsClassByKey[spec.key as StringComponentKey] = kClass as KClass<InputComponent<*>>
     }
 
     private fun <C : Component<C>> registerSnapper(kClass: KClass<C>, spec: ComponentSpec) {
@@ -155,6 +164,11 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         return keyByClass[registeredClass] ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
     }
 
+    private fun getInputComponentKey(kClass: KClass<out InputComponent<*>>): StringComponentKey {
+        val registeredClass = inputComponentsKeyByClass.keys.first { it.isSuperclassOf(kClass) }
+        return inputComponentsKeyByClass[registeredClass] ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
+    }
+
     override fun snapState(entities: Entities): MapsStateRecipe {
         return MapsStateRecipe(entities.all().map { e ->
             packEntity(e)
@@ -165,7 +179,8 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         MapsEntityRecipe(
             entityId = e.id,
             ownedBy = e.ownedBy,
-            components = e.components().map { packComponent(it) }
+            components = e.components().map { packComponent(it) },
+            inputComponents = e.inputComponents().map { getInputComponentKey(it) }
         )
 
     // TODO shit wtf is this mess with unsafe casts
@@ -185,6 +200,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private fun unpackEntityRecipe(entities: Entities, recipe: MapsEntityRecipe) {
         val entity = entities.createEntity(recipe.entityId, recipe.ownedBy)
         recipe.components.forEach { componentRecipe -> entity.addComponent(unpackComponentRecipe(componentRecipe)) }
+        recipe.inputComponents.forEach { inputComponent -> entity.addInputComponent(inputComponentsClassByKey[inputComponent] as KClass<out InputComponent<*>>) }
     }
 
     private fun unpackComponentRecipe(recipe: MapComponentRecipe): Component<*> {

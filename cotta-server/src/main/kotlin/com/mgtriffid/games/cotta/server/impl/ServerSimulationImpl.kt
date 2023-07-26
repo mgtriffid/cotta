@@ -45,6 +45,8 @@ class ServerSimulationImpl(
 
     private lateinit var state: CottaState
     private lateinit var invokersFactory: InvokersFactory
+    private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
+
     private val effectsHistory = EffectsHistory(historyLength = historyLength)
 
     override fun effectBus(): EffectBus {
@@ -73,6 +75,10 @@ class ServerSimulationImpl(
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
         logger.debug { "Registering system '${systemClass.simpleName}'" }
         systemInvokers.add(createInvoker(systemClass))
+    }
+
+    override fun setMetaEntitiesInputComponents(components: Set<KClass<out InputComponent<*>>>) {
+        this.metaEntitiesInputComponents = components;
     }
 
     override fun setInputForUpcomingTick(input: IncomingInput) {
@@ -125,6 +131,9 @@ class ServerSimulationImpl(
     private fun processEnterGameIntents() {
         enterGameIntents.forEach {
             val metaEntity = state.entities().createEntity(ownedBy = OwnedBy.Player(it.second))
+            metaEntitiesInputComponents.forEach { componentClass ->
+                metaEntity.addInputComponent(componentClass)
+            }
             val playerId = it.second
             metaEntities[playerId] = metaEntity.id
             entityOwners[metaEntity.id] = playerId

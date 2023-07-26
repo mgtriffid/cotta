@@ -111,27 +111,48 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
         processInput()
 
-        inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tick]!!)
+        val inputRecipe = inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tick]!!)
+        // simulation goes here
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
 
     }
 
     private fun processInput() {
-        val player = ((cottaState.entities(atTick = getCurrentTick()).all().find {
-            it.id == metaEntityId
-        } ?: return).ownedBy as Entity.OwnedBy.Player)
-        val inputs = cottaState.entities(atTick = getCurrentTick()).all().filter {
+        logger.debug { "Processing input" }
+        val player = ((metaEntity() ?: return).ownedBy as Entity.OwnedBy.Player)
+        val entitiesOwnedByPlayer = cottaState.entities(atTick = getCurrentTick()).all().filter {
             it.ownedBy == player
-        }.filter {
+        }
+        logger.debug { "Found ${entitiesOwnedByPlayer.size} entities owned by player $player" }
+        val entitiesWithInputComponents = entitiesOwnedByPlayer.filter {
             it.hasInputComponents()
-        }.associate { e ->
-            e.id to e.inputComponents().map { clazz -> input.input(e, clazz) }
+        }
+        logger.debug { "Found ${entitiesWithInputComponents.size} entities with input components" }
+        val inputs = entitiesWithInputComponents.associate { e ->
+            logger.debug { "Retrieving input for entity '${e.id}'" }
+            e.id to e.inputComponents().map { clazz ->
+                logger.debug { "Retrieving input of class '${clazz.simpleName}' for entity '${e.id}'" }
+                input.input(e, clazz)
+            }
         }
         val inputRecipe = inputSnapper.snapInput(inputs)
         val inputDto = ClientToServerInputDto()
         inputDto.tick = getCurrentTick()
         inputDto.payload = inputSerialization.serializeInputRecipe(inputRecipe)
         network.sendInput(inputDto)
+    }
+
+    private fun metaEntity(): Entity? {
+        logger.debug { "Looking for meta entity, metaEntityId = $metaEntityId" }
+        val entity = cottaState.entities(atTick = getCurrentTick()).all().find {
+            it.id == metaEntityId
+        }
+        if (entity != null) {
+            logger.debug { "Meta entity found" }
+        } else {
+            logger.debug { "Meta entity not found" }
+        }
+        return entity
     }
 
     private fun fetchData() {

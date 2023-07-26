@@ -76,6 +76,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         game.inputComponentClasses.forEach {
             componentsRegistry.registerInputComponentClass(it)
         }
+        serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
     }
 
     private fun initializeState() {

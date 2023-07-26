@@ -6,19 +6,49 @@ import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
+import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.IDLE
+import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.JOIN_BATTLE
+import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_DOWN
+import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
+import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_NONE
+import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
+import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_UP
+import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
+import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
 
 class PannaClientGdxInput : CottaClientInput {
-
+    private var sentJoinBattle = false
     private val storage = Storage()
+
     /**
      * Called for each Entity that has ownedBy == current player AND has some InputComponent.
      */
     override fun <T : InputComponent<T>> input(entity: Entity, clazz: KClass<T>): T {
         when(clazz) {
-
+            JoinBattleMetaEntityInputComponent::class -> {
+                if (!sentJoinBattle) {
+                    sentJoinBattle = true
+                    return JoinBattleMetaEntityInputComponent.create(JOIN_BATTLE) as T
+                } else {
+                    return JoinBattleMetaEntityInputComponent.create(IDLE) as T
+                }
+            }
+            WalkingInputComponent::class -> {
+                accumulate()
+                return WalkingInputComponent.create(
+                    when {
+                        storage.leftPressed -> WALKING_DIRECTION_LEFT
+                        storage.rightPressed -> WALKING_DIRECTION_RIGHT
+                        storage.upPressed -> WALKING_DIRECTION_UP
+                        storage.downPressed -> WALKING_DIRECTION_DOWN
+                        else -> WALKING_DIRECTION_NONE
+                    }
+                ) as T
+            }
         }
-        return TODO()
+        throw IllegalArgumentException() // TODO write a reasonable "unregistered component exception"
     }
 
     fun accumulate() {

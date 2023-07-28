@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 private val logger = KotlinLogging.logger {}
 
 class KryonetCottaServerNetwork : CottaServerNetwork {
-    lateinit var server: Server
+    private lateinit var server: Server
     private val enterGameIntents = ConcurrentLinkedQueue<Pair<ConnectionId, EnterGameIntent>>()
     private val clientToServerInputs = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>()
 

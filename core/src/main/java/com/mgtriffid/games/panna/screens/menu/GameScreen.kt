@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
-import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
@@ -61,12 +60,18 @@ class GameScreen(
 
         input.accumulate()
 
+        var tickHappened = false
         if (nextTickAt <= now()) {
             cottaClient.tick()
             nextTickAt += TICK_LENGTH
+            tickHappened = true
         }
 
-        actuallyDraw()
+        if (tickHappened) {
+            input.clear()
+        }
+
+        draw()
     }
 
     override fun dispose() {
@@ -74,7 +79,7 @@ class GameScreen(
         img.dispose()
     }
 
-    private fun actuallyDraw() {
+    private fun draw() {
         beginDraw()
         drawEntities()
         endDraw()

@@ -92,7 +92,11 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
 
     private fun <C: InputComponent<C>> packComponent(obj: InputComponent<*>): MapInputComponentRecipe {
         obj as C
-        return (snappers[getKey(obj)] as InputComponentSnapper<C>).packComponent(obj)
+        return (snappers[getKey(obj)] as InputComponentSnapper<C>).packComponent(obj).also {
+            if (it.componentKey == StringComponentKey("JoinBattleMetaEntityInputComponent")) {
+                logger.debug { "Packing JoinBattleMetaEntityInputComponent" }
+            }
+        }
     }
 
     override fun unpackInputRecipe(recipe: MapsInputRecipe): Map<EntityId, Collection<InputComponent<*>>> {
@@ -132,7 +136,7 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
             }
             return factoryMethod.callBy(
                 firstParam + otherParams
-            )
+            ).also { logger.debug { "Unpacked $it" } }
         }
     }
 

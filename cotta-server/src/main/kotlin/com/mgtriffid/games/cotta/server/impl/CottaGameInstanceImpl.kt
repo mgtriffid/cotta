@@ -111,13 +111,19 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     }
 
     private fun fetchIncomingInput(network: CottaServerNetwork, serverInputProvider: ServerInputProvider): IncomingInput {
+        val inputs = network.drainInputs().map { (cId, dto) ->
+            val recipe = inputSerialization.deserializeInputRecipe(dto.payload)
+            inputSnapper.unpackInputRecipe(recipe).entries
+        }.flatten().associate { it.key to it.value } + serverInputProvider.input(state.entities())
+        logger.debug { "Incoming input has ${inputs.size} entries" }
+        inputs.forEach { (eId, components) ->
+            logger.debug { "Inputs for entity $eId:" }
+            components.forEach { logger.debug { it } }
+        }
         return object: IncomingInput {
             // TODO protect against malicious client sending input for entity not belonging to them
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
-                return network.drainInputs().map { (cId, dto) ->
-                    val recipe = inputSerialization.deserializeInputRecipe(dto.payload)
-                    inputSnapper.unpackInputRecipe(recipe).entries
-                }.flatten().associate { it.key to it.value } + serverInputProvider.input(state.entities())
+                return inputs
             }
         }
     }

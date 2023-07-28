@@ -32,6 +32,7 @@ class ServerListener(
                 enterGameIntents.add(Pair(ConnectionId(connection.id), deserialize(obj)))
             }
             is ClientToServerInputDto -> {
+                logger.debug { "Received ${ClientToServerInputDto::class.simpleName}" }
                 clientToServerInputs.add(Pair(ConnectionId(connection.id), obj))
             }
         }

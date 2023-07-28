@@ -15,8 +15,11 @@ import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_UP
 import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
+import mu.KotlinLogging
 import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
+
+private val logger = KotlinLogging.logger {}
 
 class PannaClientGdxInput : CottaClientInput {
     private var sentJoinBattle = false
@@ -28,15 +31,16 @@ class PannaClientGdxInput : CottaClientInput {
     override fun <T : InputComponent<T>> input(entity: Entity, clazz: KClass<T>): T {
         when(clazz) {
             JoinBattleMetaEntityInputComponent::class -> {
-                if (!sentJoinBattle) {
+                return if (!sentJoinBattle) {
                     sentJoinBattle = true
-                    return JoinBattleMetaEntityInputComponent.create(JOIN_BATTLE) as T
+                    JoinBattleMetaEntityInputComponent.create(JOIN_BATTLE) as T
                 } else {
-                    return JoinBattleMetaEntityInputComponent.create(IDLE) as T
+                    JoinBattleMetaEntityInputComponent.create(IDLE) as T
+                }.also {
+                    logger.debug { "Prepared ${JoinBattleMetaEntityInputComponent::class.simpleName} $it" }
                 }
             }
             WalkingInputComponent::class -> {
-                accumulate()
                 return WalkingInputComponent.create(
                     when {
                         storage.leftPressed -> WALKING_DIRECTION_LEFT

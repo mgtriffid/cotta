@@ -19,4 +19,5 @@ data class DrawableComponentImpl(override val textureId: Int): DrawableComponent
 
 object PannaTextureIds {
     const val TEXTURE_ID_FOO_ENTITY = 1
+    const val TEXTURE_ID_PLAYER_ENTITY = 2
 }

@@ -2,11 +2,14 @@ package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import mu.KotlinLogging
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.companionObjectInstance
+
+private val logger = KotlinLogging.logger {}
 
 interface IncomingInput {
     companion object {
@@ -17,8 +20,15 @@ interface IncomingInput {
     fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>>
 
     fun inputForEntityAndComponent(entityId: EntityId, component: KClass<*>): InputComponent<*> {
-        return inputsForEntities()[entityId]?.find { component.isInstance(it) }
-            ?: fallback(component)
+        logger.debug { "Getting input for entity $entityId and component ${component.qualifiedName}" }
+        val input = inputsForEntities()[entityId]?.find { component.isInstance(it) }
+        if (input != null) {
+            logger.debug { "Input found" }
+            return input
+        } else {
+            logger.debug { "Input not found, falling back" }
+            return fallback(component)
+        }
     }
 
     private fun fallback(component: KClass<*>): InputComponent<*> {

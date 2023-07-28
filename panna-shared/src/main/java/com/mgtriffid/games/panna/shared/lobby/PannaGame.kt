@@ -11,19 +11,23 @@ import com.mgtriffid.games.panna.shared.game.components.GraverobberNpcComponent
 import com.mgtriffid.games.panna.shared.game.components.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.PannaTextureIds
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
+import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
+import com.mgtriffid.games.panna.shared.game.systems.JoinBattleEffectConsumer
+import com.mgtriffid.games.panna.shared.game.systems.JoinBattleSystem
 import com.mgtriffid.games.panna.shared.game.systems.MovementEffectConsumer
 import com.mgtriffid.games.panna.shared.game.systems.WalkingInputProcessingSystem
-import kotlin.reflect.KClass
 
 class PannaGame : CottaGame {
     override val serverSystems = listOf(
         WalkingInputProcessingSystem::class,
         MovementEffectConsumer::class,
+        JoinBattleSystem::class,
+        JoinBattleEffectConsumer::class,
     )
 
     override fun initializeServerState(state: CottaState) {
@@ -41,6 +45,7 @@ class PannaGame : CottaGame {
         DrawableComponent::class,
         WalkingComponent::class,
         GraverobberNpcComponent::class, // TODO be able to mark as server-only
+        SteamManPlayerComponent::class,
     )
 
     override val inputComponentClasses = setOf(

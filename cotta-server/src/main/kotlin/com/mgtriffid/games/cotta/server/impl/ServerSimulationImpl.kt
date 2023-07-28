@@ -99,8 +99,11 @@ class ServerSimulationImpl(
         state.entities().all().filter {
             it.hasInputComponents()
         }.forEach { e ->
+            logger.debug { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
-                e.setInputComponent(c, inputForUpcomingTick.inputForEntityAndComponent(e.id, c))
+                val component = inputForUpcomingTick.inputForEntityAndComponent(e.id, c)
+                logger.debug { "  $component" }
+                e.setInputComponent(c, component)
             }
         }
     }

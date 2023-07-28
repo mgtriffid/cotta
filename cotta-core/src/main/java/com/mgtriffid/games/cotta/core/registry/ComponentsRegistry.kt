@@ -41,7 +41,7 @@ class ComponentsRegistryImpl: ComponentsRegistry {
     }
 
     override fun <C : InputComponent<C>> registerInputComponentClass(kClass: KClass<C>) {
-        logger.debug { "Registering class ${kClass.qualifiedName} as component"}
+        logger.debug { "Registering class ${kClass.qualifiedName} as input component"}
         val descriptor = createSpec(kClass)
         data[descriptor.key] = descriptor
         inputComponentsRegistrationListeners.forEach { it.onInputComponentRegistration(kClass, descriptor) }

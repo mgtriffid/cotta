@@ -89,7 +89,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     }
 
     private fun tick() {
-        logger.info { "Tick is happening" }
+        logger.debug { "Tick is happening" }
         fetchInput()
         simulate()
         // simulation after fetching input
@@ -100,9 +100,9 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
     private fun fetchInput() {
         val intents = network.drainEnterGameIntents()
-        logger.debug { "intents.size == ${intents.size}" }
+        logger.trace { "intents.size == ${intents.size}" }
         intents.forEach {
-            logger.debug { "Received an intent to enter the game" }
+            logger.trace { "Received an intent to enter the game" }
             val playerId = serverSimulation.enterGame(it.second)
             clientsGhosts.addGhost(playerId, it.first)
         }
@@ -115,10 +115,10 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
             val recipe = inputSerialization.deserializeInputRecipe(dto.payload)
             inputSnapper.unpackInputRecipe(recipe).entries
         }.flatten().associate { it.key to it.value } + serverInputProvider.input(state.entities())
-        logger.debug { "Incoming input has ${inputs.size} entries" }
+        logger.trace { "Incoming input has ${inputs.size} entries" }
         inputs.forEach { (eId, components) ->
-            logger.debug { "Inputs for entity $eId:" }
-            components.forEach { logger.debug { it } }
+            logger.trace { "Inputs for entity $eId:" }
+            components.forEach { logger.trace { it } }
         }
         return object: IncomingInput {
             // TODO protect against malicious client sending input for entity not belonging to them
@@ -133,7 +133,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     }
 
     private fun dispatchDataToClients() {
-        logger.info { "Preparing data to send to clients" }
+        logger.debug { "Preparing data to send to clients" }
         /*
           TODO consider passing tick as a parameter here because it's confusing right now:
             tick goes through EVERYTHING but implicitly

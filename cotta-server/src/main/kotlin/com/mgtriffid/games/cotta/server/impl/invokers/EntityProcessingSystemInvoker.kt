@@ -12,12 +12,12 @@ class EntityProcessingSystemInvoker(
     private val system: EntityProcessingSystem
 ) : SystemInvoker {
     override fun invoke() {
-        logger.debug { "Invoked ${system::class.qualifiedName}" }
+        logger.trace { "Invoked ${system::class.qualifiedName}" }
         state.entities().all().forEach(::process)
     }
 
     private fun process(entity: Entity) {
-        logger.debug { "${system::class.simpleName} processing entity ${entity.id}" }
+        logger.trace { "${system::class.simpleName} processing entity ${entity.id}" }
         system.process(entity)
     }
 }

@@ -73,7 +73,7 @@ class ServerSimulationImpl(
     }
 
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
-        logger.debug { "Registering system '${systemClass.simpleName}'" }
+        logger.info { "Registering system '${systemClass.simpleName}'" }
         systemInvokers.add(createInvoker(systemClass))
     }
 
@@ -99,10 +99,10 @@ class ServerSimulationImpl(
         state.entities().all().filter {
             it.hasInputComponents()
         }.forEach { e ->
-            logger.debug { "Entity ${e.id} has some input components:" }
+            logger.trace { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
                 val component = inputForUpcomingTick.inputForEntityAndComponent(e.id, c)
-                logger.debug { "  $component" }
+                logger.trace { "  $component" }
                 e.setInputComponent(c, component)
             }
         }

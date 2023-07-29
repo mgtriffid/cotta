@@ -20,13 +20,13 @@ interface IncomingInput {
     fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>>
 
     fun inputForEntityAndComponent(entityId: EntityId, component: KClass<*>): InputComponent<*> {
-        logger.debug { "Getting input for entity $entityId and component ${component.qualifiedName}" }
+        logger.trace { "Getting input for entity $entityId and component ${component.qualifiedName}" }
         val input = inputsForEntities()[entityId]?.find { component.isInstance(it) }
         if (input != null) {
-            logger.debug { "Input found" }
+            logger.trace { "Input found" }
             return input
         } else {
-            logger.debug { "Input not found, falling back" }
+            logger.trace { "Input not found, falling back" }
             return fallback(component)
         }
     }

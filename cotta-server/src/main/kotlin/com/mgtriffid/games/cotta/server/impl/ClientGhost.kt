@@ -38,8 +38,8 @@ class ClientGhost(
         }
         return object : WhatToSend {
             override val necessaryData = necessaryData
-        }.also {
-            logOfSentData.addAll(it.necessaryData)
+        }.also { whatToSend ->
+            logOfSentData.addAll(whatToSend.necessaryData)
             logOfSentData.removeAll { it.tick < tick - 128 }
         }
     }

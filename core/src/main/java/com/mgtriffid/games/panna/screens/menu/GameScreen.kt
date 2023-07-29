@@ -87,8 +87,7 @@ class GameScreen(
 
     private fun drawEntities() {
         getDrawableEntities().forEach {
-            logger.debug { "Drawing entity ${it.id}" }
-            logger.debug { "Entity is owned by ${it.ownedBy}" }
+            logger.trace { "Drawing entity ${it.id} owned by ${it.ownedBy}" }
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
             val texture = textures[drawable.textureId]

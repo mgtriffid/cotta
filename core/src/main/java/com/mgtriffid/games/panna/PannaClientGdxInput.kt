@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.IDLE
@@ -35,9 +34,10 @@ class PannaClientGdxInput : CottaClientInput {
                     sentJoinBattle = true
                     JoinBattleMetaEntityInputComponent.create(JOIN_BATTLE) as T
                 } else {
+                    // TODO allow to assume blank
                     JoinBattleMetaEntityInputComponent.create(IDLE) as T
                 }.also {
-                    logger.debug { "Prepared ${JoinBattleMetaEntityInputComponent::class.simpleName} $it" }
+                    logger.trace { "Prepared ${JoinBattleMetaEntityInputComponent::class.simpleName} $it" }
                 }
             }
             WalkingInputComponent::class -> {

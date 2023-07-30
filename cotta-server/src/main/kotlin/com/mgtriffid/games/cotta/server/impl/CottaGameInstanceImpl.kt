@@ -14,6 +14,7 @@ import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
+import com.mgtriffid.games.cotta.server.ClientsInput
 import com.mgtriffid.games.cotta.server.CottaGameInstance
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.IncomingInput
@@ -27,7 +28,8 @@ private val logger = KotlinLogging.logger {}
 class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     val game: CottaGame,
     val engine: CottaEngine<SR, DR, IR>,
-    val network: CottaServerNetwork
+    val network: CottaServerNetwork,
+    val clientsInput: ClientsInput,
 ): CottaGameInstance {
     private val historyLength = 8
     @Volatile var running = true
@@ -35,11 +37,6 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     private val state = CottaStateImpl(historyLength, tickProvider)
     private val serverSimulation = ServerSimulation.getInstance(tickProvider, historyLength)
     private val clientsGhosts = ClientsGhosts()
-    private val componentsRegistry = engine.getComponentsRegistry()
-    private val stateSnapper = engine.getStateSnapper()
-    private val snapsSerialization = engine.getSnapsSerialization()
-    private val inputSnapper = engine.getInputSnapper()
-    private val inputSerialization = engine.getInputSerialization()
 
     private val serverInputProvider = game.serverInputProvider
 
@@ -48,10 +45,10 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         tickProvider = tickProvider,
         clientsGhosts = clientsGhosts,
         network = network,
-        stateSnapper = stateSnapper,
-        snapsSerialization = snapsSerialization,
-        inputSnapper = inputSnapper,
-        inputSerialization = inputSerialization
+        stateSnapper = engine.getStateSnapper(),
+        snapsSerialization = engine.getSnapsSerialization(),
+        inputSnapper = engine.getInputSnapper(),
+        inputSerialization = engine.getInputSerialization()
     )
 
     override fun run() {
@@ -71,10 +68,10 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     // TODO probably this is wrong place
     private fun registerComponents() {
         game.componentClasses.forEach {
-            componentsRegistry.registerComponentClass(it)
+            engine.getComponentsRegistry().registerComponentClass(it)
         }
         game.inputComponentClasses.forEach {
-            componentsRegistry.registerInputComponentClass(it)
+            engine.getComponentsRegistry().registerInputComponentClass(it)
         }
         serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
     }
@@ -111,15 +108,19 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     }
 
     private fun fetchIncomingInput(network: CottaServerNetwork, serverInputProvider: ServerInputProvider): IncomingInput {
-        val inputs = network.drainInputs().map { (cId, dto) ->
-            val recipe = inputSerialization.deserializeInputRecipe(dto.payload)
-            inputSnapper.unpackInputRecipe(recipe).entries
-        }.flatten().associate { it.key to it.value } + serverInputProvider.input(state.entities())
+        val clientsOwnedEntitiesInput = clientsInput.getInput()
+
+        val serverOwnedEntitiesInput = serverInputProvider.input(state.entities())
+
+        val inputs = clientsOwnedEntitiesInput + serverOwnedEntitiesInput
+
         logger.trace { "Incoming input has ${inputs.size} entries" }
+
         inputs.forEach { (eId, components) ->
             logger.trace { "Inputs for entity $eId:" }
             components.forEach { logger.trace { it } }
         }
+
         return object: IncomingInput {
             // TODO protect against malicious client sending input for entity not belonging to them
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {

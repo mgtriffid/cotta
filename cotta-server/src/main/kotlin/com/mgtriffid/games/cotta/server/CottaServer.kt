@@ -32,10 +32,18 @@ class CottaServer(
     private fun createGameInstance(): CottaGameInstance {
         logger.info { "Initializing game instance" }
 
+        // TODO sus dependencies
+        val serverNetwork = network.createServerNetwork()
+        val engine = CottaEngineImpl()
         return CottaGameInstanceImpl(
             game,
-            CottaEngineImpl(),
-            network.createServerNetwork()
+            engine,
+            serverNetwork,
+            ClientsInput.create(
+                serverNetwork,
+                engine.getInputSerialization(),
+                engine.getInputSnapper()
+            )
         )
     }
 }

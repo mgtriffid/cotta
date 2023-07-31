@@ -30,13 +30,13 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     val engine: CottaEngine<SR, DR, IR>,
     val network: CottaServerNetwork,
     val clientsInput: ClientsInput,
+    val clientsGhosts: ClientsGhosts,
 ): CottaGameInstance {
     private val historyLength = 8
     @Volatile var running = true
     private val tickProvider = TickProvider.getInstance()
     private val state = CottaStateImpl(historyLength, tickProvider)
     private val serverSimulation = ServerSimulation.getInstance(tickProvider, historyLength)
-    private val clientsGhosts = ClientsGhosts()
 
     private val serverInputProvider = game.serverInputProvider
 

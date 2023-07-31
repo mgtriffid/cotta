@@ -5,9 +5,10 @@ import mu.KotlinLogging
 import java.util.*
 import java.util.logging.Logger
 
-private const val MAX_LAG_COMP_DEPTH_TICKS = 8
-
 private val logger = KotlinLogging.logger {}
+
+private const val HISTORY_LENGTH = 128
+private const val MAX_LAG_COMP_DEPTH_TICKS = 8
 
 // TODO inject history length
 class ClientGhost(
@@ -40,7 +41,7 @@ class ClientGhost(
             override val necessaryData = necessaryData
         }.also { whatToSend ->
             logOfSentData.addAll(whatToSend.necessaryData)
-            logOfSentData.removeAll { it.tick < tick - 128 }
+            logOfSentData.removeAll { it.tick < tick - HISTORY_LENGTH }
         }
     }
 

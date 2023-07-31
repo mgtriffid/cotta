@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
+import com.mgtriffid.games.cotta.server.impl.ClientsGhosts
 import com.mgtriffid.games.cotta.server.impl.ClientsInputImpl
 
 interface ClientsInput {
@@ -13,11 +14,13 @@ interface ClientsInput {
         fun <IR : InputRecipe> create(
             network: CottaServerNetwork,
             inputSerialization: InputSerialization<IR>,
-            inputSnapper: InputSnapper<IR>
+            inputSnapper: InputSnapper<IR>,
+            clientsGhosts: ClientsGhosts,
         ): ClientsInput = ClientsInputImpl(
             network = network,
             inputSerialization = inputSerialization,
-            inputSnapper = inputSnapper
+            inputSnapper = inputSnapper,
+            clientsGhosts = clientsGhosts
         )
     }
 

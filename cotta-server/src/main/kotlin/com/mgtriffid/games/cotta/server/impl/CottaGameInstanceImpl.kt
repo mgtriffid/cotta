@@ -103,11 +103,11 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
             val playerId = serverSimulation.enterGame(it.second)
             clientsGhosts.addGhost(playerId, it.first)
         }
-        val input = fetchIncomingInput(network, serverInputProvider)
+        val input = fetchIncomingInput()
         serverSimulation.setInputForUpcomingTick(input)
     }
 
-    private fun fetchIncomingInput(network: CottaServerNetwork, serverInputProvider: ServerInputProvider): IncomingInput {
+    private fun fetchIncomingInput(): IncomingInput {
         val clientsOwnedEntitiesInput = clientsInput.getInput()
 
         val serverOwnedEntitiesInput = serverInputProvider.input(state.entities())

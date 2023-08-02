@@ -13,12 +13,9 @@ class CottaServer(
     private val network: CottaNetwork,
     private val game: CottaGame
 ) {
-    private val instances: MutableMap<GameInstanceId, CottaGameInstance> = HashMap()
-
     fun initializeInstances() {
         // TODO make multi-threaded
         val instance = createGameInstance()
-        instances[GameInstanceId(0)] = instance
         // start a thread that will just run
         val thread = Thread { instance.run() }
         thread.name = "game-main-loop-thread-0"

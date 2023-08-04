@@ -28,6 +28,7 @@ www-test/
 *.iws
 *.iml
 /android/out/
+/desktop/out/
 com_crashlytics_export_strings.xml
 
 ## Eclipse
@@ -101,6 +102,7 @@ gradle-app.setting
 /cotta-network-api/build/
 /cotta-network-kryonet/build/
 /cotta-server/build/
+/cotta-utils/build/
 /panna-devutils/build/
 /panna-graphics/build/
 /panna-lobby/build/

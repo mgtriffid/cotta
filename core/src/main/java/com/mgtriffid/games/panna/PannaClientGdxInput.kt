@@ -48,7 +48,7 @@ class PannaClientGdxInput : CottaClientInput {
                         storage.upPressed -> WALKING_DIRECTION_UP
                         storage.downPressed -> WALKING_DIRECTION_DOWN
                         else -> WALKING_DIRECTION_NONE
-                    }
+                    }.also { logger.trace { "WalkingInputComponent created; direction == $it" } }
                 ) as T
             }
         }

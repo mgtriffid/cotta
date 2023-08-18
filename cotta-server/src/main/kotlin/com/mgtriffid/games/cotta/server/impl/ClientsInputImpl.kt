@@ -26,12 +26,8 @@ class ClientsInputImpl<IR: InputRecipe>(
     private val inputBuffers = HashMap<PlayerId, ClientInputBuffer<IR>>()
 
     override fun getInput(): Map<EntityId, Collection<InputComponent<*>>> {
-        // so we drain into the storage which is a bunch of buffers
-        // we unpack all recipes
-        // then we figure what do we take for each particular connection
-
-        val rawInputDtos = network.drainInputs()
-        rawInputDtos.forEach { (connectionId, dto) ->
+        val rawDtos = network.drainInputs()
+        rawDtos.forEach { (connectionId, dto) ->
             val playerId = clientsGhosts.playerByConnection[connectionId]
             if (playerId == null) {
                 logger.warn { "Got input from unknown connection $connectionId" }
@@ -63,9 +59,11 @@ class ClientsInputImpl<IR: InputRecipe>(
                 }
                 RUNNING -> {
                     val lastUsedInput = ghost.lastUsedInput()
-                    if (inputBuffer.has(lastUsedInput + 1)) {
-                        inputRecipes.add(inputBuffer.get(lastUsedInput + 1))
-                        ghost.setLastUsedInput(lastUsedInput + 1)
+                    val clientsTickToUse = lastUsedInput + 1
+                    logger.debug { "Client input tick is $clientsTickToUse for $playerId" }
+                    if (inputBuffer.has(clientsTickToUse)) {
+                        inputRecipes.add(inputBuffer.get(clientsTickToUse))
+                        ghost.setLastUsedInput(clientsTickToUse)
                     } else {
                         TODO("Not supported yet, need to take care of this legit missing packets case")
                     }

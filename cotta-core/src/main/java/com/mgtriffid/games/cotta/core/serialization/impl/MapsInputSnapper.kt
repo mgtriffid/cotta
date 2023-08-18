@@ -136,7 +136,7 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
             }
             return factoryMethod.callBy(
                 firstParam + otherParams
-            ).also { logger.debug { "Unpacked $it" } }
+            ).also { logger.trace { "Unpacked $it" } }
         }
     }
 

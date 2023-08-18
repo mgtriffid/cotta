@@ -56,6 +56,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         registerComponents()
         initializeState()
         registerSystems()
+        logger.debug { "Tick length is $TICK_LENGTH" }
         val loop = FixedRateLoopBody(
             tickLengthMs = TICK_LENGTH,
             startsAt = System.currentTimeMillis()
@@ -86,7 +87,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     }
 
     private fun tick() {
-        logger.debug { "Tick is happening" }
+        logger.debug { "Tick is happening: advancing from tick ${tickProvider.tick} to ${tickProvider.tick + 1}" }
         fetchInput()
         simulate()
         // simulation after fetching input

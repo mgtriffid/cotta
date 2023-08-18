@@ -51,7 +51,8 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputR
             KindOfData.DELTA -> {
                 val dto = ServerToClientDto()
                 dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.DELTA
-                dto.tick = tick
+                dto.tick = tick - 1
+                logger.debug { "Snapping delta for tick ${tick - 1} to $tick" }
                 dto.payload = snapsSerialization.serializeDeltaRecipe(
                     stateSnapper.snapDelta(
                         prev = data.entities(tick - 1),
@@ -61,9 +62,9 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputR
                 val inputDto = ServerToClientDto()
                 inputDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT
                 inputDto.payload = inputSerialization.serializeInputRecipe(
-                    inputSnapper.snapInput(data.inputs(tick))
+                    inputSnapper.snapInput(data.inputs(tick - 1))
                 )
-                inputDto.tick = tick
+                inputDto.tick = tick - 1
                 return listOf(dto, inputDto)
             }
             KindOfData.STATE -> {

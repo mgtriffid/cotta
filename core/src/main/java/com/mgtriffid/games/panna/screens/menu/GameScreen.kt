@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
+import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.cotta.utils.now
@@ -34,6 +36,8 @@ class GameScreen(
 
     private lateinit var input: PannaClientGdxInput
 
+    private val debugPositions = mutableMapOf<EntityId, Pair<Int, Int>>()
+
     override fun show() {
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
@@ -41,7 +45,7 @@ class GameScreen(
         textures = PannaTextures()
         textures.init()
         input = PannaClientGdxInput()
-
+        logger.debug { "Tick length is $TICK_LENGTH" }
         cottaClient = CottaClient.getInstance(
             game = PannaGame(),
             engine = engine,
@@ -56,7 +60,7 @@ class GameScreen(
      * This is called rapidly by LibGDX game loop. Think of this as of the main loop body.
      */
     override fun render(delta: Float) {
-        logger.debug { "${GameScreen::class.simpleName}#render called" }
+        logger.trace { "${GameScreen::class.simpleName}#render called" }
 
         input.accumulate()
 
@@ -87,16 +91,25 @@ class GameScreen(
 
     private fun drawEntities() {
         getDrawableEntities().forEach {
-            logger.trace { "Drawing entity ${it.id} owned by ${it.ownedBy}" }
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
+            logger.trace { "Drawing entity ${it.id} owned by ${it.ownedBy}. Position: $position." }
             val texture = textures[drawable.textureId]
+            logPositionIfChanged(it, position)
             batch.draw(texture, position.xPos.toFloat(), position.yPos.toFloat())
         }
     }
 
     private fun getDrawableEntities() = (cottaClient as CottaClientImpl<*, *, *>).cottaState.entities().all().filter {
         it.hasComponent(DrawableComponent::class) && it.hasComponent(PositionComponent::class)
+    }
+
+    private fun logPositionIfChanged(entity: Entity, position: PositionComponent) {
+        val recorded = debugPositions[entity.id]
+        if (recorded != Pair(position.xPos, position.yPos)) {
+            logger.debug { "Entity ${entity.id} moved to ${position.xPos}, ${position.yPos}" }
+            debugPositions[entity.id] = Pair(position.xPos, position.yPos)
+        }
     }
 
     // <editor-fold desc="Draw lifecycle">

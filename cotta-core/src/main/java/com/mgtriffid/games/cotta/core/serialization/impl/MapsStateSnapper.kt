@@ -116,7 +116,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
                 try {
                     field.get(obj) ?: throw IllegalStateException("Nullable fields are not allowed")
                 } catch (e: Exception) {
-                    logger.debug { "Field: ${field.name}, object: $obj" }
+                    logger.error { "Field: ${field.name}, object: $obj could not be packed" }
                     throw e
                 }
             })
@@ -236,6 +236,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
                 // cast and fucking pray
                 val kClass = classByKey[it.componentKey]
                 val component = entity.getComponent(kClass as KClass<out Component<*>>)
+                logger.debug { "Unpacked changed component ${it.data}" }
                 unpackComponentDeltaRecipe(component as Any, it)
             }
             recipe.removedComponents.forEach { entity.removeComponent(classByKey[it] as KClass<out Component<*>>) }
@@ -264,7 +265,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
             prevComponents.none { pc -> getKey(cc) == getKey(pc) }
         }
         val changedComponents: Map<Component<*>, Component<*>> = currComponents.associateWith { cc ->
-            prevComponents.find { pc -> getKey(pc) == getKey(cc) }
+            prevComponents.find { pc -> (getKey(pc) == getKey(cc)) && (pc != cc) }
         }.filterValues { it != null } as Map<Component<*>, Component<*>>
 
         return MapsChangedEntityRecipe(
@@ -277,9 +278,10 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         )
     }
 
-    private fun <C: Component<C>> packComponentDelta(c1: Component<*>, c0: Component<*>): MapComponentDeltaRecipe {
+    private fun <C: Component<C>> packComponentDelta(c0: Component<*>, c1: Component<*>): MapComponentDeltaRecipe {
         val prev = c0 as C // I apologize
         val curr = c1 as C
+        logger.debug { "Packing component delta: prev = $prev, curr = $curr" }
         return (deltaSnappers[getKey(curr)]!! as ComponentDeltaSnapper<C>).packDelta(prev, curr)
     }
 }

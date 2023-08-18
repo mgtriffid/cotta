@@ -15,6 +15,7 @@ import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
+import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_NONE
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
 import com.mgtriffid.games.panna.shared.game.systems.JoinBattleEffectConsumer
@@ -69,7 +70,8 @@ class PannaGame : CottaGame {
                     goingLeft = false
                 }
                 it.id to listOf(WalkingInputComponent.create(
-                    if (goingLeft) WALKING_DIRECTION_LEFT else WALKING_DIRECTION_RIGHT
+//                    if (goingLeft) WALKING_DIRECTION_LEFT else WALKING_DIRECTION_RIGHT
+                    WALKING_DIRECTION_NONE
                 ))
             }
         }

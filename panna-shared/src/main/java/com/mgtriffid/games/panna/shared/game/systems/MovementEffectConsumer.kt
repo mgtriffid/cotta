@@ -10,9 +10,12 @@ import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_UP
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 
+private val logger = mu.KotlinLogging.logger {}
+
 class MovementEffectConsumer(private val entities: Entities) : EffectsConsumer {
     override fun handleEffect(e: CottaEffect) {
         if (e is MovementEffect) {
+            logger.debug { "Received MovementEffect: $e" }
             val entity = entities.get(e.entityId)
             if (entity.hasComponent(PositionComponent::class)) {
                 val position = entity.getComponent(PositionComponent::class)
@@ -26,6 +29,7 @@ class MovementEffectConsumer(private val entities: Entities) : EffectsConsumer {
                     WALKING_DIRECTION_DOWN -> position.yPos - e.velocity
                     else -> position.yPos
                 }
+                logger.debug { "position.xPos = ${position.xPos}" }
             }
         }
     }

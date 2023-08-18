@@ -123,3 +123,15 @@ Thumbs.db
 
 # Project exclude paths
 /server/build/
+/panna-server/out/
+/desktop/out/
+/panna-graphics/out/
+/panna-lobby/out/
+/cotta-utils/out/
+/cotta-server/out/
+/cotta-network-kryonet/out/
+/cotta-network-api/out/
+/cotta-annotations/out/
+/cotta-client/out/
+/cotta-core/out/
+/core/out/

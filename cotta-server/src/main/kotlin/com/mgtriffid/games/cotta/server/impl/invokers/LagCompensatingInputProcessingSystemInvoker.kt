@@ -21,13 +21,13 @@ class LagCompensatingInputProcessingSystemInvoker(
 
     private fun process(entity: Entity) {
         logger.debug { "${system::class.simpleName} processing entity ${entity.id}" }
-        sawTickHolder.tick = entityOwnerSawTickProvider.getSawTickByEntityId(entityId = entity.id)
+        sawTickHolder.tick = entityOwnerSawTickProvider.getSawTickByEntity(entity)
         system.process(entity)
         sawTickHolder.tick = null
     }
 
     interface EntityOwnerSawTickProvider {
-        fun getSawTickByEntityId(entityId: EntityId): Long?
+        fun getSawTickByEntity(entity: Entity): Long?
     }
 
 }

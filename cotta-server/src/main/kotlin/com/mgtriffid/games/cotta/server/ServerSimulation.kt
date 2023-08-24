@@ -38,7 +38,6 @@ interface ServerSimulation {
     fun setMetaEntitiesInputComponents(components: Set<KClass<out InputComponent<*>>>)
 
     fun tick()
-    fun setEntityOwner(entityId: EntityId, playerId: PlayerId)
     fun setPlayerSawTick(playerId: PlayerId, tick: Long)
     fun enterGame(intent: EnterGameIntent): PlayerId
     fun getDataToBeSentToClients(): DataForClients

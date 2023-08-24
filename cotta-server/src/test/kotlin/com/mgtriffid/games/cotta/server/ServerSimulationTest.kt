@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
@@ -135,7 +136,7 @@ class ServerSimulationTest {
         damageable.addComponent(LinearPositionTestComponent.create(0))
         damageable.addComponent(VelocityTestComponent.create(2))
 
-        val damageDealer = state.entities().createEntity()
+        val damageDealer = state.entities().createEntity(ownedBy = Entity.OwnedBy.Player(playerId))
         val damageDealerId = damageDealer.id
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val input = PlayerInputTestComponent.create(aim = 4, shoot = true)
@@ -149,7 +150,6 @@ class ServerSimulationTest {
             serverSimulation.tick()
         }
 
-        serverSimulation.setEntityOwner(damageDealerId, playerId)
         serverSimulation.setPlayerSawTick(playerId, 2L)
         serverSimulation.setInputForUpcomingTick(object: IncomingInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
@@ -225,7 +225,6 @@ class ServerSimulationTest {
         val serverSimulation = getServerSimulation()
         serverSimulation.setState(state)
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
-        serverSimulation.setEntityOwner(damageDealerId, playerId)
         serverSimulation.setPlayerSawTick(playerId, 2L)
         val input1 = PlayerInputTestComponent.create(
             aim = 4,

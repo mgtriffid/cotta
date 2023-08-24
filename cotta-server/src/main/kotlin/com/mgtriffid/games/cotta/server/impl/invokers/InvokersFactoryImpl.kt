@@ -21,7 +21,6 @@ import kotlin.reflect.full.primaryConstructor
 class InvokersFactoryImpl(
     private val lagCompensatingEffectBus: LagCompensatingEffectBus,
     private val state: CottaState,
-    private val entityOwners: HashMap<EntityId, PlayerId>,
     private val playersSawTicks: HashMap<PlayerId, Long>,
     private val tickProvider: TickProvider,
     private val sawTickHolder: SawTickHolder
@@ -82,8 +81,8 @@ class InvokersFactoryImpl(
             state = state,
             system = ctor.call(*parameterValues.toTypedArray()) as InputProcessingSystem,
             entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
-                override fun getSawTickByEntityId(entityId: EntityId): Long? {
-                    return entityOwners[entityId]?.let { playersSawTicks[it] }
+                override fun getSawTickByEntity(entity: Entity): Long? {
+                    return (entity.ownedBy as? Entity.OwnedBy.Player)?.let { playersSawTicks[it.playerId] }
                 }
             },
             sawTickHolder = sawTickHolder

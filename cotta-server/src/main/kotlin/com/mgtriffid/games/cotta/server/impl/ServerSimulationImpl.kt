@@ -29,7 +29,6 @@ class ServerSimulationImpl(
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
-    private val entityOwners = HashMap<EntityId, PlayerId>()
     private val playersSawTicks = HashMap<PlayerId, Long>()
 
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
@@ -65,7 +64,6 @@ class ServerSimulationImpl(
                 tickProvider = tickProvider
             ),
             state,
-            entityOwners,
             playersSawTicks,
             tickProvider,
             sawTickHolder
@@ -108,10 +106,6 @@ class ServerSimulationImpl(
         }
     }
 
-    override fun setEntityOwner(entityId: EntityId, playerId: PlayerId) {
-        entityOwners[entityId] = playerId
-    }
-
     override fun setPlayerSawTick(playerId: PlayerId, tick: Long) {
         playersSawTicks[playerId] = tick
     }
@@ -139,7 +133,6 @@ class ServerSimulationImpl(
             }
             val playerId = it.second
             metaEntities[playerId] = metaEntity.id
-            entityOwners[metaEntity.id] = playerId
             it.first.params // TODO use parameters to add certain components, figure it out
         }
         enterGameIntents.clear()

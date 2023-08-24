@@ -14,14 +14,12 @@ interface InvokersFactory {
         fun getInstance(
             lagCompensatingEffectBus: LagCompensatingEffectBus,
             state: CottaState,
-            entityOwners: HashMap<EntityId, PlayerId>,
             playersSawTicks: HashMap<PlayerId, Long>,
             tickProvider: TickProvider,
             sawTickHolder: InvokersFactoryImpl.SawTickHolder
         ): InvokersFactory = InvokersFactoryImpl(
             lagCompensatingEffectBus,
             state,
-            entityOwners,
             playersSawTicks,
             tickProvider,
             sawTickHolder

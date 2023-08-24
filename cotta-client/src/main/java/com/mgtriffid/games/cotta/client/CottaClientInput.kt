@@ -8,7 +8,6 @@ import kotlin.reflect.KClass
 interface CottaClientInput {
     fun <T: InputComponent<T>> input(
         entity: Entity,
-        /*metaEntityId: EntityId,*/
         clazz: KClass<T>
         ): T
 }

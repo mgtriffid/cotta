@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
@@ -109,7 +110,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         val tick = getCurrentTick()
         logger.debug { "Tick = $tick" }
 
-        processInput()
+        processLocalInput()
 
         val inputRecipe = inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tick]!!)
         // simulation goes here
@@ -117,30 +118,39 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
     }
 
-    private fun processInput() {
+    private fun processLocalInput() {
         logger.debug { "Processing input" }
         val player = ((metaEntity() ?: return).ownedBy as Entity.OwnedBy.Player)
-        val entitiesOwnedByPlayer = cottaState.entities(atTick = getCurrentTick()).all().filter {
-            it.ownedBy == player
-        }
-        logger.debug { "Found ${entitiesOwnedByPlayer.size} entities owned by player $player" }
-        val entitiesWithInputComponents = entitiesOwnedByPlayer.filter {
+        val localEntities = getEntitiesOwnedByPlayer(player)
+        logger.debug { "Found ${localEntities.size} entities owned by player $player" }
+        val localEntitiesWithInputComponents = localEntities.filter {
             it.hasInputComponents()
         }
-        logger.debug { "Found ${entitiesWithInputComponents.size} entities with input components" }
-        val inputs = entitiesWithInputComponents.associate { e ->
+        logger.debug { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
+        val inputs = localEntitiesWithInputComponents.associate { e ->
             logger.debug { "Retrieving input for entity '${e.id}'" }
-            e.id to e.inputComponents().map { clazz ->
-                logger.debug { "Retrieving input of class '${clazz.simpleName}' for entity '${e.id}'" }
-                input.input(e, clazz)
-            }
+            e.id to getInputs(e)
         }
+        send(inputs)
+    }
+
+    private fun send(inputs: Map<EntityId, List<InputComponent<*>>>) {
         val inputRecipe = inputSnapper.snapInput(inputs)
         val inputDto = ClientToServerInputDto()
         inputDto.tick = getCurrentTick()
         inputDto.payload = inputSerialization.serializeInputRecipe(inputRecipe)
         network.sendInput(inputDto)
     }
+
+    private fun getInputs(entity: Entity) = entity.inputComponents().map { clazz ->
+        logger.debug { "Retrieving input of class '${clazz.simpleName}' for entity '${entity.id}'" }
+        input.input(entity, clazz)
+    }
+
+    private fun getEntitiesOwnedByPlayer(player: Entity.OwnedBy.Player) =
+        cottaState.entities(atTick = getCurrentTick()).all().filter {
+            it.ownedBy == player
+        }
 
     private fun metaEntity(): Entity? {
         logger.debug { "Looking for meta entity, metaEntityId = $metaEntityId" }
@@ -173,7 +183,8 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         val stateArrived = incomingDataBuffer.states.isNotEmpty()
         if (!stateArrived) return false
         val stateTick = incomingDataBuffer.states.lastKey()
-        return incomingDataBuffer.deltas.keys.containsAll(((stateTick + 1)..(stateTick + lagCompLimit + bufferLength)).toList())
+        val deltasForLagCompArrived = incomingDataBuffer.deltas.keys.containsAll(((stateTick + 1)..(stateTick + lagCompLimit + bufferLength)).toList())
+        return deltasForLagCompArrived
     }
 
     private fun deltaAvailableForTick(tick: Long): Boolean {

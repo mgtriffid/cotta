@@ -13,7 +13,9 @@ import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
+import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
+import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.ClientsInput
 import com.mgtriffid.games.cotta.server.CottaGameInstance
 import com.mgtriffid.games.cotta.server.DataForClients
@@ -90,22 +92,22 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         logger.debug { "Tick is happening: advancing from tick ${tickProvider.tick} to ${tickProvider.tick + 1}" }
         fetchInput()
         simulate()
-        // simulation after fetching input
-        // effects after simulation
-        // no actually effects within simulation, they are effects FFS
         dispatchDataToClients()
     }
 
     private fun fetchInput() {
         val intents = network.drainEnterGameIntents()
-        logger.trace { "intents.size == ${intents.size}" }
-        intents.forEach {
-            logger.trace { "Received an intent to enter the game" }
-            val playerId = serverSimulation.enterGame(it.second)
-            clientsGhosts.addGhost(playerId, it.first)
+        intents.forEach { (connectionId, intent) ->
+            registerPlayer(connectionId, intent)
         }
         val input = fetchIncomingInput()
         serverSimulation.setInputForUpcomingTick(input)
+    }
+
+    private fun registerPlayer(connectionId: ConnectionId, intent: EnterGameIntent) {
+        logger.trace { "Received an intent to enter the game from connection '${connectionId.id}'" }
+        val playerId = serverSimulation.enterGame(intent)
+        clientsGhosts.addGhost(playerId, connectionId)
     }
 
     private fun fetchIncomingInput(): IncomingInput {
@@ -136,10 +138,6 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
     private fun dispatchDataToClients() {
         logger.debug { "Preparing data to send to clients" }
-        /*
-          TODO consider passing tick as a parameter here because it's confusing right now:
-            tick goes through EVERYTHING but implicitly
-         */
         val data = serverSimulation.getDataToBeSentToClients()
         send(data)
     }

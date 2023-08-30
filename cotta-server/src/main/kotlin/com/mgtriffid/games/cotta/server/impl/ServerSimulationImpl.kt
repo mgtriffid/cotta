@@ -9,7 +9,7 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
-import com.mgtriffid.games.cotta.server.IncomingInput
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.impl.invokers.HistoricalLagCompensatingEffectBus
@@ -24,6 +24,7 @@ import kotlin.reflect.KClass
 private val logger = KotlinLogging.logger {}
 
 class ServerSimulationImpl(
+    private val state: CottaState,
     private val tickProvider: TickProvider,
     private val historyLength: Int
 ) : ServerSimulation {
@@ -35,29 +36,19 @@ class ServerSimulationImpl(
     private val playerIdGenerator = PlayerIdGenerator()
     private val metaEntities = HashMap<PlayerId, EntityId>()
     // TODO stuff this with inputs from clients
-    private var inputForUpcomingTick: IncomingInput = object: IncomingInput {
+    private var inputForUpcomingTick: SimulationInput = object: SimulationInput {
         override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
             return emptyMap()
         }
     }
     private val effectBus = EffectBus.getInstance()
 
-    private lateinit var state: CottaState
-    private lateinit var invokersFactory: InvokersFactory
     private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
-
     private val effectsHistory = EffectsHistory(historyLength = historyLength)
 
-    override fun effectBus(): EffectBus {
-        return effectBus
-    }
-
-    // TODO add validation to call this exactly once
-    override fun setState(state: CottaState) {
-        this.state = state
+    private var invokersFactory: InvokersFactory = run {
         val sawTickHolder = InvokersFactoryImpl.SawTickHolder(null)
-        // TODO decouple
-        this.invokersFactory = InvokersFactory.getInstance(
+        InvokersFactory.getInstance(
             HistoricalLagCompensatingEffectBus(
                 history = effectsHistory,
                 impl = LagCompensatingEffectBusImpl(effectBus, sawTickHolder),
@@ -70,6 +61,10 @@ class ServerSimulationImpl(
         )
     }
 
+    override fun effectBus(): EffectBus {
+        return effectBus
+    }
+
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
         logger.info { "Registering system '${systemClass.simpleName}'" }
         systemInvokers.add(createInvoker(systemClass))
@@ -79,7 +74,7 @@ class ServerSimulationImpl(
         this.metaEntitiesInputComponents = components;
     }
 
-    override fun setInputForUpcomingTick(input: IncomingInput) {
+    override fun setInputForUpcomingTick(input: SimulationInput) {
         inputForUpcomingTick = input
     }
 

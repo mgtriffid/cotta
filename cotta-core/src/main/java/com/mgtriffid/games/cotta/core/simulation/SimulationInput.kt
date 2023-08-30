@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.server
+package com.mgtriffid.games.cotta.core.simulation
 
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
@@ -11,7 +11,7 @@ import kotlin.reflect.full.companionObjectInstance
 
 private val logger = KotlinLogging.logger {}
 
-interface IncomingInput {
+interface SimulationInput {
     companion object {
         // [brainless] TODO remove static thing make it a field of a non-static object
         val factoryFunctions = HashMap<KClass<*>, () -> InputComponent<*>>()

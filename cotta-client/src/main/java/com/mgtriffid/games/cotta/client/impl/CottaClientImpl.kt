@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
+import com.mgtriffid.games.cotta.client.ClientSimulation
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.CottaEngine
@@ -12,6 +13,7 @@ import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
@@ -31,6 +33,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     val lagCompLimit: Int,
     val bufferLength: Int
 ) : CottaClient {
+    private val historyLength = 16
     var connected = false
     private val incomingDataBuffer = IncomingDataBuffer<SR, DR, IR>()
     private var state: ClientState = ClientState.Initial
@@ -42,6 +45,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     private val tickProvider = AtomicLongTickProvider()
     val cottaState = CottaState.getInstance(tickProvider)
     private var metaEntityId: EntityId? = null
+    private val clientSimulation = ClientSimulation.getInstance(tickProvider, historyLength)
 
     override fun initialize() {
         registerComponents()
@@ -92,6 +96,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         val fullStateTick = incomingDataBuffer.states.lastKey()
         val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
         cottaState.setBlank(fullStateTick)
+        clientSimulation.setState(cottaState)
         tickProvider.tick = fullStateTick
         stateSnapper.unpackStateRecipe(cottaState.entities(atTick = fullStateTick), stateRecipe)
         ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
@@ -112,7 +117,13 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
         processLocalInput()
 
-        val inputRecipe = inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tick]!!)
+        val inputs = inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tick]!!)
+        val simulationInput = object : SimulationInput {
+            override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
+                return inputs
+            }
+        }
+        clientSimulation.setInputForUpcomingTick(simulationInput)
         // simulation goes here
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
 

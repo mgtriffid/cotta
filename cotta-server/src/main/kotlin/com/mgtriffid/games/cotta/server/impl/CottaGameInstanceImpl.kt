@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
-import com.mgtriffid.games.cotta.core.ServerInputProvider
 import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
@@ -19,7 +18,7 @@ import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.ClientsInput
 import com.mgtriffid.games.cotta.server.CottaGameInstance
 import com.mgtriffid.games.cotta.server.DataForClients
-import com.mgtriffid.games.cotta.server.IncomingInput
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import mu.KotlinLogging
@@ -38,7 +37,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     @Volatile var running = true
     private val tickProvider = TickProvider.getInstance()
     private val state = CottaStateImpl(historyLength, tickProvider)
-    private val serverSimulation = ServerSimulation.getInstance(tickProvider, historyLength)
+    private val serverSimulation = ServerSimulation.getInstance(state, tickProvider, historyLength)
 
     private val serverInputProvider = game.serverInputProvider
 
@@ -81,7 +80,6 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
     private fun initializeState() {
         game.initializeServerState(state)
-        serverSimulation.setState(state)
     }
 
     private fun registerSystems() {
@@ -110,7 +108,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         clientsGhosts.addGhost(playerId, connectionId)
     }
 
-    private fun fetchIncomingInput(): IncomingInput {
+    private fun fetchIncomingInput(): SimulationInput {
         val clientsOwnedEntitiesInput = clientsInput.getInput()
 
         val serverOwnedEntitiesInput = serverInputProvider.input(state.entities())
@@ -124,7 +122,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
             components.forEach { logger.trace { it } }
         }
 
-        return object: IncomingInput {
+        return object: SimulationInput {
             // TODO protect against malicious client sending input for entity not belonging to them
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return inputs

@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.server.impl
+package com.mgtriffid.games.cotta.core.simulation
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 

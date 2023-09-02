@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.server.impl.invokers
+package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity

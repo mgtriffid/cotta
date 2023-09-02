@@ -8,14 +8,16 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 interface ClientSimulation {
     companion object {
         fun getInstance(
+            state: CottaState,
             tickProvider: TickProvider,
             historyLength: Int
         ): ClientSimulation = ClientSimulationImpl(
+            state,
             tickProvider,
             historyLength
         )
     }
 
     fun setInputForUpcomingTick(input: SimulationInput)
-    fun setState(state: CottaState)
+    fun tick()
 }

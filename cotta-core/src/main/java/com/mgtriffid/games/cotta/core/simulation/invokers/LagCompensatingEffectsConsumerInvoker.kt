@@ -1,15 +1,15 @@
-package com.mgtriffid.games.cotta.server.impl.invokers
+package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.EffectsConsumer
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-class SimpleEffectsConsumerSystemInvoker(
+class LagCompensatingEffectsConsumerInvoker(
+    private val effectBus: LagCompensatingEffectBus,
     private val consumer: EffectsConsumer,
-    private val effectBus: EffectBus
+    private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
 ) : SystemInvoker {
     override fun invoke() {
         logger.debug { "Invoked ${consumer::class.qualifiedName}" }
@@ -18,6 +18,8 @@ class SimpleEffectsConsumerSystemInvoker(
 
     private fun process(effect: CottaEffect) {
         logger.debug { "${consumer::class.simpleName} processing effect $effect" }
+        sawTickHolder.tick = effectBus.getTickForEffect(effect)
         consumer.handleEffect(effect)
+        sawTickHolder.tick = null
     }
 }

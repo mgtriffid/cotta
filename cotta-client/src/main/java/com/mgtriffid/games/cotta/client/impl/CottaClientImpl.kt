@@ -45,7 +45,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     private val tickProvider = AtomicLongTickProvider()
     val cottaState = CottaState.getInstance(tickProvider)
     private var metaEntityId: EntityId? = null
-    private val clientSimulation = ClientSimulation.getInstance(tickProvider, historyLength)
+    private val clientSimulation = ClientSimulation.getInstance(cottaState, tickProvider, historyLength)
 
     override fun initialize() {
         registerComponents()
@@ -96,7 +96,6 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         val fullStateTick = incomingDataBuffer.states.lastKey()
         val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
         cottaState.setBlank(fullStateTick)
-        clientSimulation.setState(cottaState)
         tickProvider.tick = fullStateTick
         stateSnapper.unpackStateRecipe(cottaState.entities(atTick = fullStateTick), stateRecipe)
         ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
@@ -111,7 +110,6 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
     private fun integrate() {
         logger.debug { "Integrating" }
-        cottaState.advance()
         val tick = getCurrentTick()
         logger.debug { "Tick = $tick" }
 
@@ -124,8 +122,9 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
             }
         }
         clientSimulation.setInputForUpcomingTick(simulationInput)
+        clientSimulation.tick()
         // simulation goes here
-        stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
+        stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
 
     }
 

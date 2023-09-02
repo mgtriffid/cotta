@@ -1,9 +1,9 @@
-package com.mgtriffid.games.cotta.server.impl.invokers
+package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.server.impl.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 
 // TODO better naming
 // TODO better placing

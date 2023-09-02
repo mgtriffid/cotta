@@ -11,12 +11,13 @@ import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.server.ServerSimulation
-import com.mgtriffid.games.cotta.server.impl.invokers.HistoricalLagCompensatingEffectBus
-import com.mgtriffid.games.cotta.server.impl.invokers.InvokersFactory
-import com.mgtriffid.games.cotta.server.impl.invokers.InvokersFactoryImpl
-import com.mgtriffid.games.cotta.server.impl.invokers.LagCompensatingEffectBusImpl
-import com.mgtriffid.games.cotta.server.impl.invokers.SystemInvoker
+import com.mgtriffid.games.cotta.core.simulation.invokers.HistoricalLagCompensatingEffectBus
+import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
+import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactoryImpl
+import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBusImpl
+import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KClass
@@ -46,7 +47,7 @@ class ServerSimulationImpl(
     private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
     private val effectsHistory = EffectsHistory(historyLength = historyLength)
 
-    private var invokersFactory: InvokersFactory = run {
+    private val invokersFactory: InvokersFactory = run {
         val sawTickHolder = InvokersFactoryImpl.SawTickHolder(null)
         InvokersFactory.getInstance(
             HistoricalLagCompensatingEffectBus(

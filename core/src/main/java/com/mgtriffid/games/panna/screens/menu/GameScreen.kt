@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
-import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
@@ -23,7 +22,7 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 // TODO handle resize and pause and all the things
 class GameScreen(
-    private val game: PannaGdxGame
+    private val gdxGame: PannaGdxGame
 ) : ScreenAdapter() {
     private lateinit var cottaClient: CottaClient
 
@@ -33,6 +32,7 @@ class GameScreen(
     lateinit var textures: PannaTextures
 
     private var nextTickAt: Long = -1
+    private var tickLength: Long = -1
 
     private lateinit var input: PannaClientGdxInput
 
@@ -45,9 +45,11 @@ class GameScreen(
         textures = PannaTextures()
         textures.init()
         input = PannaClientGdxInput()
-        logger.debug { "Tick length is $TICK_LENGTH" }
+        val game = PannaGame()
+        logger.debug { "Tick length is ${game.config.tickLength}" }
+        tickLength = game.config.tickLength
         cottaClient = CottaClient.getInstance(
-            game = PannaGame(),
+            game = game,
             engine = engine,
             network = KryonetCottaNetwork().createClientNetwork(),
             input = input
@@ -67,7 +69,7 @@ class GameScreen(
         var tickHappened = false
         if (nextTickAt <= now()) {
             cottaClient.tick()
-            nextTickAt += TICK_LENGTH
+            nextTickAt += tickLength
             tickHappened = true
         }
 

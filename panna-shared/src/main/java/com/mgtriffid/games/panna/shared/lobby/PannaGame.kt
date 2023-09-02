@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.shared.lobby
 
+import com.mgtriffid.games.cotta.core.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.ServerInputProvider
 import com.mgtriffid.games.cotta.core.entities.CottaState
@@ -75,5 +76,9 @@ class PannaGame : CottaGame {
                 ))
             }
         }
+    }
+
+    override val config: CottaConfig = object : CottaConfig {
+        override val tickLength: Long = 100L
     }
 }

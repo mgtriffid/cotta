@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
-import com.mgtriffid.games.cotta.core.TICK_LENGTH
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -57,9 +56,9 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         registerComponents()
         initializeState()
         registerSystems()
-        logger.debug { "Tick length is $TICK_LENGTH" }
+        logger.debug { "Tick length is ${game.config.tickLength}" }
         val loop = FixedRateLoopBody(
-            tickLengthMs = TICK_LENGTH,
+            tickLengthMs = game.config.tickLength,
             startsAt = System.currentTimeMillis()
         ) {
             tick()

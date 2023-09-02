@@ -14,4 +14,5 @@ interface CottaGame {
     val componentClasses: Set<KClass<out Component<*>>>
     val inputComponentClasses: Set<KClass<out InputComponent<*>>>
     val metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
+    val config: CottaConfig
 }

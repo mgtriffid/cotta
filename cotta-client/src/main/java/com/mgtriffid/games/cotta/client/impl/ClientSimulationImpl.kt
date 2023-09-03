@@ -14,14 +14,16 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactoryImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBusImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
+import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import mu.KotlinLogging
+import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
 class ClientSimulationImpl(
-    val state: CottaState,
-    val tickProvider: TickProvider,
-    val historyLength: Int
+    private val state: CottaState,
+    private val tickProvider: TickProvider,
+    private val historyLength: Int
 ) : ClientSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
@@ -49,19 +51,21 @@ class ClientSimulationImpl(
     }
 
     override fun setInputForUpcomingTick(input: SimulationInput) {
-        this.inputForUpcomingTick = input
+        inputForUpcomingTick = input
     }
 
     override fun tick() {
         effectBus.clear()
         state.advance()
-        // here we don't have that processEnterGameIntents() call like on server side
-        // that is because we don't process entering game here, for those entities we just transfer them
-        // from server to client and apply them as part of delta
         putInputIntoEntities()
         for (invoker in systemInvokers) {
-            invoker()
+//            invoker()
         }
+    }
+
+    override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
+        logger.info { "Registering system '${systemClass.simpleName}'" }
+        systemInvokers.add(invokersFactory.createInvoker(systemClass))
     }
 
     private fun putInputIntoEntities() {

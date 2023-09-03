@@ -71,8 +71,7 @@ class PannaGame : CottaGame {
                     goingLeft = false
                 }
                 it.id to listOf(WalkingInputComponent.create(
-//                    if (goingLeft) WALKING_DIRECTION_LEFT else WALKING_DIRECTION_RIGHT
-                    WALKING_DIRECTION_NONE
+                    if (goingLeft) WALKING_DIRECTION_LEFT else WALKING_DIRECTION_RIGHT
                 ))
             }
         }

@@ -14,12 +14,14 @@ import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
+import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import com.mgtriffid.games.cotta.utils.now
 import mu.KotlinLogging
 import java.lang.IllegalStateException
+import kotlin.reflect.KClass
 
 const val STATE_WAITING_THRESHOLD = 5000L
 
@@ -49,6 +51,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
 
     override fun initialize() {
         registerComponents()
+        registerSystems()
     }
 
     override fun tick() {
@@ -213,6 +216,12 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         }
         game.inputComponentClasses.forEach {
             componentsRegistry.registerInputComponentClass(it)
+        }
+    }
+
+    private fun registerSystems() {
+        game.serverSystems.forEach {
+            clientSimulation.registerSystem(it as KClass<CottaSystem>)
         }
     }
 

@@ -37,10 +37,8 @@ class ServerSimulationImpl(
     private val playerIdGenerator = PlayerIdGenerator()
     private val metaEntities = HashMap<PlayerId, EntityId>()
     // TODO stuff this with inputs from clients
-    private var inputForUpcomingTick: SimulationInput = object: SimulationInput {
-        override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-            return emptyMap()
-        }
+    private var inputForUpcomingTick: SimulationInput = object : SimulationInput {
+        override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> = emptyMap()
     }
     private val effectBus = EffectBus.getInstance()
 
@@ -68,7 +66,7 @@ class ServerSimulationImpl(
 
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
         logger.info { "Registering system '${systemClass.simpleName}'" }
-        systemInvokers.add(createInvoker(systemClass))
+        systemInvokers.add(invokersFactory.createInvoker(systemClass))
     }
 
     override fun setMetaEntitiesInputComponents(components: Set<KClass<out InputComponent<*>>>) {
@@ -82,11 +80,11 @@ class ServerSimulationImpl(
     override fun tick() {
         effectBus.clear()
         state.advance()
-        processEnterGameIntents()
         putInputIntoEntities()
         for (invoker in systemInvokers) {
             invoker()
         }
+        processEnterGameIntents()
     }
 
     private fun putInputIntoEntities() {
@@ -132,10 +130,6 @@ class ServerSimulationImpl(
             it.first.params // TODO use parameters to add certain components, figure it out
         }
         enterGameIntents.clear()
-    }
-
-    private fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
-        return invokersFactory.createInvoker(systemClass)
     }
 
     private class PlayerIdGenerator {

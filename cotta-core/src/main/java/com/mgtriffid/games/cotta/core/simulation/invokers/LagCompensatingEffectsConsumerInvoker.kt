@@ -1,7 +1,7 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.effects.EffectsConsumer
+import com.mgtriffid.games.cotta.core.systems.EffectsConsumer
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import mu.KotlinLogging
 

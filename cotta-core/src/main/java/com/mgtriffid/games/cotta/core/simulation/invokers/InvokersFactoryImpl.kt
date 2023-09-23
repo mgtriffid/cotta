@@ -2,7 +2,7 @@ package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.annotations.LagCompensated
 import com.mgtriffid.games.cotta.core.effects.EffectBus
-import com.mgtriffid.games.cotta.core.effects.EffectsConsumer
+import com.mgtriffid.games.cotta.core.systems.EffectsConsumer
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -14,9 +14,8 @@ import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingInputProcessingSystemInvoker.EntityOwnerSawTickProvider
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.primaryConstructor
 
 class InvokersFactoryImpl(
     private val lagCompensatingEffectBus: LagCompensatingEffectBus,
@@ -26,90 +25,66 @@ class InvokersFactoryImpl(
     private val sawTickHolder: SawTickHolder
 ) : InvokersFactory {
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
-        val shouldPropagateLagCompensationContext = systemClass.isSubclassOf(InputProcessingSystem::class)
-        if (shouldPropagateLagCompensationContext) {
-            return buildLagCompensatingInputProcessingSystemInvoker(systemClass)
-        }
-        val ctor = getConstructor(systemClass)
+        val ctor = systemClass.getConstructor()
         val parameters = ctor.parameters
-        val parameterValues = parameters.map { param ->
+        val parameterValues = parameters.map { param: KParameter ->
             (param.type.classifier as? KClass<*>)?.let {
                 when (it) {
                     EffectBus::class -> lagCompensatingEffectBus
-                    Entities::class -> LatestEntities(state)
-                    else -> null
-                }
-            }
-        }
-        if (systemClass.isSubclassOf(EntityProcessingSystem::class)) {
-            return EntityProcessingSystemInvoker(
-                state = state,
-                system = ctor.call(*parameterValues.toTypedArray()) as EntityProcessingSystem
-            )
-        }
-
-        val shouldUseContextWhileConsumingEffects = parameters.any {
-            it.type.classifier as? KClass<*> == Entities::class &&
-                    it.hasAnnotation<LagCompensated>()
-        }
-        if (shouldUseContextWhileConsumingEffects) {
-            return buildLagCompensatingEffectsConsumerInvoker(systemClass)
-        }
-        return SimpleEffectsConsumerSystemInvoker(ctor.call(*parameterValues.toTypedArray()) as EffectsConsumer, lagCompensatingEffectBus)
-    }
-
-    private fun <T : CottaSystem> getConstructor(systemClass: KClass<T>) =
-        systemClass.primaryConstructor ?: throw IllegalArgumentException(
-            "Class ${systemClass.qualifiedName} must have a primary constructor"
-        )
-
-    private fun <T : CottaSystem> buildLagCompensatingInputProcessingSystemInvoker(
-        systemClass: KClass<T>
-    ): SystemInvoker {
-        val ctor = getConstructor(systemClass)
-        val parameters = ctor.parameters
-        val parameterValues = parameters.map { param ->
-            (param.type.classifier as? KClass<*>)?.let {
-                when (it) {
-                    EffectBus::class -> lagCompensatingEffectBus
-                    Entities::class -> LatestEntities(state)
-                    else -> null
-                }
-            }
-        }
-        return LagCompensatingInputProcessingSystemInvoker(
-            state = state,
-            system = ctor.call(*parameterValues.toTypedArray()) as InputProcessingSystem,
-            entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
-                override fun getSawTickByEntity(entity: Entity): Long? {
-                    return (entity.ownedBy as? Entity.OwnedBy.Player)?.let { playersSawTicks[it.playerId] }
-                }
-            },
-            sawTickHolder = sawTickHolder
-        )
-    }
-
-    private fun <T : CottaSystem> buildLagCompensatingEffectsConsumerInvoker(
-        systemClass: KClass<T>
-    ): SystemInvoker {
-        val ctor = getConstructor(systemClass)
-        val parameters = ctor.parameters
-
-        val parameterValues = parameters.map { param ->
-            (param.type.classifier as? KClass<*>)?.let {
-                when (it) {
-                    EffectBus::class -> lagCompensatingEffectBus
-                    Entities::class -> ReadingFromPreviousTickEntities(sawTickHolder, state, tickProvider)
+                    Entities::class -> {
+                        if (param.hasAnnotation<LagCompensated>()) {
+                            ReadingFromPreviousTickEntities(sawTickHolder, state, tickProvider)
+                        } else {
+                            LatestEntities(state)
+                        }
+                    }
 
                     else -> null
                 }
             }
+        }.toTypedArray()
+        val system = ctor.call(*parameterValues) as CottaSystem
+        return when (system) {
+            is InputProcessingSystem -> {
+                // propagates sawTick to lagCompensatingEffectBus so that effect would know what was seen by the player
+                LagCompensatingInputProcessingSystemInvoker(
+                    state = state,
+                    system = system,
+                    entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
+                        override fun getSawTickByEntity(entity: Entity): Long? {
+                            return (entity.ownedBy as? Entity.OwnedBy.Player)?.let { playersSawTicks[it.playerId] }
+                        }
+                    },
+                    sawTickHolder = sawTickHolder
+                )
+            }
+
+            is EntityProcessingSystem -> {
+                // normal stuff, uses LatestEntities and lagCompensatingEffectBus (why not normal tho)
+                EntityProcessingSystemInvoker(
+                    state = state,
+                    system = system
+                )
+            }
+
+            is EffectsConsumer -> if (
+                parameters.any {
+                    it.type.classifier as? KClass<*> == Entities::class &&
+                            it.hasAnnotation<LagCompensated>()
+                }
+            ) {
+                LagCompensatingEffectsConsumerInvoker(
+                    lagCompensatingEffectBus,
+                    system,
+                    sawTickHolder
+                )
+            } else {
+                SimpleEffectsConsumerSystemInvoker(
+                    system,
+                    lagCompensatingEffectBus
+                )
+            }
         }
-        return LagCompensatingEffectsConsumerInvoker(
-            lagCompensatingEffectBus,
-            ctor.call(*parameterValues.toTypedArray()) as EffectsConsumer,
-            sawTickHolder
-        )
     }
 
     private class LatestEntities(private val state: CottaState) : Entities {
@@ -138,7 +113,7 @@ class InvokersFactoryImpl(
         private val sawTickHolder: SawTickHolder,
         private val state: CottaState,
         private val tickProvider: TickProvider
-    ): Entities {
+    ) : Entities {
         override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
             return state.entities().createEntity(ownedBy)
         }

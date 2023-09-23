@@ -1,7 +1,7 @@
 package com.mgtriffid.games.panna.shared.game.systems
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.effects.EffectsConsumer
+import com.mgtriffid.games.cotta.core.systems.EffectsConsumer
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.ORIENTATION_LEFT

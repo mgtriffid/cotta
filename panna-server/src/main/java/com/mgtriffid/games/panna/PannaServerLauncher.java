@@ -21,8 +21,11 @@ public class PannaServerLauncher {
 
     private static void configureLogging() {
         ((Logger) LoggerFactory.getLogger("org.eclipse")).setLevel(Level.INFO);
+        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl")).setLevel(Level.INFO);
         ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl.invokers")).setLevel(Level.INFO);
-        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.serialization.impl")).setLevel(Level.DEBUG);
+        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.serialization.impl")).setLevel(Level.INFO);
         ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.network.kryonet")).setLevel(Level.INFO);
+        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.simulation.invokers")).setLevel(Level.INFO);
+        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.panna.shared.game.systems")).setLevel(Level.INFO);
     }
 }

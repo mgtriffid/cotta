@@ -1,13 +1,11 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.core.entities.EntityId
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
-import com.mgtriffid.games.cotta.server.ClientsInput
+import com.mgtriffid.games.cotta.server.ClientsInputProvider
 import com.mgtriffid.games.cotta.server.impl.ClientGhost.ClientTickCursor.State.*
 import mu.KotlinLogging
 import java.util.*
@@ -17,15 +15,15 @@ private val logger = KotlinLogging.logger {}
 
 const val REQUIRED_CLIENT_INPUTS_BUFFER = 3
 
-class ClientsInputImpl<IR: InputRecipe>(
+class ClientsInputProviderImpl<IR: InputRecipe>(
     val network: CottaServerNetwork,
     val inputSerialization: InputSerialization<IR>,
     val inputSnapper: InputSnapper<IR>,
     val clientsGhosts: ClientsGhosts,
-) : ClientsInput {
+) : ClientsInputProvider {
     private val inputBuffers = HashMap<PlayerId, ClientInputBuffer<IR>>()
 
-    override fun getInput(): Map<EntityId, Collection<InputComponent<*>>> {
+    override fun getInput(): ClientsInput {
         val rawDtos = network.drainInputs()
         rawDtos.forEach { (connectionId, dto) ->
             val playerId = clientsGhosts.playerByConnection[connectionId]
@@ -43,6 +41,7 @@ class ClientsInputImpl<IR: InputRecipe>(
         // - inputs are ready client ghost is running
         // - inputs are not ready client ghost is running
         val inputRecipes = ArrayList<IR>()
+        val playersSawTicks = HashMap<PlayerId, Long>()
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val tickCursorState = ghost.tickCursorState()
             val inputBuffer = getInputBuffer(playerId)
@@ -52,6 +51,7 @@ class ClientsInputImpl<IR: InputRecipe>(
                         ghost.setCursorState(RUNNING)
                         val clientsTickToUse = inputBuffer.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
                         ghost.setLastUsedInput(clientsTickToUse)
+                        playersSawTicks[playerId] = clientsTickToUse
                         inputRecipes.add(inputBuffer.get(clientsTickToUse))
                     } else {
                         // do nothing. Ok, we don't have the input recipe yet, no big deal.
@@ -64,6 +64,7 @@ class ClientsInputImpl<IR: InputRecipe>(
                     if (inputBuffer.has(clientsTickToUse)) {
                         inputRecipes.add(inputBuffer.get(clientsTickToUse))
                         ghost.setLastUsedInput(clientsTickToUse)
+                        playersSawTicks[playerId] = clientsTickToUse
                     } else {
                         TODO("Not supported yet, need to take care of this legit missing packets case")
                     }
@@ -72,9 +73,10 @@ class ClientsInputImpl<IR: InputRecipe>(
         }
         cleanOldInputs()
 
-        return inputRecipes.map { recipe ->
+        val inputs = inputRecipes.map { recipe ->
             inputSnapper.unpackInputRecipe(recipe).entries
         }.flatten().associate { it.key to it.value }
+        return ClientsInput(playersSawTicks, inputs)
     }
 
     private fun getInputBuffer(playerId: PlayerId): ClientInputBuffer<IR> {

@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import kotlin.reflect.KClass
 
 interface InvokersFactory {
@@ -14,7 +15,7 @@ interface InvokersFactory {
         fun getInstance(
             lagCompensatingEffectBus: LagCompensatingEffectBus,
             state: CottaState,
-            playersSawTicks: HashMap<PlayerId, Long>,
+            playersSawTicks: PlayersSawTicks,
             tickProvider: TickProvider,
             sawTickHolder: InvokersFactoryImpl.SawTickHolder
         ): InvokersFactory = InvokersFactoryImpl(

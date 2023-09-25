@@ -9,6 +9,7 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
@@ -122,6 +123,9 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
         val simulationInput = object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return inputs
+            }
+            override fun playersSawTicks(): Map<PlayerId, Long> {
+                return emptyMap() // TODO
             }
         }
         clientSimulation.setInputForUpcomingTick(simulationInput)

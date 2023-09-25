@@ -12,6 +12,7 @@ import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingInputProcessingSystemInvoker.EntityOwnerSawTickProvider
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
@@ -20,10 +21,11 @@ import kotlin.reflect.full.hasAnnotation
 class InvokersFactoryImpl(
     private val lagCompensatingEffectBus: LagCompensatingEffectBus,
     private val state: CottaState,
-    private val playersSawTicks: HashMap<PlayerId, Long>,
+    private val playersSawTicks: PlayersSawTicks,
     private val tickProvider: TickProvider,
     private val sawTickHolder: SawTickHolder
 ) : InvokersFactory {
+    // simulation invoker! very specific thing
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
         val ctor = systemClass.getConstructor()
         val parameters = ctor.parameters
@@ -38,7 +40,6 @@ class InvokersFactoryImpl(
                             LatestEntities(state)
                         }
                     }
-
                     else -> null
                 }
             }

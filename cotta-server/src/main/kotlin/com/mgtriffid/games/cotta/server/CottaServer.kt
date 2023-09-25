@@ -33,7 +33,7 @@ class CottaServer(
             game,
             engine,
             serverNetwork,
-            ClientsInput.create(
+            ClientsInputProvider.create(
                 serverNetwork,
                 engine.getInputSerialization(),
                 engine.getInputSnapper(),

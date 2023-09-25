@@ -100,6 +100,8 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input1)
                 )
             }
+
+            override fun playersSawTicks() = emptyMap<PlayerId, Long>()
         })
 
         serverSimulation.tick()
@@ -114,6 +116,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input2)
                 )
             }
+            override fun playersSawTicks() = emptyMap<PlayerId, Long>()
         })
 
         serverSimulation.tick()
@@ -147,13 +150,13 @@ class ServerSimulationTest {
             serverSimulation.tick()
         }
 
-        serverSimulation.setPlayerSawTick(playerId, 2L)
         serverSimulation.setInputForUpcomingTick(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input)
                 )
             }
+            override fun playersSawTicks() = mapOf(playerId to 2L)
         })
 
 
@@ -168,6 +171,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input2)
                 )
             }
+            override fun playersSawTicks() = mapOf(playerId to 3L)
         })
         serverSimulation.tick()
 
@@ -219,7 +223,6 @@ class ServerSimulationTest {
         val damageDealerId = damageDealer.id
         val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
-        serverSimulation.setPlayerSawTick(playerId, 2L)
         val input1 = PlayerInputTestComponent.create(
             aim = 4,
             shoot = true
@@ -230,6 +233,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input1)
                 )
             }
+            override fun playersSawTicks() = mapOf(playerId to 2L)
         })
         serverSimulation.tick()
         val dataToBeSentToClients = serverSimulation.getDataToBeSentToClients()
@@ -251,6 +255,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input2)
                 )
             }
+            override fun playersSawTicks() = mapOf(playerId to 3L)
         })
         assertEquals(
             4,

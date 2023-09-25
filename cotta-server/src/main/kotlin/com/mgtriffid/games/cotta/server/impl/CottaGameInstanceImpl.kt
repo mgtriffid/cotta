@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
@@ -14,7 +15,7 @@ import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
-import com.mgtriffid.games.cotta.server.ClientsInput
+import com.mgtriffid.games.cotta.server.ClientsInputProvider
 import com.mgtriffid.games.cotta.server.CottaGameInstance
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
@@ -29,7 +30,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     val game: CottaGame,
     val engine: CottaEngine<SR, DR, IR>,
     val network: CottaServerNetwork,
-    val clientsInput: ClientsInput,
+    val clientsInputProvider: ClientsInputProvider,
     val clientsGhosts: ClientsGhosts,
 ): CottaGameInstance {
     private val historyLength = 8
@@ -108,11 +109,12 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     }
 
     private fun fetchIncomingInput(): SimulationInput {
-        val clientsOwnedEntitiesInput = clientsInput.getInput()
+        val clientsInput = clientsInputProvider.getInput()
+        val clientsOwnedEntitiesInput = clientsInput
 
         val serverOwnedEntitiesInput = serverInputProvider.input(state.entities())
 
-        val inputs = clientsOwnedEntitiesInput + serverOwnedEntitiesInput
+        val inputs = clientsOwnedEntitiesInput.input + serverOwnedEntitiesInput
 
         logger.trace { "Incoming input has ${inputs.size} entries" }
 
@@ -125,6 +127,10 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
             // TODO protect against malicious client sending input for entity not belonging to them
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return inputs
+            }
+
+            override fun playersSawTicks(): Map<PlayerId, Long> {
+                return clientsInput.playersSawTicks
             }
         }
     }

@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.HistoricalLagCompensatingEffectBus
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
@@ -27,10 +28,15 @@ class ClientSimulationImpl(
 ) : ClientSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
-    private val playersSawTicks = HashMap<PlayerId, Long>()
-
+    // TODO null object? lateinit var? tf is wrong with this
     private var inputForUpcomingTick: SimulationInput = object : SimulationInput {
         override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> = emptyMap()
+        override fun playersSawTicks(): Map<PlayerId, Long> = emptyMap()
+    }
+    private val playersSawTicks = object: PlayersSawTicks {
+        override fun get(playerId: PlayerId): Long? {
+            return inputForUpcomingTick.playersSawTicks()[playerId]
+        }
     }
     private val effectBus = EffectBus.getInstance()
     private val effectsHistory = EffectsHistory(historyLength = historyLength)

@@ -35,7 +35,6 @@ interface ServerSimulation {
     fun setMetaEntitiesInputComponents(components: Set<KClass<out InputComponent<*>>>)
 
     fun tick()
-    fun setPlayerSawTick(playerId: PlayerId, tick: Long)
     fun enterGame(intent: EnterGameIntent): PlayerId
     fun getDataToBeSentToClients(): DataForClients
     fun setInputForUpcomingTick(input: SimulationInput)

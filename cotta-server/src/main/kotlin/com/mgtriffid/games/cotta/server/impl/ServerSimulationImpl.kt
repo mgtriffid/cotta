@@ -12,6 +12,7 @@ import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.core.simulation.invokers.HistoricalLagCompensatingEffectBus
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
@@ -31,14 +32,18 @@ class ServerSimulationImpl(
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
-    private val playersSawTicks = HashMap<PlayerId, Long>()
-
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
     private val metaEntities = HashMap<PlayerId, EntityId>()
-    // TODO stuff this with inputs from clients
+    // TODO "null object" pattern perhaps?
     private var inputForUpcomingTick: SimulationInput = object : SimulationInput {
         override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> = emptyMap()
+        override fun playersSawTicks(): Map<PlayerId, Long> = emptyMap()
+    }
+    private val playersSawTicks: PlayersSawTicks = object : PlayersSawTicks {
+        override fun get(playerId: PlayerId): Long? {
+            return inputForUpcomingTick.playersSawTicks()[playerId]
+        }
     }
     private val effectBus = EffectBus.getInstance()
 
@@ -98,10 +103,6 @@ class ServerSimulationImpl(
                 e.setInputComponent(c, component)
             }
         }
-    }
-
-    override fun setPlayerSawTick(playerId: PlayerId, tick: Long) {
-        playersSawTicks[playerId] = tick
     }
 
     override fun enterGame(intent: EnterGameIntent): PlayerId {

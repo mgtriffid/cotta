@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.simulation
 
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import mu.KotlinLogging
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
@@ -52,4 +53,6 @@ interface SimulationInput {
             factoryFunctions[component] = it
         }
     }
+
+    fun playersSawTicks(): Map<PlayerId, Long>
 }

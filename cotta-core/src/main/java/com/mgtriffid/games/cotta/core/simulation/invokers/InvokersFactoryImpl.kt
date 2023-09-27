@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.annotations.LagCompensated
 import com.mgtriffid.games.cotta.core.effects.EffectBus
+import com.mgtriffid.games.cotta.core.effects.EffectPublisher
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumer
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
@@ -26,10 +27,13 @@ class InvokersFactoryImpl(
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
         val ctor = systemClass.getConstructor()
         val parameters = ctor.parameters
+        val publisher = lagCompensatingEffectBus.publisher()
         val parameterValues = parameters.map { param: KParameter ->
             (param.type.classifier as? KClass<*>)?.let {
                 when (it) {
-                    EffectBus::class -> lagCompensatingEffectBus
+                    EffectPublisher::class -> {
+                        publisher
+                    }
                     Entities::class -> {
                         if (param.hasAnnotation<LagCompensated>()) {
                             ReadingFromPreviousTickEntities(sawTickHolder, state)

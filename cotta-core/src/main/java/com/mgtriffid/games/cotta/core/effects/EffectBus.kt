@@ -8,9 +8,9 @@ interface EffectBus {
         fun getInstance(): EffectBus = EffectBusImpl()
     }
 
-    fun fire(effect: CottaEffect)
-
     fun effects(): Collection<CottaEffect>
 
     fun clear()
+
+    fun publisher() : EffectPublisher
 }

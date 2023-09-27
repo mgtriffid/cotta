@@ -46,7 +46,7 @@ class InvokersFactoryImpl(
             is InputProcessingSystem -> {
                 // propagates sawTick to lagCompensatingEffectBus so that effect would know what was seen by the player
                 LagCompensatingInputProcessingSystemInvoker(
-                    state = state,
+                    entities = LatestEntities(state),
                     system = system,
                     entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
                         override fun getSawTickByEntity(entity: Entity): Long? {

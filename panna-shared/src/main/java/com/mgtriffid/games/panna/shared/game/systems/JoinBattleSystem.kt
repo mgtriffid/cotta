@@ -1,7 +1,7 @@
 package com.mgtriffid.games.panna.shared.game.systems
 
 import com.mgtriffid.games.cotta.core.annotations.Predicted
-import com.mgtriffid.games.cotta.core.effects.EffectBus
+import com.mgtriffid.games.cotta.core.effects.EffectPublisher
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
@@ -27,7 +27,7 @@ private val logger = KotlinLogging.logger {}
 @Predicted
 class JoinBattleSystem(
     private val entities: Entities,
-    private val effectBus: EffectBus
+    private val effectPublisher: EffectPublisher
 ) : InputProcessingSystem {
     override fun process(e: Entity) {
         if (e.hasInputComponent(JoinBattleMetaEntityInputComponent::class)) {
@@ -35,7 +35,7 @@ class JoinBattleSystem(
             if (join) {
                 // todo make sure it doesn't fire twice
                 // when this fires then we record some context
-                effectBus.fire(JoinBattleEffect(e.ownedBy))
+                effectPublisher.fire(JoinBattleEffect(e.ownedBy))
             }
         }
     }

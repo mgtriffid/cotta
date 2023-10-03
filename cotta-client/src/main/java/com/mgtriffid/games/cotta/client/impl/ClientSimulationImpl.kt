@@ -51,7 +51,6 @@ class ClientSimulationImpl(
             ),
             state,
             playersSawTicks,
-            tickProvider,
             sawTickHolder
         )
     }

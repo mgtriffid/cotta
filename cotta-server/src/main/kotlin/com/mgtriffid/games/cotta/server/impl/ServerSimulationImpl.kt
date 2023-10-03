@@ -60,7 +60,6 @@ class ServerSimulationImpl(
             ),
             state,
             playersSawTicks,
-            tickProvider,
             sawTickHolder
         )
     }

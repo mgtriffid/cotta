@@ -35,19 +35,22 @@ class ServerSimulationImpl(
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
     private val metaEntities = HashMap<PlayerId, EntityId>()
+    private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
+
     // TODO "null object" pattern perhaps?
     private var inputForUpcomingTick: SimulationInput = object : SimulationInput {
         override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> = emptyMap()
         override fun playersSawTicks(): Map<PlayerId, Long> = emptyMap()
     }
+
     private val playersSawTicks: PlayersSawTicks = object : PlayersSawTicks {
         override fun get(playerId: PlayerId): Long? {
             return inputForUpcomingTick.playersSawTicks()[playerId]
         }
     }
+
     private val effectBus = EffectBus.getInstance()
 
-    private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
     private val effectsHistory = EffectsHistory(historyLength = historyLength)
 
     private val invokersFactory: InvokersFactory = run {

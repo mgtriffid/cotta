@@ -16,20 +16,19 @@ import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_NONE
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
-import com.mgtriffid.games.panna.shared.game.systems.JoinBattleEffectConsumer
+import com.mgtriffid.games.panna.shared.game.systems.JoinBattleEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.JoinBattleSystem
-import com.mgtriffid.games.panna.shared.game.systems.MovementEffectConsumer
+import com.mgtriffid.games.panna.shared.game.systems.MovementEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.WalkingInputProcessingSystem
 
 class PannaGame : CottaGame {
     override val serverSystems = listOf(
         WalkingInputProcessingSystem::class,
-        MovementEffectConsumer::class,
+        MovementEffectConsumerSystem::class,
         JoinBattleSystem::class,
-        JoinBattleEffectConsumer::class,
+        JoinBattleEffectConsumerSystem::class,
     )
 
     override fun initializeServerState(state: CottaState) {

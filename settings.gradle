@@ -4,4 +4,5 @@ include 'desktop', 'core',
         'panna-devutils',
         'cotta-server', 'cotta-core', 'cotta-client',
         'cotta-network-api', 'cotta-network-kryonet',
-        'cotta-gdx', 'cotta-annotations-processor', 'cotta-annotations', 'cotta-utils'
+        'cotta-gdx', 'cotta-annotations-processor', 'cotta-annotations', 'cotta-utils',
+        'cotta-guice'

@@ -203,3 +203,11 @@ project(":panna-lobby") {
         implementation project(":cotta-core")
     }
 }
+
+project(":cotta-guice") {
+    dependencies {
+        implementation "com.google.inject:guice:7.0.0"
+        implementation 'com.google.inject.extensions:guice-assistedinject:7.0.0'
+        api "com.github.crykn:kryonet:2.22.7"
+    }
+}

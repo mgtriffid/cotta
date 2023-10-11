@@ -14,13 +14,13 @@ import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestCompo
 import com.mgtriffid.games.cotta.server.workload.components.VelocityTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.systems.BlankTestSystem
-import com.mgtriffid.games.cotta.server.workload.systems.EntityShotTestEffectConsumer
-import com.mgtriffid.games.cotta.server.workload.systems.HealthRegenerationTestEffectsConsumer
+import com.mgtriffid.games.cotta.server.workload.systems.EntityShotTestEffectConsumerSystem
+import com.mgtriffid.games.cotta.server.workload.systems.HealthRegenerationTestEffectsConsumerSystem
 import com.mgtriffid.games.cotta.server.workload.systems.LagCompensatedShotFiredTestEffectConsumer
 import com.mgtriffid.games.cotta.server.workload.systems.MovementTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.PlayerInputProcessingTestSystem
 import com.mgtriffid.games.cotta.server.workload.systems.RegenerationTestSystem
-import com.mgtriffid.games.cotta.server.workload.systems.ShotFiredTestEffectConsumer
+import com.mgtriffid.games.cotta.server.workload.systems.ShotFiredTestEffectConsumerSystem
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,7 +39,7 @@ class ServerSimulationTest {
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(RegenerationTestSystem::class)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
         serverSimulation.tick()
 
@@ -57,7 +57,7 @@ class ServerSimulationTest {
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(RegenerationTestSystem::class)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
         serverSimulation.tick()
         serverSimulation.tick()
@@ -82,9 +82,9 @@ class ServerSimulationTest {
         val damageDealerId = damageDealer.id
         val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
-        serverSimulation.registerSystem(ShotFiredTestEffectConsumer::class)
+        serverSimulation.registerSystem(ShotFiredTestEffectConsumerSystem::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
-        serverSimulation.registerSystem(EntityShotTestEffectConsumer::class)
+        serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
 
         serverSimulation.tick()
         serverSimulation.tick()
@@ -145,7 +145,7 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         serverSimulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
-        serverSimulation.registerSystem(EntityShotTestEffectConsumer::class)
+        serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
         repeat(6) {
             serverSimulation.tick()
         }
@@ -204,7 +204,7 @@ class ServerSimulationTest {
         entity.addComponent(HealthTestComponent.create(0))
         val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(RegenerationTestSystem::class)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumer::class)
+        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
         serverSimulation.tick()
 

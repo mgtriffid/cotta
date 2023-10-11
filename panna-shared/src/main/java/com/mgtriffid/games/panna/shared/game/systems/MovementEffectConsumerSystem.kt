@@ -1,7 +1,7 @@
 package com.mgtriffid.games.panna.shared.game.systems
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.systems.EffectsConsumer
+import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_DOWN
@@ -12,8 +12,8 @@ import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 
 private val logger = mu.KotlinLogging.logger {}
 
-class MovementEffectConsumer(private val entities: Entities) : EffectsConsumer {
-    override fun handleEffect(e: CottaEffect) {
+class MovementEffectConsumerSystem(private val entities: Entities) : EffectsConsumerSystem {
+    override fun handle(e: CottaEffect) {
         if (e is MovementEffect) {
             logger.debug { "Received MovementEffect: $e" }
             val entity = entities.get(e.entityId)

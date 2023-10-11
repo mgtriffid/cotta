@@ -1,7 +1,7 @@
 package com.mgtriffid.games.panna.shared.game.systems
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.systems.EffectsConsumer
+import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.ORIENTATION_LEFT
@@ -12,8 +12,8 @@ import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
 import com.mgtriffid.games.panna.shared.game.effects.JoinBattleEffect
 
-class JoinBattleEffectConsumer(private val entities: Entities) : EffectsConsumer {
-    override fun handleEffect(e: CottaEffect) {
+class JoinBattleEffectConsumerSystem(private val entities: Entities) : EffectsConsumerSystem {
+    override fun handle(e: CottaEffect) {
         if (e is JoinBattleEffect) {
             val dude = entities.createEntity(ownedBy = e.ownedBy)
             dude.addComponent(PositionComponent.create(200, 250, ORIENTATION_LEFT))

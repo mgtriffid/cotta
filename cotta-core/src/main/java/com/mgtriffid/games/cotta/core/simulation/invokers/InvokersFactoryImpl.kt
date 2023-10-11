@@ -1,9 +1,8 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.annotations.LagCompensated
-import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.EffectPublisher
-import com.mgtriffid.games.cotta.core.systems.EffectsConsumer
+import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -69,7 +68,7 @@ class InvokersFactoryImpl(
                 )
             }
 
-            is EffectsConsumer -> if (
+            is EffectsConsumerSystem -> if (
                 parameters.any {
                     it.type.classifier as? KClass<*> == Entities::class &&
                             it.hasAnnotation<LagCompensated>()

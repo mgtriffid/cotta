@@ -8,7 +8,6 @@ import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 
 // TODO better naming
 // TODO better placing
-// TODO separate publisher and the whole EffectBus
 interface LagCompensatingEffectBus : EffectBus {
     fun getTickForEffect(effect: CottaEffect): Long?
 }

@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
 import com.mgtriffid.games.cotta.server.impl.ClientGhost.ClientTickCursor.State.*
+import jakarta.inject.Inject
 import mu.KotlinLogging
 import java.util.*
 import kotlin.collections.HashMap
@@ -15,7 +16,7 @@ private val logger = KotlinLogging.logger {}
 
 const val REQUIRED_CLIENT_INPUTS_BUFFER = 3
 
-class ClientsInputProviderImpl<IR: InputRecipe>(
+class ClientsInputProviderImpl<IR: InputRecipe> @Inject constructor(
     val network: CottaServerNetwork,
     val inputSerialization: InputSerialization<IR>,
     val inputSnapper: InputSnapper<IR>,

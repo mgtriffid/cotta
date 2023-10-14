@@ -19,15 +19,16 @@ import com.mgtriffid.games.cotta.core.serialization.impl.MapsSnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
+import jakarta.inject.Inject
 import kotlin.reflect.KClass
 
-class CottaEngineImpl : CottaEngine<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe> {
-
-    private val componentsRegistry = ComponentsRegistryImpl()
-    private val stateSnapper = MapsStateSnapper()
-    private val snapsSerialization = MapsSnapsSerialization()
-    private val inputSnapper = MapsInputSnapper()
-    private val inputSerialization = MapsInputSerialization()
+class CottaEngineImpl @Inject constructor(
+    private val componentsRegistry: ComponentsRegistryImpl,
+    private val stateSnapper: MapsStateSnapper,
+    private val snapsSerialization: MapsSnapsSerialization,
+    private val inputSnapper: MapsInputSnapper,
+    private val inputSerialization: MapsInputSerialization,
+) : CottaEngine<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe> {
 
     init {
         componentsRegistry.addRegistrationListener(object : ComponentRegistrationListener {

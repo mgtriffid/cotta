@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
+import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.ClientSimulation
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientInput
@@ -28,14 +29,14 @@ const val STATE_WAITING_THRESHOLD = 5000L
 
 private val logger = KotlinLogging.logger {}
 
-class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
+class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
     val game: CottaGame,
     val engine: CottaEngine<SR, DR, IR>, // weird type parameterization
     val network: CottaClientNetwork,
-    val input: CottaClientInput,
-    val lagCompLimit: Int,
-    val bufferLength: Int
+    val input: CottaClientInput
 ) : CottaClient {
+    val lagCompLimit: Int = 8 // TODO move to config and bind properly
+    val bufferLength: Int = 3
     private val historyLength = 16
     var connected = false
     private val incomingDataBuffer = IncomingDataBuffer<SR, DR, IR>()

@@ -21,12 +21,13 @@ import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
+import jakarta.inject.Inject
 import mu.KotlinLogging
 import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
+class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
     val game: CottaGame,
     val engine: CottaEngine<SR, DR, IR>,
     val network: CottaServerNetwork,
@@ -53,7 +54,6 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe>(
     )
 
     override fun run() {
-        network.initialize()
         registerComponents()
         initializeState()
         registerSystems()

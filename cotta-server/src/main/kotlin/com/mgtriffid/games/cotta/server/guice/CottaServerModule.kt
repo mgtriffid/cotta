@@ -9,6 +9,7 @@ import com.google.inject.TypeLiteral
 import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
@@ -32,11 +33,13 @@ import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetwork
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
 import com.mgtriffid.games.cotta.server.CottaGameInstance
 import com.mgtriffid.games.cotta.server.ServerSimulation
+import com.mgtriffid.games.cotta.server.ServerSimulationInput
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import com.mgtriffid.games.cotta.server.impl.ClientsGhosts
 import com.mgtriffid.games.cotta.server.impl.ClientsInputProviderImpl
 import com.mgtriffid.games.cotta.server.impl.CottaGameInstanceImpl
 import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
+import com.mgtriffid.games.cotta.server.impl.ServerSimulationInputImpl
 import com.mgtriffid.games.cotta.server.impl.ServerToClientDataChannelImpl
 import jakarta.inject.Named
 
@@ -61,6 +64,10 @@ class CottaServerModule(
                 .to(object : TypeLiteral<ServerToClientDataChannelImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
 
             bind(ServerSimulation::class.java).to(ServerSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+
+            bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
+            bind(ServerSimulationInput::class.java).to(ServerSimulationInputImpl::class.java).`in`(Scopes.SINGLETON)
+
             bindEngineParts()
         }
     }

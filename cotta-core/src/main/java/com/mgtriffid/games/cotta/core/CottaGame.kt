@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 // Implement this to configure your actual game
 interface CottaGame {
     val serverSystems: List<KClass<*>>
-    val serverInputProvider: ServerInputProvider
+    val nonPlayerInputProvider: NonPlayerInputProvider
     // how to start
     fun initializeServerState(state: CottaState)
     val componentClasses: Set<KClass<out Component<*>>>

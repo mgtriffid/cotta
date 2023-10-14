@@ -2,7 +2,7 @@ package com.mgtriffid.games.panna.shared.lobby
 
 import com.mgtriffid.games.cotta.core.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
-import com.mgtriffid.games.cotta.core.ServerInputProvider
+import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.EntityId
@@ -58,7 +58,7 @@ class PannaGame : CottaGame {
         JoinBattleMetaEntityInputComponent::class
     )
 
-    override val serverInputProvider = object: ServerInputProvider {
+    override val nonPlayerInputProvider = object: NonPlayerInputProvider {
         var goingLeft = false
         override fun input(entities: Entities): Map<EntityId, Collection<InputComponent<*>>> {
             return entities.all().filter { it.hasComponent(GraverobberNpcComponent::class) }.associate {

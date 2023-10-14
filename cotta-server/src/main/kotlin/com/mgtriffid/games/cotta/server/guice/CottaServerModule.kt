@@ -6,8 +6,13 @@ import com.google.inject.Provides
 import com.google.inject.Scopes
 import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
+import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
+import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
@@ -26,9 +31,14 @@ import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetwork
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
 import com.mgtriffid.games.cotta.server.CottaGameInstance
+import com.mgtriffid.games.cotta.server.ServerSimulation
+import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import com.mgtriffid.games.cotta.server.impl.ClientsGhosts
 import com.mgtriffid.games.cotta.server.impl.ClientsInputProviderImpl
 import com.mgtriffid.games.cotta.server.impl.CottaGameInstanceImpl
+import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
+import com.mgtriffid.games.cotta.server.impl.ServerToClientDataChannelImpl
+import jakarta.inject.Named
 
 class CottaServerModule(
     private val game: CottaGame
@@ -38,8 +48,19 @@ class CottaServerModule(
             bind(CottaGameInstance::class.java).to(object : TypeLiteral<CottaGameInstanceImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>() {})
             bind(CottaGame::class.java).toInstance(game)
             bind(ClientsGhosts::class.java).`in`(Scopes.SINGLETON)
-            bind(ClientsInputProvider::class.java).to(object : TypeLiteral<ClientsInputProviderImpl<MapsInputRecipe>>() {}).`in`(Scopes.SINGLETON)
+
+            bind(ClientsInputProvider::class.java)
+                .to(object : TypeLiteral<ClientsInputProviderImpl<MapsInputRecipe>>() {})
+                .`in`(Scopes.SINGLETON)
+
             bind(ComponentsRegistryImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
+            bind(Int::class.java).annotatedWith(named("historyLength")).toInstance(8)
+            bind(CottaState::class.java).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(ServerToClientDataChannel::class.java)
+                .to(object : TypeLiteral<ServerToClientDataChannelImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
+
+            bind(ServerSimulation::class.java).to(ServerSimulationImpl::class.java).`in`(Scopes.SINGLETON)
             bindEngineParts()
         }
     }

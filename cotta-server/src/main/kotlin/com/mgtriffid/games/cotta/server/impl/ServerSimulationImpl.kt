@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
+import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
@@ -19,16 +20,17 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactoryImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBusImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
+import jakarta.inject.Named
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class ServerSimulationImpl(
+class ServerSimulationImpl @Inject constructor(
     private val state: CottaState,
     private val tickProvider: TickProvider,
-    private val historyLength: Int
+    @Named("historyLength") private val historyLength: Int
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 

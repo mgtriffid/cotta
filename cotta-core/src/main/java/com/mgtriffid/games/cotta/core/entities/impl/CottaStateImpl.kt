@@ -1,13 +1,15 @@
 package com.mgtriffid.games.cotta.core.entities.impl
 
+import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.exceptions.EcsRuntimeException
+import jakarta.inject.Named
+import jdk.jfr.Name
 
-class CottaStateImpl(
-    private val historyLength: Int,
-    // TODO doesn't have to be a dependency actually
+class CottaStateImpl @Inject constructor(
+    @Named("historyLength") private val historyLength: Int,
     private val tick: TickProvider
 ) : CottaState {
 

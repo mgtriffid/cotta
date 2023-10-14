@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
+import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
@@ -19,7 +20,7 @@ import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
 
-class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> (
+class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
     private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts,
     private val network: CottaServerNetwork,

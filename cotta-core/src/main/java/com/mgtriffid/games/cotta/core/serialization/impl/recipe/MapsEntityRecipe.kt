@@ -1,8 +1,7 @@
-package com.mgtriffid.games.cotta.core.serialization.impl.recipes
+package com.mgtriffid.games.cotta.core.serialization.impl.recipe
 
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
-import com.mgtriffid.games.cotta.core.registry.ComponentKey
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.EntityRecipe
 

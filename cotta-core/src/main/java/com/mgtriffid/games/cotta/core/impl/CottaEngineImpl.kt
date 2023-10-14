@@ -14,11 +14,11 @@ import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSerialization
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsSnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import kotlin.reflect.KClass
 
 class CottaEngineImpl : CottaEngine<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe> {

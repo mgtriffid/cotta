@@ -44,12 +44,11 @@ public class CottaServerModule extends AbstractModule {
     @Override
     protected void configure() {
         bindScope(GameInstanceScoped.class, gameInstanceScope);
-        install(new ChildModule());
     }
 
     @Provides
     @GameInstanceScoped
-    SimulationTick provideSimulationTick(SomeBean someBean) {
+    SimulationTick provideSimulationTick() {
         return new SimulationTick();
     }
 

@@ -11,9 +11,9 @@ import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapInputComponentRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsEntityInputRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsInputRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapInputComponentRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsEntityInputRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapInputComponentRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsEntityInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 
 class MapsInputSerialization: InputSerialization<MapsInputRecipe> {
     private val kryo = Kryo()

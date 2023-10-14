@@ -7,9 +7,9 @@ import com.mgtriffid.games.cotta.core.registry.ComponentKey
 import com.mgtriffid.games.cotta.core.registry.ComponentSpec
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsEntityInputRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapInputComponentRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipes.MapsInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsEntityInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapInputComponentRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import mu.KotlinLogging
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass

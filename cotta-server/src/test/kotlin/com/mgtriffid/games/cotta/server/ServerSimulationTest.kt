@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
+import com.mgtriffid.games.cotta.server.impl.MetaEntitiesImpl
 import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
 import com.mgtriffid.games.cotta.server.impl.ServerSimulationInputImpl
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
@@ -289,6 +290,7 @@ class ServerSimulationTest {
         state = state,
         tickProvider = tickProvider,
         historyLength = 8,
-        serverSimulationInput = serverSimulationInput
+        serverSimulationInput = serverSimulationInput,
+        metaEntities = MetaEntitiesImpl()
     )
 }

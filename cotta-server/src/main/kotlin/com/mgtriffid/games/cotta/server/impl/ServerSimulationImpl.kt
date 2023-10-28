@@ -11,6 +11,7 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.DataForClients
+import com.mgtriffid.games.cotta.server.MetaEntities
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import com.mgtriffid.games.cotta.server.ServerSimulationInput
 import jakarta.inject.Named
@@ -24,13 +25,13 @@ class ServerSimulationImpl @Inject constructor(
     private val state: CottaState,
     private val tickProvider: TickProvider,
     @Named("historyLength") private val historyLength: Int,
-    private val serverSimulationInput: ServerSimulationInput
+    private val serverSimulationInput: ServerSimulationInput,
+    private val metaEntities: MetaEntities
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
-    private val metaEntities = HashMap<PlayerId, EntityId>()
     private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
 
     private val playersSawTicks: PlayersSawTicks = object : PlayersSawTicks {

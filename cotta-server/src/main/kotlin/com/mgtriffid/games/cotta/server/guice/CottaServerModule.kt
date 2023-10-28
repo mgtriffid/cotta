@@ -57,6 +57,7 @@ class CottaServerModule(
             bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
             bind(ServerSimulationInputProvider::class.java).to(ServerSimulationInputProviderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(ServerSimulationInput::class.java).to(ServerSimulationInputImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(MetaEntities::class.java).to(MetaEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
 
             bindEngineParts()
         }

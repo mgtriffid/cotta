@@ -23,7 +23,7 @@ class InvokersFactoryImpl(
     private val sawTickHolder: SawTickHolder
 ) : InvokersFactory {
     // simulation invoker! very specific thing
-    override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker {
+    override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, T> {
         val ctor = systemClass.getConstructor()
         val parameters = ctor.parameters
         val publisher = lagCompensatingEffectBus.publisher()
@@ -44,28 +44,26 @@ class InvokersFactoryImpl(
                 }
             }
         }.toTypedArray()
-        val system = ctor.call(*parameterValues) as CottaSystem
+        val system = ctor.call(*parameterValues)
         return when (system) {
             is InputProcessingSystem -> {
                 // propagates sawTick to lagCompensatingEffectBus so that effect would know what was seen by the player
-                LagCompensatingInputProcessingSystemInvoker(
+                Pair(LagCompensatingInputProcessingSystemInvoker(
                     entities = LatestEntities(state),
-                    system = system,
                     entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
                         override fun getSawTickByEntity(entity: Entity): Long? {
                             return (entity.ownedBy as? Entity.OwnedBy.Player)?.let { playersSawTicks[it.playerId] }
                         }
                     },
                     sawTickHolder = sawTickHolder
-                )
+                ), system)
             }
 
             is EntityProcessingSystem -> {
                 // normal stuff, uses LatestEntities and lagCompensatingEffectBus (why not normal tho)
-                EntityProcessingSystemInvoker(
-                    state = state,
-                    system = system
-                )
+                Pair(EntityProcessingSystemInvoker(
+                    state = state
+                ), system)
             }
 
             is EffectsConsumerSystem -> if (
@@ -74,17 +72,17 @@ class InvokersFactoryImpl(
                             it.hasAnnotation<LagCompensated>()
                 }
             ) {
-                LagCompensatingEffectsConsumerInvoker(
+                Pair(LagCompensatingEffectsConsumerInvoker(
                     lagCompensatingEffectBus,
-                    system,
                     sawTickHolder
-                )
+                ), system)
             } else {
-                SimpleEffectsConsumerSystemInvoker(
-                    system,
+                Pair(SimpleEffectsConsumerSystemInvoker(
                     lagCompensatingEffectBus
-                )
+                ), system)
             }
+
+            else -> { throw IllegalStateException("Unexpected implementation of CottaSystem") }
         }
     }
 

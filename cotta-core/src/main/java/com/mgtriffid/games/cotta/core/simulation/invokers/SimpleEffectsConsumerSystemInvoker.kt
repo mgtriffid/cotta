@@ -8,16 +8,15 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class SimpleEffectsConsumerSystemInvoker(
-    private val consumer: EffectsConsumerSystem,
     private val effectBus: EffectBus
-) : SystemInvoker {
-    override fun invoke() {
-        logger.debug { "Invoked ${consumer::class.qualifiedName}" }
-        effectBus.effects().forEach(::process)
+) : SystemInvoker<EffectsConsumerSystem> {
+    override fun invoke(system: EffectsConsumerSystem) {
+        logger.debug { "Invoked ${system::class.qualifiedName}" }
+        effectBus.effects().forEach { process(it, system) }
     }
 
-    private fun process(effect: CottaEffect) {
-        logger.debug { "${consumer::class.simpleName} processing effect $effect" }
-        consumer.handle(effect)
+    private fun process(effect: CottaEffect, system: EffectsConsumerSystem) {
+        logger.debug { "${system::class.simpleName} processing effect $effect" }
+        system.handle(effect)
     }
 }

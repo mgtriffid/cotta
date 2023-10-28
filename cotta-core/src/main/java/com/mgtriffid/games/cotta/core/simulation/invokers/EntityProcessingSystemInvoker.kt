@@ -8,15 +8,14 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class EntityProcessingSystemInvoker(
-    private val state: CottaState,
-    private val system: EntityProcessingSystem
-) : SystemInvoker {
-    override fun invoke() {
+    private val state: CottaState
+) : SystemInvoker<EntityProcessingSystem> {
+    override fun invoke(system: EntityProcessingSystem) {
         logger.trace { "Invoked ${system::class.qualifiedName}" }
-        state.entities().all().forEach(::process)
+        state.entities().all().forEach { process(it, system) }
     }
 
-    private fun process(entity: Entity) {
+    private fun process(entity: Entity, system: EntityProcessingSystem) {
         logger.trace { "${system::class.simpleName} processing entity ${entity.id}" }
         system.process(entity)
     }

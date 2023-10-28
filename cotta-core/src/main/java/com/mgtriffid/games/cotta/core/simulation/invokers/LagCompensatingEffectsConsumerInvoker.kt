@@ -8,18 +8,17 @@ private val logger = KotlinLogging.logger {}
 
 class LagCompensatingEffectsConsumerInvoker(
     private val effectBus: LagCompensatingEffectBus,
-    private val consumer: EffectsConsumerSystem,
     private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
-) : SystemInvoker {
-    override fun invoke() {
-        logger.debug { "Invoked ${consumer::class.qualifiedName}" }
-        effectBus.effects().forEach(::process)
+) : SystemInvoker<EffectsConsumerSystem> {
+    override fun invoke(system: EffectsConsumerSystem) {
+        logger.debug { "Invoked ${system::class.qualifiedName}" }
+        effectBus.effects().forEach { process(it, system) }
     }
 
-    private fun process(effect: CottaEffect) {
-        logger.debug { "${consumer::class.simpleName} processing effect $effect" }
+    private fun process(effect: CottaEffect, system: EffectsConsumerSystem) {
+        logger.debug { "${system::class.simpleName} processing effect $effect" }
         sawTickHolder.tick = effectBus.getTickForEffect(effect)
-        consumer.handle(effect)
+        system.handle(effect)
         sawTickHolder.tick = null
     }
 }

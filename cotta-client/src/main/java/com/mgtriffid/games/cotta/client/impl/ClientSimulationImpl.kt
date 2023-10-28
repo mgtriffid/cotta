@@ -26,7 +26,7 @@ class ClientSimulationImpl(
     private val tickProvider: TickProvider,
     private val historyLength: Int
 ) : ClientSimulation {
-    private val systemInvokers = ArrayList<SystemInvoker>()
+    private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, *>>() // TODO pathetic casts
 
     // TODO null object? lateinit var? tf is wrong with this
     private var inputForUpcomingTick: SimulationInput = object : SimulationInput {

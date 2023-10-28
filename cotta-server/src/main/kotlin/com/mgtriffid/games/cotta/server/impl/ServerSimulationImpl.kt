@@ -6,7 +6,6 @@ import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
-import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
@@ -28,7 +27,7 @@ class ServerSimulationImpl @Inject constructor(
     private val serverSimulationInput: ServerSimulationInput,
     private val metaEntities: MetaEntities
 ) : ServerSimulation {
-    private val systemInvokers = ArrayList<SystemInvoker>()
+    private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
@@ -75,8 +74,8 @@ class ServerSimulationImpl @Inject constructor(
         effectBus.clear()
         state.advance()
         putInputIntoEntities()
-        for (invoker in systemInvokers) {
-            invoker()
+        for ((invoker, system) in systemInvokers) {
+            (invoker as SystemInvoker<CottaSystem>).invoke(system) // TODO cast issue
         }
         processEnterGameIntents()
     }

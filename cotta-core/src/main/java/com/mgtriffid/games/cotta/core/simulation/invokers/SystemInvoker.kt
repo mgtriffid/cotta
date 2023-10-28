@@ -1,5 +1,7 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
-interface SystemInvoker {
-    operator fun invoke()
+import com.mgtriffid.games.cotta.core.systems.CottaSystem
+
+interface SystemInvoker<in T: CottaSystem> {
+    operator fun invoke(system: T)
 }

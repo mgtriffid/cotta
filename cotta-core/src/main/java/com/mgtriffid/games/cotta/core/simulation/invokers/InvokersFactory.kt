@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import kotlin.reflect.KClass
 
 interface InvokersFactory {
-    fun <T: CottaSystem> createInvoker(systemClass: KClass<T>): SystemInvoker
+    fun <T: CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, CottaSystem>
 
     companion object {
         fun getInstance(

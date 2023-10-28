@@ -2,12 +2,14 @@ package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-class LagCompensatingEffectsConsumerInvoker(
-    private val effectBus: LagCompensatingEffectBus,
+class LagCompensatingEffectsConsumerInvoker @Inject constructor(
+    @Named("lagCompensated") private val effectBus: LagCompensatingEffectBus,
     private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
 ) : SystemInvoker<EffectsConsumerSystem> {
     override fun invoke(system: EffectsConsumerSystem) {

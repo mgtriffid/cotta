@@ -12,7 +12,7 @@ import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.MetaEntities
 import com.mgtriffid.games.cotta.server.ServerSimulation
-import com.mgtriffid.games.cotta.server.ServerSimulationInput
+import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import jakarta.inject.Named
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicInteger
@@ -24,38 +24,18 @@ class ServerSimulationImpl @Inject constructor(
     private val state: CottaState,
     private val tickProvider: TickProvider,
     @Named("historyLength") private val historyLength: Int,
-    private val serverSimulationInput: ServerSimulationInput,
-    private val metaEntities: MetaEntities
+    private val simulationInputHolder: SimulationInputHolder,
+    private val metaEntities: MetaEntities,
+    private val invokersFactory: InvokersFactory,
+    private val effectBus: EffectBus,
+    private val playersSawTicks: PlayersSawTicks,
+    private val effectsHistory: EffectsHistory
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
     private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
-
-    private val playersSawTicks: PlayersSawTicks = object : PlayersSawTicks {
-        override fun get(playerId: PlayerId): Long? {
-            return serverSimulationInput.get().playersSawTicks()[playerId]
-        }
-    }
-
-    private val effectBus = EffectBus.getInstance()
-
-    private val effectsHistory = EffectsHistory(historyLength = historyLength)
-
-    private val invokersFactory: InvokersFactory = run {
-        val sawTickHolder = InvokersFactoryImpl.SawTickHolder(null)
-        InvokersFactory.getInstance(
-            HistoricalLagCompensatingEffectBus(
-                history = effectsHistory,
-                impl = LagCompensatingEffectBusImpl(effectBus, sawTickHolder),
-                tickProvider = tickProvider
-            ),
-            state,
-            playersSawTicks,
-            sawTickHolder
-        )
-    }
 
     override fun effectBus(): EffectBus {
         return effectBus
@@ -86,7 +66,7 @@ class ServerSimulationImpl @Inject constructor(
         }.forEach { e ->
             logger.trace { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
-                val component = serverSimulationInput.get().inputForEntityAndComponent(e.id, c)
+                val component = simulationInputHolder.get().inputForEntityAndComponent(e.id, c)
                 logger.trace { "  $component" }
                 e.setInputComponent(c, component)
             }
@@ -102,7 +82,7 @@ class ServerSimulationImpl @Inject constructor(
     override fun getDataToBeSentToClients(): DataForClients {
         return DataForClientsImpl(
             effectsHistory = effectsHistory,
-            inputs = serverSimulationInput.get().inputsForEntities(),
+            inputs = simulationInputHolder.get().inputsForEntities(),
             state = state,
             metaEntities = metaEntities
         )

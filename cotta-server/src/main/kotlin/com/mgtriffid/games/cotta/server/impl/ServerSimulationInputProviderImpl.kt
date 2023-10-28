@@ -7,7 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
-import com.mgtriffid.games.cotta.server.ServerSimulationInput
+import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.ServerSimulationInputProvider
 import jakarta.inject.Inject
 import mu.KotlinLogging
@@ -18,7 +18,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
     private val clientsInputProvider: ClientsInputProvider,
     private val nonPlayerInputProvider: NonPlayerInputProvider,
     private val state: CottaState,
-    private val serverSimulationInput: ServerSimulationInput
+    private val simulationInputHolder: SimulationInputHolder
 ): ServerSimulationInputProvider {
     override fun prepare() {
         val clientsInput = clientsInputProvider.getInput()
@@ -34,7 +34,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
             components.forEach { logger.trace { it } }
         }
 
-        serverSimulationInput.set(object: SimulationInput {
+        simulationInputHolder.set(object: SimulationInput {
             // TODO protect against malicious client sending input for entity not belonging to them
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return inputs

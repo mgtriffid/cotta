@@ -5,6 +5,9 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.EffectPublisher
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
+import jakarta.inject.Inject
+import jakarta.inject.Named
 
 // TODO better naming
 // TODO better placing
@@ -12,9 +15,9 @@ interface LagCompensatingEffectBus : EffectBus {
     fun getTickForEffect(effect: CottaEffect): Long?
 }
 
-class HistoricalLagCompensatingEffectBus(
+class HistoricalLagCompensatingEffectBus @Inject constructor(
     val history: EffectsHistory,
-    val impl: LagCompensatingEffectBus,
+    @Named("lagCompensated") val impl: LagCompensatingEffectBus,
     val tickProvider: TickProvider
 ): LagCompensatingEffectBus by impl {
     override fun publisher(): EffectPublisher {
@@ -28,7 +31,7 @@ class HistoricalLagCompensatingEffectBus(
     }
 }
 
-class LagCompensatingEffectBusImpl(
+class LagCompensatingEffectBusImpl @Inject constructor(
     private val effectBus: EffectBus,
     private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
 ): LagCompensatingEffectBus {

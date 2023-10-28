@@ -1,8 +1,8 @@
-package com.mgtriffid.games.cotta.server
+package com.mgtriffid.games.cotta.core.simulation
 
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 
-interface ServerSimulationInput {
+interface SimulationInputHolder {
     fun set(input: SimulationInput)
     fun get(): SimulationInput
 }

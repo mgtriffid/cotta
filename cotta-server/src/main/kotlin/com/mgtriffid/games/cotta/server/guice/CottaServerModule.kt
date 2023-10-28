@@ -10,6 +10,8 @@ import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
+import com.mgtriffid.games.cotta.core.effects.EffectBus
+import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
@@ -27,10 +29,17 @@ import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
+import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
+import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
+import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
+import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetwork
 import com.mgtriffid.games.cotta.server.*
 import com.mgtriffid.games.cotta.server.impl.*
+import org.checkerframework.common.reflection.qual.Invoke
 
 class CottaServerModule(
     private val game: CottaGame
@@ -56,8 +65,15 @@ class CottaServerModule(
 
             bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
             bind(ServerSimulationInputProvider::class.java).to(ServerSimulationInputProviderImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(ServerSimulationInput::class.java).to(ServerSimulationInputImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(MetaEntities::class.java).to(MetaEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(InvokersFactory::class.java).to(InvokersFactoryImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(InvokersFactoryImpl.SawTickHolder::class.java).toInstance(InvokersFactoryImpl.SawTickHolder(null))
+            bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(LagCompensatingEffectBus::class.java).annotatedWith(named("historical")).to(HistoricalLagCompensatingEffectBus::class.java).`in`(Scopes.SINGLETON)
+            bind(LagCompensatingEffectBus::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectBusImpl::class.java).`in`(Scopes.SINGLETON)
 
             bindEngineParts()
         }

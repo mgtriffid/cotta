@@ -1,5 +1,7 @@
 package com.mgtriffid.games.cotta.server
 
+import com.mgtriffid.games.cotta.core.effects.EffectBus
+import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
@@ -7,10 +9,16 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
+import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
+import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
+import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
+import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
+import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.server.impl.MetaEntitiesImpl
 import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
-import com.mgtriffid.games.cotta.server.impl.ServerSimulationInputImpl
+import com.mgtriffid.games.cotta.server.impl.SimulationInputHolderImpl
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
@@ -30,13 +38,13 @@ import org.junit.jupiter.api.Test
 
 class ServerSimulationTest {
     private lateinit var tickProvider: TickProvider
-    private lateinit var serverSimulationInput: ServerSimulationInput
+    private lateinit var simulationInputHolder: SimulationInputHolder
 
     @BeforeEach
     fun setUp() {
         tickProvider = AtomicLongTickProvider()
-        serverSimulationInput = ServerSimulationInputImpl()
-        serverSimulationInput.set(object : SimulationInput {
+        simulationInputHolder = SimulationInputHolderImpl()
+        simulationInputHolder.set(object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return emptyMap()
             }
@@ -110,7 +118,7 @@ class ServerSimulationTest {
             shoot = true
         )
 
-        serverSimulationInput.set(object: SimulationInput {
+        simulationInputHolder.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input1)
@@ -126,7 +134,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = true
         )
-        serverSimulationInput.set(object: SimulationInput {
+        simulationInputHolder.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
@@ -166,7 +174,7 @@ class ServerSimulationTest {
             serverSimulation.tick()
         }
 
-        serverSimulationInput.set(object: SimulationInput {
+        simulationInputHolder.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input)
@@ -181,7 +189,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = false
         )
-        serverSimulationInput.set(object: SimulationInput {
+        simulationInputHolder.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
@@ -243,7 +251,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = true
         )
-        serverSimulationInput.set(object: SimulationInput {
+        simulationInputHolder.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input1)
@@ -265,7 +273,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = false
         )
-        serverSimulationInput.set(object: SimulationInput {
+        simulationInputHolder.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
@@ -286,11 +294,42 @@ class ServerSimulationTest {
 
     private fun getCottaState() = CottaState.getInstance(tickProvider)
 
-    private fun getServerSimulation(state: CottaState) = ServerSimulationImpl(
-        state = state,
-        tickProvider = tickProvider,
-        historyLength = 8,
-        serverSimulationInput = serverSimulationInput,
-        metaEntities = MetaEntitiesImpl()
-    )
+    private fun getServerSimulation(state: CottaState): ServerSimulation {
+        val sawTickHolder = InvokersFactoryImpl.SawTickHolder(null)
+        val effectBus = EffectBusImpl()
+        val effectsHistory = EffectsHistoryImpl(8)
+        val lagCompensatingEffectBus = LagCompensatingEffectBusImpl(
+            effectBus = effectBus,
+            sawTickHolder = sawTickHolder,
+        )
+        val historicalLagCompensatingEffectBus = HistoricalLagCompensatingEffectBus(
+            history = effectsHistory,
+            impl = lagCompensatingEffectBus,
+            tickProvider = tickProvider
+        )
+        return ServerSimulationImpl(
+            state = state,
+            tickProvider = tickProvider,
+            historyLength = 8,
+            simulationInputHolder = simulationInputHolder,
+            metaEntities = MetaEntitiesImpl(),
+            invokersFactory = InvokersFactoryImpl(
+                lagCompensatingEffectBus = historicalLagCompensatingEffectBus,
+                state = state,
+                playersSawTicks = PlayersSawTickImpl(simulationInputHolder),
+                sawTickHolder = sawTickHolder,
+                lagCompensatingEffectsConsumerInvoker = LagCompensatingEffectsConsumerInvoker(
+                    effectBus = historicalLagCompensatingEffectBus,
+                    sawTickHolder = sawTickHolder
+                )
+            ),
+            effectBus = effectBus,
+            playersSawTicks = object : PlayersSawTicks {
+                override fun get(playerId: PlayerId): Long? {
+                    return simulationInputHolder.get().playersSawTicks()[playerId]
+                }
+            },
+            effectsHistory = effectsHistory
+        )
+    }
 }

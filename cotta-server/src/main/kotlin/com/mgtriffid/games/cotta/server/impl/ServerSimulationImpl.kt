@@ -2,24 +2,17 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.effects.EffectBus
-import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
-import com.mgtriffid.games.cotta.core.entities.EntityId
-import com.mgtriffid.games.cotta.core.entities.InputComponent
-import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.systems.CottaSystem
-import com.mgtriffid.games.cotta.server.DataForClients
-import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
-import com.mgtriffid.games.cotta.core.simulation.SimulationInput
-import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
+import com.mgtriffid.games.cotta.core.simulation.invokers.*
+import com.mgtriffid.games.cotta.core.systems.CottaSystem
+import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
+import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerSimulation
-import com.mgtriffid.games.cotta.core.simulation.invokers.HistoricalLagCompensatingEffectBus
-import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
-import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactoryImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBusImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
+import com.mgtriffid.games.cotta.server.ServerSimulationInput
 import jakarta.inject.Named
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicInteger
@@ -30,7 +23,8 @@ private val logger = KotlinLogging.logger {}
 class ServerSimulationImpl @Inject constructor(
     private val state: CottaState,
     private val tickProvider: TickProvider,
-    @Named("historyLength") private val historyLength: Int
+    @Named("historyLength") private val historyLength: Int,
+    private val serverSimulationInput: ServerSimulationInput
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<SystemInvoker>()
 
@@ -39,15 +33,9 @@ class ServerSimulationImpl @Inject constructor(
     private val metaEntities = HashMap<PlayerId, EntityId>()
     private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
 
-    // TODO "null object" pattern perhaps?
-    private var inputForUpcomingTick: SimulationInput = object : SimulationInput {
-        override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> = emptyMap()
-        override fun playersSawTicks(): Map<PlayerId, Long> = emptyMap()
-    }
-
     private val playersSawTicks: PlayersSawTicks = object : PlayersSawTicks {
         override fun get(playerId: PlayerId): Long? {
-            return inputForUpcomingTick.playersSawTicks()[playerId]
+            return serverSimulationInput.get().playersSawTicks()[playerId]
         }
     }
 
@@ -82,10 +70,6 @@ class ServerSimulationImpl @Inject constructor(
         this.metaEntitiesInputComponents = components;
     }
 
-    override fun setInputForUpcomingTick(input: SimulationInput) {
-        inputForUpcomingTick = input
-    }
-
     override fun tick() {
         effectBus.clear()
         state.advance()
@@ -102,7 +86,7 @@ class ServerSimulationImpl @Inject constructor(
         }.forEach { e ->
             logger.trace { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
-                val component = inputForUpcomingTick.inputForEntityAndComponent(e.id, c)
+                val component = serverSimulationInput.get().inputForEntityAndComponent(e.id, c)
                 logger.trace { "  $component" }
                 e.setInputComponent(c, component)
             }
@@ -118,7 +102,7 @@ class ServerSimulationImpl @Inject constructor(
     override fun getDataToBeSentToClients(): DataForClients {
         return DataForClientsImpl(
             effectsHistory = effectsHistory,
-            inputs = inputForUpcomingTick.inputsForEntities(),
+            inputs = serverSimulationInput.get().inputsForEntities(),
             state = state,
             metaEntities = metaEntities
         )

@@ -15,7 +15,7 @@ import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.CottaGameInstance
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerSimulation
-import com.mgtriffid.games.cotta.server.ServerSimulationInput
+import com.mgtriffid.games.cotta.server.ServerSimulationInputProvider
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import jakarta.inject.Inject
 import mu.KotlinLogging
@@ -32,7 +32,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
     val state: CottaState,
     private val serverToClientDataChannel: ServerToClientDataChannel,
     private val serverSimulation: ServerSimulation,
-    private val serverSimulationInput: ServerSimulationInput
+    private val serverSimulationInputProvider: ServerSimulationInputProvider
 ): CottaGameInstance {
     @Volatile
     var running = true
@@ -81,8 +81,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
         intents.forEach { (connectionId, intent) ->
             registerPlayer(connectionId, intent)
         }
-        val input = serverSimulationInput.prepare()
-        serverSimulation.setInputForUpcomingTick(input)
+        serverSimulationInputProvider.prepare()
     }
 
     private fun registerPlayer(connectionId: ConnectionId, intent: EnterGameIntent) {

@@ -12,17 +12,6 @@ import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
 import kotlin.reflect.KClass
 
 interface ServerSimulation {
-    companion object {
-        fun getInstance(
-            state: CottaState,
-            tickProvider: TickProvider,
-            historyLength: Int
-        ): ServerSimulation = ServerSimulationImpl(
-            state,
-            tickProvider,
-            historyLength
-        )
-    }
 
     // TODO use DI instead. Of some kind. Maybe.
     fun effectBus(): EffectBus
@@ -37,5 +26,4 @@ interface ServerSimulation {
     fun tick()
     fun enterGame(intent: EnterGameIntent): PlayerId
     fun getDataToBeSentToClients(): DataForClients
-    fun setInputForUpcomingTick(input: SimulationInput)
 }

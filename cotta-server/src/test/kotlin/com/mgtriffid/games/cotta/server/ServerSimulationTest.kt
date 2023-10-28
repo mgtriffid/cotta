@@ -8,6 +8,8 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
+import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
+import com.mgtriffid.games.cotta.server.impl.ServerSimulationInputImpl
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
@@ -27,9 +29,22 @@ import org.junit.jupiter.api.Test
 
 class ServerSimulationTest {
     private lateinit var tickProvider: TickProvider
+    private lateinit var serverSimulationInput: ServerSimulationInput
 
     @BeforeEach
-    fun setUp() { tickProvider = AtomicLongTickProvider() }
+    fun setUp() {
+        tickProvider = AtomicLongTickProvider()
+        serverSimulationInput = ServerSimulationInputImpl()
+        serverSimulationInput.set(object : SimulationInput {
+            override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
+                return emptyMap()
+            }
+
+            override fun playersSawTicks(): Map<PlayerId, Long> {
+                return emptyMap()
+            }
+        })
+    }
 
     @Test
     fun `systems should listen to effects`() {
@@ -94,7 +109,7 @@ class ServerSimulationTest {
             shoot = true
         )
 
-        serverSimulation.setInputForUpcomingTick(object: SimulationInput {
+        serverSimulationInput.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input1)
@@ -110,7 +125,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = true
         )
-        serverSimulation.setInputForUpcomingTick(object: SimulationInput {
+        serverSimulationInput.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
@@ -150,7 +165,7 @@ class ServerSimulationTest {
             serverSimulation.tick()
         }
 
-        serverSimulation.setInputForUpcomingTick(object: SimulationInput {
+        serverSimulationInput.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input)
@@ -165,7 +180,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = false
         )
-        serverSimulation.setInputForUpcomingTick(object: SimulationInput {
+        serverSimulationInput.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
@@ -227,7 +242,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = true
         )
-        serverSimulation.setInputForUpcomingTick(object: SimulationInput {
+        serverSimulationInput.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input1)
@@ -249,7 +264,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = false
         )
-        serverSimulation.setInputForUpcomingTick(object: SimulationInput {
+        serverSimulationInput.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
@@ -270,9 +285,10 @@ class ServerSimulationTest {
 
     private fun getCottaState() = CottaState.getInstance(tickProvider)
 
-    private fun getServerSimulation(state: CottaState) = ServerSimulation.getInstance(
+    private fun getServerSimulation(state: CottaState) = ServerSimulationImpl(
         state = state,
         tickProvider = tickProvider,
-        historyLength = 8
+        historyLength = 8,
+        serverSimulationInput = serverSimulationInput
     )
 }

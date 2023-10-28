@@ -15,7 +15,6 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
@@ -30,18 +29,8 @@ import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetwork
-import com.mgtriffid.games.cotta.server.ClientsInputProvider
-import com.mgtriffid.games.cotta.server.CottaGameInstance
-import com.mgtriffid.games.cotta.server.ServerSimulation
-import com.mgtriffid.games.cotta.server.ServerSimulationInput
-import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
-import com.mgtriffid.games.cotta.server.impl.ClientsGhosts
-import com.mgtriffid.games.cotta.server.impl.ClientsInputProviderImpl
-import com.mgtriffid.games.cotta.server.impl.CottaGameInstanceImpl
-import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
-import com.mgtriffid.games.cotta.server.impl.ServerSimulationInputImpl
-import com.mgtriffid.games.cotta.server.impl.ServerToClientDataChannelImpl
-import jakarta.inject.Named
+import com.mgtriffid.games.cotta.server.*
+import com.mgtriffid.games.cotta.server.impl.*
 
 class CottaServerModule(
     private val game: CottaGame
@@ -66,6 +55,7 @@ class CottaServerModule(
             bind(ServerSimulation::class.java).to(ServerSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 
             bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
+            bind(ServerSimulationInputProvider::class.java).to(ServerSimulationInputProviderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(ServerSimulationInput::class.java).to(ServerSimulationInputImpl::class.java).`in`(Scopes.SINGLETON)
 
             bindEngineParts()

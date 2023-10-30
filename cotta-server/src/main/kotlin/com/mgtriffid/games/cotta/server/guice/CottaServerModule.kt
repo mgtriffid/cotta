@@ -38,7 +38,9 @@ import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.EntityOwnerSawTickProviderImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.EntityProcessingContextImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.InputProcessingContextImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
@@ -83,6 +85,7 @@ class CottaServerModule(
             bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(Entities::class.java).annotatedWith(named("latest")).to(LatestEntities::class.java)
             bind(InputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
 
             bindEngineParts()
         }

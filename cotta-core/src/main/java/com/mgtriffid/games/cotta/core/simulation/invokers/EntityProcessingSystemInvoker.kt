@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import jakarta.inject.Inject
 import mu.KotlinLogging
@@ -10,7 +11,8 @@ private val logger = KotlinLogging.logger {}
 
 class EntityProcessingSystemInvoker @Inject constructor(
     // TODO better inject Entities
-    private val state: CottaState
+    private val state: CottaState,
+    private val context: EntityProcessingContext
 ) : SystemInvoker<EntityProcessingSystem> {
     override fun invoke(system: EntityProcessingSystem) {
         logger.trace { "Invoked ${system::class.qualifiedName}" }
@@ -19,6 +21,6 @@ class EntityProcessingSystemInvoker @Inject constructor(
 
     private fun process(entity: Entity, system: EntityProcessingSystem) {
         logger.trace { "${system::class.simpleName} processing entity ${entity.id}" }
-        system.process(entity)
+        system.process(entity, context)
     }
 }

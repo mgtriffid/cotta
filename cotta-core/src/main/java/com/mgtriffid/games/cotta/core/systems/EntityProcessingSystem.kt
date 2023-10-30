@@ -4,5 +4,5 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
 
 interface EntityProcessingSystem : CottaSystem {
-    fun process(e: Entity)
+    fun process(e: Entity, ctx: EntityProcessingContext)
 }

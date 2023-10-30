@@ -318,10 +318,6 @@ class ServerSimulationTest {
             simulationInputHolder = simulationInputHolder,
             metaEntities = MetaEntitiesImpl(),
             invokersFactory = InvokersFactoryImpl(
-                lagCompensatingEffectBus = historicalLagCompensatingEffectBus,
-                state = state,
-                playersSawTicks = playersSawTicks,
-                sawTickHolder = sawTickHolder,
                 lagCompensatingEffectsConsumerInvoker = LagCompensatingEffectsConsumerInvoker(
                     effectBus = historicalLagCompensatingEffectBus,
                     sawTickHolder = sawTickHolder,

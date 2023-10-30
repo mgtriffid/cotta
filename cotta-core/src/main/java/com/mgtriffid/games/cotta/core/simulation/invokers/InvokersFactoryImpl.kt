@@ -2,21 +2,14 @@ package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.annotations.LagCompensated
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
-import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
-import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import jakarta.inject.Inject
-import jakarta.inject.Named
 import kotlin.reflect.KClass
 import kotlin.reflect.full.hasAnnotation
 
 class InvokersFactoryImpl @Inject constructor(
-    @Named("historical") private val lagCompensatingEffectBus: LagCompensatingEffectBus,
-    private val state: CottaState,
-    private val playersSawTicks: PlayersSawTicks,
-    private val sawTickHolder: SawTickHolder,
     private val lagCompensatingEffectsConsumerInvoker: LagCompensatingEffectsConsumerInvoker,
     private val simpleEffectsConsumerSystemInvoker: SimpleEffectsConsumerSystemInvoker,
     private val entityProcessingSystemInvoker: EntityProcessingSystemInvoker,

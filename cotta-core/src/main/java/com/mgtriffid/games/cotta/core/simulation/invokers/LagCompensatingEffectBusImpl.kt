@@ -5,7 +5,6 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.EffectPublisher
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
-import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
@@ -33,7 +32,7 @@ class HistoricalLagCompensatingEffectBus @Inject constructor(
 
 class LagCompensatingEffectBusImpl @Inject constructor(
     private val effectBus: EffectBus,
-    private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
+    private val sawTickHolder: SawTickHolder
 ): LagCompensatingEffectBus {
     private val ticksForEffects: MutableMap<CottaEffect, Long?> = HashMap()
 

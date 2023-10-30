@@ -298,7 +298,7 @@ class ServerSimulationTest {
     private fun getCottaState() = CottaState.getInstance(tickProvider)
 
     private fun getServerSimulation(state: CottaState): ServerSimulation {
-        val sawTickHolder = InvokersFactoryImpl.SawTickHolder(null)
+        val sawTickHolder = SawTickHolder(null)
         val effectBus = EffectBusImpl()
         val effectsHistory = EffectsHistoryImpl(8)
         val lagCompensatingEffectBus = LagCompensatingEffectBusImpl(

@@ -1,22 +1,15 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.annotations.LagCompensated
-import com.mgtriffid.games.cotta.core.effects.EffectPublisher
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
-import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
-import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import kotlin.reflect.KClass
-import kotlin.reflect.KParameter
 import kotlin.reflect.full.hasAnnotation
 
 class InvokersFactoryImpl @Inject constructor(
@@ -56,33 +49,4 @@ class InvokersFactoryImpl @Inject constructor(
         }
     }
 
-    class ReadingFromPreviousTickEntities(
-        private val sawTickHolder: SawTickHolder,
-        private val state: CottaState
-    ) : Entities {
-        override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
-            return state.entities().createEntity(ownedBy)
-        }
-
-        override fun get(id: EntityId): Entity {
-            val entities = sawTickHolder.tick?.let { state.entities(atTick = it) } ?: state.entities()
-            return entities.get(id)
-        }
-
-        override fun all(): Collection<Entity> {
-            val entities = sawTickHolder.tick?.let { state.entities(atTick = it) } ?: state.entities()
-            return entities.all()
-        }
-
-        override fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
-            throw NotImplementedError("Is not supposed to be called on Server")
-        }
-
-        override fun remove(id: EntityId) {
-            // TODO should be actually handled by a different subclass
-            throw NotImplementedError("Is not supposed to be called on Server")
-        }
-    }
-
-    data class SawTickHolder(var tick: Long?)
 }

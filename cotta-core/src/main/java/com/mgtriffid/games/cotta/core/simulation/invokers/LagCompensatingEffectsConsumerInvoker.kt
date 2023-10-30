@@ -11,7 +11,7 @@ private val logger = KotlinLogging.logger {}
 
 class LagCompensatingEffectsConsumerInvoker @Inject constructor(
     @Named("lagCompensated") private val effectBus: LagCompensatingEffectBus,
-    private val sawTickHolder: InvokersFactoryImpl.SawTickHolder,
+    private val sawTickHolder: SawTickHolder,
     @Named("lagCompensated") private val context: EffectProcessingContext
 ) : SystemInvoker<EffectsConsumerSystem> {
     override fun invoke(system: EffectsConsumerSystem) {

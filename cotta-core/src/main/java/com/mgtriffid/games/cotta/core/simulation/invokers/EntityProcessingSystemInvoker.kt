@@ -3,11 +3,13 @@ package com.mgtriffid.games.cotta.core.simulation.invokers
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
+import jakarta.inject.Inject
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-class EntityProcessingSystemInvoker(
+class EntityProcessingSystemInvoker @Inject constructor(
+    // TODO better inject Entities
     private val state: CottaState
 ) : SystemInvoker<EntityProcessingSystem> {
     override fun invoke(system: EntityProcessingSystem) {

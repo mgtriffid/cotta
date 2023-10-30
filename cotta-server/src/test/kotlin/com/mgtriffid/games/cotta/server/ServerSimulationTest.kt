@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta.server
 
-import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -9,13 +8,14 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
-import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
+import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.server.impl.MetaEntitiesImpl
 import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
 import com.mgtriffid.games.cotta.server.impl.SimulationInputHolderImpl
@@ -307,6 +307,7 @@ class ServerSimulationTest {
             impl = lagCompensatingEffectBus,
             tickProvider = tickProvider
         )
+        val playersSawTicks = PlayersSawTickImpl(simulationInputHolder)
         return ServerSimulationImpl(
             state = state,
             tickProvider = tickProvider,
@@ -316,10 +317,21 @@ class ServerSimulationTest {
             invokersFactory = InvokersFactoryImpl(
                 lagCompensatingEffectBus = historicalLagCompensatingEffectBus,
                 state = state,
-                playersSawTicks = PlayersSawTickImpl(simulationInputHolder),
+                playersSawTicks = playersSawTicks,
                 sawTickHolder = sawTickHolder,
                 lagCompensatingEffectsConsumerInvoker = LagCompensatingEffectsConsumerInvoker(
                     effectBus = historicalLagCompensatingEffectBus,
+                    sawTickHolder = sawTickHolder
+                ),
+                simpleEffectsConsumerSystemInvoker = SimpleEffectsConsumerSystemInvoker(lagCompensatingEffectBus),
+                entityProcessingSystemInvoker = EntityProcessingSystemInvoker(state),
+                lagCompensatingInputProcessingSystemInvoker = LagCompensatingInputProcessingSystemInvokerImpl(
+                    LatestEntities(state),
+                    entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
+                        override fun getSawTickByEntity(entity: Entity): Long? {
+                            return (entity.ownedBy as? Entity.OwnedBy.Player)?.let { playersSawTicks[it.playerId] }
+                        }
+                    },
                     sawTickHolder = sawTickHolder
                 )
             ),

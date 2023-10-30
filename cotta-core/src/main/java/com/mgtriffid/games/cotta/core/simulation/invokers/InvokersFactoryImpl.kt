@@ -12,10 +12,9 @@ import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl.EntityOwnerSawTickProvider
+import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import jakarta.inject.Inject
 import jakarta.inject.Named
-import org.checkerframework.common.reflection.qual.Invoke
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.hasAnnotation
@@ -25,7 +24,10 @@ class InvokersFactoryImpl @Inject constructor(
     private val state: CottaState,
     private val playersSawTicks: PlayersSawTicks,
     private val sawTickHolder: SawTickHolder,
-    private val lagCompensatingEffectsConsumerInvoker: LagCompensatingEffectsConsumerInvoker
+    private val lagCompensatingEffectsConsumerInvoker: LagCompensatingEffectsConsumerInvoker,
+    private val simpleEffectsConsumerSystemInvoker: SimpleEffectsConsumerSystemInvoker,
+    private val entityProcessingSystemInvoker: EntityProcessingSystemInvoker,
+    private val lagCompensatingInputProcessingSystemInvoker: LagCompensatingInputProcessingSystemInvoker
 ) : InvokersFactory {
     // simulation invoker! very specific thing
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, T> {
@@ -53,22 +55,12 @@ class InvokersFactoryImpl @Inject constructor(
         return when (system) {
             is InputProcessingSystem -> {
                 // propagates sawTick to lagCompensatingEffectBus so that effect would know what was seen by the player
-                Pair(LagCompensatingInputProcessingSystemInvokerImpl(
-                    entities = LatestEntities(state),
-                    entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
-                        override fun getSawTickByEntity(entity: Entity): Long? {
-                            return (entity.ownedBy as? Entity.OwnedBy.Player)?.let { playersSawTicks[it.playerId] }
-                        }
-                    },
-                    sawTickHolder = sawTickHolder
-                ), system)
+                Pair(lagCompensatingInputProcessingSystemInvoker, system)
             }
 
             is EntityProcessingSystem -> {
                 // normal stuff, uses LatestEntities and lagCompensatingEffectBus (why not normal tho)
-                Pair(EntityProcessingSystemInvoker(
-                    state = state
-                ), system)
+                Pair(entityProcessingSystemInvoker, system)
             }
 
             is EffectsConsumerSystem -> if (
@@ -77,39 +69,12 @@ class InvokersFactoryImpl @Inject constructor(
                             it.hasAnnotation<LagCompensated>()
                 }
             ) {
-                Pair(LagCompensatingEffectsConsumerInvoker(
-                    lagCompensatingEffectBus,
-                    sawTickHolder
-                ), system)
+                Pair(lagCompensatingEffectsConsumerInvoker, system)
             } else {
-                Pair(SimpleEffectsConsumerSystemInvoker(
-                    lagCompensatingEffectBus
-                ), system)
+                Pair(simpleEffectsConsumerSystemInvoker, system)
             }
 
             else -> { throw IllegalStateException("Unexpected implementation of CottaSystem") }
-        }
-    }
-
-    private class LatestEntities(private val state: CottaState) : Entities {
-        override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
-            return state.entities().createEntity(ownedBy)
-        }
-
-        override fun get(id: EntityId): Entity {
-            return state.entities().get(id)
-        }
-
-        override fun all(): Collection<Entity> {
-            return state.entities().all()
-        }
-
-        override fun remove(id: EntityId) {
-            throw NotImplementedError("Is not supposed to be called on Server")
-        }
-
-        override fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
-            throw NotImplementedError("Is not supposed to be called on Server")
         }
     }
 

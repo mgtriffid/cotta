@@ -32,26 +32,7 @@ class InvokersFactoryImpl @Inject constructor(
     // simulation invoker! very specific thing
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, T> {
         val ctor = systemClass.getConstructor()
-        val parameters = ctor.parameters
-        val publisher = lagCompensatingEffectBus.publisher()
-        val parameterValues = parameters.map { param: KParameter ->
-            (param.type.classifier as? KClass<*>)?.let {
-                when (it) {
-                    EffectPublisher::class -> {
-                        publisher
-                    }
-                    Entities::class -> {
-                        if (param.hasAnnotation<LagCompensated>()) {
-                            ReadingFromPreviousTickEntities(sawTickHolder, state)
-                        } else {
-                            LatestEntities(state)
-                        }
-                    }
-                    else -> null
-                }
-            }
-        }.toTypedArray()
-        val system = ctor.call(*parameterValues)
+        val system = ctor.call()
         return when (system) {
             is InputProcessingSystem -> {
                 // propagates sawTick to lagCompensatingEffectBus so that effect would know what was seen by the player
@@ -64,10 +45,7 @@ class InvokersFactoryImpl @Inject constructor(
             }
 
             is EffectsConsumerSystem -> if (
-                parameters.any {
-                    it.type.classifier as? KClass<*> == Entities::class &&
-                            it.hasAnnotation<LagCompensated>()
-                }
+                systemClass.hasAnnotation<LagCompensated>()
             ) {
                 Pair(lagCompensatingEffectsConsumerInvoker, system)
             } else {
@@ -78,7 +56,7 @@ class InvokersFactoryImpl @Inject constructor(
         }
     }
 
-    private class ReadingFromPreviousTickEntities(
+    class ReadingFromPreviousTickEntities(
         private val sawTickHolder: SawTickHolder,
         private val state: CottaState
     ) : Entities {

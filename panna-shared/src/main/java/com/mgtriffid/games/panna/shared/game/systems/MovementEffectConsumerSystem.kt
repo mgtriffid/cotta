@@ -3,6 +3,7 @@ package com.mgtriffid.games.panna.shared.game.systems
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.entities.Entities
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_DOWN
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
@@ -12,11 +13,11 @@ import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 
 private val logger = mu.KotlinLogging.logger {}
 
-class MovementEffectConsumerSystem(private val entities: Entities) : EffectsConsumerSystem {
-    override fun handle(e: CottaEffect) {
+class MovementEffectConsumerSystem : EffectsConsumerSystem {
+    override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is MovementEffect) {
             logger.debug { "Received MovementEffect: $e" }
-            val entity = entities.get(e.entityId)
+            val entity = ctx.entities().get(e.entityId)
             if (entity.hasComponent(PositionComponent::class)) {
                 val position = entity.getComponent(PositionComponent::class)
                 position.xPos = when (e.direction) {

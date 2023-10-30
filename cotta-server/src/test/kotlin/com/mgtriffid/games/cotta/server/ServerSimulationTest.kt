@@ -17,6 +17,7 @@ import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.EntityProcessingContextImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.InputProcessingContextImpl
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompensatingEffectProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.server.impl.MetaEntitiesImpl
 import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
@@ -323,9 +324,17 @@ class ServerSimulationTest {
                 sawTickHolder = sawTickHolder,
                 lagCompensatingEffectsConsumerInvoker = LagCompensatingEffectsConsumerInvoker(
                     effectBus = historicalLagCompensatingEffectBus,
-                    sawTickHolder = sawTickHolder
+                    sawTickHolder = sawTickHolder,
+                    context = LagCompensatingEffectProcessingContext(
+                        lagCompensatingEffectBus, state, sawTickHolder
+                    )
                 ),
-                simpleEffectsConsumerSystemInvoker = SimpleEffectsConsumerSystemInvoker(lagCompensatingEffectBus),
+                simpleEffectsConsumerSystemInvoker = SimpleEffectsConsumerSystemInvoker(
+                    lagCompensatingEffectBus,
+                    LagCompensatingEffectProcessingContext(
+                        lagCompensatingEffectBus, state, sawTickHolder
+                    )
+                ),
                 entityProcessingSystemInvoker = EntityProcessingSystemInvoker(state, EntityProcessingContextImpl(
                     historicalLagCompensatingEffectBus,
                     state

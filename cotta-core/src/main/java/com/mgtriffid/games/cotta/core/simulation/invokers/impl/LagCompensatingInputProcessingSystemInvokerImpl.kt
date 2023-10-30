@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactoryImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingInputProcessingSystemInvoker
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessingContext
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -15,7 +16,8 @@ private val logger = KotlinLogging.logger {}
 class LagCompensatingInputProcessingSystemInvokerImpl @Inject constructor(
     @Named("latest") private val entities: Entities,
     private val entityOwnerSawTickProvider: EntityOwnerSawTickProvider,
-    private val sawTickHolder: InvokersFactoryImpl.SawTickHolder
+    private val sawTickHolder: InvokersFactoryImpl.SawTickHolder,
+    private val context: InputProcessingContext
 ): LagCompensatingInputProcessingSystemInvoker {
     override fun invoke(system: InputProcessingSystem) {
         logger.debug { "Invoked ${system::class.qualifiedName}" }
@@ -25,7 +27,7 @@ class LagCompensatingInputProcessingSystemInvokerImpl @Inject constructor(
     private fun process(entity: Entity, system: InputProcessingSystem) {
         logger.debug { "${system::class.simpleName} processing entity ${entity.id}" }
         sawTickHolder.tick = entityOwnerSawTickProvider.getSawTickByEntity(entity)
-        system.process(entity)
+        system.process(entity, context)
         sawTickHolder.tick = null
     }
 

@@ -15,6 +15,7 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.InputProcessingContextImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.server.impl.MetaEntitiesImpl
 import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
@@ -332,7 +333,10 @@ class ServerSimulationTest {
                             return (entity.ownedBy as? Entity.OwnedBy.Player)?.let { playersSawTicks[it.playerId] }
                         }
                     },
-                    sawTickHolder = sawTickHolder
+                    sawTickHolder = sawTickHolder,
+                    InputProcessingContextImpl(
+                        lagCompensatingEffectBus = lagCompensatingEffectBus
+                    )
                 )
             ),
             effectBus = effectBus,

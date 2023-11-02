@@ -10,7 +10,7 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class LagCompensatingEffectsConsumerInvoker @Inject constructor(
-    @Named("lagCompensated") private val effectBus: LagCompensatingEffectBus,
+    @Named("historical") private val effectBus: LagCompensatingEffectBus,
     private val sawTickHolder: SawTickHolder,
     @Named("lagCompensated") private val context: EffectProcessingContext
 ) : SystemInvoker<EffectsConsumerSystem> {

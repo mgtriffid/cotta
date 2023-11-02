@@ -1,27 +1,14 @@
 package com.mgtriffid.games.cotta.server
 
-import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
-import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.EntityId
-import com.mgtriffid.games.cotta.core.entities.InputComponent
-import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.google.inject.Guice
+import com.mgtriffid.games.cotta.core.CottaConfig
+import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
+import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
-import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
-import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
-import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
-import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.*
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.EntityProcessingContextImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.InputProcessingContextImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompensatingEffectProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
-import com.mgtriffid.games.cotta.server.impl.MetaEntitiesImpl
-import com.mgtriffid.games.cotta.server.impl.ServerSimulationImpl
-import com.mgtriffid.games.cotta.server.impl.SimulationInputHolderImpl
+import com.mgtriffid.games.cotta.server.guice.CottaServerModule
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
@@ -38,15 +25,19 @@ import com.mgtriffid.games.cotta.server.workload.systems.ShotFiredTestEffectCons
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import kotlin.reflect.KClass
 
 class ServerSimulationTest {
     private lateinit var tickProvider: TickProvider
     private lateinit var simulationInputHolder: SimulationInputHolder
+    private lateinit var state: CottaState
+    private lateinit var serverSimulation: ServerSimulation
 
     @BeforeEach
     fun setUp() {
-        tickProvider = AtomicLongTickProvider()
-        simulationInputHolder = SimulationInputHolderImpl()
+        val injector = Guice.createInjector(CottaServerModule(GameStub))
+        tickProvider = injector.getInstance(TickProvider::class.java)
+        simulationInputHolder = injector.getInstance(SimulationInputHolder::class.java)
         simulationInputHolder.set(object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return emptyMap()
@@ -56,15 +47,15 @@ class ServerSimulationTest {
                 return emptyMap()
             }
         })
+        state = injector.getInstance(CottaState::class.java)
+        serverSimulation = injector.getInstance(ServerSimulation::class.java)
     }
 
     @Test
     fun `systems should listen to effects`() {
-        val state = getCottaState()
         val entity = state.entities().createEntity()
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
-        val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
@@ -78,11 +69,9 @@ class ServerSimulationTest {
 
     @Test
     fun `effects should be processed within given tick once`() {
-        val state = getCottaState()
         val entity = state.entities().createEntity()
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
-        val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
@@ -97,7 +86,6 @@ class ServerSimulationTest {
 
     @Test
     fun `should consume input`() {
-        val state = getCottaState()
         val damageable = state.entities().createEntity()
         val damageableId = damageable.id
         damageable.addComponent(HealthTestComponent.create(20))
@@ -107,7 +95,6 @@ class ServerSimulationTest {
         val damageDealer = state.entities().createEntity()
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val damageDealerId = damageDealer.id
-        val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         serverSimulation.registerSystem(ShotFiredTestEffectConsumerSystem::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
@@ -157,7 +144,6 @@ class ServerSimulationTest {
     @Test
     fun `should compensate lags`() {
         val playerId = PlayerId(0)
-        val state = getCottaState()
         val damageable = state.entities().createEntity()
         val damageableId = damageable.id
         damageable.addComponent(HealthTestComponent.create(20))
@@ -168,7 +154,6 @@ class ServerSimulationTest {
         val damageDealerId = damageDealer.id
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val input = PlayerInputTestComponent.create(aim = 4, shoot = true)
-        val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         serverSimulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
@@ -210,9 +195,7 @@ class ServerSimulationTest {
 
     @Test
     fun `should invoke systems`() {
-        val state = getCottaState()
         state.entities().createEntity()
-        val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(BlankTestSystem::class)
 
         serverSimulation.tick()
@@ -225,11 +208,9 @@ class ServerSimulationTest {
 
     @Test
     fun `should return effects that are to be returned to clients`() {
-        val state = getCottaState()
         val entity = state.entities().createEntity()
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
-        val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
@@ -244,11 +225,9 @@ class ServerSimulationTest {
     @Test
     fun `should prepare inputs to be sent to clients`() {
         val playerId = PlayerId(0)
-        val state = getCottaState()
         val damageDealer = state.entities().createEntity()
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val damageDealerId = damageDealer.id
-        val serverSimulation = getServerSimulation(state)
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         val input1 = PlayerInputTestComponent.create(
             aim = 4,
@@ -294,67 +273,17 @@ class ServerSimulationTest {
         )
     }
 
-
-    private fun getCottaState() = CottaState.getInstance(tickProvider)
-
-    private fun getServerSimulation(state: CottaState): ServerSimulation {
-        val sawTickHolder = SawTickHolder(null)
-        val effectBus = EffectBusImpl()
-        val effectsHistory = EffectsHistoryImpl(8)
-        val lagCompensatingEffectBus = LagCompensatingEffectBusImpl(
-            effectBus = effectBus,
-            sawTickHolder = sawTickHolder,
-        )
-        val historicalLagCompensatingEffectBus = HistoricalLagCompensatingEffectBus(
-            history = effectsHistory,
-            impl = lagCompensatingEffectBus,
-            tickProvider = tickProvider
-        )
-        val playersSawTicks = PlayersSawTickImpl(simulationInputHolder)
-        return ServerSimulationImpl(
-            state = state,
-            tickProvider = tickProvider,
-            historyLength = 8,
-            simulationInputHolder = simulationInputHolder,
-            metaEntities = MetaEntitiesImpl(),
-            invokersFactory = InvokersFactoryImpl(
-                lagCompensatingEffectsConsumerInvoker = LagCompensatingEffectsConsumerInvoker(
-                    effectBus = historicalLagCompensatingEffectBus,
-                    sawTickHolder = sawTickHolder,
-                    context = LagCompensatingEffectProcessingContext(
-                        lagCompensatingEffectBus, state, sawTickHolder
-                    )
-                ),
-                simpleEffectsConsumerSystemInvoker = SimpleEffectsConsumerSystemInvoker(
-                    lagCompensatingEffectBus,
-                    LagCompensatingEffectProcessingContext(
-                        lagCompensatingEffectBus, state, sawTickHolder
-                    )
-                ),
-                entityProcessingSystemInvoker = EntityProcessingSystemInvoker(state, EntityProcessingContextImpl(
-                    historicalLagCompensatingEffectBus,
-                    state
-                )),
-                lagCompensatingInputProcessingSystemInvoker = LagCompensatingInputProcessingSystemInvokerImpl(
-                    LatestEntities(state),
-                    entityOwnerSawTickProvider = object : EntityOwnerSawTickProvider {
-                        override fun getSawTickByEntity(entity: Entity): Long? {
-                            return (entity.ownedBy as? Entity.OwnedBy.Player)?.let { playersSawTicks[it.playerId] }
-                        }
-                    },
-                    sawTickHolder = sawTickHolder,
-                    InputProcessingContextImpl(
-                        lagCompensatingEffectBus = lagCompensatingEffectBus
-                    )
-                )
-            ),
-            effectBus = effectBus,
-            playersSawTicks = object : PlayersSawTicks {
-                override fun get(playerId: PlayerId): Long? {
-                    return simulationInputHolder.get().playersSawTicks()[playerId]
-                }
-            },
-            effectsHistory = effectsHistory
-        )
+    private object GameStub : CottaGame {
+        override val serverSystems: List<KClass<*>> = emptyList()
+        override val nonPlayerInputProvider = object : NonPlayerInputProvider {
+            override fun input(entities: Entities) = emptyMap<EntityId, Collection<InputComponent<*>>>()
+        }
+        override fun initializeServerState(state: CottaState) { }
+        override val componentClasses: Set<KClass<out Component<*>>> = emptySet()
+        override val inputComponentClasses: Set<KClass<out InputComponent<*>>> = emptySet()
+        override val metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>> = emptySet()
+        override val config: CottaConfig = object : CottaConfig {
+            override val tickLength: Long = 20
+        }
     }
 }

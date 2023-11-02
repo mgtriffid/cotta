@@ -6,11 +6,11 @@ import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
-import com.mgtriffid.games.cotta.server.impl.ClientGhost.ClientTickCursor.State.*
+import com.mgtriffid.games.cotta.server.impl.ClientGhost.ClientTickCursor.State.AWAITING_INPUTS
+import com.mgtriffid.games.cotta.server.impl.ClientGhost.ClientTickCursor.State.RUNNING
 import jakarta.inject.Inject
 import mu.KotlinLogging
 import java.util.*
-import kotlin.collections.HashMap
 
 private val logger = KotlinLogging.logger {}
 

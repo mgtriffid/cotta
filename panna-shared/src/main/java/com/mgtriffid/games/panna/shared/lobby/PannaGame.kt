@@ -7,13 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
-import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
-import com.mgtriffid.games.panna.shared.game.components.GraverobberNpcComponent
-import com.mgtriffid.games.panna.shared.game.components.ORIENTATION_LEFT
-import com.mgtriffid.games.panna.shared.game.components.PannaTextureIds
-import com.mgtriffid.games.panna.shared.game.components.PositionComponent
-import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
-import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
+import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT

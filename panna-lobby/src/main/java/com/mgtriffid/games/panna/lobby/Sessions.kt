@@ -1,7 +1,5 @@
 package com.mgtriffid.games.panna.lobby
 
-import java.util.HashMap
-
 class Sessions {
     private val sessions = HashMap<SessionToken, Username>()
 

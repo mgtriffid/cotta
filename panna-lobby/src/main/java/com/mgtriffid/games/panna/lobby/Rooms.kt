@@ -1,6 +1,6 @@
 package com.mgtriffid.games.panna.lobby
 
-import java.util.UUID
+import java.util.*
 
 class Rooms {
     val rooms: MutableMap<RoomId, Room> = HashMap()

@@ -13,14 +13,7 @@ import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestCo
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.VelocityTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
-import com.mgtriffid.games.cotta.server.workload.systems.BlankTestSystem
-import com.mgtriffid.games.cotta.server.workload.systems.EntityShotTestEffectConsumerSystem
-import com.mgtriffid.games.cotta.server.workload.systems.HealthRegenerationTestEffectsConsumerSystem
-import com.mgtriffid.games.cotta.server.workload.systems.LagCompensatedShotFiredTestEffectConsumer
-import com.mgtriffid.games.cotta.server.workload.systems.MovementTestSystem
-import com.mgtriffid.games.cotta.server.workload.systems.PlayerInputProcessingTestSystem
-import com.mgtriffid.games.cotta.server.workload.systems.RegenerationTestSystem
-import com.mgtriffid.games.cotta.server.workload.systems.ShotFiredTestEffectConsumerSystem
+import com.mgtriffid.games.cotta.server.workload.systems.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

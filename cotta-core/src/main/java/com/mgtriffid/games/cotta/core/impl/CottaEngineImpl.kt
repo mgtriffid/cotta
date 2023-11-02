@@ -3,22 +3,18 @@ package com.mgtriffid.games.cotta.core.impl
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
-import com.mgtriffid.games.cotta.core.registry.ComponentSpec
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
-import com.mgtriffid.games.cotta.core.registry.ComponentRegistrationListener
-import com.mgtriffid.games.cotta.core.registry.InputComponentRegistrationListener
+import com.mgtriffid.games.cotta.core.registry.*
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSerialization
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsSnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
 import jakarta.inject.Inject
 import kotlin.reflect.KClass
 

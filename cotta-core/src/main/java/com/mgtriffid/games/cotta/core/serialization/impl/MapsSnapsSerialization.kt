@@ -11,20 +11,8 @@ import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityIdDto
-import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityOwnedByDto
-import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapComponentDeltaRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapComponentRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsChangedEntityRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsDeltaRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsEntityRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsStateRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapComponentDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapComponentRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsChangedEntityRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsEntityRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.dto.*
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.*
 
 class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe> {
     // this is not thread safe

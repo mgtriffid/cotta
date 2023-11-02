@@ -10,10 +10,7 @@ import spark.Filter
 import spark.Request
 import spark.Response
 import spark.Spark
-import spark.Spark.before
-import spark.Spark.get
-import spark.Spark.post
-import spark.Spark.halt
+import spark.Spark.*
 import java.util.*
 
 private val logger = KotlinLogging.logger {}

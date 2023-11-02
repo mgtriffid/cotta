@@ -1,11 +1,6 @@
 package com.mgtriffid.games.cotta.server.guice
 
-import com.google.inject.Binder
-import com.google.inject.Module
-import com.google.inject.Provides
-import com.google.inject.Scopes
-import com.google.inject.Singleton
-import com.google.inject.TypeLiteral
+import com.google.inject.*
 import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider

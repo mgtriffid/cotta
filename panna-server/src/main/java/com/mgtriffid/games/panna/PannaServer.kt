@@ -1,7 +1,5 @@
 package com.mgtriffid.games.panna
 
-import com.mgtriffid.games.cotta.server.CottaServer
-import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaNetwork
 import com.mgtriffid.games.cotta.server.guice.CottaServerFactory
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging

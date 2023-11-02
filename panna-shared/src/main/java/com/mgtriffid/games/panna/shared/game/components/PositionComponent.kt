@@ -2,7 +2,6 @@ package com.mgtriffid.games.panna.shared.game.components
 
 import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
-import java.awt.ComponentOrientation
 
 // very much mutable, we need to send only deltas
 // also need to provide instantiation

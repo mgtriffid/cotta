@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.network.ConnectionId
 import mu.KotlinLogging
-import java.util.*
 
 private val logger = KotlinLogging.logger {}
 

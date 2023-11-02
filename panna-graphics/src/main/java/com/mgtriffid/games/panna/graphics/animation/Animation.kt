@@ -1,7 +1,6 @@
 package com.mgtriffid.games.panna.graphics.animation
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import java.lang.IllegalStateException
 
 class Animation(
     private val frames: List<FrameConfig>

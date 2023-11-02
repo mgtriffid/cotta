@@ -1,10 +1,6 @@
 package com.mgtriffid.games.cotta.client.guice
 
-import com.google.inject.AbstractModule
-import com.google.inject.Provides
-import com.google.inject.Scopes
-import com.google.inject.Singleton
-import com.google.inject.TypeLiteral
+import com.google.inject.*
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.client.impl.CottaClientImpl

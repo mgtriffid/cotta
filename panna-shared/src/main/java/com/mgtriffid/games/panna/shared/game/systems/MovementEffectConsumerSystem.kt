@@ -1,9 +1,8 @@
 package com.mgtriffid.games.panna.shared.game.systems
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
-import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
+import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_DOWN
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT

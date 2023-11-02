@@ -6,7 +6,6 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.exceptions.EcsRuntimeException
 import jakarta.inject.Named
-import jdk.jfr.Name
 
 class CottaStateImpl @Inject constructor(
     @Named("historyLength") private val historyLength: Int,

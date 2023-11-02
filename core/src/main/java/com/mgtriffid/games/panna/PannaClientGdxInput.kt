@@ -5,17 +5,10 @@ import com.badlogic.gdx.Input
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
-import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
+import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.IDLE
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.JOIN_BATTLE
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_DOWN
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_NONE
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_UP
-import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
 import mu.KotlinLogging
-import java.lang.IllegalArgumentException
 import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}

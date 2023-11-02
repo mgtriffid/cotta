@@ -1,22 +1,15 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.google.inject.Inject
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.InputRecipe
-import com.mgtriffid.games.cotta.core.serialization.InputSerialization
-import com.mgtriffid.games.cotta.core.serialization.InputSnapper
-import com.mgtriffid.games.cotta.network.CottaServerNetwork
-import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.StateRecipe
-import com.mgtriffid.games.cotta.core.serialization.StateSnapper
+import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.network.ConnectionId
+import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
-import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
 import mu.KotlinLogging
-import java.lang.IllegalStateException
 
 private val logger = KotlinLogging.logger {}
 

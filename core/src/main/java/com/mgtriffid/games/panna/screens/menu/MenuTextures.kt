@@ -1,7 +1,6 @@
 package com.mgtriffid.games.panna.screens.menu
 
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 
 /**
  * Constructor is expensive!

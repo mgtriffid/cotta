@@ -7,19 +7,15 @@ import com.mgtriffid.games.cotta.core.registry.ComponentKey
 import com.mgtriffid.games.cotta.core.registry.ComponentSpec
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsEntityInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapInputComponentRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsEntityInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import mu.KotlinLogging
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.companionObject
-import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.full.*
 
 private val logger = KotlinLogging.logger {}
 

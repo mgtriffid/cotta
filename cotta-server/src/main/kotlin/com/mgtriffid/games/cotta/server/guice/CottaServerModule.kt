@@ -7,7 +7,6 @@ import com.google.inject.Scopes
 import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names.named
-import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.effects.EffectBus
@@ -17,16 +16,8 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
-import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
+import com.mgtriffid.games.cotta.core.guice.SerializationModule
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
-import com.mgtriffid.games.cotta.core.serialization.InputSerialization
-import com.mgtriffid.games.cotta.core.serialization.InputSnapper
-import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.StateSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSerialization
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsSnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
@@ -89,23 +80,8 @@ class CottaServerModule(
             bind(InputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
-            bindEngineParts()
+            install(SerializationModule())
         }
-    }
-
-    private fun Binder.bindEngineParts() {
-        val stateSnapper = MapsStateSnapper()
-        val snapsSerialization = MapsSnapsSerialization()
-        val inputSnapper = MapsInputSnapper()
-        val inputSerialization = MapsInputSerialization()
-        bind(MapsStateSnapper::class.java).toInstance(stateSnapper)
-        bind(object : TypeLiteral<StateSnapper<MapsStateRecipe, MapsDeltaRecipe>>() {}).toInstance(stateSnapper)
-        bind(MapsSnapsSerialization::class.java).`in`(Scopes.SINGLETON)
-        bind(object : TypeLiteral<SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe>>() {}).toInstance(snapsSerialization)
-        bind(MapsInputSnapper::class.java).toInstance(inputSnapper)
-        bind(object : TypeLiteral<InputSnapper<MapsInputRecipe>>(){}).toInstance(inputSnapper)
-        bind(MapsInputSerialization::class.java).toInstance(inputSerialization)
-        bind(object : TypeLiteral<InputSerialization<MapsInputRecipe>>(){}).toInstance(inputSerialization)
     }
 
     @Provides @Singleton // TODO game instance scoped
@@ -115,20 +91,4 @@ class CottaServerModule(
         return network
     }
 
-    @Provides @Singleton
-    fun provideCottaEngine(
-        componentRegistry: ComponentsRegistryImpl,
-        stateSnapper: MapsStateSnapper,
-        snapsSerialization: MapsSnapsSerialization,
-        inputSnapper: MapsInputSnapper,
-        inputSerialization: MapsInputSerialization,
-    ): CottaEngine<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe> {
-        return CottaEngineImpl(
-            componentRegistry,
-            stateSnapper,
-            snapsSerialization,
-            inputSnapper,
-            inputSerialization
-        )
-    }
 }

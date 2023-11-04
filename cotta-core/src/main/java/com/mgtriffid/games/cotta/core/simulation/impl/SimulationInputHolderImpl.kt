@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.server.impl
+package com.mgtriffid.games.cotta.core.simulation.impl
 
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder

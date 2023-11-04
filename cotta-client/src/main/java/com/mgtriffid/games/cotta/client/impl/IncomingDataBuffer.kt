@@ -31,6 +31,7 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
     }
 
     fun storeInput(tick: Long, input: IR) {
+        logger.debug { "Storing input for $tick, data buffer ${this.hashCode()}" }
         inputs[tick] = input
         cleanUpOldInputs(tick)
     }

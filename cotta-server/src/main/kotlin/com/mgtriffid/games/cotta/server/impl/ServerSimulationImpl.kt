@@ -6,9 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
-import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
@@ -17,7 +15,6 @@ import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.MetaEntities
 import com.mgtriffid.games.cotta.server.ServerSimulation
-import jakarta.inject.Named
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KClass
@@ -26,13 +23,10 @@ private val logger = KotlinLogging.logger {}
 
 class ServerSimulationImpl @Inject constructor(
     private val state: CottaState,
-    private val tickProvider: TickProvider,
-    @Named("historyLength") private val historyLength: Int,
     private val simulationInputHolder: SimulationInputHolder,
     private val metaEntities: MetaEntities,
     private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
-    private val playersSawTicks: PlayersSawTicks,
     private val effectsHistory: EffectsHistory
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()

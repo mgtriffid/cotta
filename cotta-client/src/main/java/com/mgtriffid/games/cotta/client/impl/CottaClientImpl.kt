@@ -2,16 +2,15 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.ClientSimulation
+import com.mgtriffid.games.cotta.client.ClientSimulationInputProvider
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
-import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
@@ -28,23 +27,22 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
     val game: CottaGame,
     val engine: CottaEngine<SR, DR, IR>, // weird type parameterization
     val network: CottaClientNetwork,
-    val input: CottaClientInput
+    val localInput: CottaClientInput,
+    val clientSimulation: ClientSimulation,
+    val input: ClientSimulationInputProvider,
+    private val tickProvider: TickProvider,
+    private val incomingDataBuffer: IncomingDataBuffer<SR, DR, IR>,
+    val cottaState: CottaState // Todo not expose as public
 ) : CottaClient {
     val lagCompLimit: Int = 8 // TODO move to config and bind properly
     val bufferLength: Int = 3
-    private val historyLength = 16
-    var connected = false
-    private val incomingDataBuffer = IncomingDataBuffer<SR, DR, IR>()
     private var state: ClientState = ClientState.Initial
     private val componentsRegistry = engine.getComponentsRegistry()
     private val stateSnapper = engine.getStateSnapper()
     private val snapsSerialization = engine.getSnapsSerialization()
     private val inputSnapper = engine.getInputSnapper()
     private val inputSerialization = engine.getInputSerialization()
-    private val tickProvider = AtomicLongTickProvider()
-    val cottaState = CottaState.getInstance(tickProvider)
     private var metaEntityId: EntityId? = null
-    private val clientSimulation = ClientSimulation.getInstance(cottaState, tickProvider, historyLength)
 
     override fun initialize() {
         registerComponents()
@@ -113,22 +111,17 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         val tick = getCurrentTick()
         logger.debug { "Tick = $tick" }
 
-        processLocalInput()
-
-        val inputs = inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tick]!!)
-        val simulationInput = object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
-                return inputs
-            }
-            override fun playersSawTicks(): Map<PlayerId, Long> {
-                return emptyMap() // TODO
-            }
-        }
-        clientSimulation.setInputForUpcomingTick(simulationInput)
+        fetchInput()
         clientSimulation.tick()
         // simulation goes here
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
 
+    }
+    private fun fetchInput() {
+
+        processLocalInput()
+
+        input.prepare()
     }
 
     private fun processLocalInput() {
@@ -157,7 +150,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
 
     private fun getInputs(entity: Entity) = entity.inputComponents().map { clazz ->
         logger.debug { "Retrieving input of class '${clazz.simpleName}' for entity '${entity.id}'" }
-        input.input(entity, clazz)
+        localInput.input(entity, clazz)
     }
 
     private fun getEntitiesOwnedByPlayer(player: Entity.OwnedBy.Player) =

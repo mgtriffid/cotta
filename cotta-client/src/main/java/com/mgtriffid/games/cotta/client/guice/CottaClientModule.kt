@@ -1,11 +1,22 @@
 package com.mgtriffid.games.cotta.client.guice
 
 import com.google.inject.*
+import com.google.inject.name.Names
+import com.mgtriffid.games.cotta.client.ClientSimulation
+import com.mgtriffid.games.cotta.client.ClientSimulationInputProvider
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientInput
+import com.mgtriffid.games.cotta.client.impl.ClientSimulationImpl
+import com.mgtriffid.games.cotta.client.impl.ClientSimulationInputProviderImpl
 import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
+import com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
+import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
+import com.mgtriffid.games.cotta.core.guice.SerializationModule
 import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
@@ -19,6 +30,8 @@ import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
+import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaClientNetwork
 
@@ -32,39 +45,15 @@ class CottaClientModule(
         bind(CottaClientNetwork::class.java).to(KryonetCottaClientNetwork::class.java)
         bind(CottaClient::class.java)
             .to(object: TypeLiteral<CottaClientImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
-        bindEngineParts()
-    }
+        bind(Int::class.java).annotatedWith(Names.named("historyLength")).toInstance(8)
 
-    private fun bindEngineParts() {
-        val stateSnapper = MapsStateSnapper()
-        val snapsSerialization = MapsSnapsSerialization()
-        val inputSnapper = MapsInputSnapper()
-        val inputSerialization = MapsInputSerialization()
-        bind(MapsStateSnapper::class.java).toInstance(stateSnapper)
-        bind(object : TypeLiteral<StateSnapper<MapsStateRecipe, MapsDeltaRecipe>>() {}).toInstance(stateSnapper)
-        bind(MapsSnapsSerialization::class.java).`in`(Scopes.SINGLETON)
-        bind(object : TypeLiteral<SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe>>() {}).toInstance(snapsSerialization)
-        bind(MapsInputSnapper::class.java).toInstance(inputSnapper)
-        bind(object : TypeLiteral<InputSnapper<MapsInputRecipe>>(){}).toInstance(inputSnapper)
-        bind(MapsInputSerialization::class.java).toInstance(inputSerialization)
-        bind(object : TypeLiteral<InputSerialization<MapsInputRecipe>>(){}).toInstance(inputSerialization)
-    }
-
-    @Provides
-    @Singleton
-    fun provideCottaEngine(
-        componentRegistry: ComponentsRegistryImpl,
-        stateSnapper: MapsStateSnapper,
-        snapsSerialization: MapsSnapsSerialization,
-        inputSnapper: MapsInputSnapper,
-        inputSerialization: MapsInputSerialization,
-    ): CottaEngine<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe> {
-        return CottaEngineImpl(
-            componentRegistry,
-            stateSnapper,
-            snapsSerialization,
-            inputSnapper,
-            inputSerialization
-        )
+        bind(ClientSimulationInputProvider::class.java).to(ClientSimulationInputProviderImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(ClientSimulation::class.java).to(ClientSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
+        bind(CottaState::class.java).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(object : TypeLiteral<IncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>() {})
+            .toInstance(IncomingDataBuffer())
+        install(SerializationModule())
     }
 }

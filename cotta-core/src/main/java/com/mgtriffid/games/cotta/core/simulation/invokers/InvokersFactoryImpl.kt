@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
 import com.mgtriffid.games.cotta.core.annotations.LagCompensated
+import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingEffectsConsumerInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
@@ -41,5 +42,4 @@ class InvokersFactoryImpl @Inject constructor(
             else -> { throw IllegalStateException("Unexpected implementation of CottaSystem") }
         }
     }
-
 }

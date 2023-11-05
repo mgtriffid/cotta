@@ -9,7 +9,7 @@ import jakarta.inject.Named
 
 class InputProcessingContextImpl @Inject constructor(
     @Named("lagCompensated") private val lagCompensatingEffectBus: LagCompensatingEffectBus
-) : InputProcessingContext{
+) : InputProcessingContext {
     override fun fire(effect: CottaEffect) {
         lagCompensatingEffectBus.publisher().fire(effect)
     }

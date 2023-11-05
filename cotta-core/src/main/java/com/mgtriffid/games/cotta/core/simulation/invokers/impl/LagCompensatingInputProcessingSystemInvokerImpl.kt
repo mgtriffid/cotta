@@ -30,5 +30,4 @@ class LagCompensatingInputProcessingSystemInvokerImpl @Inject constructor(
         system.process(entity, context)
         sawTickHolder.tick = null
     }
-
 }

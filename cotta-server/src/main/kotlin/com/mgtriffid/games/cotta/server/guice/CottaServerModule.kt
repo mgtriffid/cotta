@@ -73,9 +73,11 @@ class CottaServerModule(
             bind(LagCompensatingInputProcessingSystemInvoker::class.java).to(LagCompensatingInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(Entities::class.java).annotatedWith(named("latest")).to(LatestEntities::class.java)
+
             bind(InputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
+
             install(SerializationModule())
         }
     }

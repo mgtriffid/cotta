@@ -4,12 +4,10 @@ import com.mgtriffid.games.cotta.client.ClientSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
-import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import jakarta.inject.Inject
-import jakarta.inject.Named
 import mu.KotlinLogging
 import kotlin.reflect.KClass
 
@@ -17,7 +15,6 @@ private val logger = KotlinLogging.logger {}
 
 class ClientSimulationImpl @Inject constructor(
     private val state: CottaState,
-    @Named("historyLength") private val historyLength: Int,
     private val simulationInputHolder: SimulationInputHolder,
     private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus

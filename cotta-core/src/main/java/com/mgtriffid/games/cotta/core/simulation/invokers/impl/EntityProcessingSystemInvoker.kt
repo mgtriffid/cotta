@@ -1,7 +1,8 @@
-package com.mgtriffid.games.cotta.core.simulation.invokers
+package com.mgtriffid.games.cotta.core.simulation.invokers.impl
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import jakarta.inject.Inject

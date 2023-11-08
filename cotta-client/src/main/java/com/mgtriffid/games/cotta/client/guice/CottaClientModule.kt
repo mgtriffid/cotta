@@ -42,12 +42,11 @@ import com.mgtriffid.games.cotta.core.simulation.impl.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.EntityProcessingContextImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.InputProcessingContextImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompensatingEffectProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaClientNetwork
@@ -89,6 +88,9 @@ class CottaClientModule(
         bind(EffectProcessingContext::class.java).annotatedWith(Names.named("lagCompensated")).to(
             LagCompensatingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
         bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
+
+        bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing")).to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
+        bind(ServerCreatedEntitiesRegistry::class.java).`in`(Scopes.SINGLETON)
 
         install(SerializationModule())
     }

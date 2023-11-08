@@ -14,6 +14,8 @@ import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
 import jakarta.inject.Inject
 import mu.KotlinLogging
 
@@ -23,11 +25,13 @@ class ClientSimulationInputProviderImpl @Inject constructor(
     private val inputSnapper: InputSnapper<MapsInputRecipe>,
     private val incomingDataBuffer: IncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>,
     private val tickProvider: TickProvider,
+    private val createdEntitiesRegistry: ServerCreatedEntitiesRegistry,
     private val simulationInputHolder: SimulationInputHolder
 ) : ClientSimulationInputProvider {
     override fun prepare() {
         logger.debug { "Unpacking input for tick ${tickProvider.tick}, incomingDataBuffer is ${incomingDataBuffer.hashCode()}" }
         val inputs = inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tickProvider.tick]!!)
+        createdEntitiesRegistry.data = incomingDataBuffer.createdEntities[tickProvider.tick + 1]!!
         val simulationInput = object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return inputs

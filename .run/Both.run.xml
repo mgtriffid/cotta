@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Both" type="CompoundRunConfigurationType">
+    <toRun name="Panna Desktop" type="Application" />
+    <toRun name="Panna Server" type="Application" />
+    <method v="2" />
+  </configuration>
+</component>

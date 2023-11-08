@@ -10,6 +10,7 @@ import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.DataForClients
@@ -27,6 +28,7 @@ class ServerSimulationImpl @Inject constructor(
     private val metaEntities: MetaEntities,
     private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
+    private val createdEntities: CreatedEntities,
     private val effectsHistory: EffectsHistory
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
@@ -82,6 +84,7 @@ class ServerSimulationImpl @Inject constructor(
             effectsHistory = effectsHistory,
             inputs = simulationInputHolder.get().inputsForEntities(),
             state = state,
+            createdEntities = createdEntities,
             metaEntities = metaEntities
         )
     }

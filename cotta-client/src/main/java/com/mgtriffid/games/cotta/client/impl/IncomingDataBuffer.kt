@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityTrace
 import mu.KotlinLogging
 import java.util.*
 import kotlin.math.min
@@ -14,6 +15,7 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
     val inputs = TreeMap<Long, IR>()
+    val createdEntities = TreeMap<Long, Map<CreateEntityTrace, EntityId>>()
     val metaEntityIds = TreeMap<Long, EntityId>() // not really needed but for the uniformity
 
     fun storeDelta(tick: Long, delta: DR) {
@@ -36,12 +38,21 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
         cleanUpOldInputs(tick)
     }
 
+    fun storeCreatedEntities(tick: Long, createdEntities: Map<CreateEntityTrace, EntityId>) {
+        this.createdEntities[tick] = createdEntities
+        cleanUpOldCreatedEntities(tick)
+    }
+
     private fun cleanUpOldStates(tick: Long) {
         cleanUp(states, tick)
     }
 
     private fun cleanUpOldInputs(tick: Long) {
         cleanUp(inputs, tick)
+    }
+
+    private fun cleanUpOldCreatedEntities(tick: Long) {
+        cleanUp(createdEntities, tick)
     }
 
     private fun cleanUp(data: TreeMap<Long, *>, tick: Long) {

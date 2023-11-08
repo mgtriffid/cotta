@@ -43,11 +43,11 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputR
     private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients, playerId: PlayerId): Collection<ServerToClientDto> {
         when (kindOfData) {
             KindOfData.DELTA -> {
-                val dto = ServerToClientDto()
-                dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.DELTA
-                dto.tick = tick - 1
+                val deltaDto = ServerToClientDto()
+                deltaDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.DELTA
+                deltaDto.tick = tick - 1
                 logger.debug { "Snapping delta for tick ${tick - 1} to $tick" }
-                dto.payload = snapsSerialization.serializeDeltaRecipe(
+                deltaDto.payload = snapsSerialization.serializeDeltaRecipe(
                     stateSnapper.snapDelta(
                         prev = data.entities(tick - 1),
                         curr = data.entities(tick)
@@ -59,7 +59,13 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputR
                     inputSnapper.snapInput(data.inputs(tick - 1))
                 )
                 inputDto.tick = tick - 1
-                return listOf(dto, inputDto)
+                val createdEntitiesDto = ServerToClientDto()
+                createdEntitiesDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CREATED_ENTITIES
+                createdEntitiesDto.payload = snapsSerialization.serializeEntityCreationTraces(
+                    data.createdEntities(tick)
+                )
+                createdEntitiesDto.tick = tick
+                return listOf(deltaDto, inputDto, createdEntitiesDto)
             }
             KindOfData.STATE -> {
                 val dto = ServerToClientDto()

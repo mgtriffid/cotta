@@ -24,6 +24,6 @@ class LatestEntities @Inject constructor(private val state: CottaState) : Entiti
    }
 
    override fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
-       throw NotImplementedError("Is not supposed to be called on Server")
+       return state.entities().createEntity(id, ownedBy)
    }
 }

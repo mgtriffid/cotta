@@ -10,7 +10,7 @@ import com.mgtriffid.games.panna.shared.game.effects.JoinBattleEffect
 class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is JoinBattleEffect) {
-            val dude = ctx.entities().createEntity(ownedBy = e.ownedBy)
+            val dude = ctx.createEntity(ownedBy = e.ownedBy)
             dude.addComponent(PositionComponent.create(200, 250, ORIENTATION_LEFT))
             dude.addInputComponent(WalkingInputComponent::class)
             dude.addComponent(WalkingComponent.create(15))

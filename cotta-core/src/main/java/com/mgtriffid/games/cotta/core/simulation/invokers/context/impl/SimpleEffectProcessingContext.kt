@@ -15,7 +15,7 @@ class SimpleEffectProcessingContext : EffectProcessingContext {
         TODO("Not yet implemented")
     }
 
-    override fun createEntity(): Entity {
+    override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
         TODO("Not yet implemented")
     }
 }

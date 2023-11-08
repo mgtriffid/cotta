@@ -6,6 +6,8 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityTrace
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.MetaEntities
 
@@ -13,6 +15,7 @@ data class DataForClientsImpl(
     val effectsHistory: EffectsHistory,
     val inputs: Map<EntityId, Collection<InputComponent<*>>>,
     val state: CottaState,
+    val createdEntities: CreatedEntities,
     val metaEntities: MetaEntities
 ) : DataForClients {
     override fun effects(tick: Long): Collection<CottaEffect> {
@@ -25,6 +28,10 @@ data class DataForClientsImpl(
 
     override fun entities(tick: Long): Entities {
         return state.entities(tick)
+    }
+
+    override fun createdEntities(tick: Long): Map<CreateEntityTrace, EntityId> {
+        return createdEntities.forTick(tick)
     }
 
     override fun metaEntities(): MetaEntities {

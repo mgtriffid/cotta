@@ -13,10 +13,13 @@ import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.*
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.*
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityTrace
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.SimplestCreateEntityTrace
 
 class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe> {
     // this is not thread safe
     private val kryo = Kryo()
+
     init {
         kryo.register(MapComponentDeltaRecipeDto::class.java)
         kryo.register(MapComponentRecipeDto::class.java)
@@ -29,6 +32,8 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
         kryo.register(EntityIdDto::class.java)
+        kryo.register(CreateEntityTraceDto::class.java)
+        kryo.register(CreateEntityTracesDto::class.java)
     }
 
     override fun serializeDeltaRecipe(recipe: MapsDeltaRecipe): ByteArray {
@@ -59,6 +64,39 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
 
     override fun deserializeEntityId(bytes: ByteArray): EntityId {
         return kryo.readObject(Input(bytes), EntityIdDto::class.java).toEntityId()
+    }
+
+    override fun serializeEntityCreationTraces(traces: Map<CreateEntityTrace, EntityId>): ByteArray {
+        val output = Output(64, 1024 * 1024)
+        val entries = ArrayList<CreateEntityTraceDto>()
+        traces.forEach { (trace, entityId) -> entries.add(trace.toDto().also { it.entityId = entityId.toDto() }) }
+        kryo.writeObject(output, CreateEntityTracesDto().also { it.traces = entries })
+        return output.toBytes()
+    }
+
+    override fun deserializeEntityCreationTraces(bytes: ByteArray): Map<CreateEntityTrace, EntityId> {
+        return kryo.readObject(
+            Input(bytes),
+            CreateEntityTracesDto::class.java
+        ).traces.associate {
+            it.toTrace() to it.entityId.toEntityId()
+        }
+    }
+}
+
+private fun CreateEntityTraceDto.toTrace(): CreateEntityTrace {
+    return SimplestCreateEntityTrace(ownedBy.toOwnedBy())
+}
+
+private fun CreateEntityTrace.toDto(): CreateEntityTraceDto {
+    return when (this) {
+        is SimplestCreateEntityTrace -> {
+            val dto = CreateEntityTraceDto()
+            dto.ownedBy = ownedBy.toDto()
+            dto
+        }
+
+        else -> throw IllegalStateException("Unknown trace type")
     }
 }
 
@@ -129,7 +167,7 @@ fun MapsChangedEntityRecipeDto.toRecipe() = MapsChangedEntityRecipe(
 fun MapsDeltaRecipeDto.toRecipe() = MapsDeltaRecipe(
     addedEntities = addedEntities.map { it.toRecipe() },
     changedEntities = changedEntities.map { it.toRecipe() },
-    removedEntitiesIds = removedEntitiesIds.map { it.toEntityId() }. toSet()
+    removedEntitiesIds = removedEntitiesIds.map { it.toEntityId() }.toSet()
 )
 
 fun MapsEntityRecipeDto.toRecipe() = MapsEntityRecipe(
@@ -161,6 +199,7 @@ fun Entity.OwnedBy.toDto(): EntityOwnedByDto {
             ret.ownedBySystem = false
             ret.playerId = playerId.id
         }
+
         is Entity.OwnedBy.System -> {
             ret.ownedBySystem = true
             ret.playerId = 0

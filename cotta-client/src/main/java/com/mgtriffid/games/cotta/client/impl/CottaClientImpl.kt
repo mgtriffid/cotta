@@ -179,6 +179,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
                 KindOfData.STATE -> incomingDataBuffer.storeState(it.tick, snapsSerialization.deserializeStateRecipe(it.payload))
                 KindOfData.CLIENT_META_ENTITY_ID -> metaEntityId = snapsSerialization.deserializeEntityId(it.payload)
                 KindOfData.INPUT -> incomingDataBuffer.storeInput(it.tick, inputSerialization.deserializeInputRecipe(it.payload))
+                KindOfData.CREATED_ENTITIES -> incomingDataBuffer.storeCreatedEntities(it.tick, snapsSerialization.deserializeEntityCreationTraces(it.payload))
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
             }
         }

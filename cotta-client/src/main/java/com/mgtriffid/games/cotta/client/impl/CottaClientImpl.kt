@@ -1,13 +1,12 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.google.inject.Inject
-import com.mgtriffid.games.cotta.client.ClientSimulation
-import com.mgtriffid.games.cotta.client.ClientSimulationInputProvider
-import com.mgtriffid.games.cotta.client.CottaClient
-import com.mgtriffid.games.cotta.client.CottaClientInput
+import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.input.ClientInput
+import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
@@ -28,6 +27,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
     val engine: CottaEngine<SR, DR, IR>, // weird type parameterization
     val network: CottaClientNetwork,
     val localInput: CottaClientInput,
+    val clientInputs: ClientInputs,
     val clientSimulation: ClientSimulation,
     val input: ClientSimulationInputProvider,
     private val tickProvider: TickProvider,
@@ -126,7 +126,18 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
 
     private fun processLocalInput() {
         logger.debug { "Processing input" }
-        val player = ((metaEntity() ?: return).ownedBy as Entity.OwnedBy.Player)
+        val metaEntity = metaEntity()
+        if (metaEntity == null) {
+            logger.debug { "No meta entity, returning" }
+            return
+        }
+        val inputs = gatherLocalInput(metaEntity)
+        clientInputs.store(inputs)
+        send(inputs)
+    }
+
+    private fun gatherLocalInput(metaEntity: Entity): ClientInput {
+        val player = (metaEntity.ownedBy as Entity.OwnedBy.Player)
         val localEntities = getEntitiesOwnedByPlayer(player)
         logger.debug { "Found ${localEntities.size} entities owned by player $player" }
         val localEntitiesWithInputComponents = localEntities.filter {
@@ -137,11 +148,11 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
             logger.debug { "Retrieving input for entity '${e.id}'" }
             e.id to getInputs(e)
         }
-        send(inputs)
+        return ClientInputImpl(inputs)
     }
 
-    private fun send(inputs: Map<EntityId, List<InputComponent<*>>>) {
-        val inputRecipe = inputSnapper.snapInput(inputs)
+    private fun send(inputs: ClientInput) {
+        val inputRecipe = inputSnapper.snapInput(inputs.inputs)
         val inputDto = ClientToServerInputDto()
         inputDto.tick = getCurrentTick()
         inputDto.payload = inputSerialization.serializeInputRecipe(inputRecipe)

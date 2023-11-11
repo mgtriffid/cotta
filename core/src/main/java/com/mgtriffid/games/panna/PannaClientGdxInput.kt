@@ -20,7 +20,10 @@ class PannaClientGdxInput : CottaClientInput {
     /**
      * Called for each Entity that has ownedBy == current player AND has some InputComponent.
      */
-    override fun <T : InputComponent<T>> input(entity: Entity, clazz: KClass<T>): T {
+    override fun <T : InputComponent<T>> input(
+        entity: Entity,
+        clazz: KClass<T>
+    ): T {
         when(clazz) {
             JoinBattleMetaEntityInputComponent::class -> {
                 return if (!sentJoinBattle) {

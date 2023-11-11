@@ -21,7 +21,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = "cotta"
-        gdxVersion = '1.11.0'
+        gdxVersion = '1.12.1'
         roboVMVersion = '2.3.16'
         box2DLightsVersion = '1.5'
         ashleyVersion = '1.7.4'

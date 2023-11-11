@@ -25,9 +25,32 @@ class ClientSimulationImpl @Inject constructor(
         effectBus.clear()
         state.advance()
         putInputIntoEntities()
+        simulate()
+        predict()
+    }
+
+    private fun simulate() {
         for ((invoker, system) in systemInvokers) {
             (invoker as SystemInvoker<CottaSystem>).invoke(system) // TODO cast issue
         }
+    }
+
+    private fun predict() {
+        // Article on Unity says we need to distinguish OwnerPredicted and just Predicted. Which kind of makes sense.
+        // My avatar is OwnerPredicted. My missiles are OwnerPredicted but also Predicted for my enemies.
+        // There has to be a strategy that selects Entities that should be processed on this particular Client.
+        // What about Effects though?
+        // So for Movement Input we process Input, we fire Effect to actually move, then we process this Effect. All three
+        // should happen. Let's say if collision happens then there's some effect on collision and damage. In that case
+        // we should track effect of collision, track effect of damage intent but not use actual damage processing. Which
+        // means we can't really do that automatic. It is up to developer to specify up until which point simulation runs.
+
+        // copy state to predicted state
+        // invoke systems but only on part of those entities
+        //      create new invokers
+        //      create new Entities that refer to predicted state
+        //
+        // actually invoke many times because we have certain list of inputs
     }
 
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {

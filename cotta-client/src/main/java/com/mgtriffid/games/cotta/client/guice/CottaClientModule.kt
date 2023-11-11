@@ -2,14 +2,8 @@ package com.mgtriffid.games.cotta.client.guice
 
 import com.google.inject.*
 import com.google.inject.name.Names
-import com.mgtriffid.games.cotta.client.ClientSimulation
-import com.mgtriffid.games.cotta.client.ClientSimulationInputProvider
-import com.mgtriffid.games.cotta.client.CottaClient
-import com.mgtriffid.games.cotta.client.CottaClientInput
-import com.mgtriffid.games.cotta.client.impl.ClientSimulationImpl
-import com.mgtriffid.games.cotta.client.impl.ClientSimulationInputProviderImpl
-import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
-import com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer
+import com.mgtriffid.games.cotta.client.*
+import com.mgtriffid.games.cotta.client.impl.*
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.effects.EffectBus
@@ -92,6 +86,8 @@ class CottaClientModule(
         bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing")).to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
         bind(ServerCreatedEntitiesRegistry::class.java).`in`(Scopes.SINGLETON)
 
+        bind(ClientInputs::class.java).to(ClientInputsImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)
         install(SerializationModule())
     }
 }

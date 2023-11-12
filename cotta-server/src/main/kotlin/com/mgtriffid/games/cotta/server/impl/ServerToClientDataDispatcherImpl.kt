@@ -8,12 +8,12 @@ import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
-import com.mgtriffid.games.cotta.server.ServerToClientDataChannel
+import com.mgtriffid.games.cotta.server.ServerToClientDataDispatcher
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
+class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
     private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts,
     private val network: CottaServerNetwork,
@@ -21,7 +21,8 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputR
     private val snapsSerialization: SnapsSerialization<SR, DR>,
     private val inputSnapper: InputSnapper<IR>,
     private val inputSerialization: InputSerialization<IR>,
-) : ServerToClientDataChannel {
+    private val data: DataForClients,
+) : ServerToClientDataDispatcher {
 
     // Here we don't care much about data that comes _from_ client and about their sawTick values.
     // We do, however, care about data that is being sent _to_ clients. We record acks, we record what entities
@@ -30,7 +31,7 @@ class ServerToClientDataChannelImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputR
     // you predicted it as id `predicted_1`, we gave it id `543`, now we match all input you give for that entity,
     // and when we send you this entity back, your job is to start treating `543` as the id, not `predicted_1`".
 
-    override fun send(data: DataForClients) {
+    override fun dispatch() {
         val currentTick = tick.tick
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val whatToSend = ghost.whatToSend(currentTick)

@@ -24,6 +24,7 @@ class ServerSimulationTest {
     private lateinit var simulationInputHolder: SimulationInputHolder
     private lateinit var state: CottaState
     private lateinit var serverSimulation: ServerSimulation
+    private lateinit var dataForClients: DataForClients
 
     @BeforeEach
     fun setUp() {
@@ -41,6 +42,7 @@ class ServerSimulationTest {
         })
         state = injector.getInstance(CottaState::class.java)
         serverSimulation = injector.getInstance(ServerSimulation::class.java)
+        dataForClients = injector.getInstance(DataForClients::class.java)
     }
 
     @Test
@@ -210,7 +212,7 @@ class ServerSimulationTest {
 
         assertEquals(
             HealthRegenerationTestEffect(entityId, 1),
-            serverSimulation.getDataToBeSentToClients().effects(tick = tickProvider.tick).first()
+            dataForClients.effects(tick = tickProvider.tick).first()
         )
     }
 
@@ -234,14 +236,13 @@ class ServerSimulationTest {
             override fun playersSawTicks() = mapOf(playerId to 2L)
         })
         serverSimulation.tick()
-        val dataToBeSentToClients = serverSimulation.getDataToBeSentToClients()
         assertEquals(
             4,
-            (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
         )
         assertEquals(
             true,
-            (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
         val input2 = PlayerInputTestComponent.create(
             aim = 4,
@@ -257,11 +258,11 @@ class ServerSimulationTest {
         })
         assertEquals(
             4,
-            (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
         )
         assertEquals(
-            true,
-            (dataToBeSentToClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            false,
+            (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
     }
 

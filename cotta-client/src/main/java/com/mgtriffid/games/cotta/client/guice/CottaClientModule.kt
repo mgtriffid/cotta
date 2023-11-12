@@ -4,7 +4,9 @@ import com.google.inject.*
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.impl.*
-import com.mgtriffid.games.cotta.core.CottaEngine
+import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemInvoker
+import com.mgtriffid.games.cotta.client.invokers.PredictionInvokersFactory
+import com.mgtriffid.games.cotta.client.invokers.impl.PredictedInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
@@ -14,16 +16,6 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.guice.SerializationModule
-import com.mgtriffid.games.cotta.core.impl.CottaEngineImpl
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
-import com.mgtriffid.games.cotta.core.serialization.InputSerialization
-import com.mgtriffid.games.cotta.core.serialization.InputSnapper
-import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.StateSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSerialization
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsSnapsSerialization
-import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
@@ -65,7 +57,19 @@ class CottaClientModule(
         bind(object : TypeLiteral<IncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>() {})
             .toInstance(IncomingDataBuffer())
 
-        bind(InvokersFactory::class.java).to(InvokersFactoryImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(InvokersFactory::class.java)
+            .annotatedWith(Names.named("simulation"))
+            .to(SimulationInvokersFactory::class.java)
+            .`in`(Scopes.SINGLETON)
+
+/*
+        bind(InvokersFactory::class.java)
+            .annotatedWith(Names.named("prediction"))
+            .to(PredictionInvokersFactory::class.java)
+            .`in`(Scopes.SINGLETON)
+*/
+
+//        bind(PredictedInputProcessingSystemInvoker::class.java).to(PredictedInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
         bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)

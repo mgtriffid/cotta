@@ -171,6 +171,7 @@ project(":cotta-client") {
         implementation project(":cotta-core")
         implementation project(":cotta-network-api")
         implementation project(":cotta-network-kryonet") // TODO questionnable
+        implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
         implementation "com.google.inject:guice:7.0.0"
     }

@@ -79,16 +79,6 @@ class ServerSimulationImpl @Inject constructor(
         return playerId
     }
 
-    override fun getDataToBeSentToClients(): DataForClients {
-        return DataForClientsImpl(
-            effectsHistory = effectsHistory,
-            inputs = simulationInputHolder.get().inputsForEntities(),
-            state = state,
-            createdEntities = createdEntities,
-            metaEntities = metaEntities
-        )
-    }
-
     private fun processEnterGameIntents() {
         enterGameIntents.forEach {
             val metaEntity = state.entities().createEntity(ownedBy = OwnedBy.Player(it.second))

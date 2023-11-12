@@ -26,7 +26,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
     val clientsGhosts: ClientsGhosts,
     val tickProvider: TickProvider,
     val state: CottaState,
-    private val serverToClientDataChannel: ServerToClientDataChannel,
+    private val serverToClientDataDispatcher: ServerToClientDataDispatcher,
     private val serverSimulation: ServerSimulation,
     private val serverSimulationInputProvider: ServerSimulationInputProvider
 ): CottaGameInstance {
@@ -88,11 +88,6 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
 
     private fun dispatchDataToClients() {
         logger.debug { "Preparing data to send to clients" }
-        val data = serverSimulation.getDataToBeSentToClients()
-        send(data)
-    }
-
-    private fun send(data: DataForClients) {
-        serverToClientDataChannel.send(data)
+        serverToClientDataDispatcher.dispatch()
     }
 }

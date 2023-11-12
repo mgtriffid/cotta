@@ -6,14 +6,16 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityTrace
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.MetaEntities
+import jakarta.inject.Inject
 
-data class DataForClientsImpl(
+data class DataForClientsImpl @Inject constructor(
     val effectsHistory: EffectsHistory,
-    val inputs: Map<EntityId, Collection<InputComponent<*>>>,
+    val simulationInputHolder: SimulationInputHolder,
     val state: CottaState,
     val createdEntities: CreatedEntities,
     val metaEntities: MetaEntities
@@ -23,7 +25,7 @@ data class DataForClientsImpl(
     }
 
     override fun inputs(tick: Long): Map<EntityId, Collection<InputComponent<*>>> {
-        return inputs // TODO care about tick
+        return simulationInputHolder.get().inputsForEntities() // TODO care about tick
     }
 
     override fun entities(tick: Long): Entities {

@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
@@ -17,6 +18,7 @@ import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import com.mgtriffid.games.cotta.utils.now
 import mu.KotlinLogging
 import kotlin.reflect.KClass
+import kotlin.reflect.full.hasAnnotation
 
 const val STATE_WAITING_THRESHOLD = 5000L
 
@@ -29,6 +31,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
     val localInput: CottaClientInput,
     val clientInputs: ClientInputs,
     val clientSimulation: ClientSimulation,
+//    private val predictionSimulation: PredictionSimulation,
     val input: ClientSimulationInputProvider,
     private val tickProvider: TickProvider,
     private val incomingDataBuffer: IncomingDataBuffer<SR, DR, IR>,
@@ -115,10 +118,18 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         clientSimulation.tick()
         // simulation goes here
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
-
+        predict()
     }
-    private fun fetchInput() {
 
+    private fun predict() {
+        logger.debug { "Predicting" }
+        val numberOfTicksToPredict = 0 //
+        // calculate how many times to predict - for that input buffer is handy
+        // then copy the state
+        // then for each tick do partial simulation
+    }
+
+    private fun fetchInput() {
         processLocalInput()
 
         input.prepare()
@@ -225,9 +236,16 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
     }
 
     private fun registerSystems() {
-        game.serverSystems.forEach {
-            clientSimulation.registerSystem(it as KClass<CottaSystem>)
+        game.serverSystems.forEach { system ->
+            clientSimulation.registerSystem(system as KClass<CottaSystem>)
+            if (isPredicted(system)) {
+//                predictionSimulation.registerSystem(system)
+            }
         }
+    }
+
+    private fun isPredicted(system: KClass<CottaSystem>): Boolean {
+        return system.hasAnnotation<Predicted>()
     }
 
     sealed class ClientState {

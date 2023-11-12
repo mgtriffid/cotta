@@ -21,5 +21,4 @@ interface ServerSimulation {
 
     fun tick()
     fun enterGame(intent: EnterGameIntent): PlayerId
-    fun getDataToBeSentToClients(): DataForClients
 }

@@ -12,7 +12,7 @@ import jakarta.inject.Inject
 import kotlin.reflect.KClass
 import kotlin.reflect.full.hasAnnotation
 
-class InvokersFactoryImpl @Inject constructor(
+class SimulationInvokersFactory @Inject constructor(
     private val lagCompensatingEffectsConsumerInvoker: LagCompensatingEffectsConsumerInvoker,
     private val simpleEffectsConsumerSystemInvoker: SimpleEffectsConsumerSystemInvoker,
     private val entityProcessingSystemInvoker: EntityProcessingSystemInvoker,

@@ -50,8 +50,8 @@ class CottaServerModule(
             bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
             bind(Int::class.java).annotatedWith(named("historyLength")).toInstance(8)
             bind(CottaState::class.java).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(ServerToClientDataChannel::class.java)
-                .to(object : TypeLiteral<ServerToClientDataChannelImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
+            bind(ServerToClientDataDispatcher::class.java)
+                .to(object : TypeLiteral<ServerToClientDataDispatcherImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
 
             bind(ServerSimulation::class.java).to(ServerSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 
@@ -60,7 +60,7 @@ class CottaServerModule(
             bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(MetaEntities::class.java).to(MetaEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(InvokersFactory::class.java).to(InvokersFactoryImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(InvokersFactory::class.java).to(SimulationInvokersFactory::class.java).`in`(Scopes.SINGLETON)
             bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
             bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
@@ -75,7 +75,7 @@ class CottaServerModule(
             bind(EffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
             bind(CreateEntityStrategy::class.java).annotatedWith(named("effectProcessing")).to(CreateAndRecordCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
             bind(CreatedEntities::class.java).to(CreatedEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
-
+            bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
             install(SerializationModule())
         }
     }

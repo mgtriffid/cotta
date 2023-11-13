@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityTrace
 
 /**
@@ -16,4 +17,5 @@ interface DataForClients {
     fun entities(tick: Long): Entities
     fun createdEntities(tick: Long): Map<CreateEntityTrace, EntityId>
     fun metaEntities(): MetaEntities
+    fun playersSawTicks(): PlayersSawTicks
 }

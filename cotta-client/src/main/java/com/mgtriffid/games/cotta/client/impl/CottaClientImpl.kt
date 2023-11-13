@@ -202,6 +202,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
                 KindOfData.CLIENT_META_ENTITY_ID -> metaEntityId = snapsSerialization.deserializeEntityId(it.payload)
                 KindOfData.INPUT -> incomingDataBuffer.storeInput(it.tick, inputSerialization.deserializeInputRecipe(it.payload))
                 KindOfData.CREATED_ENTITIES -> incomingDataBuffer.storeCreatedEntities(it.tick, snapsSerialization.deserializeEntityCreationTraces(it.payload))
+                KindOfData.PLAYERS_SAW_TICKS -> incomingDataBuffer.storePlayersSawTicks(it.tick, snapsSerialization.deserializePlayersSawTicks(it.payload))
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
             }
         }
@@ -217,7 +218,10 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
     }
 
     private fun deltaAvailableForTick(tick: Long): Boolean {
-        return incomingDataBuffer.deltas.containsKey(tick) && incomingDataBuffer.inputs.containsKey(tick)
+        return incomingDataBuffer.deltas.containsKey(tick)
+            && incomingDataBuffer.inputs.containsKey(tick)
+            && incomingDataBuffer.playersSawTicks.containsKey(tick)
+            && incomingDataBuffer.createdEntities.containsKey(tick)
     }
 
     private fun connect() {

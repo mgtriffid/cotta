@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityTrace
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
@@ -18,7 +19,8 @@ data class DataForClientsImpl @Inject constructor(
     val simulationInputHolder: SimulationInputHolder,
     val state: CottaState,
     val createdEntities: CreatedEntities,
-    val metaEntities: MetaEntities
+    val metaEntities: MetaEntities,
+    val playersSawTicks: PlayersSawTicks,
 ) : DataForClients {
     override fun effects(tick: Long): Collection<CottaEffect> {
         return effectsHistory.forTick(tick) // TODO care about tick
@@ -38,5 +40,9 @@ data class DataForClientsImpl @Inject constructor(
 
     override fun metaEntities(): MetaEntities {
         return metaEntities
+    }
+
+    override fun playersSawTicks(): PlayersSawTicks {
+        return playersSawTicks
     }
 }

@@ -5,5 +5,6 @@ public enum KindOfData {
     STATE,
     CLIENT_META_ENTITY_ID,
     INPUT,
-    CREATED_ENTITIES
+    CREATED_ENTITIES,
+    PLAYERS_SAW_TICKS
 }

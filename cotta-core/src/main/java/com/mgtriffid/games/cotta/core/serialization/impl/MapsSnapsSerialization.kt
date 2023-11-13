@@ -34,6 +34,7 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         kryo.register(EntityIdDto::class.java)
         kryo.register(CreateEntityTraceDto::class.java)
         kryo.register(CreateEntityTracesDto::class.java)
+        kryo.register(PlayersSawTicksDto::class.java)
     }
 
     override fun serializeDeltaRecipe(recipe: MapsDeltaRecipe): ByteArray {
@@ -80,6 +81,25 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
             CreateEntityTracesDto::class.java
         ).traces.associate {
             it.toTrace() to it.entityId.toEntityId()
+        }
+    }
+
+    override fun serializePlayersSawTicks(playersSawTicks: Map<PlayerId, Long>): ByteArray {
+        val output = Output(64, 1024 * 1024)
+        val dto = PlayersSawTicksDto()
+        dto.playersSawTicks = playersSawTicks.mapKeys { (playerId, _) ->
+            playerId.id
+        }
+        kryo.writeObject(output, dto)
+        return output.toBytes()
+    }
+
+    override fun deserializePlayersSawTicks(bytes: ByteArray): Map<PlayerId, Long> {
+        return kryo.readObject(
+            Input(bytes),
+            PlayersSawTicksDto::class.java
+        ).playersSawTicks.mapKeys { (playerId, _) ->
+            PlayerId(playerId)
         }
     }
 }

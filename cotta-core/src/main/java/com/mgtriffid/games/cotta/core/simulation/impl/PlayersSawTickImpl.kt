@@ -11,4 +11,8 @@ class PlayersSawTickImpl @Inject constructor(
     override fun get(playerId: PlayerId): Long? {
         return simulationInputHolder.get().playersSawTicks()[playerId]
     }
+
+    override fun all(): Map<PlayerId, Long> {
+        return simulationInputHolder.get().playersSawTicks().toMap()
+    }
 }

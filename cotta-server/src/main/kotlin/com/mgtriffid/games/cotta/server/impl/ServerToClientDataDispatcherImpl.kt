@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
+import com.esotericsoftware.kryonet.Server
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -66,7 +67,13 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
                     data.createdEntities(tick)
                 )
                 createdEntitiesDto.tick = tick
-                return listOf(deltaDto, inputDto, createdEntitiesDto)
+                val playersSawTicksDto = ServerToClientDto()
+                playersSawTicksDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.PLAYERS_SAW_TICKS
+                playersSawTicksDto.payload = snapsSerialization.serializePlayersSawTicks(
+                    data.playersSawTicks().all()
+                )
+                playersSawTicksDto.tick = tick
+                return listOf(deltaDto, inputDto, createdEntitiesDto, playersSawTicksDto)
             }
             KindOfData.STATE -> {
                 val dto = ServerToClientDto()

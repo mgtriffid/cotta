@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import java.util.*
 
 class ClientInputsImpl @Inject constructor(
     private val tickProvider: TickProvider,
@@ -32,5 +33,9 @@ class ClientInputsImpl @Inject constructor(
     private sealed interface Envelope {
         class Present(val tick: Long, val input: ClientInput) : Envelope
         object Absent : Envelope
+    }
+
+    override fun all(): SortedMap<Long, ClientInput> {
+        return data.filterIsInstance<Envelope.Present>().associate { it.tick to it.input }.toSortedMap()
     }
 }

@@ -90,6 +90,8 @@ class CottaClientModule(
         bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing")).to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
         bind(ServerCreatedEntitiesRegistry::class.java).`in`(Scopes.SINGLETON)
 
+        bind(PredictionSimulation::class.java).to(PredictionSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+
         bind(ClientInputs::class.java).to(ClientInputsImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)
         install(SerializationModule())

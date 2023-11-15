@@ -31,7 +31,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
     val localInput: CottaClientInput,
     val clientInputs: ClientInputs,
     val clientSimulation: ClientSimulation,
-//    private val predictionSimulation: PredictionSimulation,
+    private val predictionSimulation: PredictionSimulation,
     val input: ClientSimulationInputProvider,
     private val tickProvider: TickProvider,
     private val incomingDataBuffer: IncomingDataBuffer<SR, DR, IR>,
@@ -115,18 +115,41 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         logger.debug { "Tick = $tick" }
 
         fetchInput()
+        // tick is advanced inside;
         clientSimulation.tick()
-        // simulation goes here
+
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
+
         predict()
+
+        sendDataToServer()
+    }
+
+    private fun sendDataToServer() {
+        val inputs = clientInputs.get(tickProvider.tick - 1)
+        send(inputs)
     }
 
     private fun predict() {
+        val playerId = (metaEntity()?.ownedBy as? Entity.OwnedBy.Player)?.playerId
+        if (playerId == null) {
+            logger.warn { "No player id, we should not even be simulating. Returning." }
+            return
+        }
         logger.debug { "Predicting" }
-        val numberOfTicksToPredict = 0 //
-        // calculate how many times to predict - for that input buffer is handy
-        // then copy the state
-        // then for each tick do partial simulation
+        val currentTick = getCurrentTick()
+        val lastMyInputProcessedByServerSimulation = incomingDataBuffer.playersSawTicks[currentTick - 1]!![playerId]?.let {
+            logger.debug { "Got $it as processed input from Server" }
+            it
+        } ?: 0L.also {
+            logger.debug { "Did not find our input in server's input, assuming none of our input was processed yet" }
+        }// TODO gracefully handle missing
+        val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
+            .also { logger.debug { it.joinToString() } }.size
+        predictionSimulation.startPredictionFrom(cottaState.entities(atTick = currentTick), currentTick)
+        repeat(unprocessedTicks) { _ ->
+            predictionSimulation.tick()
+        }
     }
 
     private fun fetchInput() {
@@ -144,7 +167,6 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         }
         val inputs = gatherLocalInput(metaEntity)
         clientInputs.store(inputs)
-        send(inputs)
     }
 
     private fun gatherLocalInput(metaEntity: Entity): ClientInput {

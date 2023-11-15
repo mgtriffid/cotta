@@ -5,8 +5,9 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import jakarta.inject.Inject
+import jakarta.inject.Named
 
-class LatestEntities @Inject constructor(private val state: CottaState) : Entities {
+class LatestEntities @Inject constructor(@Named("simulation") private val state: CottaState) : Entities {
    override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
        return state.entities().createEntity(ownedBy)
    }

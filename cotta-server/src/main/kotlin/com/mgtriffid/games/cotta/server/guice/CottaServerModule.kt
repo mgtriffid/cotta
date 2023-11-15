@@ -49,7 +49,7 @@ class CottaServerModule(
             bind(ComponentsRegistryImpl::class.java).`in`(Scopes.SINGLETON)
             bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
             bind(Int::class.java).annotatedWith(named("historyLength")).toInstance(8)
-            bind(CottaState::class.java).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(CottaState::class.java).annotatedWith(named("simulation")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
             bind(ServerToClientDataDispatcher::class.java)
                 .to(object : TypeLiteral<ServerToClientDataDispatcherImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
 

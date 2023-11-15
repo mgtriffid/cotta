@@ -10,6 +10,7 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
 import com.mgtriffid.games.cotta.server.ServerSimulationInputProvider
 import jakarta.inject.Inject
+import jakarta.inject.Named
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -17,7 +18,7 @@ private val logger = KotlinLogging.logger {}
 class ServerSimulationInputProviderImpl @Inject constructor(
     private val clientsInputProvider: ClientsInputProvider,
     private val nonPlayerInputProvider: NonPlayerInputProvider,
-    private val state: CottaState,
+    @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder
 ): ServerSimulationInputProvider {
     override fun prepare() {

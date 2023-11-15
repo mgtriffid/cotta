@@ -52,7 +52,7 @@ class CottaClientModule(
         bind(ClientSimulationInputProvider::class.java).to(ClientSimulationInputProviderImpl::class.java).`in`(Scopes.SINGLETON)
         bind(ClientSimulation::class.java).to(ClientSimulationImpl::class.java).`in`(Scopes.SINGLETON)
         bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
-        bind(CottaState::class.java).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
         bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
         bind(object : TypeLiteral<IncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>() {})
             .toInstance(IncomingDataBuffer())

@@ -13,11 +13,12 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntitie
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.MetaEntities
 import jakarta.inject.Inject
+import jakarta.inject.Named
 
 data class DataForClientsImpl @Inject constructor(
     val effectsHistory: EffectsHistory,
     val simulationInputHolder: SimulationInputHolder,
-    val state: CottaState,
+    @Named("simulation") val state: CottaState,
     val createdEntities: CreatedEntities,
     val metaEntities: MetaEntities,
     val playersSawTicks: PlayersSawTicks,

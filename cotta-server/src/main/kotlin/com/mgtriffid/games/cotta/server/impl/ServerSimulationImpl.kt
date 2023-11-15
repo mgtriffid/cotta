@@ -16,6 +16,7 @@ import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.MetaEntities
 import com.mgtriffid.games.cotta.server.ServerSimulation
+import jakarta.inject.Named
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KClass
@@ -23,7 +24,7 @@ import kotlin.reflect.KClass
 private val logger = KotlinLogging.logger {}
 
 class ServerSimulationImpl @Inject constructor(
-    private val state: CottaState,
+    @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder,
     private val metaEntities: MetaEntities,
     private val invokersFactory: InvokersFactory,

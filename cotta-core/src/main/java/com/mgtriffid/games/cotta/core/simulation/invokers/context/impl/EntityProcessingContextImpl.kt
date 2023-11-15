@@ -10,7 +10,7 @@ import jakarta.inject.Named
 
 class EntityProcessingContextImpl @Inject constructor(
     @Named("historical") private val lagCompensatingEffectBus: LagCompensatingEffectBus,
-    private val state: CottaState
+    @Named("simulation") private val state: CottaState
 ) : EntityProcessingContext {
     override fun fire(effect: CottaEffect) {
         lagCompensatingEffectBus.publisher().fire(effect)

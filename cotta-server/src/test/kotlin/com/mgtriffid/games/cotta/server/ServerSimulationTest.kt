@@ -1,6 +1,8 @@
 package com.mgtriffid.games.cotta.server
 
 import com.google.inject.Guice
+import com.google.inject.Key
+import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.core.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
@@ -40,7 +42,7 @@ class ServerSimulationTest {
                 return emptyMap()
             }
         })
-        state = injector.getInstance(CottaState::class.java)
+        state = injector.getInstance(Key.get(CottaState::class.java, Names.named("simulation")))
         serverSimulation = injector.getInstance(ServerSimulation::class.java)
         dataForClients = injector.getInstance(DataForClients::class.java)
     }

@@ -14,7 +14,7 @@ import jakarta.inject.Named
 
 class LagCompensatingEffectProcessingContext @Inject constructor(
     @Named("lagCompensated") private val lagCompensatingEffectBus: LagCompensatingEffectBus,
-    private val state: CottaState,
+    @Named("simulation") private val state: CottaState,
     private val sawTickHolder: SawTickHolder,
     @Named("effectProcessing") private val createEntityStrategy: CreateEntityStrategy
 ) : EffectProcessingContext {

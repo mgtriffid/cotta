@@ -1,7 +1,9 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.PredictionSimulation
+import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
@@ -14,15 +16,20 @@ private val logger = KotlinLogging.logger {}
 
 class PredictionSimulationImpl @Inject constructor(
 //    @Named("prediction") private val invokersFactory: InvokersFactory
+//    @Named("predicted") private val predictedState: CottaState
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
-
+    private lateinit var entities: Entities
     override fun tick() {
+        // invoke all registered invokers
         logger.info { "PredictionSimulation#tick" }
     }
 
     override fun startPredictionFrom(entities: Entities, tick: Long) {
         logger.info { "Setting initial predictions state with tick $tick" }
+        if (entities is EntitiesImpl) {
+            this.entities = entities.deepCopy()
+        }
     }
 
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {

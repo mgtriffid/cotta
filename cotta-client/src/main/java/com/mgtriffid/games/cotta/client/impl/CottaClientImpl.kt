@@ -16,6 +16,7 @@ import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import com.mgtriffid.games.cotta.utils.now
+import jakarta.inject.Named
 import mu.KotlinLogging
 import kotlin.reflect.KClass
 import kotlin.reflect.full.hasAnnotation
@@ -35,7 +36,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
     val input: ClientSimulationInputProvider,
     private val tickProvider: TickProvider,
     private val incomingDataBuffer: IncomingDataBuffer<SR, DR, IR>,
-    val cottaState: CottaState // Todo not expose as public
+    @Named("simulation") val cottaState: CottaState // Todo not expose as public
 ) : CottaClient {
     val lagCompLimit: Int = 8 // TODO move to config and bind properly
     val bufferLength: Int = 3

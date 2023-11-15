@@ -15,7 +15,7 @@ import kotlin.reflect.KClass
 private val logger = KotlinLogging.logger {}
 
 class ClientSimulationImpl @Inject constructor(
-    private val state: CottaState,
+    @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder,
     @Named("simulation") private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus

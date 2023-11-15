@@ -14,6 +14,7 @@ import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.*
 import jakarta.inject.Inject
+import jakarta.inject.Named
 import mu.KotlinLogging
 import kotlin.reflect.KClass
 
@@ -25,7 +26,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
     val network: CottaServerNetwork,
     val clientsGhosts: ClientsGhosts,
     val tickProvider: TickProvider,
-    val state: CottaState,
+    @Named("simulation") private val state: CottaState,
     private val serverToClientDataDispatcher: ServerToClientDataDispatcher,
     private val serverSimulation: ServerSimulation,
     private val serverSimulationInputProvider: ServerSimulationInputProvider

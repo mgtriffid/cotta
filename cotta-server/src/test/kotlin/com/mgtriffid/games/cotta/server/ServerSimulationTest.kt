@@ -273,7 +273,7 @@ class ServerSimulationTest {
         override val nonPlayerInputProvider = object : NonPlayerInputProvider {
             override fun input(entities: Entities) = emptyMap<EntityId, Collection<InputComponent<*>>>()
         }
-        override fun initializeServerState(state: CottaState) { }
+        override fun initializeServerState(entities: Entities) { }
         override val componentClasses: Set<KClass<out Component<*>>> = emptySet()
         override val inputComponentClasses: Set<KClass<out InputComponent<*>>> = emptySet()
         override val metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>> = emptySet()
@@ -281,4 +281,6 @@ class ServerSimulationTest {
             override val tickLength: Long = 20
         }
     }
+
+    private fun CottaState.entities() = entities(tickProvider.tick)
 }

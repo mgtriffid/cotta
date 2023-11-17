@@ -16,6 +16,7 @@ private val logger = KotlinLogging.logger {}
 
 class ClientSimulationImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
+    private val tick: TickProvider,
     private val simulationInputHolder: SimulationInputHolder,
     @Named("simulation") private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus
@@ -24,7 +25,8 @@ class ClientSimulationImpl @Inject constructor(
 
     override fun tick() {
         effectBus.clear()
-        state.advance()
+        state.advance(tick.tick)
+        tick.tick++
         putInputIntoEntities()
         simulate()
         predict()
@@ -54,7 +56,7 @@ class ClientSimulationImpl @Inject constructor(
 
     private fun putInputIntoEntities() {
         val input = simulationInputHolder.get()
-        state.entities().all().filter {
+        state.entities(tick.tick).all().filter {
             it.hasInputComponents()
         }.forEach { e ->
             logger.trace { "Entity ${e.id} has some input components:" }

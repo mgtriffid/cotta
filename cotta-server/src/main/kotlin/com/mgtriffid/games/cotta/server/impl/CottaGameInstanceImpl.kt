@@ -60,7 +60,7 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
     }
 
     private fun initializeState() {
-        game.initializeServerState(state)
+        game.initializeServerState(state.entities(tickProvider.tick))
     }
 
     private fun registerSystems() {

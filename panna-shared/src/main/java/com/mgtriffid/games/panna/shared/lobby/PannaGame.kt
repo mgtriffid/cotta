@@ -25,9 +25,9 @@ class PannaGame : CottaGame {
         JoinBattleEffectConsumerSystem::class,
     )
 
-    override fun initializeServerState(state: CottaState) {
+    override fun initializeServerState(entities: Entities) {
         // Adding a graverobber, owner should be system
-        val graverobber = state.entities().createEntity()
+        val graverobber = entities.createEntity()
         graverobber.addComponent(GraverobberNpcComponent.create())
         graverobber.addInputComponent(WalkingInputComponent::class)
         graverobber.addComponent(WalkingComponent.create(30))

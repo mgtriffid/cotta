@@ -1,23 +1,25 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
-import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.*
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
-class LatestEntities @Inject constructor(@Named("simulation") private val state: CottaState) : Entities {
-   override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
-       return state.entities().createEntity(ownedBy)
-   }
+class LatestEntities @Inject constructor(
+    @Named("simulation") private val state: CottaState,
+    private val tick: TickProvider
+) : Entities {
+    override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
+        return entities().createEntity(ownedBy)
+    }
 
-   override fun get(id: EntityId): Entity {
-       return state.entities().get(id)
+    private fun entities() = state.entities(tick.tick)
+
+    override fun get(id: EntityId): Entity {
+       return entities().get(id)
    }
 
    override fun all(): Collection<Entity> {
-       return state.entities().all()
+       return entities().all()
    }
 
    override fun remove(id: EntityId) {
@@ -25,6 +27,6 @@ class LatestEntities @Inject constructor(@Named("simulation") private val state:
    }
 
    override fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
-       return state.entities().createEntity(id, ownedBy)
+       return entities().createEntity(id, ownedBy)
    }
 }

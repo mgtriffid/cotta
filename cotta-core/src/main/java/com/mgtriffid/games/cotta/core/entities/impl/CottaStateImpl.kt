@@ -3,44 +3,45 @@ package com.mgtriffid.games.cotta.core.entities.impl
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.exceptions.EcsRuntimeException
 import jakarta.inject.Named
+import kotlin.math.max
 
 class CottaStateImpl @Inject constructor(
-    @Named("historyLength") private val historyLength: Int,
-    private val tick: TickProvider
+    @Named("historyLength") private val historyLength: Int
 ) : CottaState {
 
     private val entitiesArray = Array<Entities?>(historyLength) { null }
+
+    private var latestTickSet = 0L
 
     init {
         entitiesArray[0] = Entities.getInstance()
     }
 
-    override fun entities(): Entities = entities(tick.tick)
-
     override fun entities(atTick: Long): Entities {
-        if (atTick > tick.tick) {
-            throw EcsRuntimeException("Cannot retrieve entities at tick $atTick: current tick is $tick")
+        if (atTick > latestTickSet) {
+            throw EcsRuntimeException("Cannot retrieve entities at tick $atTick: latest stored tick is $latestTickSet")
         }
-        if (atTick < tick.tick - historyLength) {
+        if (atTick < latestTickSet - historyLength) {
             throw EcsRuntimeException(
-                "Cannot retrieve entities at tick $atTick: current tick is ${tick.tick} while history length is $historyLength"
+                "Cannot retrieve entities at tick $atTick: latest stored tick is $latestTickSet while history length is $historyLength"
             )
         }
-        return entitiesArray[(atTick % historyLength).toInt()]!!
+        return entitiesArray[atTick.toIndex()]!!
     }
 
-    override fun advance() {
-        val entities = entities(tick.tick)
-        tick.tick++ // TODO move out of here
-        entitiesArray[(tick.tick % historyLength).toInt()] = entities.deepCopy()
+    override fun advance(tick: Long) {
+        val entities = entities(tick)
+        set(tick + 1, entities.deepCopy())
     }
 
     override fun set(tick: Long, entities: Entities) {
-        entitiesArray[(tick % historyLength).toInt()] = entities
+        entitiesArray[tick.toIndex()] = entities
+        latestTickSet = max(latestTickSet, tick)
     }
+
+    private fun Long.toIndex() = (this % historyLength).toInt()
 
     private fun Entities.deepCopy(): Entities {
         return if (this is EntitiesImpl) {

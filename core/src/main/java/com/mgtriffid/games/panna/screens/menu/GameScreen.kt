@@ -95,8 +95,10 @@ class GameScreen(
         }
     }
 
-    private fun getDrawableEntities() = (cottaClient as CottaClientImpl<*, *, *>).cottaState.entities().all().filter {
-        it.hasComponent(DrawableComponent::class) && it.hasComponent(PositionComponent::class)
+    private fun getDrawableEntities() = with (cottaClient as CottaClientImpl<*, *, *>) {
+        cottaState.entities(tickProvider.tick).all().filter {
+            it.hasComponent(DrawableComponent::class) && it.hasComponent(PositionComponent::class)
+        }
     }
 
     private fun logPositionIfChanged(entity: Entity, position: PositionComponent) {

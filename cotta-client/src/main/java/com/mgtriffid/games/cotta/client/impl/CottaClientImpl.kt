@@ -34,7 +34,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
     val clientSimulation: ClientSimulation,
     private val predictionSimulation: PredictionSimulation,
     val input: ClientSimulationInputProvider,
-    private val tickProvider: TickProvider,
+    val tickProvider: TickProvider,
     private val incomingDataBuffer: IncomingDataBuffer<SR, DR, IR>,
     @Named("simulation") val cottaState: CottaState // Todo not expose as public
 ) : CottaClient {
@@ -82,9 +82,11 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
                 is ClientState.Running -> {
                     fetchData()
                     if (deltaAvailableForTick(getCurrentTick())) {
+                        logger.trace { "Delta available, we will integrate" }
                         integrate()
                         state = ClientState.Running(it.currentTick + 1)
                     } else {
+                        logger.trace { "Delta not available" }
                         // for now do nothing, later we'll guess and keep track of how
                         // long ago did we have a state that is trusted
                     }
@@ -101,7 +103,8 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         tickProvider.tick = fullStateTick
         stateSnapper.unpackStateRecipe(cottaState.entities(atTick = fullStateTick), stateRecipe)
         ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
-            cottaState.advance()
+            cottaState.advance(tick - 1)
+            tickProvider.tick++
             stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
         }
     }
@@ -120,7 +123,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         fetchInput()
         // tick is advanced inside;
         clientSimulation.tick()
-
+        logger.info { "About to unpack delta and apply to ${tick + 1}" }
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
 
         predict()

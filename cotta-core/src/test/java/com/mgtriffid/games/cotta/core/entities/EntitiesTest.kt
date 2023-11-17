@@ -126,4 +126,10 @@ class EntitiesTest {
             cottaState.entities().get(entityId).getComponent(PositionTestComponent::class).x
         )
     }
+
+    private fun CottaState.entities() = entities(tickProvider.tick)
+    private fun CottaState.advance() {
+        advance(tickProvider.tick)
+        tickProvider.tick++
+    }
 }

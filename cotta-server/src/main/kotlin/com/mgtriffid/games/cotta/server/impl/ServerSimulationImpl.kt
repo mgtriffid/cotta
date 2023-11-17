@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
@@ -30,7 +31,8 @@ class ServerSimulationImpl @Inject constructor(
     private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
     private val createdEntities: CreatedEntities,
-    private val effectsHistory: EffectsHistory
+    private val effectsHistory: EffectsHistory,
+    private val tickProvider: TickProvider
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
@@ -53,7 +55,8 @@ class ServerSimulationImpl @Inject constructor(
 
     override fun tick() {
         effectBus.clear()
-        state.advance()
+        state.advance(tickProvider.tick)
+        tickProvider.tick++
         putInputIntoEntities()
         for ((invoker, system) in systemInvokers) {
             (invoker as SystemInvoker<CottaSystem>).invoke(system) // TODO cast issue
@@ -62,7 +65,7 @@ class ServerSimulationImpl @Inject constructor(
     }
 
     private fun putInputIntoEntities() {
-        state.entities().all().filter {
+        state.entities(tickProvider.tick).all().filter {
             it.hasInputComponents()
         }.forEach { e ->
             logger.trace { "Entity ${e.id} has some input components:" }
@@ -82,7 +85,7 @@ class ServerSimulationImpl @Inject constructor(
 
     private fun processEnterGameIntents() {
         enterGameIntents.forEach {
-            val metaEntity = state.entities().createEntity(ownedBy = OwnedBy.Player(it.second))
+            val metaEntity = state.entities(tickProvider.tick).createEntity(ownedBy = OwnedBy.Player(it.second))
             metaEntitiesInputComponents.forEach { componentClass ->
                 metaEntity.addInputComponent(componentClass)
             }

@@ -97,7 +97,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         logger.debug { "Setting state from authoritative" }
         val fullStateTick = incomingDataBuffer.states.lastKey()
         val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
-        cottaState.setBlank(fullStateTick)
+        cottaState.set(fullStateTick, blankEntities())
         tickProvider.tick = fullStateTick
         stateSnapper.unpackStateRecipe(cottaState.entities(atTick = fullStateTick), stateRecipe)
         ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
@@ -105,6 +105,8 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
             stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
         }
     }
+
+    private fun blankEntities() = Entities.getInstance()
 
     private fun getCurrentTick(): Long {
         return tickProvider.tick

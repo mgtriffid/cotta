@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.client.impl.*
 import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionInvokersFactory
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictedInputProcessingSystemInvokerImpl
+import com.mgtriffid.games.cotta.client.invokers.impl.PredictionInputProcessingContext
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
@@ -62,14 +63,12 @@ class CottaClientModule(
             .to(SimulationInvokersFactory::class.java)
             .`in`(Scopes.SINGLETON)
 
-/*
         bind(InvokersFactory::class.java)
             .annotatedWith(Names.named("prediction"))
             .to(PredictionInvokersFactory::class.java)
             .`in`(Scopes.SINGLETON)
-*/
 
-//        bind(PredictedInputProcessingSystemInvoker::class.java).to(PredictedInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(PredictedInputProcessingSystemInvoker::class.java).to(PredictedInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
         bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
@@ -83,14 +82,21 @@ class CottaClientModule(
         bind(Entities::class.java).annotatedWith(Names.named("latest")).to(LatestEntities::class.java)
         bind(InputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
         bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(EffectProcessingContext::class.java).annotatedWith(Names.named("lagCompensated")).to(
-            LagCompensatingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
+        bind(EffectProcessingContext::class.java)
+            .annotatedWith(Names.named("lagCompensated"))
+            .to(LagCompensatingEffectProcessingContext::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing")).to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
         bind(ServerCreatedEntitiesRegistry::class.java).`in`(Scopes.SINGLETON)
 
         bind(PredictionSimulation::class.java).to(PredictionSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(CottaState::class.java).annotatedWith(Names.named("prediction")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(InputProcessingContext::class.java)
+            .annotatedWith(Names.named("prediction"))
+            .to(PredictionInputProcessingContext::class.java)
+            .`in`(Scopes.SINGLETON)
 
         bind(ClientInputs::class.java).to(ClientInputsImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)

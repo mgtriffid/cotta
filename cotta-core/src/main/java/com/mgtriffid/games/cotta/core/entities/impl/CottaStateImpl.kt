@@ -38,8 +38,8 @@ class CottaStateImpl @Inject constructor(
         entitiesArray[(tick.tick % historyLength).toInt()] = entities.deepCopy()
     }
 
-    override fun setBlank(tick: Long) {
-        entitiesArray[(tick % historyLength).toInt()] = Entities.getInstance()
+    override fun set(tick: Long, entities: Entities) {
+        entitiesArray[(tick % historyLength).toInt()] = entities
     }
 
     private fun Entities.deepCopy(): Entities {

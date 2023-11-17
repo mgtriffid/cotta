@@ -7,13 +7,17 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessin
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 class PredictedInputProcessingSystemInvokerImpl @Inject constructor(
-    @Named("predictedLocal") private val entities: Entities, // TODO only for reading
-    @Named("predicted") private val context: InputProcessingContext,
+//    @Named("predictedLocal") private val entities: Entities, // TODO only for reading
+    @Named("prediction") private val context: InputProcessingContext,
 ): PredictedInputProcessingSystemInvoker {
     override fun invoke(system: InputProcessingSystem) {
-        entities.all().forEach { process(it, system) }
+        logger.debug { "Invoked ${system::class.qualifiedName}" }
+//        entities.all().forEach { process(it, system) }
     }
 
     private fun process(entity: Entity, system: InputProcessingSystem) {

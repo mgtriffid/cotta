@@ -9,5 +9,5 @@ interface CottaState {
     fun entities(): Entities
     fun entities(atTick: Long): Entities
     fun advance()
-    fun setBlank(tick: Long)
+    fun set(tick: Long, entities: Entities)
 }

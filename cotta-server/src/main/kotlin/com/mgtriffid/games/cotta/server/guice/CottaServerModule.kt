@@ -62,6 +62,7 @@ class CottaServerModule(
             bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
             bind(InvokersFactory::class.java).to(SimulationInvokersFactory::class.java).`in`(Scopes.SINGLETON)
             bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
+            bind(EffectHolder::class.java).toInstance(EffectHolder(null))
             bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
             bind(LagCompensatingEffectBus::class.java).annotatedWith(named("historical")).to(HistoricalLagCompensatingEffectBus::class.java).`in`(Scopes.SINGLETON)

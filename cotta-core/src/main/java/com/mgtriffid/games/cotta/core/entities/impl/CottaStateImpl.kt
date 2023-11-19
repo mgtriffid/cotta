@@ -41,6 +41,11 @@ class CottaStateImpl @Inject constructor(
         latestTickSet = max(latestTickSet, tick)
     }
 
+    override fun wipe() {
+        entitiesArray.fill(null)
+        latestTickSet = 0L
+    }
+
     private fun Long.toIndex() = (this % historyLength).toInt()
 
     private fun Entities.deepCopy(): Entities {

@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.simulation.invokers.EffectHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBus
 import com.mgtriffid.games.cotta.core.simulation.invokers.ReadingFromPreviousTickEntities
@@ -17,6 +18,7 @@ class LagCompensatingEffectProcessingContext @Inject constructor(
     @Named("lagCompensated") private val lagCompensatingEffectBus: LagCompensatingEffectBus,
     @Named("simulation") private val state: CottaState,
     private val sawTickHolder: SawTickHolder,
+    private val effectHolder: EffectHolder,
     @Named("effectProcessing") private val createEntityStrategy: CreateEntityStrategy,
     private val tickProvider: TickProvider
 ) : EffectProcessingContext {
@@ -33,6 +35,6 @@ class LagCompensatingEffectProcessingContext @Inject constructor(
     }
 
     override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
-        return createEntityStrategy.createEntity(ownedBy)
+        return createEntityStrategy.createEntity(ownedBy, effectHolder)
     }
 }

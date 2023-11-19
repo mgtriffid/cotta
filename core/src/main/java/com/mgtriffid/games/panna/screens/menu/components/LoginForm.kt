@@ -26,52 +26,56 @@ class LoginForm(
     val passwordInput: TextField
     val loginInput: TextField
     var onClick: LoginForm.() -> Unit = {}
+
     init {
         table.setFillParent(true)
-            table.debug = UI_DEBUG
-            val loginLabel = Label("login", MenuScreen.Styles.formInputLabelStyle)
-            table.add(loginLabel)
-            // TODO use pref size
-            val textFieldStyle = TextField.TextFieldStyle(
-                BitmapFont(),
-                Color.YELLOW,
-                TextureRegionDrawable(textures.textInputCursor),
-                null,
-                NinePatchDrawable(
-                    NinePatch(
-                        textures.textInput9Patch,
-                        8, 8, 8, 8
-                    )
+        table.debug = UI_DEBUG
+        val loginLabel = Label("login", MenuScreen.Styles.formInputLabelStyle)
+        table.add(loginLabel)
+        // TODO use pref size
+        val textFieldStyle = TextField.TextFieldStyle(
+            BitmapFont(),
+            Color.YELLOW,
+            TextureRegionDrawable(textures.textInputCursor),
+            null,
+            NinePatchDrawable(
+                NinePatch(
+                    textures.textInput9Patch,
+                    8, 8, 8, 8
                 )
             )
-            loginInput = TextField(
-                "", textFieldStyle
-            )
-            table.add(loginInput).width(300f).height(50f).pad(10f)
-            table.row()
-            val passwordLabel = Label("password", MenuScreen.Styles.formInputLabelStyle)
-            table.add(passwordLabel)
-            passwordInput = TextField(
-                "", textFieldStyle
-            )
-            passwordInput.isPasswordMode = true
-            passwordInput.setPasswordCharacter('*')
-            table.add(passwordInput).width(300f).height(50f).pad(10f)
-            table.row()
-            val buttonStyle = getLoginButtonStyle()
-            val loginButton = TextButton("login", buttonStyle)
-            loginButton.addListener(object : ClickListener() {
-                override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
-                    logger.debug { "Login button clicked" }
-                    super.touchUp(event, x, y, pointer, button)
-                    if (button == Input.Buttons.LEFT) onClick()
-                    logger.debug { "touchUp processing of loginButton complete" }
-                }
-            })
+        )
+        loginInput = TextField(
+            "", textFieldStyle
+        )
+        loginInput.text = "Abel"
+        table.add(loginInput).width(300f).height(50f).pad(10f)
+        table.row()
+        val passwordLabel = Label("password", MenuScreen.Styles.formInputLabelStyle)
+        table.add(passwordLabel)
+        passwordInput = TextField(
+            "", textFieldStyle
+        )
+        passwordInput.isPasswordMode = true
+        passwordInput.setPasswordCharacter('*')
+        passwordInput.text = "1234"
+        table.add(passwordInput).width(300f).height(50f).pad(10f)
+        table.row()
+        val buttonStyle = getLoginButtonStyle()
+        val loginButton = TextButton("login", buttonStyle)
+        loginButton.addListener(object : ClickListener() {
+            override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
+                logger.debug { "Login button clicked" }
+                super.touchUp(event, x, y, pointer, button)
+                if (button == Input.Buttons.LEFT) onClick()
+                logger.debug { "touchUp processing of loginButton complete" }
+            }
+        })
 
-            table.add(loginButton).colspan(2)
+        table.add(loginButton).colspan(2)
 
     }
+
     private fun getLoginButtonStyle(): TextButton.TextButtonStyle {
         return getButtonStyle(
             upTexture = textures.loginButtonUpTexture,

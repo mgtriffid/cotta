@@ -12,8 +12,6 @@ class LatestEntities @Inject constructor(
         return entities().createEntity(ownedBy)
     }
 
-    private fun entities() = state.entities(tick.tick)
-
     override fun get(id: EntityId): Entity {
        return entities().get(id)
    }
@@ -29,4 +27,6 @@ class LatestEntities @Inject constructor(
    override fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
        return entities().createEntity(id, ownedBy)
    }
+
+    private fun entities() = state.entities(tick.tick)
 }

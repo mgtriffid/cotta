@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.client.impl.*
 import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionInvokersFactory
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictedInputProcessingSystemInvokerImpl
+import com.mgtriffid.games.cotta.client.invokers.impl.PredictedLatestEntities
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictionInputProcessingContext
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.effects.EffectBus
@@ -71,8 +72,10 @@ class CottaClientModule(
         bind(PredictedInputProcessingSystemInvoker::class.java).to(PredictedInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
+        bind(EffectHolder::class.java).toInstance(EffectHolder(null))
         bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
         bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(EffectBus::class.java).annotatedWith(Names.named("prediction")).to(EffectBus::class.java).`in`(Scopes.SINGLETON)
         bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("historical")).to(
             HistoricalLagCompensatingEffectBus::class.java).`in`(Scopes.SINGLETON)
         bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("lagCompensated")).to(
@@ -97,6 +100,10 @@ class CottaClientModule(
             .annotatedWith(Names.named("prediction"))
             .to(PredictionInputProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
+        bind(TickProvider::class.java)
+            .annotatedWith(Names.named("prediction"))
+            .toInstance(AtomicLongTickProvider())
+        bind(Entities::class.java).annotatedWith(Names.named("prediction")).to(PredictedLatestEntities::class.java)
 
         bind(ClientInputs::class.java).to(ClientInputsImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)

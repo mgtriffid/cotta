@@ -12,12 +12,12 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class PredictedInputProcessingSystemInvokerImpl @Inject constructor(
-//    @Named("predictedLocal") private val entities: Entities, // TODO only for reading
+    @Named("prediction") private val entities: Entities, // TODO only for reading
     @Named("prediction") private val context: InputProcessingContext,
 ): PredictedInputProcessingSystemInvoker {
     override fun invoke(system: InputProcessingSystem) {
         logger.debug { "Invoked ${system::class.qualifiedName}" }
-//        entities.all().forEach { process(it, system) }
+        entities.all().forEach { process(it, system) }
     }
 
     private fun process(entity: Entity, system: InputProcessingSystem) {

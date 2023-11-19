@@ -126,7 +126,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         logger.info { "About to unpack delta and apply to ${tick + 1}" }
         stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
 
-        predict()
+//        predict()
 
         sendDataToServer()
     }
@@ -151,11 +151,9 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
             logger.debug { "Did not find our input in server's input, assuming none of our input was processed yet" }
         }// TODO gracefully handle missing
         val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
-            .also { logger.debug { it.joinToString() } }.size
+            .also { logger.debug { it.joinToString() } } // TODO explicit sorting
         predictionSimulation.startPredictionFrom(cottaState.entities(atTick = currentTick), currentTick)
-        repeat(unprocessedTicks) { _ ->
-            predictionSimulation.tick()
-        }
+        predictionSimulation.run(unprocessedTicks, playerId)
     }
 
     private fun fetchInput() {
@@ -271,7 +269,7 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         game.serverSystems.forEach { system ->
             clientSimulation.registerSystem(system as KClass<CottaSystem>)
             if (isPredicted(system)) {
-//                predictionSimulation.registerSystem(system)
+                predictionSimulation.registerSystem(system)
             }
         }
     }

@@ -17,7 +17,7 @@ class WalkingInputProcessingSystem : InputProcessingSystem {
             if (input.direction == WALKING_DIRECTION_NONE) {
                 return
             }
-            ctx.fire(MovementEffect(input.direction, walking.speed, e.id).also {
+            ctx.fire(MovementEffect.create(input.direction, walking.speed, e.id).also {
                 logger.debug { "MovementEffect fired: $it" }
             })
         }

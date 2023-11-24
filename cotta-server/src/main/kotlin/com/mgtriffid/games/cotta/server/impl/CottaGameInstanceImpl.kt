@@ -56,6 +56,9 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
         game.inputComponentClasses.forEach {
             engine.getComponentsRegistry().registerInputComponentClass(it)
         }
+        game.effectClasses.forEach {
+            engine.getComponentsRegistry().registerEffectClass(it)
+        }
         serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
     }
 

@@ -2,7 +2,7 @@ package com.mgtriffid.games.cotta.core.tracing
 
 import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 
-class CottaTrace private constructor(
+data class CottaTrace(
     val elements: List<TraceElement>
 ) {
     companion object {

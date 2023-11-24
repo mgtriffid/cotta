@@ -2,11 +2,9 @@ package com.mgtriffid.games.cotta.core.simulation.invokers.context
 
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 
 interface CreatedEntities {
-    fun record(createEntityTrace: CreateEntityTrace, entityId: EntityId)
-    fun forTick(tick: Long): Map<CreateEntityTrace, EntityId>
+    fun record(trace: CottaTrace, entityId: EntityId)
+    fun forTick(tick: Long): List<Pair<CottaTrace, EntityId>>
 }
-
-interface CreateEntityTrace
-data class SimplestCreateEntityTrace(val ownedBy: Entity.OwnedBy) : CreateEntityTrace

@@ -11,6 +11,9 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectB
 import com.mgtriffid.games.cotta.core.simulation.invokers.ReadingFromPreviousTickEntities
 import com.mgtriffid.games.cotta.core.simulation.invokers.SawTickHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingEffectProcessingContext
+import com.mgtriffid.games.cotta.core.tracing.CottaTrace
+import com.mgtriffid.games.cotta.core.tracing.Traces
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
@@ -20,9 +23,14 @@ class LagCompensatingEffectProcessingContext @Inject constructor(
     private val sawTickHolder: SawTickHolder,
     private val effectHolder: EffectHolder,
     @Named("effectProcessing") private val createEntityStrategy: CreateEntityStrategy,
-    private val tickProvider: TickProvider
-) : EffectProcessingContext {
+    private val tickProvider: TickProvider,
+    private val traces: Traces
+) : TracingEffectProcessingContext {
+
+    private var trace: CottaTrace? = null
+
     override fun fire(effect: CottaEffect) {
+        traces.set(effect, trace!!)
         lagCompensatingEffectBus.publisher().fire(effect)
     }
 
@@ -35,6 +43,14 @@ class LagCompensatingEffectProcessingContext @Inject constructor(
     }
 
     override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
-        return createEntityStrategy.createEntity(ownedBy, effectHolder)
+        return createEntityStrategy.createEntity(ownedBy, trace ?: throw IllegalStateException("Expected trace to be set"))
+    }
+
+    override fun setTrace(trace: CottaTrace?) {
+        this.trace = trace
+    }
+
+    override fun getTrace(): CottaTrace? {
+        return trace
     }
 }

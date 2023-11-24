@@ -1,20 +1,22 @@
 package com.mgtriffid.games.cotta.core.serialization.impl
 
 import com.mgtriffid.games.cotta.ComponentData
-import com.mgtriffid.games.cotta.core.entities.Component
-import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.InputComponent
-import com.mgtriffid.games.cotta.core.registry.ComponentKey
-import com.mgtriffid.games.cotta.core.registry.ComponentSpec
-import com.mgtriffid.games.cotta.core.registry.StringComponentKey
+import com.mgtriffid.games.cotta.EffectData
+import com.mgtriffid.games.cotta.core.effects.CottaEffect
+import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.registry.*
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
+import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.*
+import com.mgtriffid.games.cotta.core.tracing.CottaTrace
+import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import mu.KotlinLogging
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 
 private val logger = KotlinLogging.logger {}
+
+const val SYSTEM_PLAYER_ID = -1
 
 class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val snappers = HashMap<ComponentKey, ComponentSnapper<*>>()
@@ -25,6 +27,10 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val classByKey = HashMap<StringComponentKey, KClass<Component<*>>>()
     private val inputComponentsClassByKey = HashMap<StringComponentKey, KClass<InputComponent<*>>>()
     private val factoryMethodsByClass = HashMap<ComponentKey, KCallable<*>>()
+    // GROOM extract out
+    private val effectSnappers = HashMap<EffectKey, EffectSnapper<*>>()
+    private val effectsKeyByClass = HashMap<KClass<*>, StringEffectKey>()
+    private val effectsClassByKey = HashMap<StringEffectKey, KClass<*>>()
 
     fun <T : Component<T>> registerComponent(kClass: KClass<T>, spec: ComponentSpec) {
         logger.debug { "Registering component ${kClass.qualifiedName}, spec has key of ${spec.key}" }
@@ -38,6 +44,13 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         logger.debug { "Registering input component ${kClass.qualifiedName}" }
         inputComponentsKeyByClass[kClass] = spec.key as StringComponentKey // hack, the fact that maps and componentregistry are connected leaks in here but okay
         inputComponentsClassByKey[spec.key as StringComponentKey] = kClass as KClass<InputComponent<*>>
+    }
+
+    fun <T : CottaEffect> registerEffect(kClass: KClass<T>, spec: EffectSpec) {
+        logger.debug { "Registering effect ${kClass.qualifiedName}" }
+        effectsKeyByClass[kClass] = spec.key as StringEffectKey // hack, the fact that maps and componentregistry are connected leaks in here but okay
+        registerEffectSnapper(kClass, spec)
+        effectsClassByKey[spec.key as StringEffectKey] = kClass as KClass<*>
     }
 
     private fun <C : Component<C>> registerSnapper(kClass: KClass<C>, spec: ComponentSpec) {
@@ -77,6 +90,41 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         )
     }
 
+    fun <C: CottaEffect> registerEffectSnapper(kClass: KClass<C>, spec: EffectSpec) {
+        val companion = kClass.companionObject
+            ?: throw IllegalArgumentException("${kClass.qualifiedName} does not have a companion object")
+        val companionInstance =
+            kClass.companionObjectInstance ?: throw IllegalArgumentException("Could not find companion instance")
+        val factoryMethod: KCallable<C> = (companion.members.find { it.name == "create" }
+            ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")) as KCallable<C>
+        val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<EffectData>() }
+
+        val fieldsByName = fields.associateBy { it.name }
+
+        val factoryParameters = factoryMethod.parameters
+        val factoryInstanceParameter = factoryParameters.find { it.kind == KParameter.Kind.INSTANCE }
+            ?: throw IllegalArgumentException("No instance parameter on factory")
+        val valueParameters = factoryParameters.filter { it.kind == KParameter.Kind.VALUE }
+        val valueParametersToNames = valueParameters.associateWith { it.name }
+
+        val fieldNames = fieldsByName.keys
+        val valueParametersNames = valueParametersToNames.values
+        if (fieldNames.toSet() != valueParametersNames.toSet()) {
+            throw IllegalArgumentException(
+                "Factory method for class '${kClass.qualifiedName}' is misconfigured: fields are " + "${fieldNames.joinToString()}, factory parameters are ${valueParametersNames.joinToString()}}"
+            )
+        }
+
+        effectSnappers[spec.key] = EffectSnapper(
+            key = spec.key as StringEffectKey,
+            factoryMethod = factoryMethod,
+            factoryInstanceParameter = factoryInstanceParameter,
+            companionInstance = companionInstance,
+            valueParametersToNames = valueParametersToNames,
+            fieldsByName = fieldsByName
+        )
+    }
+
     private fun <C : Component<C>> registerDeltaSnapper(kClass: KClass<C>, spec: ComponentSpec) {
         val fields = kClass.declaredMemberProperties.filter {
             it.hasAnnotation<ComponentData>()
@@ -100,7 +148,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         fun packComponent(obj: C): MapComponentRecipe {
             return MapComponentRecipe(componentKey = key, data = fieldsByName.mapValues { (_, field) ->
                 try {
-                    field.get(obj) ?: throw IllegalStateException("Nullable fields are not allowed")
+                    serializeProperty(field.get(obj), field) ?: throw IllegalStateException("Nullable fields are not allowed")
                 } catch (e: Exception) {
                     logger.error { "Field: ${field.name}, object: $obj could not be packed" }
                     throw e
@@ -111,7 +159,12 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         fun unpackComponent(recipe: MapComponentRecipe): C {
             val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
             val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
-                recipe.data[valueParametersToNames[p]]
+                val propertyName = valueParametersToNames[p]
+                deserializeProperty(
+                    value = recipe.data[propertyName],
+                    prop = fieldsByName[propertyName]
+                        ?: throw IllegalArgumentException("Property $propertyName not found")
+                )
             }
             return factoryMethod.callBy(
                 firstParam + otherParams
@@ -144,10 +197,53 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         }
     }
 
+    private inner class EffectSnapper<E : CottaEffect>(
+        private val key: StringEffectKey,
+        private val factoryMethod: KCallable<E>,
+        private val factoryInstanceParameter: KParameter,
+        private val companionInstance: Any,
+        private val valueParametersToNames: Map<KParameter, String?>,
+        private val fieldsByName: Map<String, KProperty1<E, *>>
+    ) {
+        private val valueParameters: Collection<KParameter> = valueParametersToNames.keys
+
+        fun packEffect(obj: E): MapEffectRecipe {
+            return MapEffectRecipe(effectKey = key, data = fieldsByName.mapValues { (_, field) ->
+                try {
+                    serializeProperty(field.get(obj), field) ?: throw IllegalStateException("Nullable fields are not allowed")
+                } catch (e: Exception) {
+                    logger.error { "Field: ${field.name}, object: $obj could not be packed" }
+                    throw e
+                }
+            })
+        }
+
+        fun unpackEffect(recipe: MapEffectRecipe): CottaEffect {
+            val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
+            val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
+                val propertyName = valueParametersToNames[p]
+                deserializeProperty(
+                    value = recipe.data[propertyName],
+                    prop = fieldsByName[propertyName]
+                        ?: throw IllegalArgumentException("Property $propertyName not found")
+                )
+            }
+            return factoryMethod.callBy(
+                firstParam + otherParams
+            )
+        }
+    }
+
     private fun getKey(obj: Component<*>): StringComponentKey {
         val kClass = obj::class
         val registeredClass = keyByClass.keys.first { it.isSuperclassOf(kClass) }
         return keyByClass[registeredClass] ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
+    }
+
+    private fun getKey(obj: CottaEffect): StringEffectKey {
+        val kClass = obj::class
+        val registeredClass = effectsKeyByClass.keys.first { it.isSuperclassOf(kClass) }
+        return effectsKeyByClass[registeredClass] ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
     }
 
     private fun getInputComponentKey(kClass: KClass<out InputComponent<*>>): StringComponentKey {
@@ -159,6 +255,39 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         return MapsStateRecipe(entities.all().map { e ->
             packEntity(e)
         })
+    }
+
+    override fun snapTrace(trace: CottaTrace): MapsTraceRecipe {
+        return MapsTraceRecipe(trace.elements.map { it.toRecipe() })
+    }
+
+    override fun unpackTrace(trace: MapsTraceRecipe): CottaTrace {
+        return CottaTrace(trace.elements.map { it.toTraceElement() })
+    }
+
+    private fun MapsTraceElementRecipe.toTraceElement(): TraceElement {
+        return when (this) {
+            is MapsTraceElementRecipe.MapsEffectTraceElementRecipe -> {
+                TraceElement.EffectTraceElement(unpackEffectRecipe(this.effectRecipe))
+            }
+            is MapsTraceElementRecipe.MapsInputTraceElementRecipe -> {
+                TraceElement.InputTraceElement(this.entityId)
+            }
+
+            is MapsTraceElementRecipe.MapsEntityProcessingTraceElementRecipe -> TODO()
+        }
+    }
+
+    private fun TraceElement.toRecipe(): MapsTraceElementRecipe {
+        return when (this) {
+            is TraceElement.EffectTraceElement -> {
+                MapsTraceElementRecipe.MapsEffectTraceElementRecipe(packEffect<CottaEffect>(this.effect))
+            }
+            is TraceElement.EntityProcessingTraceElement -> TODO()
+            is TraceElement.InputTraceElement -> {
+                MapsTraceElementRecipe.MapsInputTraceElementRecipe(this.entityId)
+            }
+        }
     }
 
     private fun packEntity(e: Entity) =
@@ -173,6 +302,15 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private fun <C : Component<C>> packComponent(obj: Any): MapComponentRecipe {
         obj as C
         return (snappers[getKey(obj)] as ComponentSnapper<C>).packComponent(obj)
+    }
+
+    fun <C : CottaEffect> packEffect(obj: Any): MapEffectRecipe {
+        obj as C
+        return (effectSnappers[getKey(obj)] as EffectSnapper<C>).packEffect(obj)
+    }
+    fun unpackEffectRecipe(recipe: MapEffectRecipe): CottaEffect {
+        return effectSnappers[recipe.effectKey]?.unpackEffect(recipe)
+            ?: throw java.lang.IllegalArgumentException("Effect Snapper not found for effect ${recipe.effectKey}")
     }
 
     override fun snapDelta(prev: Entities, curr: Entities): MapsDeltaRecipe {
@@ -269,5 +407,39 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         val curr = c1 as C
         logger.debug { "Packing component delta: prev = $prev, curr = $curr" }
         return (deltaSnappers[getKey(curr)]!! as ComponentDeltaSnapper<C>).packDelta(prev, curr)
+    }
+}
+
+private fun deserializeProperty(value: Any?, prop: KProperty1<*, *>?, ): Any? {
+    return when (prop?.returnType) {
+        Byte::class.createType() -> value
+        Int::class.createType() -> value
+        Float::class.createType() -> value
+        Boolean::class.createType() -> value
+        Long::class.createType() -> value
+        Double::class.createType() -> value
+        Entity.OwnedBy::class.createType() -> when (val id = value as Int) {
+            SYSTEM_PLAYER_ID -> Entity.OwnedBy.System
+            else -> Entity.OwnedBy.Player(PlayerId(id))
+        }
+        EntityId::class.createType() -> (value as EntityIdDto).toEntityId()
+        else -> throw IllegalArgumentException("Unexpected type of field #${prop?.name}")
+    }
+}
+
+private fun serializeProperty(value: Any?, prop: KProperty1<*, *>?, ): Any? {
+    return when (prop?.returnType) {
+        Byte::class.createType() -> value
+        Int::class.createType() -> value
+        Float::class.createType() -> value
+        Boolean::class.createType() -> value
+        Long::class.createType() -> value
+        Double::class.createType() -> value
+        Entity.OwnedBy::class.createType() -> when (val id = value as Entity.OwnedBy) {
+            Entity.OwnedBy.System -> SYSTEM_PLAYER_ID
+            is Entity.OwnedBy.Player -> id.playerId.id
+        }
+        EntityId::class.createType() -> (value as EntityId).toDto()
+        else -> throw IllegalArgumentException("Unexpected type of field #${prop?.name}")
     }
 }

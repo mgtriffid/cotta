@@ -28,6 +28,8 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
+import com.mgtriffid.games.cotta.core.tracing.Traces
+import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetwork
 import com.mgtriffid.games.cotta.server.*
@@ -71,13 +73,16 @@ class CottaServerModule(
             bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(Entities::class.java).annotatedWith(named("latest")).to(LatestEntities::class.java)
 
-            bind(InputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(TracingInputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
+            bind(TracingEffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectProcessingContext::class.java)
             bind(CreateEntityStrategy::class.java).annotatedWith(named("effectProcessing")).to(CreateAndRecordCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
             bind(CreatedEntities::class.java).to(CreatedEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
             install(SerializationModule())
+
+            bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
         }
     }
 

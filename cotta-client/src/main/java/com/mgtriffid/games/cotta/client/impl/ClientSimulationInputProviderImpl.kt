@@ -7,7 +7,9 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
+import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.MapsInputSnapper
+import com.mgtriffid.games.cotta.core.serialization.impl.MapsStateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.MapsInputRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
@@ -23,6 +25,7 @@ private val logger = KotlinLogging.logger {}
 
 class ClientSimulationInputProviderImpl @Inject constructor(
     private val inputSnapper: InputSnapper<MapsInputRecipe>,
+    private val stateSnapper: StateSnapper<MapsStateRecipe, MapsDeltaRecipe>,
     private val incomingDataBuffer: IncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>,
     private val tickProvider: TickProvider,
     private val createdEntitiesRegistry: ServerCreatedEntitiesRegistry,
@@ -31,7 +34,9 @@ class ClientSimulationInputProviderImpl @Inject constructor(
     override fun prepare() {
         logger.debug { "Unpacking input for tick ${tickProvider.tick}, incomingDataBuffer is ${incomingDataBuffer.hashCode()}" }
         val inputs = inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tickProvider.tick]!!)
-        createdEntitiesRegistry.data = incomingDataBuffer.createdEntities[tickProvider.tick + 1]!!
+        createdEntitiesRegistry.data = incomingDataBuffer.createdEntities[tickProvider.tick + 1]!!.map { (traceRecipe, entityId) ->
+            Pair(stateSnapper.unpackTrace(traceRecipe), entityId)
+        }.toMutableList()
         val simulationInput = object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return inputs

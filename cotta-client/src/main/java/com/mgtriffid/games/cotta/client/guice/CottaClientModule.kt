@@ -30,12 +30,11 @@ import com.mgtriffid.games.cotta.core.simulation.impl.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
+import com.mgtriffid.games.cotta.core.tracing.Traces
+import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaClientNetwork
 
@@ -83,13 +82,14 @@ class CottaClientModule(
         bind(LagCompensatingInputProcessingSystemInvoker::class.java).to(LagCompensatingInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
         bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Entities::class.java).annotatedWith(Names.named("latest")).to(LatestEntities::class.java)
-        bind(InputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(TracingInputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
         bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(EffectProcessingContext::class.java)
+        bind(TracingEffectProcessingContext::class.java)
             .annotatedWith(Names.named("lagCompensated"))
             .to(LagCompensatingEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
         bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing")).to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
         bind(ServerCreatedEntitiesRegistry::class.java).`in`(Scopes.SINGLETON)

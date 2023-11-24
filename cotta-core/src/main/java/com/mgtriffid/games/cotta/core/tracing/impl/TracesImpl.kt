@@ -10,7 +10,7 @@ class TracesImpl : Traces {
         data[effect] = trace
     }
 
-    override fun get(effect: CottaEffect): CottaTrace {
-        return data[effect] ?: throw IllegalStateException("Not found trace for effect $effect")
+    override fun get(effect: CottaEffect): CottaTrace? {
+        return data[effect]
     }
 }

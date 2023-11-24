@@ -5,6 +5,11 @@ interface ComponentSpec {
     val fields: List<FieldSpec>
 }
 
+interface EffectSpec {
+    val key: EffectKey
+    val fields: List<FieldSpec>
+}
+
 interface FieldSpec {
     val type: FieldType
     val mutability: FieldMutability
@@ -16,7 +21,9 @@ enum class FieldType {
     FLOAT,
     BOOLEAN,
     LONG,
-    DOUBLE
+    DOUBLE,
+    OWNED_BY,
+    ENTITY_ID
 }
 
 enum class FieldMutability {

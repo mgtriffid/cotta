@@ -41,3 +41,5 @@ interface EntityInputRecipe {
 }
 
 interface InputComponentRecipe
+
+interface EffectRecipe

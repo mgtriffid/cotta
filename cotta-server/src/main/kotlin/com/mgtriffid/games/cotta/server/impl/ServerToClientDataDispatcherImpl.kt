@@ -64,7 +64,9 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
                 val createdEntitiesDto = ServerToClientDto()
                 createdEntitiesDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CREATED_ENTITIES
                 createdEntitiesDto.payload = snapsSerialization.serializeEntityCreationTraces(
-                    data.createdEntities(tick)
+                    data.createdEntities(tick).map { (trace, id) ->
+                        Pair(stateSnapper.snapTrace(trace), id)
+                    }
                 )
                 createdEntitiesDto.tick = tick
                 val playersSawTicksDto = ServerToClientDto()

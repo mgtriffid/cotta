@@ -12,6 +12,8 @@ import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEnti
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
+import com.mgtriffid.games.panna.shared.game.effects.JoinBattleEffect
+import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 import com.mgtriffid.games.panna.shared.game.systems.JoinBattleEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.JoinBattleSystem
 import com.mgtriffid.games.panna.shared.game.systems.MovementEffectConsumerSystem
@@ -46,6 +48,11 @@ class PannaGame : CottaGame {
     override val inputComponentClasses = setOf(
         WalkingInputComponent::class,
         JoinBattleMetaEntityInputComponent::class,
+    )
+
+    override val effectClasses = setOf(
+        JoinBattleEffect::class,
+        MovementEffect::class,
     )
 
     override val metaEntitiesInputComponents = setOf(

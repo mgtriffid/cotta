@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.core.impl
 
 import com.mgtriffid.games.cotta.core.CottaEngine
+import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.registry.*
@@ -49,6 +50,11 @@ class CottaEngineImpl @Inject constructor(
                 descriptor: ComponentSpec
             ) {
                 stateSnapper.registerInputComponent(kClass, descriptor)
+            }
+        })
+        componentsRegistry.addEffectRegistrationListener(object : EffectRegistrationListener {
+            override fun onEffectRegistration(effectClass: KClass<out CottaEffect>, descriptor: EffectSpec) {
+                stateSnapper.registerEffect(effectClass, descriptor)
             }
         })
     }

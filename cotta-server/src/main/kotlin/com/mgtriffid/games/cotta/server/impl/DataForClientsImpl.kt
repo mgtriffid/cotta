@@ -8,8 +8,8 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityTrace
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
+import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.MetaEntities
 import jakarta.inject.Inject
@@ -35,7 +35,7 @@ data class DataForClientsImpl @Inject constructor(
         return state.entities(tick)
     }
 
-    override fun createdEntities(tick: Long): Map<CreateEntityTrace, EntityId> {
+    override fun createdEntities(tick: Long): List<Pair<CottaTrace, EntityId>> {
         return createdEntities.forTick(tick)
     }
 

@@ -263,6 +263,9 @@ class CottaClientImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject
         game.inputComponentClasses.forEach {
             componentsRegistry.registerInputComponentClass(it)
         }
+        game.effectClasses.forEach { effectClass ->
+            componentsRegistry.registerEffectClass(effectClass)
+        }
     }
 
     private fun registerSystems() {

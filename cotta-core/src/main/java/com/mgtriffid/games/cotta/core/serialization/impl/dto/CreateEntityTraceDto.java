@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.core.serialization.impl.dto;
 
 public class CreateEntityTraceDto {
-    public EntityOwnedByDto ownedBy;
+    public CottaTraceDto trace;
     public EntityIdDto entityId;
 }

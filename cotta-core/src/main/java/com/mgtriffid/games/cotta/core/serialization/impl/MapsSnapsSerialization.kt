@@ -10,11 +10,10 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
+import com.mgtriffid.games.cotta.core.registry.StringEffectKey
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.*
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.*
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityTrace
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.SimplestCreateEntityTrace
 
 class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe> {
     // this is not thread safe
@@ -35,6 +34,14 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         kryo.register(CreateEntityTraceDto::class.java)
         kryo.register(CreateEntityTracesDto::class.java)
         kryo.register(PlayersSawTicksDto::class.java)
+        kryo.register(CottaTraceDto::class.java)
+        kryo.register(CottaTraceElementDto::class.java)
+        kryo.register(CottaTraceElementDto.Kind::class.java)
+        kryo.register(MapEffectRecipeDto::class.java)
+        // TODO: these clearly should not be here, consider refactoring
+        kryo.register(Entity.OwnedBy.Player::class.java)
+        kryo.register(PlayerId::class.java)
+        kryo.register(Entity.OwnedBy.System::class.java)
     }
 
     override fun serializeDeltaRecipe(recipe: MapsDeltaRecipe): ByteArray {
@@ -67,20 +74,39 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         return kryo.readObject(Input(bytes), EntityIdDto::class.java).toEntityId()
     }
 
-    override fun serializeEntityCreationTraces(traces: Map<CreateEntityTrace, EntityId>): ByteArray {
+    override fun serializeEntityCreationTraces(traces: List<Pair<MapsTraceRecipe, EntityId>>): ByteArray {
         val output = Output(64, 1024 * 1024)
         val entries = ArrayList<CreateEntityTraceDto>()
-        traces.forEach { (trace, entityId) -> entries.add(trace.toDto().also { it.entityId = entityId.toDto() }) }
+        traces.forEach { (trace, entityId) -> entries.add(
+            CreateEntityTraceDto().also {
+                it.trace = trace.toDto()
+                it.entityId = entityId.toDto()
+            }
+        ) }
         kryo.writeObject(output, CreateEntityTracesDto().also { it.traces = entries })
         return output.toBytes()
     }
 
-    override fun deserializeEntityCreationTraces(bytes: ByteArray): Map<CreateEntityTrace, EntityId> {
-        return kryo.readObject(
-            Input(bytes),
-            CreateEntityTracesDto::class.java
-        ).traces.associate {
-            it.toTrace() to it.entityId.toEntityId()
+    override fun deserializeEntityCreationTraces(bytes: ByteArray): List<Pair<MapsTraceRecipe, EntityId>> {
+        val dto = kryo.readObject(Input(bytes), CreateEntityTracesDto::class.java)
+        return dto.traces.map {
+            val trace: CottaTraceDto = it.trace
+            val entityIdDto = it.entityId
+            Pair(
+                MapsTraceRecipe(
+                    trace.elements.map { it: CottaTraceElementDto ->
+                        when (it.kind) {
+                            CottaTraceElementDto.Kind.INPUT -> MapsTraceElementRecipe.MapsInputTraceElementRecipe(
+                                it.entityId.toEntityId()
+                            )
+                            CottaTraceElementDto.Kind.EFFECT -> MapsTraceElementRecipe.MapsEffectTraceElementRecipe(
+                                it.data.toRecipe()
+                            )
+                            CottaTraceElementDto.Kind.ENTITY_PROCESSING -> TODO()
+                        }
+                    }
+                ),
+                entityIdDto.toEntityId())
         }
     }
 
@@ -101,22 +127,6 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         ).playersSawTicks.mapKeys { (playerId, _) ->
             PlayerId(playerId)
         }
-    }
-}
-
-private fun CreateEntityTraceDto.toTrace(): CreateEntityTrace {
-    return SimplestCreateEntityTrace(ownedBy.toOwnedBy())
-}
-
-private fun CreateEntityTrace.toDto(): CreateEntityTraceDto {
-    return when (this) {
-        is SimplestCreateEntityTrace -> {
-            val dto = CreateEntityTraceDto()
-            dto.ownedBy = ownedBy.toDto()
-            dto
-        }
-
-        else -> throw IllegalStateException("Unknown trace type")
     }
 }
 
@@ -234,5 +244,42 @@ fun EntityOwnedByDto.toOwnedBy(): Entity.OwnedBy {
     } else {
         Entity.OwnedBy.Player(PlayerId(playerId))
     }
+}
+
+fun MapsTraceRecipe.toDto(): CottaTraceDto {
+    val ret = CottaTraceDto()
+    ret.elements = elements.map { it.toDto() }
+    return ret
+}
+
+private fun MapsTraceElementRecipe.toDto(): CottaTraceElementDto {
+    val ret = CottaTraceElementDto()
+    when (this) {
+        is MapsTraceElementRecipe.MapsEffectTraceElementRecipe -> {
+            ret.kind = CottaTraceElementDto.Kind.EFFECT
+            ret.data = this.effectRecipe.toDto()
+        }
+
+        is MapsTraceElementRecipe.MapsEntityProcessingTraceElementRecipe -> TODO()
+        is MapsTraceElementRecipe.MapsInputTraceElementRecipe -> {
+            ret.kind = CottaTraceElementDto.Kind.INPUT
+            ret.entityId = entityId.toDto()
+        }
+    }
+    return ret
+}
+
+private fun MapEffectRecipe.toDto(): MapEffectRecipeDto {
+    val ret = MapEffectRecipeDto()
+    ret.key = effectKey.name
+    ret.data = HashMap(data)
+    return ret
+}
+
+private fun MapEffectRecipeDto.toRecipe(): MapEffectRecipe {
+    return MapEffectRecipe(
+        effectKey = StringEffectKey(key),
+        data = data
+    )
 }
 // </editor-fold>

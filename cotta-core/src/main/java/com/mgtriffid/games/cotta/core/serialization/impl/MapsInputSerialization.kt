@@ -21,6 +21,7 @@ class MapsInputSerialization: InputSerialization<MapsInputRecipe> {
         kryo.register(MapInputComponentRecipeDto::class.java)
         kryo.register(MapsEntityInputRecipeDto::class.java)
         kryo.register(EntityIdDto::class.java)
+        kryo.register(EntityIdDto.Kind::class.java)
         kryo.register(MapsInputRecipeDto::class.java)
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(ArrayList::class.java, CollectionSerializer<ArrayList<Any?>>())

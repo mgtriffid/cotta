@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.shared.game.systems
 
+import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
@@ -7,6 +8,7 @@ import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
 import com.mgtriffid.games.panna.shared.game.effects.JoinBattleEffect
 
+@Predicted
 class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is JoinBattleEffect) {

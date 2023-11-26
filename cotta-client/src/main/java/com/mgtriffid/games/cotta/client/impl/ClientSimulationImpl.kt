@@ -29,24 +29,12 @@ class ClientSimulationImpl @Inject constructor(
         tick.tick++
         putInputIntoEntities()
         simulate()
-        predict()
     }
 
     private fun simulate() {
         for ((invoker, system) in systemInvokers) {
             (invoker as SystemInvoker<CottaSystem>).invoke(system) // TODO cast issue
         }
-    }
-
-    private fun predict() {
-        // copy state to predicted state
-        // multiple times
-        //      put local input into local entities
-        //      invoke systems but only on part of those entities
-        //      create new invokers
-        //      create new Entities that refer to predicted state
-        //
-        // actually invoke many times because we have certain list of inputs
     }
 
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {

@@ -5,6 +5,8 @@ import ch.qos.logback.classic.Logger;
 import com.mgtriffid.games.panna.lobby.PannaLobby;
 import org.slf4j.LoggerFactory;
 
+import static com.mgtriffid.games.cotta.core.logging.LoggingConfigurationKt.configureLogging;
+
 public class PannaServerLauncher {
     public static void main(String[] args) {
         configureLogging();
@@ -17,15 +19,5 @@ public class PannaServerLauncher {
             System.out.println("Starting server");
             new PannaServer().start();
         }).start();
-    }
-
-    private static void configureLogging() {
-        ((Logger) LoggerFactory.getLogger("org.eclipse")).setLevel(Level.INFO);
-        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl")).setLevel(Level.INFO);
-        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl.invokers")).setLevel(Level.INFO);
-        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.serialization.impl")).setLevel(Level.INFO);
-        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.network.kryonet")).setLevel(Level.INFO);
-        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.simulation.invokers")).setLevel(Level.INFO);
-        ((Logger) LoggerFactory.getLogger("com.mgtriffid.games.panna.shared.game.systems")).setLevel(Level.INFO);
     }
 }

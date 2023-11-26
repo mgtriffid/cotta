@@ -3,8 +3,11 @@ package com.mgtriffid.games.cotta.client.invokers.impl
 import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemInvoker
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.SawTickHolder
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingInputProcessingContext
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
+import com.mgtriffid.games.cotta.core.tracing.CottaTrace
+import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -13,7 +16,8 @@ private val logger = KotlinLogging.logger {}
 
 class PredictedInputProcessingSystemInvokerImpl @Inject constructor(
     @Named("prediction") private val entities: Entities, // TODO only for reading
-    @Named("prediction") private val context: InputProcessingContext,
+    private val sawTickHolder: SawTickHolder,
+    @Named("prediction") private val context: TracingInputProcessingContext,
 ): PredictedInputProcessingSystemInvoker {
     override fun invoke(system: InputProcessingSystem) {
         logger.debug { "Invoked ${system::class.qualifiedName}" }
@@ -21,6 +25,10 @@ class PredictedInputProcessingSystemInvokerImpl @Inject constructor(
     }
 
     private fun process(entity: Entity, system: InputProcessingSystem) {
+        logger.debug { "${system::class.simpleName} processing entity ${entity.id}" }
+        context.setTrace(CottaTrace.from(TraceElement.InputTraceElement(entity.id)))
         system.process(entity, context)
+        context.setTrace(null)
+        sawTickHolder.tick = null
     }
 }

@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.core.serialization
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsTraceRecipe
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 
 interface SnapsSerialization<SR : StateRecipe, DR : DeltaRecipe> {
     fun serializeDeltaRecipe(recipe: DR): ByteArray
@@ -12,6 +11,8 @@ interface SnapsSerialization<SR : StateRecipe, DR : DeltaRecipe> {
     fun deserializeStateRecipe(bytes: ByteArray): SR
     fun serializeEntityId(entityId: EntityId): ByteArray
     fun deserializeEntityId(bytes: ByteArray): EntityId
+    fun serializeMetaEntityId(entityId: EntityId, playerId: PlayerId): ByteArray
+    fun deserializeMetaEntityId(bytes: ByteArray): Pair<EntityId, PlayerId>
     fun serializeEntityCreationTraces(traces: List<Pair<MapsTraceRecipe, EntityId>>): ByteArray
     fun deserializeEntityCreationTraces(bytes: ByteArray): List<Pair<MapsTraceRecipe, EntityId>>
     fun serializePlayersSawTicks(playersSawTicks: Map<PlayerId, Long>): ByteArray

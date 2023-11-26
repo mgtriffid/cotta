@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
 import com.mgtriffid.games.cotta.network.CottaNetwork
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
@@ -26,6 +27,7 @@ class KryonetCottaNetwork : CottaNetwork {
 fun Kryo.registerClasses() {
     register(EnterTheGameDto::class.java)
     register(ClientToServerInputDto::class.java)
+    register(ClientToServerCreatedPredictedEntitiesDto::class.java)
     register(ServerToClientDto::class.java)
     register(ByteArray::class.java)
     register(KindOfData::class.java)

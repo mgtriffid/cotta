@@ -5,10 +5,7 @@ import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
-import com.mgtriffid.games.cotta.core.entities.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.EntityId
-import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.registry.StringEffectKey
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
@@ -31,6 +28,8 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
         kryo.register(EntityIdDto::class.java)
+        kryo.register(EntityIdDto.Kind::class.java)
+        kryo.register(MetaEntityPlayerIdDto::class.java)
         kryo.register(CreateEntityTraceDto::class.java)
         kryo.register(CreateEntityTracesDto::class.java)
         kryo.register(PlayersSawTicksDto::class.java)
@@ -72,6 +71,20 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
 
     override fun deserializeEntityId(bytes: ByteArray): EntityId {
         return kryo.readObject(Input(bytes), EntityIdDto::class.java).toEntityId()
+    }
+
+    override fun serializeMetaEntityId(entityId: EntityId, playerId: PlayerId): ByteArray {
+        val output = Output(64, 1024 * 1024)
+        kryo.writeObject(output, MetaEntityPlayerIdDto().also {
+            it.entityId = entityId.toDto()
+            it.playerId = playerId.id
+        })
+        return output.toBytes()
+    }
+
+    override fun deserializeMetaEntityId(bytes: ByteArray): Pair<EntityId, PlayerId> {
+        val dto = kryo.readObject(Input(bytes), MetaEntityPlayerIdDto::class.java)
+        return Pair(dto.entityId.toEntityId(), PlayerId(dto.playerId))
     }
 
     override fun serializeEntityCreationTraces(traces: List<Pair<MapsTraceRecipe, EntityId>>): ByteArray {
@@ -213,13 +226,25 @@ fun MapsStateRecipeDto.toRecipe() = MapsStateRecipe(
 
 fun EntityId.toDto(): EntityIdDto {
     return when (this) {
-        is AuthoritativeEntityId -> EntityIdDto().also { it.id = id }
-        else -> TODO()
+        is AuthoritativeEntityId -> EntityIdDto().also {
+            it.id = id
+            it.kind = EntityIdDto.Kind.AUTHORITATIVE
+        }
+        is PredictedEntityId -> EntityIdDto().also {
+            it.id = id
+            it.kind = EntityIdDto.Kind.PREDICTED
+            it.playerId = playerId.id
+        }
+        else -> throw IllegalStateException("Unexpected EntityId implementation")
     }
 }
 
 fun EntityIdDto.toEntityId(): EntityId {
-    return AuthoritativeEntityId(id)
+    return when (kind) {
+        EntityIdDto.Kind.AUTHORITATIVE -> AuthoritativeEntityId(id)
+        EntityIdDto.Kind.PREDICTED -> PredictedEntityId(PlayerId(playerId), id)
+        else -> throw IllegalStateException("Unexpected EntityIdDto.Kind")
+    }
 }
 
 fun Entity.OwnedBy.toDto(): EntityOwnedByDto {

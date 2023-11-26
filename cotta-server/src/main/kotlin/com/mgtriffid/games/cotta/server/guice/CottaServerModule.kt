@@ -45,12 +45,18 @@ class CottaServerModule(
             bind(ClientsGhosts::class.java).`in`(Scopes.SINGLETON)
 
             bind(ClientsInputProvider::class.java)
-                .to(object : TypeLiteral<ClientsInputProviderImpl<MapsInputRecipe>>() {})
+                .to(object : TypeLiteral<
+                    ClientsInputProviderImpl<
+                        MapsStateRecipe,
+                        MapsDeltaRecipe,
+                        MapsInputRecipe>
+                    >() {})
                 .`in`(Scopes.SINGLETON)
 
             bind(ComponentsRegistryImpl::class.java).`in`(Scopes.SINGLETON)
             bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
             bind(Int::class.java).annotatedWith(named("historyLength")).toInstance(8)
+            bind(Int::class.java).annotatedWith(named("stateHistoryLength")).toInstance(128)
             bind(CottaState::class.java).annotatedWith(named("simulation")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
             bind(ServerToClientDataDispatcher::class.java)
                 .to(object : TypeLiteral<ServerToClientDataDispatcherImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
@@ -64,7 +70,6 @@ class CottaServerModule(
             bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
             bind(InvokersFactory::class.java).to(SimulationInvokersFactory::class.java).`in`(Scopes.SINGLETON)
             bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
-            bind(EffectHolder::class.java).toInstance(EffectHolder(null))
             bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
             bind(LagCompensatingEffectBus::class.java).annotatedWith(named("historical")).to(HistoricalLagCompensatingEffectBus::class.java).`in`(Scopes.SINGLETON)

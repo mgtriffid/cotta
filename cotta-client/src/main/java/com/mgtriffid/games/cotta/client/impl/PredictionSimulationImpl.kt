@@ -15,11 +15,13 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
+// TODO test this, without unit tests it's super fragile
 class PredictionSimulationImpl @Inject constructor(
     @Named("prediction") private val invokersFactory: InvokersFactory,
     @Named("prediction") private val state: CottaState,
     private val clientInputs: ClientInputs,
-    @Named("prediction") private val tickProvider: TickProvider
+    @Named("prediction") private val tickProvider: TickProvider,
+    private val playerIdHolder: PlayerIdHolder
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
@@ -84,5 +86,11 @@ class PredictionSimulationImpl @Inject constructor(
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
         logger.info { "Registering ${systemClass.simpleName} for prediction simulation" }
         systemInvokers.add(invokersFactory.createInvoker(systemClass))
+    }
+
+    override fun getLocalPredictedEntities(): Collection<Entity> {
+        return state.entities(tickProvider.tick).all().filter {
+            it.ownedBy == Entity.OwnedBy.Player(playerIdHolder.playerId)
+        }
     }
 }

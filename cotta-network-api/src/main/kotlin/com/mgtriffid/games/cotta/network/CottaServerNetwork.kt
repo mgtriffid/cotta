@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.network
 
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 
@@ -15,6 +16,8 @@ interface CottaServerNetwork {
 
     // TODO pass and utilize tick
     fun drainInputs(): Collection<Pair<ConnectionId, ClientToServerInputDto>>
+
+    fun drainCreatedEntities(): Collection<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>>
 
     fun send(connectionId: ConnectionId, any: Any)
 }

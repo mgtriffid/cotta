@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Client
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.mgtriffid.games.cotta.network.CottaClientNetwork
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
@@ -35,6 +36,10 @@ class KryonetCottaClientNetwork: CottaClientNetwork {
 
     override fun sendInput(input: ClientToServerInputDto) {
         client.sendUDP(input)
+    }
+
+    override fun sendCreatedEntities(createdEntitiesDto: ClientToServerCreatedPredictedEntitiesDto) {
+        client.sendUDP(createdEntitiesDto)
     }
 
     private fun configureListener() {

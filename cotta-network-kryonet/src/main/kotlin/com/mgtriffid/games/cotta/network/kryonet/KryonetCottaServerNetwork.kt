@@ -1,9 +1,11 @@
 package com.mgtriffid.games.cotta.network.kryonet
 
 import com.esotericsoftware.kryonet.Server
+import com.esotericsoftware.minlog.Log
 import com.mgtriffid.games.cotta.network.ClientConnection
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.utils.drain
@@ -16,6 +18,7 @@ class KryonetCottaServerNetwork : CottaServerNetwork {
     private lateinit var server: Server
     private val enterGameIntents = ConcurrentLinkedQueue<Pair<ConnectionId, EnterGameIntent>>()
     private val clientToServerInputs = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>()
+    private val clientToServerCreatedPredictedEntities = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>>()
 
     override fun initialize() {
         logger.info { "Initializing ${KryonetCottaServerNetwork::class.simpleName}..." }
@@ -29,7 +32,8 @@ class KryonetCottaServerNetwork : CottaServerNetwork {
     private fun configureListener() {
         val listener = ServerListener(
             enterGameIntents = enterGameIntents,
-            clientToServerInputs = clientToServerInputs
+            clientToServerInputs = clientToServerInputs,
+            clientToServerCreatedPredictedEntities = clientToServerCreatedPredictedEntities
         )
         server.addListener(listener)
     }
@@ -40,6 +44,10 @@ class KryonetCottaServerNetwork : CottaServerNetwork {
 
     override fun drainInputs(): Collection<Pair<ConnectionId, ClientToServerInputDto>> {
         return clientToServerInputs.drain()
+    }
+
+    override fun drainCreatedEntities(): Collection<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>> {
+        return clientToServerCreatedPredictedEntities.drain()
     }
 
     override fun send(connectionId: ConnectionId, any: Any) {

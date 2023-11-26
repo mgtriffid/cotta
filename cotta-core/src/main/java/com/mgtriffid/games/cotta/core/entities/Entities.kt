@@ -10,6 +10,7 @@ interface Entities {
     fun createEntity(ownedBy: Entity.OwnedBy = Entity.OwnedBy.System): Entity
     fun get(id: EntityId): Entity
     fun all(): Collection<Entity>
+    // GROOM ISP violated here, clearly
     fun createEntity(id: EntityId, ownedBy: Entity.OwnedBy = Entity.OwnedBy.System): Entity
     fun remove(id: EntityId)
 }

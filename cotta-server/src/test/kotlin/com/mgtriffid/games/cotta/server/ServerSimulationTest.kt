@@ -6,6 +6,7 @@ import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.core.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
+import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
@@ -276,6 +277,7 @@ class ServerSimulationTest {
         override fun initializeServerState(entities: Entities) { }
         override val componentClasses: Set<KClass<out Component<*>>> = emptySet()
         override val inputComponentClasses: Set<KClass<out InputComponent<*>>> = emptySet()
+        override val effectClasses: Set<KClass<out CottaEffect>> = emptySet()
         override val metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>> = emptySet()
         override val config: CottaConfig = object : CottaConfig {
             override val tickLength: Long = 20

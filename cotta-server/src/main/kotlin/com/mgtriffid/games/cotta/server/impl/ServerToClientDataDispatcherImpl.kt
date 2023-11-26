@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.esotericsoftware.kryonet.Server
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -34,10 +33,13 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
 
     override fun dispatch() {
         val currentTick = tick.tick
+        logger.info { "Dispatching data to clients, currentTick=$currentTick" }
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val whatToSend = ghost.whatToSend(currentTick)
             whatToSend.necessaryData.forEach { (tick, kind) ->
+                logger.info { "Sending tick $tick, kind $kind to $playerId" }
                 network.sendAll(ghost.connectionId, packData(tick, kind, data, playerId))
+                logger.info { "Sent tick $tick, kind $kind to $playerId" }
             }
         }
     }
@@ -87,8 +89,9 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
             KindOfData.CLIENT_META_ENTITY_ID -> {
                 val dto = ServerToClientDto()
                 dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CLIENT_META_ENTITY_ID
-                dto.payload = snapsSerialization.serializeEntityId(
-                    data.metaEntities()[playerId] ?: throw IllegalStateException("Meta-entity does not exist for player ${playerId.id}")
+                dto.payload = snapsSerialization.serializeMetaEntityId(
+                    data.metaEntities()[playerId],
+                    playerId
                 )
                 dto.tick = tick
                 return listOf(dto)
@@ -98,5 +101,8 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
 }
 
 fun CottaServerNetwork.sendAll(connectionId: ConnectionId, dtos: Collection<ServerToClientDto>) {
-    dtos.forEach { send(connectionId, it) }
+    dtos.forEach {
+        logger.info { "Sending ${it.kindOfData} with tick ${it.tick} to $connectionId" }
+        send(connectionId, it)
+    }
 }

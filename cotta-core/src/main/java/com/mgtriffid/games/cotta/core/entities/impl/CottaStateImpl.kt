@@ -7,11 +7,12 @@ import com.mgtriffid.games.cotta.core.exceptions.EcsRuntimeException
 import jakarta.inject.Named
 import kotlin.math.max
 
+private val logger = mu.KotlinLogging.logger {}
 class CottaStateImpl @Inject constructor(
-    @Named("historyLength") private val historyLength: Int
+    @Named("stateHistoryLength") private val stateHistoryLength: Int
 ) : CottaState {
 
-    private val entitiesArray = Array<Entities?>(historyLength) { null }
+    private val entitiesArray = Array<Entities?>(stateHistoryLength) { null }
 
     private var latestTickSet = 0L
 
@@ -23,15 +24,16 @@ class CottaStateImpl @Inject constructor(
         if (atTick > latestTickSet) {
             throw EcsRuntimeException("Cannot retrieve entities at tick $atTick: latest stored tick is $latestTickSet")
         }
-        if (atTick < latestTickSet - historyLength) {
+        if (atTick < latestTickSet - stateHistoryLength) {
             throw EcsRuntimeException(
-                "Cannot retrieve entities at tick $atTick: latest stored tick is $latestTickSet while history length is $historyLength"
+                "Cannot retrieve entities at tick $atTick: latest stored tick is $latestTickSet while history length is $stateHistoryLength"
             )
         }
         return entitiesArray[atTick.toIndex()]!!
     }
 
     override fun advance(tick: Long) {
+        logger.debug { "Advancing state tick from $tick to ${tick + 1}" }
         val entities = entities(tick)
         set(tick + 1, entities.deepCopy())
     }
@@ -46,7 +48,7 @@ class CottaStateImpl @Inject constructor(
         latestTickSet = 0L
     }
 
-    private fun Long.toIndex() = (this % historyLength).toInt()
+    private fun Long.toIndex() = (this % stateHistoryLength).toInt()
 
     private fun Entities.deepCopy(): Entities {
         return if (this is EntitiesImpl) {

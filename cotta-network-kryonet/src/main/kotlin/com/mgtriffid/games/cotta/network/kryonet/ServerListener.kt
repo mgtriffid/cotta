@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.network.kryonet
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.mgtriffid.games.cotta.network.ConnectionId
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
@@ -13,7 +14,8 @@ private val logger = KotlinLogging.logger {}
 
 class ServerListener(
     private val enterGameIntents: ConcurrentLinkedQueue<Pair<ConnectionId, EnterGameIntent>>,
-    private val clientToServerInputs: ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>
+    private val clientToServerInputs: ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>,
+    private val clientToServerCreatedPredictedEntities: ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>>
 ) : Listener {
     override fun connected(connection: Connection?) {
         super.connected(connection)
@@ -34,6 +36,13 @@ class ServerListener(
             is ClientToServerInputDto -> {
                 logger.trace { "Received ${ClientToServerInputDto::class.simpleName}" }
                 clientToServerInputs.add(Pair(ConnectionId(connection.id), obj))
+            }
+            is ClientToServerCreatedPredictedEntitiesDto -> {
+                logger.trace { "Received ${ClientToServerCreatedPredictedEntitiesDto::class.simpleName}" }
+                clientToServerCreatedPredictedEntities.add(Pair(ConnectionId(connection.id), obj))
+            }
+            else -> {
+                logger.warn { "Received unknown object: $obj" }
             }
         }
     }

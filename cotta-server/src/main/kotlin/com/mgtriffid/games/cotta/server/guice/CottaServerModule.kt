@@ -16,14 +16,8 @@ import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
-import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
-import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
-import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
-import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
-import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
-import com.mgtriffid.games.cotta.core.simulation.impl.EntityOwnerSawTickProviderImpl
-import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
-import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
+import com.mgtriffid.games.cotta.core.simulation.*
+import com.mgtriffid.games.cotta.core.simulation.impl.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
@@ -82,12 +76,16 @@ class CottaServerModule(
             bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
             bind(TracingEffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectProcessingContext::class.java)
-            bind(CreateEntityStrategy::class.java).annotatedWith(named("effectProcessing")).to(CreateAndRecordCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
+            bind(CreateEntityStrategy::class.java).annotatedWith(named("effectProcessing")).to(
+                CreateAndRecordCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
             bind(CreatedEntities::class.java).to(CreatedEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
             install(SerializationModule())
 
             bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
+
+            bind(PredictedToAuthoritativeIdMappings::class.java).to(PredictedToAuthoritativeIdMappingsImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(EntitiesCreatedOnClientsRegistry::class.java).to(EntitiesCreatedOnClientsRegistryImpl::class.java).`in`(Scopes.SINGLETON)
         }
     }
 

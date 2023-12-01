@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
+import com.mgtriffid.games.cotta.server.EntitiesCreatedOnClientsRegistry
 import com.mgtriffid.games.cotta.server.ServerSimulationInputProvider
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -17,10 +18,14 @@ class ServerSimulationInputProviderImpl @Inject constructor(
     private val nonPlayerInputProvider: NonPlayerInputProvider,
     @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder,
+    private val entitiesCreatedOnClientsRegistry: EntitiesCreatedOnClientsRegistry,
     private val tickProvider: TickProvider
 ): ServerSimulationInputProvider {
     override fun prepare() {
-        val clientsInput = clientsInputProvider.getInput()
+        val dataFromClients = clientsInputProvider.getInput()
+        val clientsInput = dataFromClients.first
+        val predictedClientEntities = dataFromClients.second
+        entitiesCreatedOnClientsRegistry.populate(predictedClientEntities)
 
         val nonPlayerEntitiesInput = nonPlayerInputProvider.input(state.entities(tickProvider.tick))
 

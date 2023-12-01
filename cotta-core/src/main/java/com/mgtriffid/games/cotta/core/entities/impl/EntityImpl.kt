@@ -41,7 +41,12 @@ class EntityImpl(
 
     override fun <T : InputComponent<T>> getInputComponent(clazz: KClass<T>): T {
         @Suppress("UNCHECKED_CAST")
-        return inputComponents[clazz] as T
+        return try {
+            inputComponents[clazz] as T
+        } catch (t: Throwable) {
+            println("keke")
+            throw t
+        }
     }
 
     override fun <T : Component<T>> removeComponent(clazz: KClass<T>) {

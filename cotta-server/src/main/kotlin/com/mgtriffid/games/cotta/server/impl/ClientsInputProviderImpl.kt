@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.PredictedEntityId
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
@@ -25,8 +26,8 @@ class ClientsInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
     val clientsGhosts: ClientsGhosts,
 ) : ClientsInputProvider {
     private val inputBuffers = HashMap<PlayerId, ClientDataBuffer<IR>>()
-    private val createdEntitiesBuffer = HashMap<PlayerId, ClientDataBuffer<List<Pair<CottaTrace, EntityId>>>>()
-    override fun getInput(): ClientsInput {
+    private val createdEntitiesBuffer = HashMap<PlayerId, ClientDataBuffer<List<Pair<CottaTrace, PredictedEntityId>>>>()
+    override fun getInput(): Pair<ClientsInput, ClientsPredictedEntities> {
         val rawDtos = network.drainInputs()
         rawDtos.forEach { (connectionId, dto) ->
             val playerId = clientsGhosts.playerByConnection[connectionId]
@@ -46,8 +47,8 @@ class ClientsInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
                 return@forEach
             }
             val createdEntitiesRecipe = snapsSerialization.deserializeEntityCreationTraces(dto.payload)
-            val createdEntities: List<Pair<CottaTrace, EntityId>> = createdEntitiesRecipe.map { (trace, entityId) ->
-                Pair(stateSnapper.unpackTrace(trace), entityId)
+            val createdEntities: List<Pair<CottaTrace, PredictedEntityId>> = createdEntitiesRecipe.map { (trace, entityId) ->
+                Pair(stateSnapper.unpackTrace(trace), entityId as PredictedEntityId)
             }
             getCreatedEntitiesBuffer(playerId).store(dto.tick, createdEntities)
         }
@@ -59,7 +60,7 @@ class ClientsInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
         // - inputs are ready client ghost is running
         // - inputs are not ready client ghost is running
         val inputRecipes = ArrayList<IR>()
-        val createdEntities = ArrayList<Pair<CottaTrace, EntityId>>()
+        val createdEntities = ArrayList<Pair<CottaTrace, PredictedEntityId>>()
         val playersSawTicks = HashMap<PlayerId, Long>()
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val tickCursorState = ghost.tickCursorState()
@@ -98,14 +99,14 @@ class ClientsInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
         val inputs = inputRecipes.map { recipe ->
             inputSnapper.unpackInputRecipe(recipe).entries
         }.flatten().associate { it.key to it.value }
-        return ClientsInput(playersSawTicks, inputs)
+        return Pair(ClientsInput(playersSawTicks, inputs), ClientsPredictedEntities(createdEntities))
     }
 
     private fun getInputBuffer(playerId: PlayerId): ClientDataBuffer<IR> {
         return inputBuffers.computeIfAbsent(playerId) { ClientDataBuffer() }
     }
 
-    private fun getCreatedEntitiesBuffer(playerId: PlayerId): ClientDataBuffer<List<Pair<CottaTrace, EntityId>>> {
+    private fun getCreatedEntitiesBuffer(playerId: PlayerId): ClientDataBuffer<List<Pair<CottaTrace, PredictedEntityId>>> {
         return createdEntitiesBuffer.computeIfAbsent(playerId) { ClientDataBuffer() }
     }
 

@@ -37,15 +37,15 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     val clientSimulation: ClientSimulation,
     private val predictionSimulation: PredictionSimulation,
     val input: ClientSimulationInputProvider,
-    val tickProvider: TickProvider,
+    override val tickProvider: TickProvider,
     private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
     private val playerIdHolder: PlayerIdHolder,
     private val incomingDataBuffer: IncomingDataBuffer<SR, DR, IR>,
-    @Named("simulation") val cottaState: CottaState // Todo not expose as public
+    @Named("simulation") override val state: CottaState // Todo not expose as public
 ) : CottaClient {
     val lagCompLimit: Int = 8 // TODO move to config and bind properly
     val bufferLength: Int = 3
-    private var state: ClientState = ClientState.Initial
+    private var clientState: ClientState = ClientState.Initial
     private val componentsRegistry = engine.getComponentsRegistry()
     private val stateSnapper = engine.getStateSnapper()
     private val snapsSerialization = engine.getSnapsSerialization()
@@ -60,11 +60,11 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
 
     override fun tick() {
         logger.debug { "Running ${CottaClientImpl::class.simpleName}" }
-        state.let {
+        clientState.let {
             when (it) {
                 ClientState.Initial -> {
                     connect()
-                    state = ClientState.AwaitingGameState(since = System.currentTimeMillis())
+                    clientState = ClientState.AwaitingGameState(since = System.currentTimeMillis())
                 }
 
                 is ClientState.AwaitingGameState -> {
@@ -72,10 +72,10 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
                     // TODO ensure that if metaEntity did not come we still can operate
                     if (stateAvailable()) {
                         setStateFromAuthoritative()
-                        state = ClientState.Running(getCurrentTick())
+                        clientState = ClientState.Running(getCurrentTick())
                     } else {
                         if (now() - it.since > STATE_WAITING_THRESHOLD) {
-                            state = ClientState.Disconnected
+                            clientState = ClientState.Disconnected
                         }
                     }
                 }
@@ -89,7 +89,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
                     if (deltaAvailableForTick(getCurrentTick())) {
                         logger.debug { "Delta available, we will integrate" }
                         integrate()
-                        state = ClientState.Running(it.currentTick + 1)
+                        clientState = ClientState.Running(it.currentTick + 1)
                     } else {
                         logger.debug { "Delta not available" }
                         // for now do nothing, later we'll guess and keep track of how
@@ -104,13 +104,13 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         logger.debug { "Setting state from authoritative" }
         val fullStateTick = incomingDataBuffer.states.lastKey()
         val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
-        cottaState.set(fullStateTick, blankEntities())
+        state.set(fullStateTick, blankEntities())
         tickProvider.tick = fullStateTick
-        stateSnapper.unpackStateRecipe(cottaState.entities(atTick = fullStateTick), stateRecipe)
+        stateSnapper.unpackStateRecipe(state.entities(atTick = fullStateTick), stateRecipe)
         ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
-            cottaState.advance(tick - 1)
+            state.advance(tick - 1)
             tickProvider.tick++
-            stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
+            stateSnapper.unpackDeltaRecipe(state.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
         }
     }
 
@@ -129,7 +129,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         // tick is advanced inside;
         clientSimulation.tick()
         logger.info { "About to unpack delta and apply to ${tick + 1}" }
-        stateSnapper.unpackDeltaRecipe(cottaState.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
+        stateSnapper.unpackDeltaRecipe(state.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
 
         predict()
 
@@ -167,7 +167,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
             .also { logger.debug { it.joinToString() } } // TODO explicit sorting
         predictionSimulation.startPredictionFrom(
-            cottaState.entities(atTick = unprocessedTicks.min()),
+            state.entities(atTick = unprocessedTicks.min()),
             unprocessedTicks.min()
         )
         predictionSimulation.run(unprocessedTicks, playerId)
@@ -227,13 +227,13 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     }
 
     private fun getEntitiesOwnedByPlayer(player: Entity.OwnedBy.Player) =
-        cottaState.entities(atTick = getCurrentTick()).all().filter {
+        state.entities(atTick = getCurrentTick()).all().filter {
             it.ownedBy == player
         } + predictionSimulation.getLocalPredictedEntities()
 
     private fun metaEntity(): Entity? {
         logger.debug { "Looking for meta entity, metaEntityId = $metaEntityId" }
-        val entity = cottaState.entities(atTick = getCurrentTick()).all().find {
+        val entity = state.entities(atTick = getCurrentTick()).all().find {
             it.id == metaEntityId
         }
         if (entity != null) {

@@ -121,6 +121,8 @@ class CottaClientModule(
         bind(PredictedEntityIdGenerator::class.java).to(PredictedEntityIdGeneratorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)
         bind(PlayerIdHolder::class.java).toInstance(PlayerIdHolder())
+
+        bind(AuthoritativeToPredictedEntityIdMappings::class.java).to(AuthoritativeToPredictedEntityIdMappingsImpl::class.java).`in`(Scopes.SINGLETON)
         install(SerializationModule())
     }
 }

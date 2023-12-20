@@ -1,7 +1,9 @@
 package com.mgtriffid.games.cotta.client.impl
 
+import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.ClientInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
+import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesImpl
 import com.mgtriffid.games.cotta.core.input.ClientInput
@@ -20,15 +22,18 @@ class PredictionSimulationImpl @Inject constructor(
     @Named("prediction") private val invokersFactory: InvokersFactory,
     @Named("prediction") private val state: CottaState,
     private val clientInputs: ClientInputs,
+    @Named("prediction") private val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
-    private val playerIdHolder: PlayerIdHolder
+    private val playerIdHolder: PlayerIdHolder,
+    private val idMappings: AuthoritativeToPredictedEntityIdMappings
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
     override fun run(ticks: List<Long>, playerId: PlayerId) {
-        logger.info { "Running prediction simulation for ticks $ticks" }
+        logger.debug { "Running prediction simulation for ticks $ticks" }
         for (tick in ticks) {
             logger.info { "Running prediction simulation for tick $tick" }
+            effectBus.clear()
             state.advance(tickProvider.tick)
             tickProvider.tick++
             putInputIntoEntities(tick, playerId)
@@ -37,7 +42,7 @@ class PredictionSimulationImpl @Inject constructor(
     }
 
     private fun putInputIntoEntities(tick: Long, playerId: PlayerId) {
-        logger.info { "Putting input into entities for tick $tick" }
+        logger.debug { "Putting input into entities for tick $tick" }
         val input = clientInputs.get(tick)
         state.entities(tickProvider.tick).all().filter {
             it.ownedBy == Entity.OwnedBy.Player(playerId) && it.hasInputComponents()
@@ -53,7 +58,8 @@ class PredictionSimulationImpl @Inject constructor(
 
     private fun ClientInput.inputForEntityAndComponent(entityId: EntityId, component: KClass<*>): InputComponent<*> {
         logger.trace { "Getting input for entity $entityId and component ${component.qualifiedName}" }
-        val input = inputs[entityId]?.find { component.isInstance(it) }
+        val entityInputs = getEntityInputs(entityId)
+        val input = entityInputs?.find { component.isInstance(it) }
         if (input != null) {
             logger.trace { "Input found" }
             return input
@@ -63,19 +69,26 @@ class PredictionSimulationImpl @Inject constructor(
         }
     }
 
+    private fun ClientInput.getEntityInputs(entityId: EntityId): List<InputComponent<*>>? {
+        return inputs[entityId] ?: inputs[getMatchingPredictedEntityId(entityId)]
+    }
+
+    private fun getMatchingPredictedEntityId(entityId: EntityId): EntityId? {
+        return idMappings[entityId]
+    }
+
     private fun fallback(component: KClass<*>): InputComponent<*> {
         TODO()
     }
 
     private fun simulate() {
         for ((invoker, system) in systemInvokers) {
-            logger.info { "Running prediction simulation for system ${system::class.simpleName}" }
+            logger.debug { "Running prediction simulation for system ${system::class.simpleName}" }
             (invoker as SystemInvoker<CottaSystem>).invoke(system)
         }
     }
 
     override fun startPredictionFrom(entities: Entities, tick: Long) {
-        logger.info { "Setting initial predictions state with tick $tick" }
         state.wipe()
         tickProvider.tick = tick
         if (entities is EntitiesImpl) {
@@ -92,5 +105,10 @@ class PredictionSimulationImpl @Inject constructor(
         return state.entities(tickProvider.tick).all().filter {
             it.ownedBy == Entity.OwnedBy.Player(playerIdHolder.playerId)
         }
+    }
+
+    override fun getPredictedEntities(): List<Entity> {
+        return state.entities(tickProvider.tick).all()
+            .toList()
     }
 }

@@ -20,7 +20,13 @@ class PredictionEffectsConsumerSystemInvokerImpl @Inject constructor(
 ) : PredictionEffectsConsumerSystemInvoker {
     override fun invoke(system: EffectsConsumerSystem) {
         logger.debug { "Invoked ${system::class.qualifiedName}" }
+        if (system::class.simpleName == "MovementEffectConsumerSystem") {
+            logger.debug { "Invoked MovementEffectConsumerSystem in prediction" }
+        }
         effectBus.effects().forEach { process(it, system) }
+        if (system::class.simpleName == "MovementEffectConsumerSystem") {
+            logger.debug { "Done invoking MovementEffectConsumerSystem in prediction" }
+        }
     }
 
     private fun process(effect: CottaEffect, system: EffectsConsumerSystem) {

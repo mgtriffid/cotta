@@ -12,6 +12,8 @@ import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.*
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.*
 
+private val logger = mu.KotlinLogging.logger {}
+
 class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe> {
     // this is not thread safe
     private val kryo = Kryo()
@@ -32,6 +34,7 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         kryo.register(MetaEntityPlayerIdDto::class.java)
         kryo.register(CreateEntityTraceDto::class.java)
         kryo.register(CreateEntityTracesDto::class.java)
+        kryo.register(CreatedEntitiesWithTracesRecipeDto::class.java)
         kryo.register(PlayersSawTicksDto::class.java)
         kryo.register(CottaTraceDto::class.java)
         kryo.register(CottaTraceElementDto::class.java)
@@ -100,6 +103,26 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         return output.toBytes()
     }
 
+    override fun serializeEntityCreationTracesV2(createdEntities: CreatedEntitiesWithTracesRecipe): ByteArray {
+        val dto = CreatedEntitiesWithTracesRecipeDto()
+        val tracesDtos =  ArrayList<CreateEntityTraceDto>()
+        createdEntities.traces.forEach { (trace, entityId) ->
+            tracesDtos.add(CreateEntityTraceDto().also {
+                it.trace = trace.toDto()
+                it.entityId = entityId.toDto()
+            })
+        }
+        dto.traces = tracesDtos
+        val predictedEntitiesIds = HashMap<EntityIdDto, EntityIdDto>()
+        createdEntities.mappedPredictedIds.forEach { (authoritativeEntityId, predictedEntityId) ->
+            predictedEntitiesIds[authoritativeEntityId.toDto()] = predictedEntityId.toDto()
+        }
+        dto.predictedEntitiesIds = predictedEntitiesIds
+        val output = Output(64, 1024 * 1024)
+        kryo.writeObject(output, dto)
+        return output.toBytes()
+    }
+
     override fun deserializeEntityCreationTraces(bytes: ByteArray): List<Pair<MapsTraceRecipe, EntityId>> {
         val dto = kryo.readObject(Input(bytes), CreateEntityTracesDto::class.java)
         return dto.traces.map {
@@ -121,6 +144,34 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
                 ),
                 entityIdDto.toEntityId())
         }
+    }
+
+    override fun deserializeEntityCreationTracesV2(bytes: ByteArray): CreatedEntitiesWithTracesRecipe {
+        val dto = kryo.readObject(Input(bytes), CreatedEntitiesWithTracesRecipeDto::class.java)
+        val traces = dto.traces.map {
+            val trace: CottaTraceDto = it.trace
+            val entityIdDto = it.entityId
+            Pair(
+                MapsTraceRecipe(
+                    trace.elements.map { it: CottaTraceElementDto ->
+                        when (it.kind) {
+                            CottaTraceElementDto.Kind.INPUT -> MapsTraceElementRecipe.MapsInputTraceElementRecipe(
+                                it.entityId.toEntityId()
+                            )
+                            CottaTraceElementDto.Kind.EFFECT -> MapsTraceElementRecipe.MapsEffectTraceElementRecipe(
+                                it.data.toRecipe()
+                            )
+                            CottaTraceElementDto.Kind.ENTITY_PROCESSING -> TODO()
+                        }
+                    }
+                ),
+                entityIdDto.toEntityId())
+        }
+        val mappedPredictedIds = HashMap<AuthoritativeEntityId, PredictedEntityId>()
+        dto.predictedEntitiesIds.forEach { (authoritativeEntityIdDto, predictedEntityIdDto) ->
+            mappedPredictedIds[authoritativeEntityIdDto.toEntityId() as AuthoritativeEntityId] = predictedEntityIdDto.toEntityId() as PredictedEntityId
+        }
+        return CreatedEntitiesWithTracesRecipe(traces, mappedPredictedIds)
     }
 
     override fun serializePlayersSawTicks(playersSawTicks: Map<PlayerId, Long>): ByteArray {

@@ -73,7 +73,7 @@ class ClientsInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
                         ghost.setLastUsedInput(clientsTickToUse)
                         playersSawTicks[playerId] = clientsTickToUse
                         inputRecipes.add(inputBuffer.get(clientsTickToUse))
-                        createdEntities.addAll(getCreatedEntitiesBuffer(playerId).get(clientsTickToUse))
+                        createdEntities.addAll(getCreatedEntitiesBuffer(playerId).get(clientsTickToUse + 1))
                     } else {
                         // do nothing. Ok, we don't have the input recipe yet, no big deal.
                     }

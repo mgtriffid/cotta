@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsTraceRecipe
 import mu.KotlinLogging
 import java.util.*
@@ -17,6 +18,7 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
     val deltas = TreeMap<Long, DR>()
     val inputs = TreeMap<Long, IR>()
     val createdEntities = TreeMap<Long, List<Pair<MapsTraceRecipe, EntityId>>>() // GROOM class with naming
+    val createdEntitiesV2 = TreeMap<Long, CreatedEntitiesWithTracesRecipe>() // GROOM class with naming
     val metaEntityIds = TreeMap<Long, EntityId>() // not really needed but for the uniformity
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
 
@@ -43,6 +45,15 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
     fun storeCreatedEntities(tick: Long, createdEntities: List<Pair<MapsTraceRecipe, EntityId>>) {
         this.createdEntities[tick] = createdEntities
         cleanUpOldCreatedEntities(tick)
+    }
+
+    fun storeCreatedEntitiesV2(tick: Long, createdEntities: CreatedEntitiesWithTracesRecipe) {
+        this.createdEntitiesV2[tick] = createdEntities
+        cleanUpOldCreatedEntitiesV2(tick)
+    }
+
+    private fun cleanUpOldCreatedEntitiesV2(tick: Long) {
+        cleanUp(createdEntitiesV2, tick)
     }
 
     fun storePlayersSawTicks(tick: Long, playersSawTicks: Map<PlayerId, Long>) {

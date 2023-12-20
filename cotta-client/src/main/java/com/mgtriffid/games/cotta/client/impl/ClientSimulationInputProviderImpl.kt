@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
+import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.ClientSimulationInputProvider
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
@@ -29,14 +30,18 @@ class ClientSimulationInputProviderImpl @Inject constructor(
     private val incomingDataBuffer: IncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>,
     private val tickProvider: TickProvider,
     private val createdEntitiesRegistry: ServerCreatedEntitiesRegistry,
+    private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val simulationInputHolder: SimulationInputHolder
 ) : ClientSimulationInputProvider {
     override fun prepare() {
-        logger.debug { "Unpacking input for tick ${tickProvider.tick}, incomingDataBuffer is ${incomingDataBuffer.hashCode()}" }
+        logger.info { "Unpacking input for tick ${tickProvider.tick}" }
         val inputs = inputSnapper.unpackInputRecipe(incomingDataBuffer.inputs[tickProvider.tick]!!)
-        createdEntitiesRegistry.data = incomingDataBuffer.createdEntities[tickProvider.tick + 1]!!.map { (traceRecipe, entityId) ->
+        createdEntitiesRegistry.data = incomingDataBuffer.createdEntitiesV2[tickProvider.tick + 1]!!.traces.map { (traceRecipe, entityId) ->
             Pair(stateSnapper.unpackTrace(traceRecipe), entityId)
         }.toMutableList()
+        incomingDataBuffer.createdEntitiesV2[tickProvider.tick + 1]!!.mappedPredictedIds.forEach { (authoritativeId, predictedId) ->
+            authoritativeToPredictedEntityIdMappings[authoritativeId] = predictedId
+        }
         val simulationInput = object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                 return inputs

@@ -8,6 +8,7 @@ import jakarta.inject.Named
 import kotlin.math.max
 
 private val logger = mu.KotlinLogging.logger {}
+
 class CottaStateImpl @Inject constructor(
     @Named("stateHistoryLength") private val stateHistoryLength: Int
 ) : CottaState {

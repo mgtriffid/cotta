@@ -56,6 +56,7 @@ class ServerSimulationImpl @Inject constructor(
     override fun tick() {
         effectBus.clear()
         state.advance(tickProvider.tick)
+        logger.info { "Advancing tick from ${tickProvider.tick} to ${tickProvider.tick + 1}" }
         tickProvider.tick++
         putInputIntoEntities()
         for ((invoker, system) in systemInvokers) {
@@ -68,10 +69,10 @@ class ServerSimulationImpl @Inject constructor(
         state.entities(tickProvider.tick).all().filter {
             it.hasInputComponents()
         }.forEach { e ->
-            logger.trace { "Entity ${e.id} has some input components:" }
+            logger.info { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
                 val component = simulationInputHolder.get().inputForEntityAndComponent(e.id, c)
-                logger.trace { "  $component" }
+                logger.info { "  $component" }
                 e.setInputComponent(c, component)
             }
         }

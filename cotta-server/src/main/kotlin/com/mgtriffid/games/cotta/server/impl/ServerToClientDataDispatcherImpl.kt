@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.*
+import com.mgtriffid.games.cotta.core.serialization.impl.recipe.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
@@ -33,13 +34,13 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
 
     override fun dispatch() {
         val currentTick = tick.tick
-        logger.info { "Dispatching data to clients, currentTick=$currentTick" }
+        logger.debug { "Dispatching data to clients, currentTick=$currentTick" }
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val whatToSend = ghost.whatToSend(currentTick)
             whatToSend.necessaryData.forEach { (tick, kind) ->
-                logger.info { "Sending tick $tick, kind $kind to $playerId" }
+                logger.debug { "Sending tick $tick, kind $kind to $playerId" }
                 network.sendAll(ghost.connectionId, packData(tick, kind, data, playerId))
-                logger.info { "Sent tick $tick, kind $kind to $playerId" }
+                logger.debug { "Sent tick $tick, kind $kind to $playerId" }
             }
         }
     }
@@ -71,13 +72,26 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
                     }
                 )
                 createdEntitiesDto.tick = tick
+
+                val createdEntitiesWithTracesDto = ServerToClientDto()
+                createdEntitiesWithTracesDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CREATED_ENTITIES_V2
+                createdEntitiesWithTracesDto.payload = snapsSerialization.serializeEntityCreationTracesV2(CreatedEntitiesWithTracesRecipe(
+                    data.createdEntities(tick).map { (trace, id) ->
+                        Pair(stateSnapper.snapTrace(trace), id)
+                    },
+                    data.confirmedEntities(tick).associate { (predictedId, authoritativeId) ->
+                        authoritativeId to predictedId
+                    }
+                ))
+                createdEntitiesWithTracesDto.tick = tick
+
                 val playersSawTicksDto = ServerToClientDto()
                 playersSawTicksDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.PLAYERS_SAW_TICKS
                 playersSawTicksDto.payload = snapsSerialization.serializePlayersSawTicks(
-                    data.playersSawTicks().all()
+                    data.playersSawTicks().all().also { logger.info { it.toString() } }
                 )
-                playersSawTicksDto.tick = tick
-                return listOf(deltaDto, inputDto, createdEntitiesDto, playersSawTicksDto)
+                playersSawTicksDto.tick = tick - 1
+                return listOf(deltaDto, inputDto, createdEntitiesDto, createdEntitiesWithTracesDto, playersSawTicksDto)
             }
             KindOfData.STATE -> {
                 val dto = ServerToClientDto()
@@ -102,7 +116,7 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
 
 fun CottaServerNetwork.sendAll(connectionId: ConnectionId, dtos: Collection<ServerToClientDto>) {
     dtos.forEach {
-        logger.info { "Sending ${it.kindOfData} with tick ${it.tick} to $connectionId" }
+        logger.debug { "Sending ${it.kindOfData} with tick ${it.tick} to $connectionId" }
         send(connectionId, it)
     }
 }

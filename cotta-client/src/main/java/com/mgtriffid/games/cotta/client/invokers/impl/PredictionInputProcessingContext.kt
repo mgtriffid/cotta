@@ -15,6 +15,7 @@ class PredictionInputProcessingContext @Inject constructor(
     @Named("prediction") private val traces: Traces
 ) : TracingInputProcessingContext {
     override fun fire(effect: CottaEffect) {
+        traces.set(effect, trace!!)
         effectBus.publisher().fire(effect)
     }
 

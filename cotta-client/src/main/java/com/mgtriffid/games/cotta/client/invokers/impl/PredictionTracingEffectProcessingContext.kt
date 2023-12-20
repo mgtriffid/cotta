@@ -12,7 +12,8 @@ import jakarta.inject.Named
 
 class PredictionTracingEffectProcessingContext @Inject constructor(
     @Named("prediction") private val traces: Traces,
-    @Named("prediction") private val createEntityStrategy: CreateEntityStrategy
+    @Named("prediction") private val createEntityStrategy: CreateEntityStrategy,
+    @Named("prediction") private val entities: Entities,
 ) : TracingEffectProcessingContext {
 
     override fun fire(effect: CottaEffect) {
@@ -20,7 +21,7 @@ class PredictionTracingEffectProcessingContext @Inject constructor(
     }
 
     override fun entities(): Entities {
-        TODO("Not yet implemented")
+        return entities // not sure
     }
 
     override fun createEntity(ownedBy: Entity.OwnedBy): Entity {

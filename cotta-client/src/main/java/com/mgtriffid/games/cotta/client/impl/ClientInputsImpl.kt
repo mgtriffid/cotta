@@ -12,6 +12,8 @@ class ClientInputsImpl @Inject constructor(
     @Named("clientInputBufferLength") private val bufferLength: Int
 ) : ClientInputs {
     private val data = Array<Envelope>(bufferLength) { Envelope.Absent }
+
+    // called before advancing tick
     override fun store(input: ClientInput) {
         store(tickProvider.tick, input)
     }

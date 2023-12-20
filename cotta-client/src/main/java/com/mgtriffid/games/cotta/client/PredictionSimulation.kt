@@ -12,4 +12,5 @@ interface PredictionSimulation {
     fun startPredictionFrom(entities: Entities, tick: Long)
 
     fun getLocalPredictedEntities(): Collection<Entity>
+    fun getPredictedEntities(): List<Entity>
 }

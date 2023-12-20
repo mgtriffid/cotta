@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.shared.game.systems
 
+import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
@@ -12,7 +13,7 @@ import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 
 private val logger = mu.KotlinLogging.logger {}
 
-class MovementEffectConsumerSystem : EffectsConsumerSystem {
+@Predicted class MovementEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is MovementEffect) {
             logger.debug { "Received MovementEffect: $e" }

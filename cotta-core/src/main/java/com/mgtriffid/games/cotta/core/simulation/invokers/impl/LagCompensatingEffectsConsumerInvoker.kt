@@ -23,7 +23,13 @@ class LagCompensatingEffectsConsumerInvoker @Inject constructor(
 ) : SystemInvoker<EffectsConsumerSystem> {
     override fun invoke(system: EffectsConsumerSystem) {
         logger.debug { "Invoked ${system::class.qualifiedName}" }
+        if (system::class.simpleName == "MovementEffectConsumerSystem") {
+            logger.info { "Invoked MovementEffectConsumerSystem in simulation" }
+        }
         effectBus.effects().forEach { process(it, system) }
+        if (system::class.simpleName == "MovementEffectConsumerSystem") {
+            logger.info { "Done invoking MovementEffectConsumerSystem in simulation" }
+        }
     }
 
     private fun process(effect: CottaEffect, system: EffectsConsumerSystem) {

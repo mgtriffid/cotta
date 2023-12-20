@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
-import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.utils.now
@@ -19,6 +18,7 @@ import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
+
 // TODO handle resize and pause and all the things
 class GameScreen(
     private val gdxGame: PannaGdxGame
@@ -88,7 +88,7 @@ class GameScreen(
         getDrawableEntities().forEach {
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
-            logger.trace { "Drawing entity ${it.id} owned by ${it.ownedBy}. Position: $position." }
+            logger.debug { "Drawing entity ${it.id} owned by ${it.ownedBy}. Position: $position." }
             val texture = textures[drawable.textureId]
             logPositionIfChanged(it, position)
             batch.draw(texture, position.xPos.toFloat(), position.yPos.toFloat())
@@ -96,8 +96,12 @@ class GameScreen(
     }
 
     private fun getDrawableEntities(): List<Entity> {
-        return cottaClient.state.entities(cottaClient.tickProvider.tick).all().filter {
+        val predicted = cottaClient.getPredictedEntities()
+        val authoritative = cottaClient.state.entities(cottaClient.tickProvider.tick).all()
+        return (predicted + authoritative.filter { it.id !in predicted.map { it.id } }).filter {
             it.hasComponent(DrawableComponent::class) && it.hasComponent(PositionComponent::class)
+        }.also {
+            logger.debug { "Entities found: ${it.map { it.id }}" }
         }
     }
 

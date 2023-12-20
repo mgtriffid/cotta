@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.shared.game.systems
 
+import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessingContext
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
@@ -9,7 +10,8 @@ import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputCompon
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 
 private val logger = mu.KotlinLogging.logger {}
-class WalkingInputProcessingSystem : InputProcessingSystem {
+
+@Predicted class WalkingInputProcessingSystem : InputProcessingSystem {
     override fun process(e: Entity, ctx: InputProcessingContext) {
         if (e.hasInputComponent(WalkingInputComponent::class) && e.hasComponent(WalkingComponent::class)) {
             val input = e.getInputComponent(WalkingInputComponent::class)

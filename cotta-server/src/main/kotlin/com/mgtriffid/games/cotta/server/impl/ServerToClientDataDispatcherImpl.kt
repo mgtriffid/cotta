@@ -88,7 +88,7 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
                 val playersSawTicksDto = ServerToClientDto()
                 playersSawTicksDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.PLAYERS_SAW_TICKS
                 playersSawTicksDto.payload = snapsSerialization.serializePlayersSawTicks(
-                    data.playersSawTicks().all().also { logger.info { it.toString() } }
+                    data.playersSawTicks().all().also { logger.debug { it.toString() } }
                 )
                 playersSawTicksDto.tick = tick - 1
                 return listOf(deltaDto, inputDto, createdEntitiesDto, createdEntitiesWithTracesDto, playersSawTicksDto)

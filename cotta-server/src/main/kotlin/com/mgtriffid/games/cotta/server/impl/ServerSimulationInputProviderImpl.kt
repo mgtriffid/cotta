@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
 import com.mgtriffid.games.cotta.server.EntitiesCreatedOnClientsRegistry
+import com.mgtriffid.games.cotta.server.PredictedToAuthoritativeIdMappings
 import com.mgtriffid.games.cotta.server.ServerSimulationInputProvider
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -19,6 +20,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder,
     private val entitiesCreatedOnClientsRegistry: EntitiesCreatedOnClientsRegistry,
+    private val predictedToAuthoritativeIdMappings: PredictedToAuthoritativeIdMappings,
     private val tickProvider: TickProvider
 ): ServerSimulationInputProvider {
     override fun prepare() {
@@ -29,7 +31,27 @@ class ServerSimulationInputProviderImpl @Inject constructor(
 
         val nonPlayerEntitiesInput = nonPlayerInputProvider.input(state.entities(tickProvider.tick))
 
-        val inputs = clientsInput.input + nonPlayerEntitiesInput
+        val remappedInput = clientsInput.input.entries.associate { (eId, components) ->
+            when (eId) {
+                is PredictedEntityId -> {
+                    val authoritativeId = predictedToAuthoritativeIdMappings[eId]
+                    if (authoritativeId != null) {
+                        logger.trace { "Remapping input for entity $eId to $authoritativeId" }
+                        authoritativeId to components
+                    } else {
+                        // TODO probably warning or not needed in the resulting map at all
+                        logger.trace { "Not remapping input for entity $eId" }
+                        eId to components
+                    }
+                }
+                is AuthoritativeEntityId -> {
+                    logger.trace { "Not remapping input for entity $eId" }
+                    eId to components
+                }
+            }
+        }
+
+        val inputs = remappedInput + nonPlayerEntitiesInput
 
         logger.trace { "Incoming input has ${inputs.size} entries" }
 

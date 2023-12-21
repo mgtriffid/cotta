@@ -84,7 +84,7 @@ class ClientsInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
                     logger.debug { "Client input tick is $clientsTickToUse for $playerId" }
                     if (inputBuffer.has(clientsTickToUse)) {
                         inputRecipes.add(inputBuffer.get(clientsTickToUse))
-                        createdEntities.addAll(getCreatedEntitiesBuffer(playerId).get(clientsTickToUse))
+                        createdEntities.addAll(getCreatedEntitiesBuffer(playerId).get(clientsTickToUse + 1))
                         ghost.setLastUsedInput(clientsTickToUse)
                         playersSawTicks[playerId] = clientsTickToUse
                     } else {

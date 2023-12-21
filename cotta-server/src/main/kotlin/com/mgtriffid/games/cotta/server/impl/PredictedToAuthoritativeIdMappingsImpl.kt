@@ -17,9 +17,14 @@ class PredictedToAuthoritativeIdMappingsImpl @Inject constructor(
     private val tickProvider: TickProvider
 ) : PredictedToAuthoritativeIdMappings {
     private val data = TreeMap<Long, MutableMap<PredictedEntityId, EntityId>>()
+
+    // TODO cleanup old too
+    private val all = HashMap<PredictedEntityId, EntityId>()
+
     override fun record(predictedEntityId: PredictedEntityId, id: EntityId) {
         logger.debug { "Recorded mapping $predictedEntityId -> $id" }
         data.computeIfAbsent(tickProvider.tick) { HashMap() }[predictedEntityId] = id
+        all[predictedEntityId] = id
         cleanUpOld()
     }
 
@@ -28,6 +33,8 @@ class PredictedToAuthoritativeIdMappingsImpl @Inject constructor(
             predicted to authoritative as AuthoritativeEntityId
         } ?: emptyList()
     }
+
+    override operator fun get(predictedEntityId: PredictedEntityId) = all[predictedEntityId]
 
     private fun cleanUpOld() {
         val tick = tickProvider.tick

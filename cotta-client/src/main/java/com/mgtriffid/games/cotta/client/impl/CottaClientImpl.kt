@@ -138,6 +138,8 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         logger.info { "Authoritative position: ${state.entities(getCurrentTick()).all().find { it.id == AuthoritativeEntityId(3) }
             ?.getComponent(Class.forName("com.mgtriffid.games.panna.shared.game.components.PositionComponent").kotlin as KClass<out Component<*>>)}" }
         predict()
+        logger.info { "Predicted position: ${predictionSimulation.getPredictedEntities().find { it.id == PredictedEntityId(PlayerId(1), 1) }
+            ?.getComponent(Class.forName("com.mgtriffid.games.panna.shared.game.components.PositionComponent").kotlin as KClass<out Component<*>>)}" }
         logger.info { "Predicted position: ${predictionSimulation.getPredictedEntities().find { it.id == AuthoritativeEntityId(3) }
             ?.getComponent(Class.forName("com.mgtriffid.games.panna.shared.game.components.PositionComponent").kotlin as KClass<out Component<*>>)}" }
         sendDataToServer()

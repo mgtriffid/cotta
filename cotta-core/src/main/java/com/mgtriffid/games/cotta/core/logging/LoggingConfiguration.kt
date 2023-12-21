@@ -24,6 +24,7 @@ fun configureLogging() {
     (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.impl.PredictionSimulationImpl") as Logger).setLevel(Level.INFO)
     (LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl.PredictedToAuthoritativeIdMappingsImpl") as Logger).setLevel(Level.INFO)
     (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.impl.ClientSimulationInputProviderImpl") as Logger).setLevel(Level.INFO)
+    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.simulation.SimulationInput") as Logger).setLevel(Level.DEBUG)
     (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl") as Logger).setLevel(Level.INFO)
     (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider") as Logger).setLevel(Level.INFO)
     (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer") as Logger).setLevel(Level.INFO)

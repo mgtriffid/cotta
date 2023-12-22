@@ -13,7 +13,6 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
@@ -120,7 +119,7 @@ class CottaClientModule(
         bind(PredictedCreatedEntitiesRegistry::class.java).to(PredictedCreatedEntitiesRegistryImpl::class.java).`in`(Scopes.SINGLETON)
         bind(PredictedEntityIdGenerator::class.java).to(PredictedEntityIdGeneratorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)
-        bind(PlayerIdHolder::class.java).toInstance(PlayerIdHolder())
+        bind(LocalPlayer::class.java).toInstance(LocalPlayer())
 
         bind(AuthoritativeToPredictedEntityIdMappings::class.java).to(AuthoritativeToPredictedEntityIdMappingsImpl::class.java).`in`(Scopes.SINGLETON)
         install(SerializationModule())

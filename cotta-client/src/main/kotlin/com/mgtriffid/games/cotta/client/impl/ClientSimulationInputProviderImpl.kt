@@ -2,12 +2,10 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.ClientSimulationInputProvider
-import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
@@ -21,8 +19,6 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class ClientSimulationInputProviderImpl @Inject constructor(
-    private val cottaEngine: CottaEngine<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>,
-    private val inputSnapper: InputSnapper<MapsInputRecipe>,
     private val stateSnapper: StateSnapper<MapsStateRecipe, MapsDeltaRecipe>,
     private val incomingDataBuffer: IncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>,
     private val tickProvider: TickProvider,

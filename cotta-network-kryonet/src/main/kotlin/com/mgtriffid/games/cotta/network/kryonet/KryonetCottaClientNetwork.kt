@@ -18,11 +18,13 @@ class KryonetCottaClientNetwork: CottaClientNetwork {
     private lateinit var client: Client
     private val packetsQueue = ConcurrentLinkedQueue<ServerToClientDto>()
 
+    // TODO would be more clear to separate init and connect.
     override fun initialize() {
         client = Client()
         client.kryo.registerClasses()
         configureListener()
         client.start()
+        // TODO configuration
         client.connect(5000, "127.0.0.1", 16001, 16002)
     }
 

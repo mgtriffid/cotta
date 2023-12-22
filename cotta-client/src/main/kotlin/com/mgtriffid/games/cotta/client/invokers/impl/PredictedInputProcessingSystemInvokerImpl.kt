@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.client.invokers.impl
 
-import com.mgtriffid.games.cotta.client.impl.PlayerIdHolder
+import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemInvoker
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -19,7 +19,7 @@ class PredictedInputProcessingSystemInvokerImpl @Inject constructor(
     @Named("prediction") private val entities: Entities, // TODO only for reading
     private val sawTickHolder: SawTickHolder,
     @Named("prediction") private val context: TracingInputProcessingContext,
-    private val playerIdHolder: PlayerIdHolder,
+    private val localPlayer: LocalPlayer,
 ): PredictedInputProcessingSystemInvoker {
     override fun invoke(system: InputProcessingSystem) {
         logger.debug { "Invoked ${system::class.qualifiedName}" }
@@ -28,7 +28,7 @@ class PredictedInputProcessingSystemInvokerImpl @Inject constructor(
             .forEach { process(it, system) }
     }
 
-    private fun Entity.shouldBePredicted() = ownedBy == Entity.OwnedBy.Player(playerIdHolder.playerId)
+    private fun Entity.shouldBePredicted() = ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
 
     private fun process(entity: Entity, system: InputProcessingSystem) {
         logger.debug { "${system::class.simpleName} processing entity ${entity.id}" }

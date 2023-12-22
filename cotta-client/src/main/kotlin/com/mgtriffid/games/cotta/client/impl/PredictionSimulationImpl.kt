@@ -24,7 +24,7 @@ class PredictionSimulationImpl @Inject constructor(
     private val clientInputs: ClientInputs,
     @Named("prediction") private val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
-    private val playerIdHolder: PlayerIdHolder,
+    private val localPlayer: LocalPlayer,
     private val idMappings: AuthoritativeToPredictedEntityIdMappings
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
@@ -103,7 +103,7 @@ class PredictionSimulationImpl @Inject constructor(
 
     override fun getLocalPredictedEntities(): Collection<Entity> {
         return state.entities(tickProvider.tick).all().filter {
-            it.ownedBy == Entity.OwnedBy.Player(playerIdHolder.playerId)
+            it.ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
         }
     }
 

@@ -70,7 +70,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
                 is ClientState.AwaitingGameState -> {
                     fetchData()
                     // TODO ensure that if metaEntity did not come we still can operate
-                    if (stateAvailable()) {
+                    if (stateAvailable() && playerReady()) {
                         setStateFromAuthoritative()
                         clientState = ClientState.Running(getCurrentTick())
                     } else {
@@ -149,11 +149,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     }
 
     private fun predict() {
-        val playerId = (metaEntity()?.ownedBy as? Entity.OwnedBy.Player)?.playerId
-        if (playerId == null) {
-            logger.warn { "No player id, we should not even be simulating. Returning." }
-            return
-        }
+        val playerId = playerIdHolder.playerId
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
         val lastMyInputProcessedByServerSimulation =
@@ -233,6 +229,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         localInput.input(entity, clazz)
     }
 
+    // GROOM rename
     private fun getEntitiesOwnedByPlayer(player: Entity.OwnedBy.Player) =
         state.entities(atTick = getCurrentTick()).all().filter {
             it.ownedBy == player
@@ -251,6 +248,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         return entity
     }
 
+    // GROOM move some of this into network
     private fun fetchData() {
         val data = network.drainIncomingData()
         data.forEach {
@@ -344,5 +342,9 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         class AwaitingGameState(val since: Long) : ClientState()
         object Disconnected : ClientState()
         class Running(val currentTick: Long) : ClientState() // not sure again
+    }
+
+    private fun playerReady() : Boolean {
+        return metaEntityId != null && playerIdHolder.playerId != null
     }
 }

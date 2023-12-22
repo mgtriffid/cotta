@@ -9,25 +9,28 @@ fun configureLogging() {
     // KryoNet:
     Log.set(Log.LEVEL_INFO)
 
-    (LoggerFactory.getLogger("org.eclipse") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl.invokers") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.invokers.impl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.serialization.impl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.network.kryonet") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.simulation.invokers") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.panna.shared.game.systems") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.impl.CottaClientImpl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.registry.ComponentsRegistry") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl.ServerToClientDataDispatcherImpl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.invokers.impl.PredictionCreateEntityStrategy") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.impl.PredictionSimulationImpl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.server.impl.PredictedToAuthoritativeIdMappingsImpl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.impl.ClientSimulationInputProviderImpl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.simulation.SimulationInput") as Logger).setLevel(Level.DEBUG)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider") as Logger).setLevel(Level.INFO)
-    (LoggerFactory.getLogger("com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer") as Logger).setLevel(Level.INFO)
-
-    (LoggerFactory.getLogger("com.mgtriffid.games.panna.screens.menu.GameScreen") as Logger).setLevel(Level.INFO)
+    mapOf(
+        "org.eclipse" to Level.INFO,
+        "com.mgtriffid.games.cotta.server.impl" to Level.INFO,
+        "com.mgtriffid.games.cotta.server.impl.invokers" to Level.INFO,
+        "com.mgtriffid.games.cotta.client.invokers.impl" to Level.INFO,
+        "com.mgtriffid.games.cotta.core.serialization.impl" to Level.INFO,
+        "com.mgtriffid.games.cotta.network.kryonet" to Level.INFO,
+        "com.mgtriffid.games.cotta.core.simulation.invokers" to Level.INFO,
+        "com.mgtriffid.games.panna.shared.game.systems" to Level.INFO,
+        "com.mgtriffid.games.cotta.client.impl.CottaClientImpl" to Level.INFO,
+        "com.mgtriffid.games.cotta.core.registry.ComponentsRegistry" to Level.INFO,
+        "com.mgtriffid.games.cotta.server.impl.ServerToClientDataDispatcherImpl" to Level.INFO,
+        "com.mgtriffid.games.cotta.client.invokers.impl.PredictionCreateEntityStrategy" to Level.INFO,
+        "com.mgtriffid.games.cotta.client.impl.PredictionSimulationImpl" to Level.INFO,
+        "com.mgtriffid.games.cotta.server.impl.PredictedToAuthoritativeIdMappingsImpl" to Level.INFO,
+        "com.mgtriffid.games.cotta.client.impl.ClientSimulationInputProviderImpl" to Level.INFO,
+        "com.mgtriffid.games.cotta.core.simulation.SimulationInput" to Level.DEBUG,
+        "com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl" to Level.INFO,
+        "com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider" to Level.INFO,
+        "com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer" to Level.INFO,
+        "com.mgtriffid.games.panna.screens.menu.GameScreen" to Level.INFO,
+    ).forEach { (logger, level) ->
+        (LoggerFactory.getLogger(logger) as Logger).level = level
+    }
 }

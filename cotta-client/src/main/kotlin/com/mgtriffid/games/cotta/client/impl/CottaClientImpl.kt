@@ -189,21 +189,21 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
             logger.debug { "No meta entity, returning" }
             return
         }
-        val inputs = gatherLocalInput(metaEntity)
+        val inputs = gatherLocalInput()
         clientInputs.store(inputs)
     }
 
-    private fun gatherLocalInput(metaEntity: Entity): ClientInput {
-        val player = (metaEntity.ownedBy as Entity.OwnedBy.Player)
-        val localEntities = getEntitiesOwnedByPlayer(player)
-        logger.debug { "Found ${localEntities.size} entities owned by player $player" }
+    private fun gatherLocalInput(): ClientInput {
+        val playerId = playerIdHolder.playerId
+        val localEntities = getEntitiesOwnedByPlayer(playerId)
+        logger.debug { "Found ${localEntities.size} entities owned by player $playerId" }
         val localEntitiesWithInputComponents = localEntities.filter {
             it.hasInputComponents()
         }
         logger.debug { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
-        val inputs = localEntitiesWithInputComponents.associate { e ->
-            logger.debug { "Retrieving input for entity '${e.id}'" }
-            e.id to getInputs(e)
+        val inputs = localEntitiesWithInputComponents.associate { entity ->
+            logger.debug { "Retrieving input for entity '${entity.id}'" }
+            entity.id to getInputs(entity)
         }
         return ClientInputImpl(inputs)
     }
@@ -230,9 +230,9 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     }
 
     // GROOM rename
-    private fun getEntitiesOwnedByPlayer(player: Entity.OwnedBy.Player) =
+    private fun getEntitiesOwnedByPlayer(playerId: PlayerId) =
         state.entities(atTick = getCurrentTick()).all().filter {
-            it.ownedBy == player
+            it.ownedBy == Entity.OwnedBy.Player(playerId)
         } + predictionSimulation.getLocalPredictedEntities()
 
     private fun metaEntity(): Entity? {

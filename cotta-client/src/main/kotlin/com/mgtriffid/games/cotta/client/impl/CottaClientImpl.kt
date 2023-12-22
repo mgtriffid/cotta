@@ -114,8 +114,12 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
             state.advance(tick - 1)
             tickProvider.tick++
-            stateSnapper.unpackDeltaRecipe(state.entities(atTick = tick), incomingDataBuffer.deltas[tick]!!)
+            applyDeltaFromNetwork(tick)
         }
+    }
+
+    private fun applyDeltaFromNetwork(tick: Long) {
+        stateSnapper.unpackDeltaRecipe(state.entities(atTick = tick), incomingDataBuffer.deltas[tick - 1]!!)
     }
 
     private fun blankEntities() = Entities.getInstance()
@@ -132,20 +136,11 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         fetchInput()
         // tick is advanced inside;
         clientSimulation.tick()
-        logger.info { "About to unpack delta and apply to ${tick + 1}" }
-        stateSnapper.unpackDeltaRecipe(state.entities(atTick = tick + 1), incomingDataBuffer.deltas[tick]!!)
-
-        logger.info { "Authoritative position: ${state.entities(getCurrentTick()).all().find { it.id == AuthoritativeEntityId(3) }
-            ?.getComponent(Class.forName("com.mgtriffid.games.panna.shared.game.components.PositionComponent").kotlin as KClass<out Component<*>>)}" }
+        applyDeltaFromNetwork(tick + 1)
         predict()
-        logger.info { "Predicted position: ${predictionSimulation.getPredictedEntities().find { it.id == PredictedEntityId(PlayerId(1), 1) }
-            ?.getComponent(Class.forName("com.mgtriffid.games.panna.shared.game.components.PositionComponent").kotlin as KClass<out Component<*>>)}" }
-        logger.info { "Predicted position: ${predictionSimulation.getPredictedEntities().find { it.id == AuthoritativeEntityId(3) }
-            ?.getComponent(Class.forName("com.mgtriffid.games.panna.shared.game.components.PositionComponent").kotlin as KClass<out Component<*>>)}" }
         sendDataToServer()
     }
 
-    // called after advancing tick
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick
         val inputs = clientInputs.get(tickProvider.tick - 1)
@@ -276,14 +271,9 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
                     playerIdHolder.playerId = playerId
                 }
 
-                KindOfData.INPUT -> incomingDataBuffer.storeInput(
+                KindOfData.INPUT -> incomingDataBuffer.storeInputV2(
                     it.tick,
-                    inputSerialization.deserializeInputRecipe(it.payload)
-                )
-
-                KindOfData.CREATED_ENTITIES -> incomingDataBuffer.storeCreatedEntities(
-                    it.tick,
-                    snapsSerialization.deserializeEntityCreationTraces(it.payload)
+                    inputSnapper.unpackInputRecipe(inputSerialization.deserializeInputRecipe(it.payload))
                 )
 
                 KindOfData.PLAYERS_SAW_TICKS -> incomingDataBuffer.storePlayersSawTicks(

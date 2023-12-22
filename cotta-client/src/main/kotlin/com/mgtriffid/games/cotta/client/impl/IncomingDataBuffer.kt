@@ -1,12 +1,12 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.CreatedEntitiesWithTracesRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsTraceRecipe
 import mu.KotlinLogging
 import java.util.*
 import kotlin.math.min
@@ -16,8 +16,7 @@ private val logger = KotlinLogging.logger {}
 class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
-    val inputs = TreeMap<Long, IR>()
-    val createdEntities = TreeMap<Long, List<Pair<MapsTraceRecipe, EntityId>>>() // GROOM class with naming
+    val inputs = TreeMap<Long, Map<EntityId, Collection<InputComponent<*>>>>() // GROOM class with naming
     val createdEntitiesV2 = TreeMap<Long, CreatedEntitiesWithTracesRecipe>() // GROOM class with naming
     val metaEntityIds = TreeMap<Long, EntityId>() // not really needed but for the uniformity
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
@@ -36,15 +35,10 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
         cleanUpOldStates(tick)
     }
 
-    fun storeInput(tick: Long, input: IR) {
+    fun storeInputV2(tick: Long, input: Map<EntityId, Collection<InputComponent<*>>>) {
         logger.debug { "Storing input for $tick, data buffer ${this.hashCode()}" }
         inputs[tick] = input
         cleanUpOldInputs(tick)
-    }
-
-    fun storeCreatedEntities(tick: Long, createdEntities: List<Pair<MapsTraceRecipe, EntityId>>) {
-        this.createdEntities[tick] = createdEntities
-        cleanUpOldCreatedEntities(tick)
     }
 
     fun storeCreatedEntitiesV2(tick: Long, createdEntities: CreatedEntitiesWithTracesRecipe) {
@@ -71,10 +65,6 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
 
     private fun cleanUpOldInputs(tick: Long) {
         cleanUp(inputs, tick)
-    }
-
-    private fun cleanUpOldCreatedEntities(tick: Long) {
-        cleanUp(createdEntities, tick)
     }
 
     private fun cleanUp(data: TreeMap<Long, *>, tick: Long) {

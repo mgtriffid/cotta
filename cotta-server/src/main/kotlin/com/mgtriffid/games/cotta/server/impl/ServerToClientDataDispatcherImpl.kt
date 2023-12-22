@@ -64,14 +64,6 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
                     inputSnapper.snapInput(data.inputs(tick - 1))
                 )
                 inputDto.tick = tick - 1
-                val createdEntitiesDto = ServerToClientDto()
-                createdEntitiesDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CREATED_ENTITIES
-                createdEntitiesDto.payload = snapsSerialization.serializeEntityCreationTraces(
-                    data.createdEntities(tick).map { (trace, id) ->
-                        Pair(stateSnapper.snapTrace(trace), id)
-                    }
-                )
-                createdEntitiesDto.tick = tick
 
                 val createdEntitiesWithTracesDto = ServerToClientDto()
                 createdEntitiesWithTracesDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CREATED_ENTITIES_V2
@@ -91,7 +83,7 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
                     data.playersSawTicks().all().also { logger.debug { it.toString() } }
                 )
                 playersSawTicksDto.tick = tick - 1
-                return listOf(deltaDto, inputDto, createdEntitiesDto, createdEntitiesWithTracesDto, playersSawTicksDto)
+                return listOf(deltaDto, inputDto, createdEntitiesWithTracesDto, playersSawTicksDto)
             }
             KindOfData.STATE -> {
                 val dto = ServerToClientDto()

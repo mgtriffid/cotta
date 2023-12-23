@@ -4,7 +4,7 @@ import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredicted
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 
-interface CottaClientNetwork {
+interface CottaClientNetworkTransport {
     fun initialize()
 
     fun sendEnterGameIntent()

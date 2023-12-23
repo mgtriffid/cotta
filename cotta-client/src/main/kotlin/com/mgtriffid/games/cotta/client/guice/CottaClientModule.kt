@@ -8,6 +8,8 @@ import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemI
 import com.mgtriffid.games.cotta.client.invokers.PredictionEffectsConsumerSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionInvokersFactory
 import com.mgtriffid.games.cotta.client.invokers.impl.*
+import com.mgtriffid.games.cotta.client.network.NetworkClient
+import com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
@@ -34,8 +36,8 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.core.tracing.Traces
 import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
-import com.mgtriffid.games.cotta.network.CottaClientNetwork
-import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaClientNetwork
+import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
+import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaClientNetworkTransport
 
 class CottaClientModule(
     private val game: CottaGame,
@@ -44,7 +46,9 @@ class CottaClientModule(
     override fun configure() {
         bind(CottaGame::class.java).toInstance(game)
         bind(CottaClientInput::class.java).toInstance(input)
-        bind(CottaClientNetwork::class.java).to(KryonetCottaClientNetwork::class.java)
+        bind(CottaClientNetworkTransport::class.java).to(KryonetCottaClientNetworkTransport::class.java).`in`(Scopes.SINGLETON)
+        bind(NetworkClient::class.java)
+            .to(NetworkClientImpl::class.java).`in`(Scopes.SINGLETON)
         bind(CottaClient::class.java)
             .to(object: TypeLiteral<CottaClientImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
         bind(Int::class.java).annotatedWith(Names.named("historyLength")).toInstance(8)

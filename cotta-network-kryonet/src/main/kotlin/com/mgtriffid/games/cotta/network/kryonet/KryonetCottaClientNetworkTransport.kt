@@ -3,7 +3,7 @@ package com.mgtriffid.games.cotta.network.kryonet
 import com.esotericsoftware.kryonet.Client
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
-import com.mgtriffid.games.cotta.network.CottaClientNetwork
+import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 private val logger = KotlinLogging.logger {}
 
-class KryonetCottaClientNetwork: CottaClientNetwork {
+class KryonetCottaClientNetworkTransport: CottaClientNetworkTransport {
     private lateinit var client: Client
     private val packetsQueue = ConcurrentLinkedQueue<ServerToClientDto>()
 

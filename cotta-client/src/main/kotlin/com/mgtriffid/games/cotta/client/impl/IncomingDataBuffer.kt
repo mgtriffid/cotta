@@ -17,7 +17,7 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
     val inputs = TreeMap<Long, Map<EntityId, Collection<InputComponent<*>>>>() // GROOM class with naming
-    val createdEntitiesV2 = TreeMap<Long, CreatedEntitiesWithTracesRecipe>() // GROOM class with naming
+    val createdEntities = TreeMap<Long, CreatedEntitiesWithTracesRecipe>() // GROOM class with naming
     val metaEntityIds = TreeMap<Long, EntityId>() // not really needed but for the uniformity
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
 
@@ -35,19 +35,19 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
         cleanUpOldStates(tick)
     }
 
-    fun storeInputV2(tick: Long, input: Map<EntityId, Collection<InputComponent<*>>>) {
+    fun storeInput(tick: Long, input: Map<EntityId, Collection<InputComponent<*>>>) {
         logger.debug { "Storing input for $tick, data buffer ${this.hashCode()}" }
         inputs[tick] = input
         cleanUpOldInputs(tick)
     }
 
-    fun storeCreatedEntitiesV2(tick: Long, createdEntities: CreatedEntitiesWithTracesRecipe) {
-        this.createdEntitiesV2[tick] = createdEntities
-        cleanUpOldCreatedEntitiesV2(tick)
+    fun storeCreatedEntities(tick: Long, createdEntities: CreatedEntitiesWithTracesRecipe) {
+        this.createdEntities[tick] = createdEntities
+        cleanUpOldCreatedEntities(tick)
     }
 
-    private fun cleanUpOldCreatedEntitiesV2(tick: Long) {
-        cleanUp(createdEntitiesV2, tick)
+    private fun cleanUpOldCreatedEntities(tick: Long) {
+        cleanUp(createdEntities, tick)
     }
 
     fun storePlayersSawTicks(tick: Long, playersSawTicks: Map<PlayerId, Long>) {

@@ -29,10 +29,10 @@ class ClientSimulationInputProviderImpl @Inject constructor(
     override fun prepare() {
         logger.info { "Unpacking input for tick ${tickProvider.tick}" }
         val inputs = incomingDataBuffer.inputs[tickProvider.tick]!!
-        createdEntitiesRegistry.data = incomingDataBuffer.createdEntitiesV2[tickProvider.tick + 1]!!.traces.map { (traceRecipe, entityId) ->
+        createdEntitiesRegistry.data = incomingDataBuffer.createdEntities[tickProvider.tick + 1]!!.traces.map { (traceRecipe, entityId) ->
             Pair(stateSnapper.unpackTrace(traceRecipe), entityId)
         }.toMutableList()
-        incomingDataBuffer.createdEntitiesV2[tickProvider.tick + 1]!!.mappedPredictedIds.forEach { (authoritativeId, predictedId) ->
+        incomingDataBuffer.createdEntities[tickProvider.tick + 1]!!.mappedPredictedIds.forEach { (authoritativeId, predictedId) ->
             authoritativeToPredictedEntityIdMappings[authoritativeId] = predictedId
         }
         val simulationInput = object : SimulationInput {

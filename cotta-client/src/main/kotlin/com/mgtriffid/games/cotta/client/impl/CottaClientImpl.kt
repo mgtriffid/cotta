@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.client.impl
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRegistry
+import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.annotations.Predicted
@@ -13,11 +14,6 @@ import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
-import com.mgtriffid.games.cotta.network.CottaClientNetwork
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
-import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import com.mgtriffid.games.cotta.utils.now
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -32,7 +28,7 @@ private val logger = KotlinLogging.logger {}
 class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inject constructor(
     val game: CottaGame,
     val engine: CottaEngine<SR, DR, IR>, // weird type parameterization
-    val network: CottaClientNetwork,
+    val network: NetworkClient,
     val localInput: CottaClientInput,
     val clientInputs: ClientInputs,
     val clientSimulation: ClientSimulation,
@@ -44,14 +40,8 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     private val incomingDataBuffer: IncomingDataBuffer<SR, DR, IR>,
     @Named("simulation") override val state: CottaState // Todo not expose as public
 ) : CottaClient {
-    val lagCompLimit: Int = 8 // TODO move to config and bind properly
-    val bufferLength: Int = 3
     private var clientState: ClientState = ClientState.Initial // the only real `var` here
     private val componentsRegistry = engine.getComponentsRegistry()
-    private val stateSnapper = engine.getStateSnapper()
-    private val snapsSerialization = engine.getSnapsSerialization()
-    private val inputSnapper = engine.getInputSnapper()
-    private val inputSerialization = engine.getInputSerialization()
 
     override fun initialize() {
         registerComponents()
@@ -63,19 +53,22 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         clientState.let {
             when (it) {
                 ClientState.Initial -> {
-                    connect()
-                    clientState = ClientState.AwaitingGameState(since = System.currentTimeMillis())
+                    network.connect()
+                    clientState = ClientState.AwaitingGameState(since = now())
                 }
 
                 is ClientState.AwaitingGameState -> {
-                    fetchData()
-                    // TODO ensure that if metaEntity did not come we still can operate
-                    if (playerReady() && stateAvailable()) {
-                        setStateFromAuthoritative()
-                        clientState = ClientState.Running(getCurrentTick())
-                    } else {
-                        if (now() - it.since > STATE_WAITING_THRESHOLD) {
-                            clientState = ClientState.Disconnected
+                    network.fetch()
+                    when (val authoritativeState = network.tryGetAuthoritativeState()) {
+                        is AuthoritativeState.Ready -> {
+                            authoritativeState.apply(state, tickProvider)
+                            clientState = ClientState.Running(getCurrentTick())
+                        }
+
+                        AuthoritativeState.NotReady -> {
+                            if (now() - it.since > STATE_WAITING_THRESHOLD) {
+                                clientState = ClientState.Disconnected
+                            }
                         }
                     }
                 }
@@ -85,15 +78,19 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
                 }
 
                 is ClientState.Running -> {
-                    fetchData()
-                    if (deltaAvailableForTick(getCurrentTick())) {
-                        logger.debug { "Delta available, we will integrate" }
-                        integrate()
-                        clientState = ClientState.Running(it.currentTick + 1)
-                    } else {
-                        logger.debug { "Delta not available" }
-                        // for now do nothing, later we'll guess and keep track of how
-                        // long ago did we have a state that is trusted
+                    network.fetch()
+                    when (val delta = network.tryGetDelta(getCurrentTick())) {
+                        is Delta.Present -> {
+                            logger.debug { "Delta present, we will integrate" }
+                            integrate(delta)
+                            clientState = ClientState.Running(it.currentTick + 1)
+                        }
+
+                        Delta.Absent -> {
+                            logger.debug { "Delta not present" }
+                            // for now do nothing, later we'll guess and keep track of how
+                            // long ago did we have a state that is trusted
+                        }
                     }
                 }
             }
@@ -104,31 +101,11 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         return predictionSimulation.getPredictedEntities()
     }
 
-    private fun setStateFromAuthoritative() {
-        logger.debug { "Setting state from authoritative" }
-        val fullStateTick = incomingDataBuffer.states.lastKey()
-        val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
-        state.set(fullStateTick, blankEntities())
-        tickProvider.tick = fullStateTick
-        stateSnapper.unpackStateRecipe(state.entities(atTick = fullStateTick), stateRecipe)
-        ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
-            state.advance(tick - 1)
-            tickProvider.tick++
-            applyDeltaFromNetwork(tick)
-        }
-    }
-
-    private fun applyDeltaFromNetwork(tick: Long) {
-        stateSnapper.unpackDeltaRecipe(state.entities(atTick = tick), incomingDataBuffer.deltas[tick - 1]!!)
-    }
-
-    private fun blankEntities() = Entities.getInstance()
-
     private fun getCurrentTick(): Long {
         return tickProvider.tick
     }
 
-    private fun integrate() {
+    private fun integrate(delta: Delta.Present) {
         logger.debug { "Integrating" }
         val tick = getCurrentTick()
         logger.debug { "Tick = $tick" }
@@ -136,7 +113,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         fetchInput()
         // tick is advanced inside;
         clientSimulation.tick()
-        applyDeltaFromNetwork(tick + 1)
+        delta.apply(state.entities(tick + 1))
         predict()
         sendDataToServer()
     }
@@ -145,7 +122,8 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         // since this method is called after advancing tick, we need to send inputs for the previous tick
         val inputs = clientInputs.get(tickProvider.tick - 1)
         val createdEntities = predictedCreatedEntitiesRegistry.find(tickProvider.tick)
-        send(inputs, createdEntities)
+        network.send(inputs, getCurrentTick() - 1)
+        network.send(createdEntities, getCurrentTick())
     }
 
     private fun predict() {
@@ -208,22 +186,6 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         return ClientInputImpl(inputs)
     }
 
-    private fun send(inputs: ClientInput, createdEntities: List<Pair<CottaTrace, EntityId>>) {
-        val inputRecipe = inputSnapper.snapInput(inputs.inputs)
-        val createdEntitiesRecipe = createdEntities.map { (trace, id) ->
-            Pair(stateSnapper.snapTrace(trace), id)
-        }
-
-        val inputDto = ClientToServerInputDto()
-        inputDto.tick = getCurrentTick() - 1
-        inputDto.payload = inputSerialization.serializeInputRecipe(inputRecipe)
-        network.sendInput(inputDto)
-        val createdEntitiesDto = ClientToServerCreatedPredictedEntitiesDto()
-        createdEntitiesDto.tick = getCurrentTick()
-        createdEntitiesDto.payload = snapsSerialization.serializeEntityCreationTraces(createdEntitiesRecipe)
-        network.sendCreatedEntities(createdEntitiesDto)
-    }
-
     private fun getInputs(entity: Entity) = entity.inputComponents().map { clazz ->
         logger.debug { "Retrieving input of class '${clazz.simpleName}' for entity '${entity.id}'" }
         localInput.input(entity, clazz)
@@ -246,69 +208,6 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
             logger.debug { "Meta entity not found" }
         }
         return entity
-    }
-
-    // GROOM move some of this into network
-    private fun fetchData() {
-        val data = network.drainIncomingData()
-        data.forEach {
-            when (it.kindOfData) {
-                KindOfData.DELTA -> incomingDataBuffer.storeDelta(
-                    it.tick,
-                    snapsSerialization.deserializeDeltaRecipe(it.payload)
-                )
-
-                KindOfData.STATE -> incomingDataBuffer.storeState(
-                    it.tick,
-                    snapsSerialization.deserializeStateRecipe(it.payload)
-                )
-
-                KindOfData.CLIENT_META_ENTITY_ID -> {
-                    val (entityId, playerId) = snapsSerialization.deserializeMetaEntityId(it.payload)
-                    localPlayer.set(entityId, playerId)
-                }
-
-                KindOfData.INPUT -> incomingDataBuffer.storeInputV2(
-                    it.tick,
-                    inputSnapper.unpackInputRecipe(inputSerialization.deserializeInputRecipe(it.payload))
-                )
-
-                KindOfData.PLAYERS_SAW_TICKS -> incomingDataBuffer.storePlayersSawTicks(
-                    it.tick,
-                    snapsSerialization.deserializePlayersSawTicks(it.payload)
-                )
-
-                KindOfData.CREATED_ENTITIES_V2 -> incomingDataBuffer.storeCreatedEntitiesV2(
-                    it.tick,
-                    snapsSerialization.deserializeEntityCreationTracesV2(it.payload)
-                )
-
-                null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
-            }
-        }
-    }
-
-    // should not use these anywhere but awaiting game state
-    private fun stateAvailable(): Boolean {
-        val stateArrived = incomingDataBuffer.states.isNotEmpty()
-        if (!stateArrived) return false
-        val stateTick = incomingDataBuffer.states.lastKey()
-        val deltasForLagCompArrived =
-            incomingDataBuffer.deltas.keys.containsAll(((stateTick + 1)..(stateTick + lagCompLimit + bufferLength)).toList())
-        return deltasForLagCompArrived
-    }
-
-    // TODO also effects but that's when effects are transferred properly and consumed properly
-    private fun deltaAvailableForTick(tick: Long): Boolean {
-        return incomingDataBuffer.deltas.containsKey(tick).also { logger.debug { "Delta present for tick $tick: $it" } }
-            && incomingDataBuffer.inputs.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
-            && incomingDataBuffer.playersSawTicks.containsKey(tick).also { logger.debug { "sawTicks present for tick $tick: $it" } }
-            && incomingDataBuffer.createdEntitiesV2.containsKey(tick).also { logger.debug { "createEntities present for tick $tick: $it" } }
-    }
-
-    private fun connect() {
-        network.initialize()
-        network.sendEnterGameIntent()
     }
 
     // TODO probably this is wrong place
@@ -342,9 +241,5 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         class AwaitingGameState(val since: Long) : ClientState()
         object Disconnected : ClientState()
         class Running(val currentTick: Long) : ClientState() // not sure again
-    }
-
-    private fun playerReady() : Boolean {
-        return localPlayer.isReady()
     }
 }

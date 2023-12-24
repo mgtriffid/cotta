@@ -7,14 +7,12 @@ import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
-import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
-import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.MetaEntities
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import jakarta.inject.Named
@@ -26,12 +24,10 @@ private val logger = KotlinLogging.logger {}
 
 class ServerSimulationImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
-    private val simulationInputHolder: SimulationInputHolder,
     private val metaEntities: MetaEntities,
     private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
-    private val createdEntities: CreatedEntities,
-    private val effectsHistory: EffectsHistory,
+    private val playersSawTicks: PlayersSawTicks,
     private val tickProvider: TickProvider
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
@@ -53,25 +49,34 @@ class ServerSimulationImpl @Inject constructor(
         this.metaEntitiesInputComponents = components;
     }
 
-    override fun tick() {
+    override fun tick(input: SimulationInput) {
         effectBus.clear()
         state.advance(tickProvider.tick)
         logger.debug { "Advancing tick from ${tickProvider.tick} to ${tickProvider.tick + 1}" }
         tickProvider.tick++
-        putInputIntoEntities()
-        for ((invoker, system) in systemInvokers) {
-            (invoker as SystemInvoker<CottaSystem>).invoke(system) // TODO cast issue
-        }
+        putInputIntoEntities(input)
+        fillPlayersSawTicks(input)
+        simulate()
         processEnterGameIntents()
     }
 
-    private fun putInputIntoEntities() {
+    private fun simulate() {
+        for ((invoker, system) in systemInvokers) {
+            (invoker as SystemInvoker<CottaSystem>).invoke(system) // TODO cast issue
+        }
+    }
+
+    private fun fillPlayersSawTicks(input: SimulationInput) {
+        playersSawTicks.set(input.playersSawTicks())
+    }
+
+    private fun putInputIntoEntities(input: SimulationInput) {
         state.entities(tickProvider.tick).all().filter {
             it.hasInputComponents()
         }.forEach { e ->
             logger.trace { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
-                val component = simulationInputHolder.get().inputForEntityAndComponent(e.id, c)
+                val component = input.inputForEntityAndComponent(e.id, c)
                 logger.trace { "  $component" }
                 e.setInputComponent(c, component)
             }

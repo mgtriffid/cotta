@@ -113,7 +113,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         fetchInput()
         // tick is advanced inside;
         clientSimulation.tick(delta.input)
-        delta.applyDiff(state.entities(tick + 1))
+        delta.applyDiff(state.entities(tick + 1)) // unnecessary for deterministic simulation
         predict()
         sendDataToServer()
     }

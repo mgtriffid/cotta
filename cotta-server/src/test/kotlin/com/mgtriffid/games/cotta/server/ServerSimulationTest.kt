@@ -59,7 +59,15 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
-        serverSimulation.tick()
+        serverSimulation.tick(object : SimulationInput {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                return emptyMap()
+            }
+
+            override fun playersSawTicks(): Map<PlayerId, Long> {
+                return emptyMap()
+            }
+        })
 
         assertEquals(
             1,
@@ -74,9 +82,17 @@ class ServerSimulationTest {
         entity.addComponent(HealthTestComponent.create(0))
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
+        repeat(2) {
+            serverSimulation.tick(object : SimulationInput {
+                override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                    return emptyMap()
+                }
 
-        serverSimulation.tick()
-        serverSimulation.tick()
+                override fun playersSawTicks(): Map<PlayerId, Long> {
+                    return emptyMap()
+                }
+            })
+        }
 
         assertEquals(
             2,
@@ -100,15 +116,24 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(MovementTestSystem::class)
         serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
 
-        serverSimulation.tick()
-        serverSimulation.tick()
+        repeat(2) {
+            serverSimulation.tick(object : SimulationInput {
+                override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                    return emptyMap()
+                }
+
+                override fun playersSawTicks(): Map<PlayerId, Long> {
+                    return emptyMap()
+                }
+            })
+        }
 
         val input1 = PlayerInputTestComponent.create(
             aim = 4,
             shoot = true
         )
 
-        simulationInputHolder.set(object: SimulationInput {
+        serverSimulation.tick(object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input1)
@@ -118,22 +143,20 @@ class ServerSimulationTest {
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
         })
 
-        serverSimulation.tick()
-
         val input2 = PlayerInputTestComponent.create(
             aim = 4,
             shoot = true
         )
-        simulationInputHolder.set(object: SimulationInput {
+
+        serverSimulation.tick(object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
                 )
             }
+
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
         })
-
-        serverSimulation.tick()
 
         assertEquals(
             15,
@@ -159,35 +182,39 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(MovementTestSystem::class)
         serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
         repeat(6) {
-            serverSimulation.tick()
-        }
-        playersSawTicks.set(mapOf(playerId to 2L))
+            serverSimulation.tick(object : SimulationInput {
+                override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                    return emptyMap()
+                }
 
-        simulationInputHolder.set(object: SimulationInput {
+                override fun playersSawTicks(): Map<PlayerId, Long> {
+                    return emptyMap()
+                }
+            })
+        }
+
+        serverSimulation.tick(object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input)
                 )
             }
-            override fun playersSawTicks() = emptyMap<PlayerId, Long>()
+
+            override fun playersSawTicks() = mapOf(playerId to 2L)
         })
-
-
-        serverSimulation.tick()
         val input2 = PlayerInputTestComponent.create(
             aim = 4,
             shoot = false
         )
-        playersSawTicks.set(mapOf(playerId to 3L))
-        simulationInputHolder.set(object: SimulationInput {
+        serverSimulation.tick(object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
                 )
             }
-            override fun playersSawTicks() = emptyMap<PlayerId, Long>()
+
+            override fun playersSawTicks() = mapOf(playerId to 3L)
         })
-        serverSimulation.tick()
 
         assertEquals(
             15,
@@ -200,7 +227,15 @@ class ServerSimulationTest {
         state.entities().createEntity()
         serverSimulation.registerSystem(BlankTestSystem::class)
 
-        serverSimulation.tick()
+        serverSimulation.tick(object : SimulationInput {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                return emptyMap()
+            }
+
+            override fun playersSawTicks(): Map<PlayerId, Long> {
+                return emptyMap()
+            }
+        })
 
         assertEquals(
             1,
@@ -216,7 +251,15 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
-        serverSimulation.tick()
+        serverSimulation.tick(object : SimulationInput {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                return emptyMap()
+            }
+
+            override fun playersSawTicks(): Map<PlayerId, Long> {
+                return emptyMap()
+            }
+        })
 
         assertEquals(
             HealthRegenerationTestEffect(entityId, 1),
@@ -235,7 +278,7 @@ class ServerSimulationTest {
             aim = 4,
             shoot = true
         )
-        simulationInputHolder.set(object: SimulationInput {
+        simulationInputHolder.set(object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input1)
@@ -243,7 +286,15 @@ class ServerSimulationTest {
             }
             override fun playersSawTicks() = mapOf(playerId to 2L)
         })
-        serverSimulation.tick()
+        serverSimulation.tick(object : SimulationInput {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                return mapOf(
+                    damageDealerId to setOf(input1)
+                )
+            }
+
+            override fun playersSawTicks() = mapOf(playerId to 2L)
+        })
         assertEquals(
             4,
             (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
@@ -256,12 +307,13 @@ class ServerSimulationTest {
             aim = 4,
             shoot = false
         )
-        simulationInputHolder.set(object: SimulationInput {
+        simulationInputHolder.set(object : SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
                 )
             }
+
             override fun playersSawTicks() = mapOf(playerId to 3L)
         })
         assertEquals(
@@ -279,7 +331,8 @@ class ServerSimulationTest {
         override val nonPlayerInputProvider = object : NonPlayerInputProvider {
             override fun input(entities: Entities) = emptyMap<EntityId, Collection<InputComponent<*>>>()
         }
-        override fun initializeServerState(entities: Entities) { }
+
+        override fun initializeServerState(entities: Entities) {}
         override val componentClasses: Set<KClass<out Component<*>>> = emptySet()
         override val inputComponentClasses: Set<KClass<out InputComponent<*>>> = emptySet()
         override val effectClasses: Set<KClass<out CottaEffect>> = emptySet()

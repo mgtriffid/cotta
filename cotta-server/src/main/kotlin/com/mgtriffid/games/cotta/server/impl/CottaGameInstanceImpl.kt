@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetwork
@@ -71,17 +72,17 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
     }
 
     private fun tick() {
-        fetchInput()
-        serverSimulation.tick()
+        serverSimulation.tick(fetchInput())
         dispatchDataToClients()
     }
 
-    private fun fetchInput() {
+    private fun fetchInput(): SimulationInput {
         val intents = network.drainEnterGameIntents()
         intents.forEach { (connectionId, intent) ->
             registerPlayer(connectionId, intent)
         }
         serverSimulationInputProvider.prepare()
+        return serverSimulationInputProvider.get()
     }
 
     private fun registerPlayer(connectionId: ConnectionId, intent: EnterGameIntent) {

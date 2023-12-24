@@ -74,4 +74,8 @@ class ServerSimulationInputProviderImpl @Inject constructor(
         })
         playersSawTicks.set(clientsInput.playersSawTicks)
     }
+
+    override fun get(): SimulationInput {
+        return simulationInputHolder.get()
+    }
 }

@@ -7,12 +7,18 @@ import jakarta.inject.Inject
 
 class PlayersSawTickImpl @Inject constructor(
     private val simulationInputHolder: SimulationInputHolder
-): PlayersSawTicks {
+) : PlayersSawTicks {
+    private var data: Map<PlayerId, Long> = emptyMap()
     override fun get(playerId: PlayerId): Long? {
-        return simulationInputHolder.get().playersSawTicks()[playerId]
+        return data[playerId]
     }
 
     override fun all(): Map<PlayerId, Long> {
-        return simulationInputHolder.get().playersSawTicks().toMap()
+        return data
+//        return simulationInputHolder.get().playersSawTicks().toMap()
+    }
+
+    override fun set(playersSawTicks: Map<PlayerId, Long>) {
+        data = playersSawTicks
     }
 }

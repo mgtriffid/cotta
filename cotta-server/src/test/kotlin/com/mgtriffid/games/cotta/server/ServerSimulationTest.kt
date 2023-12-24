@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.guice.CottaServerModule
@@ -27,6 +28,7 @@ class ServerSimulationTest {
     private lateinit var simulationInputHolder: SimulationInputHolder
     private lateinit var state: CottaState
     private lateinit var serverSimulation: ServerSimulation
+    private lateinit var playersSawTicks: PlayersSawTicks
     private lateinit var dataForClients: DataForClients
 
     @BeforeEach
@@ -46,6 +48,7 @@ class ServerSimulationTest {
         state = injector.getInstance(Key.get(CottaState::class.java, Names.named("simulation")))
         serverSimulation = injector.getInstance(ServerSimulation::class.java)
         dataForClients = injector.getInstance(DataForClients::class.java)
+        playersSawTicks = injector.getInstance(PlayersSawTicks::class.java)
     }
 
     @Test
@@ -158,6 +161,7 @@ class ServerSimulationTest {
         repeat(6) {
             serverSimulation.tick()
         }
+        playersSawTicks.set(mapOf(playerId to 2L))
 
         simulationInputHolder.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
@@ -165,7 +169,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input)
                 )
             }
-            override fun playersSawTicks() = mapOf(playerId to 2L)
+            override fun playersSawTicks() = emptyMap<PlayerId, Long>()
         })
 
 
@@ -174,13 +178,14 @@ class ServerSimulationTest {
             aim = 4,
             shoot = false
         )
+        playersSawTicks.set(mapOf(playerId to 3L))
         simulationInputHolder.set(object: SimulationInput {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return mapOf(
                     damageDealerId to setOf(input2)
                 )
             }
-            override fun playersSawTicks() = mapOf(playerId to 3L)
+            override fun playersSawTicks() = emptyMap<PlayerId, Long>()
         })
         serverSimulation.tick()
 

@@ -5,14 +5,13 @@ import com.mgtriffid.games.cotta.client.impl.Delta
 import com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer
 import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.client.network.NetworkClient
-import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
@@ -97,9 +96,21 @@ class NetworkClientImpl @Inject constructor(
     }
 
     override fun tryGetDelta(tick: Long): Delta = if (deltaAvailable(tick)) {
-        Delta.Present { entities ->
-            applyDelta(entities, tick)
-        }
+        val input = incomingDataBuffer.inputs[tick]!!
+        Delta.Present(
+            applyDiff = { entities ->
+                applyDelta(entities, tick)
+            },
+            input = object : SimulationInput {
+                override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
+                    return input
+                }
+
+                override fun playersSawTicks(): Map<PlayerId, Long> {
+                    return emptyMap()
+                }
+            }
+        )
     } else {
         Delta.Absent
     }

@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.ClientsInputProvider
@@ -19,6 +20,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
     private val nonPlayerInputProvider: NonPlayerInputProvider,
     @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder,
+    private val playersSawTicks: PlayersSawTicks,
     private val entitiesCreatedOnClientsRegistry: EntitiesCreatedOnClientsRegistry,
     private val predictedToAuthoritativeIdMappings: PredictedToAuthoritativeIdMappings,
     private val tickProvider: TickProvider
@@ -70,5 +72,6 @@ class ServerSimulationInputProviderImpl @Inject constructor(
                 return clientsInput.playersSawTicks
             }
         })
+        playersSawTicks.set(clientsInput.playersSawTicks)
     }
 }

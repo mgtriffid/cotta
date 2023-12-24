@@ -3,7 +3,8 @@ package com.mgtriffid.games.cotta.client.impl
 import com.mgtriffid.games.cotta.client.ClientSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
+import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
@@ -17,18 +18,23 @@ private val logger = KotlinLogging.logger {}
 class ClientSimulationImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val tick: TickProvider,
-    private val simulationInputHolder: SimulationInputHolder,
     @Named("simulation") private val invokersFactory: InvokersFactory,
-    private val effectBus: EffectBus
+    private val effectBus: EffectBus,
+    private val playersSawTicks: PlayersSawTicks
 ) : ClientSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>() // TODO pathetic casts
 
-    override fun tick() {
+    override fun tick(input: SimulationInput) {
         effectBus.clear()
         state.advance(tick.tick)
         tick.tick++
-        putInputIntoEntities()
+        putInputIntoEntities(input)
+        fillPlayersSawTicks(input)
         simulate()
+    }
+
+    private fun fillPlayersSawTicks(input: SimulationInput) {
+        playersSawTicks.set(input.playersSawTicks())
     }
 
     private fun simulate() {
@@ -42,8 +48,7 @@ class ClientSimulationImpl @Inject constructor(
         systemInvokers.add(invokersFactory.createInvoker(systemClass))
     }
 
-    private fun putInputIntoEntities() {
-        val input = simulationInputHolder.get()
+    private fun putInputIntoEntities(input: SimulationInput) {
         state.entities(tick.tick).all().filter {
             it.hasInputComponents()
         }.forEach { e ->

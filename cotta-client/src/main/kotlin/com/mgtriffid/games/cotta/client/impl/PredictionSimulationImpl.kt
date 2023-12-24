@@ -29,14 +29,19 @@ class PredictionSimulationImpl @Inject constructor(
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
-    override fun run(ticks: List<Long>, playerId: PlayerId) {
+    override fun predict(initialEntities: Entities, ticks: List<Long>) {
+        startPredictionFrom(initialEntities, ticks.first())
+        run(ticks)
+    }
+
+    private fun run(ticks: List<Long>) {
         logger.debug { "Running prediction simulation for ticks $ticks" }
         for (tick in ticks) {
             logger.info { "Running prediction simulation for tick $tick" }
             effectBus.clear()
             state.advance(tickProvider.tick)
             tickProvider.tick++
-            putInputIntoEntities(tick, playerId)
+            putInputIntoEntities(tick, localPlayer.playerId)
             simulate()
         }
     }
@@ -88,7 +93,7 @@ class PredictionSimulationImpl @Inject constructor(
         }
     }
 
-    override fun startPredictionFrom(entities: Entities, tick: Long) {
+    private fun startPredictionFrom(entities: Entities, tick: Long) {
         state.wipe()
         tickProvider.tick = tick
         if (entities is EntitiesImpl) {

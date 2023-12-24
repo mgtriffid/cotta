@@ -112,8 +112,8 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
 
         fetchInput()
         // tick is advanced inside;
-        clientSimulation.tick()
-        delta.apply(state.entities(tick + 1))
+        clientSimulation.tick(delta.input)
+        delta.applyDiff(state.entities(tick + 1))
         predict()
         sendDataToServer()
     }
@@ -127,9 +127,16 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     }
 
     private fun predict() {
-        val playerId = localPlayer.playerId
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
+        val lastMyInputProcessedByServerSimulation = getLastInputProcessedByServer(currentTick, localPlayer.playerId)// TODO gracefully handle missing
+        val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
+            .also { logger.info { it.joinToString() } } // TODO explicit sorting
+        logger.info { "Setting initial predictions state with tick ${getCurrentTick()}" }
+        predictionSimulation.predict(state.entities(currentTick), unprocessedTicks)
+    }
+
+    private fun getLastInputProcessedByServer(currentTick: Long, playerId: PlayerId): Long {
         val lastMyInputProcessedByServerSimulation =
             incomingDataBuffer.playersSawTicks[currentTick - 1]!![playerId]?.let {
                 logger.debug { "Got $it as processed input from Server" }
@@ -137,19 +144,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
             } ?: 0L.also {
                 logger.debug { "Did not find our input in server's input, assuming none of our input was processed yet" }
             }// TODO gracefully handle missing
-        val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
-            .also { logger.info { it.joinToString() } } // TODO explicit sorting
-        logger.info {
-            "inputs: " + unprocessedTicks.joinToString { tick ->
-                "$tick ${clientInputs.all()[tick]?.inputs?.get(AuthoritativeEntityId(3))?.toString()}"
-            }
-        }
-        logger.info { "Setting initial predictions state with tick ${getCurrentTick()}" }
-        predictionSimulation.startPredictionFrom(
-            state.entities(currentTick),
-            unprocessedTicks.min()
-        )
-        predictionSimulation.run(unprocessedTicks, playerId)
+        return lastMyInputProcessedByServerSimulation
     }
 
     // called before advancing tick

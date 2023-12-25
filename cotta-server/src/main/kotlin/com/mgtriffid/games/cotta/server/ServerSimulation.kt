@@ -10,9 +10,6 @@ import kotlin.reflect.KClass
 
 interface ServerSimulation {
 
-    // TODO use DI instead. Of some kind. Maybe.
-    fun effectBus(): EffectBus
-
     /**
      * Registers a system for execution. Systems are invoked in the order of registration.
      */

@@ -36,10 +36,6 @@ class ServerSimulationImpl @Inject constructor(
     private val playerIdGenerator = PlayerIdGenerator()
     private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
 
-    override fun effectBus(): EffectBus {
-        return effectBus
-    }
-
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
         logger.info { "Registering system '${systemClass.simpleName}'" }
         systemInvokers.add(invokersFactory.createInvoker(systemClass))

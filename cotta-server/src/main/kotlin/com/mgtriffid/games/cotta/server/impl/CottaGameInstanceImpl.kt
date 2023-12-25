@@ -22,11 +22,11 @@ import kotlin.reflect.KClass
 private val logger = KotlinLogging.logger {}
 
 class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
-    val game: CottaGame,
-    val engine: CottaEngine<SR, DR, IR>,
-    val network: CottaServerNetwork,
-    val clientsGhosts: ClientsGhosts,
-    val tickProvider: TickProvider,
+    private val game: CottaGame,
+    private val engine: CottaEngine<SR, DR, IR>,
+    private val network: CottaServerNetwork,
+    private val clientsGhosts: ClientsGhosts,
+    private val tickProvider: TickProvider,
     @Named("simulation") private val state: CottaState,
     private val serverToClientDataDispatcher: ServerToClientDataDispatcher,
     private val serverSimulation: ServerSimulation,

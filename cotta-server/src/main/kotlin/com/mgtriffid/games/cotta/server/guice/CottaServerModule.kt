@@ -95,5 +95,4 @@ class CottaServerModule(
         network.initialize()
         return network
     }
-
 }

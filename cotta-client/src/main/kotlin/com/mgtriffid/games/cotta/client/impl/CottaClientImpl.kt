@@ -13,6 +13,7 @@ import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.utils.now
 import jakarta.inject.Named
@@ -27,17 +28,17 @@ private val logger = KotlinLogging.logger {}
 // TODO bloated constructor
 class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inject constructor(
     val game: CottaGame,
-    val engine: CottaEngine<SR, DR, IR>, // weird type parameterization
-    val network: NetworkClient,
-    val localInput: CottaClientInput,
-    val clientInputs: ClientInputs,
-    val clientSimulation: ClientSimulation,
+    engine: CottaEngine<SR, DR, IR>, // weird type parameterization
+    private val network: NetworkClient,
+    private val localInput: CottaClientInput,
+    private val clientInputs: ClientInputs,
+    private val clientSimulation: ClientSimulation,
     private val predictionSimulation: PredictionSimulation,
-    val input: ClientSimulationInputProvider,
     override val tickProvider: TickProvider,
     private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
+    private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
+    private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     private val localPlayer: LocalPlayer,
-    private val incomingDataBuffer: IncomingDataBuffer<SR, DR, IR>,
     @Named("simulation") override val state: CottaState // Todo not expose as public
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial // the only real `var` here
@@ -107,15 +108,21 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
 
     private fun integrate(delta: Delta.Present) {
         logger.debug { "Integrating" }
-        val tick = getCurrentTick()
-        logger.debug { "Tick = $tick" }
+        processLocalInput()
 
-        fetchInput()
+        serverCreatedEntitiesRegistry.data = delta.tracesOfCreatedEntities.toMutableList()
+        fillEntityIdMappings(delta)
         // tick is advanced inside;
         clientSimulation.tick(delta.input)
-        delta.applyDiff(state.entities(tick + 1)) // unnecessary for deterministic simulation
-        predict()
+        delta.applyDiff(state.entities(getCurrentTick())) // unnecessary for deterministic simulation
+        predict(delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L)
         sendDataToServer()
+    }
+
+    private fun fillEntityIdMappings(delta: Delta.Present) {
+        delta.authoritativeToPredictedEntities.forEach { (authoritativeId, predictedId) ->
+            authoritativeToPredictedEntityIdMappings[authoritativeId] = predictedId
+        }
     }
 
     private fun sendDataToServer() {
@@ -126,32 +133,13 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         network.send(createdEntities, getCurrentTick())
     }
 
-    private fun predict() {
+    private fun predict(lastMyInputProcessedByServerSimulation: Long) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
-        val lastMyInputProcessedByServerSimulation = getLastInputProcessedByServer(currentTick, localPlayer.playerId)// TODO gracefully handle missing
         val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
             .also { logger.info { it.joinToString() } } // TODO explicit sorting
         logger.info { "Setting initial predictions state with tick ${getCurrentTick()}" }
         predictionSimulation.predict(state.entities(currentTick), unprocessedTicks)
-    }
-
-    private fun getLastInputProcessedByServer(currentTick: Long, playerId: PlayerId): Long {
-        val lastMyInputProcessedByServerSimulation =
-            incomingDataBuffer.playersSawTicks[currentTick - 1]!![playerId]?.let {
-                logger.debug { "Got $it as processed input from Server" }
-                it
-            } ?: 0L.also {
-                logger.debug { "Did not find our input in server's input, assuming none of our input was processed yet" }
-            }// TODO gracefully handle missing
-        return lastMyInputProcessedByServerSimulation
-    }
-
-    // called before advancing tick
-    private fun fetchInput() {
-        processLocalInput()
-
-        input.prepare()
     }
 
     // called before advancing tick

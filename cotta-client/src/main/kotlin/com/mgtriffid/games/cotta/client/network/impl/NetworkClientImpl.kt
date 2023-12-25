@@ -107,8 +107,12 @@ class NetworkClientImpl @Inject constructor(
                 }
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {
-                    return emptyMap()
+                    return incomingDataBuffer.playersSawTicks[tick]!!
                 }
+            },
+            authoritativeToPredictedEntities = incomingDataBuffer.createdEntities[tick + 1]!!.mappedPredictedIds,
+            tracesOfCreatedEntities = incomingDataBuffer.createdEntities[tick + 1]!!.traces.map { (traceRecipe, entityId) ->
+                Pair(stateSnapper.unpackTrace(traceRecipe), entityId)
             }
         )
     } else {

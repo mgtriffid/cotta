@@ -54,7 +54,6 @@ class CottaClientModule(
         bind(Int::class.java).annotatedWith(Names.named("historyLength")).toInstance(8)
         bind(Int::class.java).annotatedWith(Names.named("stateHistoryLength")).toInstance(128)
 
-        bind(ClientSimulationInputProvider::class.java).to(ClientSimulationInputProviderImpl::class.java).`in`(Scopes.SINGLETON)
         bind(ClientSimulation::class.java).to(ClientSimulationImpl::class.java).`in`(Scopes.SINGLETON)
         bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
         bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)

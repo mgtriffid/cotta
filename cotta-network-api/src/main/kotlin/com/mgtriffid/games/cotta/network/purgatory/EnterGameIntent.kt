@@ -6,4 +6,3 @@ package com.mgtriffid.games.cotta.network.purgatory
 data class EnterGameIntent(
     val params: Map<String, String>
 )
-

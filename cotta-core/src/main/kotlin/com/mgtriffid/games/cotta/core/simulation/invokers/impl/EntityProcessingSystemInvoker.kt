@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers.impl
 
-import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
@@ -13,7 +12,6 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class EntityProcessingSystemInvoker @Inject constructor(
-    // TODO better inject Entities
     @Named("latest") private val entities: Entities,
     private val context: EntityProcessingContext
 ) : SystemInvoker<EntityProcessingSystem> {

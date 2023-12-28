@@ -112,6 +112,14 @@ class ServerSimulationInputProviderImpl @Inject constructor(
         val inputRecipes = ArrayList<MapsInputRecipe>()
         val createdEntities = ArrayList<Pair<CottaTrace, PredictedEntityId>>()
         val playersSawTicks = HashMap<PlayerId, Long>()
+
+        val use: (PlayerId, ClientGhost, Long) -> Unit = { playerId, ghost, tick ->
+            val buffer = getBuffer(playerId)
+            playersSawTicks[playerId] = tick
+            inputRecipes.add(buffer.inputs[tick]!!)
+            createdEntities.addAll(buffer.createdEntities[tick + 1]!!)
+            ghost.setLastUsedInput(tick)
+        }
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val buffer = getBuffer(playerId)
             when (ghost.tickCursorState()) {
@@ -119,11 +127,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
                     if (buffer.hasEnoughInputsToStart()) {
                         ghost.setCursorState(RUNNING)
                         val tick = buffer.inputs.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
-                        ghost.setLastUsedInput(tick)
-                        playersSawTicks[playerId] = tick
-                        inputRecipes.add(buffer.inputs[tick]!!)
-                        // TODO doesn't check if the created entities are there, need to check
-                        createdEntities.addAll(buffer.createdEntities[tick + 1]!!)
+                        use(playerId, ghost, tick)
                     } else {
                         // do nothing. Ok, we don't have the input recipe yet, no big deal.
                     }
@@ -131,14 +135,10 @@ class ServerSimulationInputProviderImpl @Inject constructor(
 
                 RUNNING -> {
                     val lastUsedInput = ghost.lastUsedInput()
-                    val clientsTickToUse = lastUsedInput + 1
-                    logger.debug { "Client input tick is $clientsTickToUse for $playerId" }
-                    if (buffer.inputs.containsKey(clientsTickToUse)) {
-                        inputRecipes.add(buffer.inputs[clientsTickToUse]!!)
-                        // TODO doesn't check if the created entities are there, need to check
-                        createdEntities.addAll(buffer.createdEntities[clientsTickToUse + 1]!!)
-                        ghost.setLastUsedInput(clientsTickToUse)
-                        playersSawTicks[playerId] = clientsTickToUse
+                    val tick = lastUsedInput + 1
+                    logger.debug { "Client input tick is $tick for $playerId" }
+                    if (buffer.inputs.containsKey(tick) && buffer.createdEntities.containsKey(tick + 1)) {
+                        use(playerId, ghost, tick)
                     } else {
                         TODO("Not supported yet, need to take care of this legit missing packets case")
                     }

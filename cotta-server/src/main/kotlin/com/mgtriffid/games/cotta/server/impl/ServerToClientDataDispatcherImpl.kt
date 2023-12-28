@@ -25,13 +25,6 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
     private val data: DataForClients,
 ) : ServerToClientDataDispatcher {
 
-    // Here we don't care much about data that comes _from_ client and about their sawTick values.
-    // We do, however, care about data that is being sent _to_ clients. We record acks, we record what entities
-    // did clients see and what entities they did not see. We also care about predicted entities of clients. Yes,
-    // when client predicts an entity spawn, we should let it know that "ok bro we have acknowledged your prediction,
-    // you predicted it as id `predicted_1`, we gave it id `543`, now we match all input you give for that entity,
-    // and when we send you this entity back, your job is to start treating `543` as the id, not `predicted_1`".
-
     override fun dispatch() {
         val currentTick = tick.tick
         logger.debug { "Dispatching data to clients, currentTick=$currentTick" }

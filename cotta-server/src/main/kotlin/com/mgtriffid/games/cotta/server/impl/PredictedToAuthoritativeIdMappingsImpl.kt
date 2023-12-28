@@ -11,18 +11,15 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-// TODO make it historical and not store too old mappings
-//      or even better too old mappings plus those acknowledged by clients
 class PredictedToAuthoritativeIdMappingsImpl @Inject constructor(
     private val tickProvider: TickProvider
 ) : PredictedToAuthoritativeIdMappings {
     private val data = TreeMap<Long, MutableMap<PredictedEntityId, EntityId>>()
 
-    // TODO cleanup old too
     private val all = HashMap<PredictedEntityId, EntityId>()
 
     override fun record(predictedEntityId: PredictedEntityId, id: EntityId) {
-        logger.debug { "Recorded mapping $predictedEntityId -> $id" }
+        logger.trace { "Recorded mapping $predictedEntityId -> $id" }
         data.computeIfAbsent(tickProvider.tick) { HashMap() }[predictedEntityId] = id
         all[predictedEntityId] = id
         cleanUpOld()
@@ -38,6 +35,13 @@ class PredictedToAuthoritativeIdMappingsImpl @Inject constructor(
 
     private fun cleanUpOld() {
         val tick = tickProvider.tick
-        data.entries.removeAll { it.key < tick - 100 }
+        if (data.firstKey() > tick - 128) return
+        data.navigableKeySet().subSet(data.firstKey(), tick - 128).toList().forEach {
+            logger.debug { "Removing data for tick $it" }
+            data[it]?.forEach { (predicted, _) ->
+                all.remove(predicted)
+            }
+            data.remove(it)
+        }
     }
 }

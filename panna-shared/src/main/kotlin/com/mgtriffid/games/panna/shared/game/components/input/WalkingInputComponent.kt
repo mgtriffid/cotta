@@ -3,7 +3,8 @@ package com.mgtriffid.games.panna.shared.game.components.input
 import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 
-interface WalkingInputComponent: InputComponent<WalkingInputComponent> {
+interface WalkingInputComponent : InputComponent<WalkingInputComponent> {
+
     @ComponentData
     val direction: Byte
 
@@ -20,7 +21,7 @@ interface WalkingInputComponent: InputComponent<WalkingInputComponent> {
 
 private data class WalkingInputComponentImpl(
     override val direction: Byte
-): WalkingInputComponent
+) : WalkingInputComponent
 
 const val WALKING_DIRECTION_NONE: Byte = 0x00
 const val WALKING_DIRECTION_LEFT: Byte = 0x01

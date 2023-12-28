@@ -4,8 +4,10 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.getConstructor
+import com.mgtriffid.games.cotta.core.simulation.invokers.impl.EntityProcessingSystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
+import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import jakarta.inject.Inject
 import mu.KotlinLogging
@@ -16,10 +18,11 @@ private val logger = KotlinLogging.logger {}
 class PredictionInvokersFactory @Inject constructor(
     private val predictedInputProcessingSystemInvoker: PredictedInputProcessingSystemInvoker,
     private val effectsConsumerSystemInvoker: PredictionEffectsConsumerSystemInvoker,
+    private val entityProcessingSystemInvoker: PredictionEntityProcessingSystemInvoker,
 ) : InvokersFactory {
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, CottaSystem> {
         val ctor = systemClass.getConstructor()
-        val system = ctor.call()
+        val system: CottaSystem = ctor.call()
         return when (system) {
             is InputProcessingSystem -> {
                 Pair(predictedInputProcessingSystemInvoker, system)
@@ -29,9 +32,11 @@ class PredictionInvokersFactory @Inject constructor(
                 Pair(effectsConsumerSystemInvoker, system)
             }
 
-            else -> {
-                throw IllegalStateException("Unexpected implementation of CottaSystem")
+            is EntityProcessingSystem -> {
+                Pair(entityProcessingSystemInvoker, system)
             }
+
+            else -> { throw IllegalStateException("Unexpected implementation of CottaSystem which is actually sealed") }
         }
     }
 }

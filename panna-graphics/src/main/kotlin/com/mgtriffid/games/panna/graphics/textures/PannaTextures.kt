@@ -9,6 +9,7 @@ class PannaTextures {
     fun init() {
         textures[PannaTextureIds.TEXTURE_ID_FOO_ENTITY] = Texture("characters-free-sprites/2 GraveRobber/Graverobber.png")
         textures[PannaTextureIds.TEXTURE_ID_PLAYER_ENTITY] = Texture("characters-free-sprites/3 SteamMan/SteamMan.png")
+        textures[PannaTextureIds.TEXTURE_ID_BULLET] = Texture("bullet.png")
     }
 
     operator fun get(textureId: Int): Texture = textures[textureId] ?:

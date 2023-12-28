@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.impl.*
 import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionEffectsConsumerSystemInvoker
+import com.mgtriffid.games.cotta.client.invokers.PredictionEntityProcessingSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionInvokersFactory
 import com.mgtriffid.games.cotta.client.invokers.impl.*
 import com.mgtriffid.games.cotta.client.network.NetworkClient
@@ -109,6 +110,9 @@ class CottaClientModule(
         bind(Entities::class.java).annotatedWith(Names.named("prediction")).to(PredictedLatestEntities::class.java)
         bind(PredictionEffectsConsumerSystemInvoker::class.java)
             .to(PredictionEffectsConsumerSystemInvokerImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(PredictionEntityProcessingSystemInvoker::class.java)
+            .to(PredictionEntityProcessingSystemInvokerImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(TracingEffectProcessingContext::class.java)
             .annotatedWith(Names.named("prediction"))

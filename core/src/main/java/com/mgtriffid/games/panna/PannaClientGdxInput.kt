@@ -24,7 +24,7 @@ class PannaClientGdxInput : CottaClientInput {
         entity: Entity,
         clazz: KClass<T>
     ): T {
-        when(clazz) {
+        when (clazz) {
             JoinBattleMetaEntityInputComponent::class -> {
                 return if (!sentJoinBattle) {
                     sentJoinBattle = true
@@ -36,6 +36,7 @@ class PannaClientGdxInput : CottaClientInput {
                     logger.trace { "Prepared ${JoinBattleMetaEntityInputComponent::class.simpleName} $it" }
                 }
             }
+
             WalkingInputComponent::class -> {
                 return WalkingInputComponent.create(
                     when {
@@ -47,25 +48,34 @@ class PannaClientGdxInput : CottaClientInput {
                     }.also { logger.trace { "WalkingInputComponent created; direction == $it" } }
                 ) as T
             }
+
+            ShootInputComponent::class -> {
+                logger.info { "Providing ${ShootInputComponent::class.simpleName}" }
+                return ShootInputComponent.create(
+                    storage.shootPressed
+                ) as T
+            }
         }
         throw IllegalArgumentException() // TODO write a reasonable "unregistered component exception"
     }
 
     fun accumulate() {
-        with (storage) {
+        with(storage) {
             leftPressed = leftPressed || Gdx.input.isKeyPressed(Input.Keys.A)
             rightPressed = rightPressed || Gdx.input.isKeyPressed(Input.Keys.D)
             upPressed = upPressed || Gdx.input.isKeyPressed(Input.Keys.W)
             downPressed = downPressed || Gdx.input.isKeyPressed(Input.Keys.S)
+            shootPressed = shootPressed || Gdx.input.isKeyPressed(Input.Keys.J)
         }
     }
 
     fun clear() {
-        with (storage) {
+        with(storage) {
             leftPressed = false
             rightPressed = false
             upPressed = false
             downPressed = false
+            shootPressed = false
         }
     }
 
@@ -74,5 +84,6 @@ class PannaClientGdxInput : CottaClientInput {
         var rightPressed: Boolean = false
         var upPressed: Boolean = false
         var downPressed: Boolean = false
+        var shootPressed: Boolean = false
     }
 }

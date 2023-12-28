@@ -18,7 +18,7 @@ class SimulationInvokersFactory @Inject constructor(
     private val entityProcessingSystemInvoker: EntityProcessingSystemInvoker,
     private val lagCompensatingInputProcessingSystemInvoker: LagCompensatingInputProcessingSystemInvoker
 ) : InvokersFactory {
-    // simulation invoker! very specific thing
+
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, T> {
         val ctor = systemClass.getConstructor()
         val system = ctor.call()

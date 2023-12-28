@@ -8,20 +8,19 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.panna.shared.game.components.*
-import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
-import com.mgtriffid.games.panna.shared.game.components.input.WalkingInputComponent
+import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_LEFT
+import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.effects.JoinBattleEffect
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
-import com.mgtriffid.games.panna.shared.game.systems.JoinBattleEffectConsumerSystem
-import com.mgtriffid.games.panna.shared.game.systems.JoinBattleSystem
-import com.mgtriffid.games.panna.shared.game.systems.MovementEffectConsumerSystem
-import com.mgtriffid.games.panna.shared.game.systems.WalkingInputProcessingSystem
+import com.mgtriffid.games.panna.shared.game.effects.ShootEffect
+import com.mgtriffid.games.panna.shared.game.systems.*
 
 class PannaGame : CottaGame {
     override val serverSystems = listOf(
         WalkingInputProcessingSystem::class,
+        ShootingInputProcessingSystem::class,
+        ShootEffectConsumerSystem::class,
+        MovementSystem::class,
         MovementEffectConsumerSystem::class,
         JoinBattleSystem::class,
         JoinBattleEffectConsumerSystem::class,
@@ -38,21 +37,24 @@ class PannaGame : CottaGame {
     }
 
     override val componentClasses = setOf(
+        VelocityComponent::class,
         PositionComponent::class,
         DrawableComponent::class,
         WalkingComponent::class,
-        GraverobberNpcComponent::class, // TODO be able to mark as server-only
+        GraverobberNpcComponent::class,
         SteamManPlayerComponent::class,
     )
 
     override val inputComponentClasses = setOf(
         WalkingInputComponent::class,
+        ShootInputComponent::class,
         JoinBattleMetaEntityInputComponent::class,
     )
 
     override val effectClasses = setOf(
         JoinBattleEffect::class,
         MovementEffect::class,
+        ShootEffect::class,
     )
 
     override val metaEntitiesInputComponents = setOf(

@@ -297,11 +297,11 @@ class ServerSimulationTest {
         })
         assertEquals(
             4,
-            (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).aim
         )
         assertEquals(
             true,
-            (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
         val input2 = PlayerInputTestComponent.create(
             aim = 4,
@@ -318,11 +318,11 @@ class ServerSimulationTest {
         })
         assertEquals(
             4,
-            (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).aim
         )
         assertEquals(
             false,
-            (dataForClients.inputs(tickProvider.tick)[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
     }
 

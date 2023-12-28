@@ -61,7 +61,7 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
                 val inputDto = ServerToClientDto()
                 inputDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT
                 inputDto.payload = inputSerialization.serializeInputRecipe(
-                    inputSnapper.snapInput(data.inputs(tick - 1))
+                    inputSnapper.snapInput(data.inputs())
                 )
                 inputDto.tick = tick - 1
 

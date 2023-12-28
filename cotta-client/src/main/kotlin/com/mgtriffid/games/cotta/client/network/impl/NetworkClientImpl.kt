@@ -2,7 +2,7 @@ package com.mgtriffid.games.cotta.client.network.impl
 
 import com.mgtriffid.games.cotta.client.impl.AuthoritativeState
 import com.mgtriffid.games.cotta.client.impl.Delta
-import com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer
+import com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer
 import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.entities.*
@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger {}
 
 class NetworkClientImpl @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
-    private val incomingDataBuffer: IncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>,
+    private val incomingDataBuffer: ClientIncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>,
     private val snapsSerialization: SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe>,
     private val inputSerialization: InputSerialization<MapsInputRecipe>,
     private val inputSnapper: InputSnapper<MapsInputRecipe>,

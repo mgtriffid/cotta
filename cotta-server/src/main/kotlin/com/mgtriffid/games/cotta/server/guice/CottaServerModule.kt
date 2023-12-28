@@ -24,8 +24,8 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.core.tracing.Traces
 import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
-import com.mgtriffid.games.cotta.network.CottaServerNetwork
-import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetwork
+import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
+import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetworkTransport
 import com.mgtriffid.games.cotta.server.*
 import com.mgtriffid.games.cotta.server.impl.*
 
@@ -37,15 +37,6 @@ class CottaServerModule(
             bind(CottaGameInstance::class.java).to(object : TypeLiteral<CottaGameInstanceImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>() {})
             bind(CottaGame::class.java).toInstance(game)
             bind(ClientsGhosts::class.java).`in`(Scopes.SINGLETON)
-
-            bind(ClientsInputProvider::class.java)
-                .to(object : TypeLiteral<
-                    ClientsInputProviderImpl<
-                        MapsStateRecipe,
-                        MapsDeltaRecipe,
-                        MapsInputRecipe>
-                    >() {})
-                .`in`(Scopes.SINGLETON)
 
             bind(ComponentsRegistryImpl::class.java).`in`(Scopes.SINGLETON)
             bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
@@ -90,8 +81,8 @@ class CottaServerModule(
     }
 
     @Provides @Singleton // TODO game instance scoped
-    fun provideCottaServerNetwork(): CottaServerNetwork {
-        val network = KryonetCottaServerNetwork()
+    fun provideCottaServerNetwork(): CottaServerNetworkTransport {
+        val network = KryonetCottaServerNetworkTransport()
         network.initialize()
         return network
     }

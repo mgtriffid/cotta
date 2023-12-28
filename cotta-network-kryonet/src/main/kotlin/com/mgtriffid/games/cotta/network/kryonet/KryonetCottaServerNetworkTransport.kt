@@ -1,10 +1,9 @@
 package com.mgtriffid.games.cotta.network.kryonet
 
 import com.esotericsoftware.kryonet.Server
-import com.esotericsoftware.minlog.Log
 import com.mgtriffid.games.cotta.network.ClientConnection
 import com.mgtriffid.games.cotta.network.ConnectionId
-import com.mgtriffid.games.cotta.network.CottaServerNetwork
+import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
@@ -14,14 +13,14 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 private val logger = KotlinLogging.logger {}
 
-class KryonetCottaServerNetwork : CottaServerNetwork {
+class KryonetCottaServerNetworkTransport : CottaServerNetworkTransport {
     private lateinit var server: Server
     private val enterGameIntents = ConcurrentLinkedQueue<Pair<ConnectionId, EnterGameIntent>>()
     private val clientToServerInputs = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>()
     private val clientToServerCreatedPredictedEntities = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>>()
 
     override fun initialize() {
-        logger.info { "Initializing ${KryonetCottaServerNetwork::class.simpleName}..." }
+        logger.info { "Initializing ${KryonetCottaServerNetworkTransport::class.simpleName}..." }
         server = Server()
         server.kryo.registerClasses()
         configureListener()

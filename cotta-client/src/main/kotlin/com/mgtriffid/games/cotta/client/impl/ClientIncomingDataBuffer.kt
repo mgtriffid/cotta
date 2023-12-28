@@ -13,7 +13,7 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger {}
 
-class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
+class ClientIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
     val inputs = TreeMap<Long, Map<EntityId, Collection<InputComponent<*>>>>() // GROOM class with naming
@@ -67,6 +67,7 @@ class IncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
         cleanUp(inputs, tick)
     }
 
+    // GROOM same on server
     private fun cleanUp(data: TreeMap<Long, *>, tick: Long) {
         data.navigableKeySet().subSet(min(data.firstKey(), tick - 128), tick - 128).toList().forEach {
             logger.debug { "Removing data for tick $it" }

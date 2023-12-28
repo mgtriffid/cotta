@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.network.ConnectionId
-import com.mgtriffid.games.cotta.network.CottaServerNetwork
+import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataDispatcher
@@ -17,7 +17,7 @@ private val logger = KotlinLogging.logger {}
 class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
     private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts,
-    private val network: CottaServerNetwork,
+    private val network: CottaServerNetworkTransport,
     private val stateSnapper: StateSnapper<SR, DR>,
     private val snapsSerialization: SnapsSerialization<SR, DR>,
     private val inputSnapper: InputSnapper<IR>,
@@ -106,7 +106,7 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
     }
 }
 
-fun CottaServerNetwork.sendAll(connectionId: ConnectionId, dtos: Collection<ServerToClientDto>) {
+fun CottaServerNetworkTransport.sendAll(connectionId: ConnectionId, dtos: Collection<ServerToClientDto>) {
     dtos.forEach {
         logger.debug { "Sending ${it.kindOfData} with tick ${it.tick} to $connectionId" }
         send(connectionId, it)

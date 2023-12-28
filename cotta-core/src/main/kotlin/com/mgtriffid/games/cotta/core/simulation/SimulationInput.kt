@@ -20,6 +20,8 @@ interface SimulationInput {
 
     fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>>
 
+    fun playersSawTicks(): Map<PlayerId, Long>
+
     fun inputForEntityAndComponent(entityId: EntityId, component: KClass<*>): InputComponent<*> {
         logger.trace { "Getting input for entity $entityId and component ${component.qualifiedName}" }
         val input = inputsForEntities()[entityId]?.find { component.isInstance(it) }
@@ -53,6 +55,4 @@ interface SimulationInput {
             factoryFunctions[component] = it
         }
     }
-
-    fun playersSawTicks(): Map<PlayerId, Long>
 }

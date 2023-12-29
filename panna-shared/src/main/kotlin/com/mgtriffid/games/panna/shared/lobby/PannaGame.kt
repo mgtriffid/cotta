@@ -19,8 +19,8 @@ class PannaGame : CottaGame {
     override val serverSystems = listOf(
         WalkingInputProcessingSystem::class,
         ShootingInputProcessingSystem::class,
-        ShootEffectConsumerSystem::class,
         MovementSystem::class,
+        ShootEffectConsumerSystem::class,
         MovementEffectConsumerSystem::class,
         JoinBattleSystem::class,
         JoinBattleEffectConsumerSystem::class,

@@ -178,7 +178,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
 
     // GROOM rename
     private fun getEntitiesOwnedByPlayer(playerId: PlayerId) =
-        state.entities(atTick = getCurrentTick()).all().filter {
+        state.entities(atTick = getCurrentTick()).dynamic().filter {
             it.ownedBy == Entity.OwnedBy.Player(playerId)
         } + predictionSimulation.getLocalPredictedEntities()
 

@@ -38,7 +38,7 @@ class PredictionSimulationImpl @Inject constructor(
     private fun run(ticks: List<Long>) {
         logger.debug { "Running prediction simulation for ticks $ticks" }
         for (tick in ticks) {
-            logger.info { "Running prediction simulation for tick $tick" }
+            logger.debug { "Running prediction simulation for tick $tick" }
             effectBus.clear()
             state.advance(tickProvider.tick)
             tickProvider.tick++
@@ -108,7 +108,7 @@ class PredictionSimulationImpl @Inject constructor(
     }
 
     override fun getLocalPredictedEntities(): Collection<Entity> {
-        return state.entities(tickProvider.tick).all().filter {
+        return state.entities(tickProvider.tick).dynamic().filter {
             it.ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
         }
     }

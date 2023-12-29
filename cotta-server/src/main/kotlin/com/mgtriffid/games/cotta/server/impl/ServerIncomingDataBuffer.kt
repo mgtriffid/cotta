@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.core.entities.PredictedEntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import mu.KotlinLogging

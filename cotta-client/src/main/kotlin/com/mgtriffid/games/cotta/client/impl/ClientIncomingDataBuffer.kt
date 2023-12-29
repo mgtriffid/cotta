@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe

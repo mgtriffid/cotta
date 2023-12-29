@@ -13,6 +13,8 @@ class CottaStateImpl @Inject constructor(
     @Named("stateHistoryLength") private val stateHistoryLength: Int
 ) : CottaState {
 
+    private lateinit var blank: Entities
+
     private val entitiesArray = Array<Entities?>(stateHistoryLength) { null }
 
     private var latestTickSet = 0L
@@ -44,9 +46,17 @@ class CottaStateImpl @Inject constructor(
         latestTickSet = max(latestTickSet, tick)
     }
 
+    override fun setBlank(tick: Long) {
+        set(tick, blank.deepCopy())
+    }
+
     override fun wipe() {
         entitiesArray.fill(null)
         latestTickSet = 0L
+    }
+
+    override fun setBlank(entities: Entities) {
+        this.blank = entities.deepCopy()
     }
 
     private fun Long.toIndex() = (this % stateHistoryLength).toInt()

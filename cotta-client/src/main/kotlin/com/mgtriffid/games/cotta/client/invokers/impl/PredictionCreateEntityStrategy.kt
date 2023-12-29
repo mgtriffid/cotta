@@ -26,10 +26,10 @@ class PredictionCreateEntityStrategy @Inject constructor(
         val entityId = registry.find(trace, tickProvider.tick)
         return if (entityId != null) {
             logger.debug { "Found entityId=$entityId for trace $trace, using it" }
-            entities.createEntity(entityId, ownedBy)
+            entities.create(entityId, ownedBy)
         } else {
             logger.debug { "No entityId found for trace $trace, generating a new one" }
-            val newEntity = entities.createEntity(predictedEntityIdGenerator.getId(), ownedBy)
+            val newEntity = entities.create(predictedEntityIdGenerator.getId(), ownedBy)
             registry.record(trace, tickProvider.tick, newEntity.id)
             newEntity
         }

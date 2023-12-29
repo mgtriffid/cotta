@@ -1,8 +1,8 @@
 package com.mgtriffid.games.cotta.server
 
-import com.mgtriffid.games.cotta.core.entities.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.EntityId
-import com.mgtriffid.games.cotta.core.entities.PredictedEntityId
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 
 interface PredictedToAuthoritativeIdMappings {
     fun record(predictedEntityId: PredictedEntityId, id: EntityId)

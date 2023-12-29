@@ -3,8 +3,8 @@ package com.mgtriffid.games.cotta.network.kryonet
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
-import com.mgtriffid.games.cotta.core.entities.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto

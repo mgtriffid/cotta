@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.core.serialization
 
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 
 interface InputSnapper<IR: InputRecipe> {

@@ -7,6 +7,7 @@ public class EntityIdDto {
 
     public enum Kind {
         AUTHORITATIVE,
-        PREDICTED
+        PREDICTED,
+        STATIC
     }
 }

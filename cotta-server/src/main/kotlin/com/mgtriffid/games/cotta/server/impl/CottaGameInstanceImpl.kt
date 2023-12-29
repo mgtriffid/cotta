@@ -66,6 +66,8 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
     }
 
     private fun initializeState() {
+        game.initializeStaticState(state.entities(tickProvider.tick))
+        state.setBlank(state.entities(tickProvider.tick))
         game.initializeServerState(state.entities(tickProvider.tick))
     }
 

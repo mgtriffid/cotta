@@ -3,10 +3,10 @@ package com.mgtriffid.games.panna.shared.lobby
 import com.mgtriffid.games.cotta.core.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
-import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.*
@@ -28,12 +28,18 @@ class PannaGame : CottaGame {
 
     override fun initializeServerState(entities: Entities) {
         // Adding a graverobber, owner should be system
-        val graverobber = entities.createEntity()
+        val graverobber = entities.create()
         graverobber.addComponent(GraverobberNpcComponent.create())
         graverobber.addInputComponent(WalkingInputComponent::class)
         graverobber.addComponent(WalkingComponent.create(30))
         graverobber.addComponent(PositionComponent.create(300, 200, ORIENTATION_LEFT))
         graverobber.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_FOO_ENTITY))
+    }
+
+    override fun initializeStaticState(entities: Entities) {
+        val terrain = entities.createStatic(StaticEntityId(1))
+        terrain.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_TERRAIN))
+        terrain.addComponent(PositionComponent.create(400, 400, ORIENTATION_LEFT))
     }
 
     override val componentClasses = setOf(

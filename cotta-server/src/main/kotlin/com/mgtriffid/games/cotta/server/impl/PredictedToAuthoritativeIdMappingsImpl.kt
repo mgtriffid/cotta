@@ -1,8 +1,8 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.core.entities.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.EntityId
-import com.mgtriffid.games.cotta.core.entities.PredictedEntityId
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.server.PredictedToAuthoritativeIdMappings
 import jakarta.inject.Inject

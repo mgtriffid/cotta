@@ -1,7 +1,7 @@
 package com.mgtriffid.games.cotta.client.invokers.impl
 
 import com.mgtriffid.games.cotta.client.impl.LocalPlayer
-import com.mgtriffid.games.cotta.core.entities.PredictedEntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import jakarta.inject.Inject
 import java.util.concurrent.atomic.AtomicInteger
 

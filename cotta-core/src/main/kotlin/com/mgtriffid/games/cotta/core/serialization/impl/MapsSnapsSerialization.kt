@@ -6,6 +6,10 @@ import com.esotericsoftware.kryo.io.Output
 import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
+import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.registry.StringEffectKey
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
@@ -286,7 +290,10 @@ fun EntityId.toDto(): EntityIdDto {
             it.kind = EntityIdDto.Kind.PREDICTED
             it.playerId = playerId.id
         }
-        else -> throw IllegalStateException("Unexpected EntityId implementation")
+        is StaticEntityId -> EntityIdDto().also {
+            it.id = id
+            it.kind = EntityIdDto.Kind.STATIC
+        }
     }
 }
 
@@ -294,7 +301,8 @@ fun EntityIdDto.toEntityId(): EntityId {
     return when (kind) {
         EntityIdDto.Kind.AUTHORITATIVE -> AuthoritativeEntityId(id)
         EntityIdDto.Kind.PREDICTED -> PredictedEntityId(PlayerId(playerId), id)
-        else -> throw IllegalStateException("Unexpected EntityIdDto.Kind")
+        EntityIdDto.Kind.STATIC -> StaticEntityId(id)
+        null -> throw IllegalStateException("${EntityIdDto::class.simpleName}.${EntityIdDto::kind.name} is null")
     }
 }
 

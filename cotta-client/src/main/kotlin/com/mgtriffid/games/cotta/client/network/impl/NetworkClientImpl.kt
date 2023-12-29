@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer
 import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
@@ -128,7 +129,7 @@ class NetworkClientImpl @Inject constructor(
                 logger.debug { "Setting state from authoritative" }
                 val fullStateTick = incomingDataBuffer.states.lastKey()
                 val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
-                state.set(fullStateTick, blankEntities())
+                state.setBlank(fullStateTick)
                 tickProvider.tick = fullStateTick
                 stateSnapper.unpackStateRecipe(state.entities(atTick = fullStateTick), stateRecipe)
                 ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->

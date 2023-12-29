@@ -13,4 +13,8 @@ interface CottaState {
     fun set(tick: Long, entities: Entities)
 
     fun wipe() // maybe not needed for Simulation; maybe need to extract a separate interface for Predicted
+
+    fun setBlank(entities: Entities)
+
+    fun setBlank(tick: Long)
 }

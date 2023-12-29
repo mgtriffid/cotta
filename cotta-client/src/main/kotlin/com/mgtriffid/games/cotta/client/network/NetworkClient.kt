@@ -2,7 +2,7 @@ package com.mgtriffid.games.cotta.client.network
 
 import com.mgtriffid.games.cotta.client.impl.AuthoritativeState
 import com.mgtriffid.games.cotta.client.impl.Delta
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 

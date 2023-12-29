@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
@@ -53,7 +54,7 @@ class ServerSimulationTest {
 
     @Test
     fun `systems should listen to effects`() {
-        val entity = state.entities().createEntity()
+        val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
         serverSimulation.registerSystem(RegenerationTestSystem::class)
@@ -77,7 +78,7 @@ class ServerSimulationTest {
 
     @Test
     fun `effects should be processed within given tick once`() {
-        val entity = state.entities().createEntity()
+        val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
         serverSimulation.registerSystem(RegenerationTestSystem::class)
@@ -102,13 +103,13 @@ class ServerSimulationTest {
 
     @Test
     fun `should consume input`() {
-        val damageable = state.entities().createEntity()
+        val damageable = state.entities().create()
         val damageableId = damageable.id
         damageable.addComponent(HealthTestComponent.create(20))
         damageable.addComponent(LinearPositionTestComponent.create(0))
         damageable.addComponent(VelocityTestComponent.create(2))
 
-        val damageDealer = state.entities().createEntity()
+        val damageDealer = state.entities().create()
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val damageDealerId = damageDealer.id
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
@@ -167,13 +168,13 @@ class ServerSimulationTest {
     @Test
     fun `should compensate lags`() {
         val playerId = PlayerId(0)
-        val damageable = state.entities().createEntity()
+        val damageable = state.entities().create()
         val damageableId = damageable.id
         damageable.addComponent(HealthTestComponent.create(20))
         damageable.addComponent(LinearPositionTestComponent.create(0))
         damageable.addComponent(VelocityTestComponent.create(2))
 
-        val damageDealer = state.entities().createEntity(ownedBy = Entity.OwnedBy.Player(playerId))
+        val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         val damageDealerId = damageDealer.id
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val input = PlayerInputTestComponent.create(aim = 4, shoot = true)
@@ -224,7 +225,7 @@ class ServerSimulationTest {
 
     @Test
     fun `should invoke systems`() {
-        state.entities().createEntity()
+        state.entities().create()
         serverSimulation.registerSystem(BlankTestSystem::class)
 
         serverSimulation.tick(object : SimulationInput {
@@ -245,7 +246,7 @@ class ServerSimulationTest {
 
     @Test
     fun `should return effects that are to be returned to clients`() {
-        val entity = state.entities().createEntity()
+        val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(HealthTestComponent.create(0))
         serverSimulation.registerSystem(RegenerationTestSystem::class)
@@ -270,7 +271,7 @@ class ServerSimulationTest {
     @Test
     fun `should prepare inputs to be sent to clients`() {
         val playerId = PlayerId(0)
-        val damageDealer = state.entities().createEntity()
+        val damageDealer = state.entities().create()
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val damageDealerId = damageDealer.id
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
@@ -333,6 +334,8 @@ class ServerSimulationTest {
         }
 
         override fun initializeServerState(entities: Entities) {}
+        override fun initializeStaticState(entities: Entities) {}
+
         override val componentClasses: Set<KClass<out Component<*>>> = emptySet()
         override val inputComponentClasses: Set<KClass<out InputComponent<*>>> = emptySet()
         override val effectClasses: Set<KClass<out CottaEffect>> = emptySet()

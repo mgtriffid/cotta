@@ -13,6 +13,6 @@ class UseIdFromServerCreateEntityStrategy @Inject constructor(
 ) : CreateEntityStrategy {
     override fun createEntity(ownedBy: Entity.OwnedBy, trace: CottaTrace): Entity {
         val entityId = registry[trace]
-        return entities.createEntity(id = entityId, ownedBy = ownedBy)
+        return entities.create(id = entityId, ownedBy = ownedBy)
     }
 }

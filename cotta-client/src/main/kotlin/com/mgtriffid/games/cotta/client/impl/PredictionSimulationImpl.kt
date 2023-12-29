@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.client.ClientInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesImpl
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
@@ -113,7 +114,7 @@ class PredictionSimulationImpl @Inject constructor(
     }
 
     override fun getPredictedEntities(): List<Entity> {
-        return state.entities(tickProvider.tick).all()
+        return state.entities(tickProvider.tick).dynamic()
             .toList()
     }
 }

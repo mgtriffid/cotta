@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.core.serialization.impl.recipe
 
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.ChangedEntityRecipe
 

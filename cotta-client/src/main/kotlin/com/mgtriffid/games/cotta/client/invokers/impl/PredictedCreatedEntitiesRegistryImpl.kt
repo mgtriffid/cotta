@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.client.invokers.impl
 
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 
 const val MAX_TICKS_TO_KEEP = 128

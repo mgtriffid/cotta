@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.EffectData
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.*
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.dto.EntityIdDto
@@ -252,7 +253,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     }
 
     override fun snapState(entities: Entities): MapsStateRecipe {
-        return MapsStateRecipe(entities.all().map { e ->
+        return MapsStateRecipe(entities.dynamic().map { e ->
             packEntity(e)
         })
     }
@@ -314,7 +315,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     }
 
     override fun snapDelta(prev: Entities, curr: Entities): MapsDeltaRecipe {
-        return snapDelta(prev.all(), curr.all())
+        return snapDelta(prev.dynamic(), curr.dynamic())
     }
 
     override fun unpackStateRecipe(entities: Entities, recipe: MapsStateRecipe) {
@@ -322,7 +323,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     }
 
     private fun unpackEntityRecipe(entities: Entities, recipe: MapsEntityRecipe) {
-        val entity = entities.createEntity(recipe.entityId, recipe.ownedBy)
+        val entity = entities.create(recipe.entityId, recipe.ownedBy)
         recipe.components.forEach { componentRecipe -> entity.addComponent(unpackComponentRecipe(componentRecipe)) }
         recipe.inputComponents.forEach { inputComponent -> entity.addInputComponent(inputComponentsClassByKey[inputComponent] as KClass<out InputComponent<*>>) }
     }

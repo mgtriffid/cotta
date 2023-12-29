@@ -47,6 +47,8 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     override fun initialize() {
         registerComponents()
         registerSystems()
+        game.initializeStaticState(state.entities(getCurrentTick()))
+        state.setBlank(state.entities(getCurrentTick()))
     }
 
     override fun tick() {

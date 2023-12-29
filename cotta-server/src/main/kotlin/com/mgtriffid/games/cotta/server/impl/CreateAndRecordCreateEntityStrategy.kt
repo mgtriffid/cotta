@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
@@ -22,7 +21,7 @@ class CreateAndRecordCreateEntityStrategy @Inject constructor(
     //  now, if we want to track down the creation of entity on Server then we also need to track sawTick in some kind
     //  of context, and who was the player - too.
     override fun createEntity(ownedBy: Entity.OwnedBy, trace: CottaTrace): Entity {
-        val entity = entities.createEntity(ownedBy)
+        val entity = entities.create(ownedBy)
         val predictedEntityWithSimilarTrace = entitiesCreatedOnClientsRegistry.find(trace)
         if (predictedEntityWithSimilarTrace != null) {
             // GROOM express that the second argument here is an AuthoritativeEntityId

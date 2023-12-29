@@ -1,7 +1,7 @@
 package com.mgtriffid.games.cotta.core.tracing.elements
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.entities.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 
 sealed interface TraceElement {
     data class InputTraceElement(

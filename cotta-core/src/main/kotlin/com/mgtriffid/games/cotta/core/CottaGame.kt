@@ -14,6 +14,7 @@ interface CottaGame {
     val nonPlayerInputProvider: NonPlayerInputProvider
     // how to start
     fun initializeServerState(entities: Entities)
+    fun initializeStaticState(entities: Entities)
     val componentClasses: Set<KClass<out Component<*>>>
     val inputComponentClasses: Set<KClass<out InputComponent<*>>>
     val effectClasses: Set<KClass<out CottaEffect>>

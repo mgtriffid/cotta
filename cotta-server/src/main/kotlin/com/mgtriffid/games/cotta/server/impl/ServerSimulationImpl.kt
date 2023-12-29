@@ -87,7 +87,7 @@ class ServerSimulationImpl @Inject constructor(
 
     private fun processEnterGameIntents() {
         enterGameIntents.forEach {
-            val metaEntity = state.entities(tickProvider.tick).createEntity(ownedBy = OwnedBy.Player(it.second))
+            val metaEntity = state.entities(tickProvider.tick).create(ownedBy = OwnedBy.Player(it.second))
             metaEntitiesInputComponents.forEach { componentClass ->
                 metaEntity.addInputComponent(componentClass)
             }

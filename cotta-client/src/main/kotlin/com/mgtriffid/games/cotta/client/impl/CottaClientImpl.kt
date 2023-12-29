@@ -104,6 +104,16 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         return predictionSimulation.getPredictedEntities()
     }
 
+    override fun getDrawableEntities(vararg components: KClass<out Component<*>>): List<Entity> {
+        val predicted = this.getPredictedEntities()
+        val authoritative = this.state.entities(this.tickProvider.tick).all()
+        return (predicted + authoritative.filter { it.id !in predicted.map { it.id } }).filter { entity ->
+            components.all { entity.hasComponent(it) }
+        }.also {
+            logger.debug { "Entities found: ${it.map { it.id }}" }
+        }
+    }
+
     private fun getCurrentTick(): Long {
         return tickProvider.tick
     }

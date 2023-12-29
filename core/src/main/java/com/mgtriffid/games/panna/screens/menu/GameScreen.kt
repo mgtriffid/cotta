@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
+import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.utils.now
@@ -16,6 +17,7 @@ import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
+import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
@@ -96,13 +98,7 @@ class GameScreen(
     }
 
     private fun getDrawableEntities(): List<Entity> {
-        val predicted = cottaClient.getPredictedEntities()
-        val authoritative = cottaClient.state.entities(cottaClient.tickProvider.tick).all()
-        return (predicted + authoritative.filter { it.id !in predicted.map { it.id } }).filter {
-            it.hasComponent(DrawableComponent::class) && it.hasComponent(PositionComponent::class)
-        }.also {
-            logger.debug { "Entities found: ${it.map { it.id }}" }
-        }
+        return cottaClient.getDrawableEntities(DrawableComponent::class, PositionComponent::class)
     }
 
     private fun logPositionIfChanged(entity: Entity, position: PositionComponent) {

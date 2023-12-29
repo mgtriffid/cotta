@@ -113,8 +113,12 @@ class PredictionSimulationImpl @Inject constructor(
         }
     }
 
-    override fun getPredictedEntities(): List<Entity> {
-        return state.entities(tickProvider.tick).dynamic()
-            .toList()
+    override fun getPreviousLocalPredictedEntities(): List<Entity> {
+        if (tickProvider.tick == 0L) {
+            return emptyList()
+        }
+        return state.entities(tickProvider.tick - 1).dynamic().filter {
+            it.ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
+        }
     }
 }

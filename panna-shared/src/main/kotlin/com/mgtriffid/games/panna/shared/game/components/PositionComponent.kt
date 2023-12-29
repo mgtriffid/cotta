@@ -1,6 +1,7 @@
 package com.mgtriffid.games.panna.shared.game.components
 
 import com.mgtriffid.games.cotta.ComponentData
+import com.mgtriffid.games.cotta.client.annotation.Interpolated
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 interface PositionComponent : MutableComponent<PositionComponent> {
@@ -13,8 +14,8 @@ interface PositionComponent : MutableComponent<PositionComponent> {
         }
     }
 
-    @ComponentData var xPos: Int
-    @ComponentData var yPos: Int
+    @Interpolated @ComponentData var xPos: Int
+    @Interpolated @ComponentData var yPos: Int
     @ComponentData var orientation: Int
 }
 private data class PositionComponentImpl(

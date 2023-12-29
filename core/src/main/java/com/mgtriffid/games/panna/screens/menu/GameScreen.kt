@@ -62,9 +62,10 @@ class GameScreen(
         input.accumulate()
 
         var tickHappened = false
-        if (nextTickAt <= now()) {
+        val now = now() // 1010
+        if (nextTickAt <= now) { // 1000
             cottaClient.tick()
-            nextTickAt += tickLength
+            nextTickAt += tickLength // 1050
             tickHappened = true
         }
 
@@ -72,7 +73,7 @@ class GameScreen(
             input.clear()
         }
 
-        draw()
+        draw(1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat())
     }
 
     override fun dispose() {
@@ -80,14 +81,15 @@ class GameScreen(
         img.dispose()
     }
 
-    private fun draw() {
+    private fun draw(alpha: Float) {
         beginDraw()
-        drawEntities()
+        drawEntities(alpha)
         endDraw()
     }
 
-    private fun drawEntities() {
-        getDrawableEntities().forEach {
+    private fun drawEntities(alpha: Float) {
+        logger.info { "Drawing entities, alpha = $alpha" }
+        getDrawableEntities(alpha).forEach {
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
             logger.debug { "Drawing entity ${it.id} owned by ${it.ownedBy}. Position: $position." }
@@ -97,8 +99,8 @@ class GameScreen(
         }
     }
 
-    private fun getDrawableEntities(): List<Entity> {
-        return cottaClient.getDrawableEntities(DrawableComponent::class, PositionComponent::class)
+    private fun getDrawableEntities(alpha: Float): List<Entity> {
+        return cottaClient.getDrawableEntities(alpha, DrawableComponent::class, PositionComponent::class)
     }
 
     private fun logPositionIfChanged(entity: Entity, position: PositionComponent) {

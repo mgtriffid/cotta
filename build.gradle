@@ -93,6 +93,7 @@ project(":panna-shared") {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
         implementation project(":cotta-annotations")
+        implementation project(":cotta-client")
     }
 }
 

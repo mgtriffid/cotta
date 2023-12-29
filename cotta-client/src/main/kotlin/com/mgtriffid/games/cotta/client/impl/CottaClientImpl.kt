@@ -2,12 +2,14 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.*
+import com.mgtriffid.games.cotta.client.interpolation.Interpolators
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
@@ -39,6 +41,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     private val localPlayer: LocalPlayer,
+    private val interpolators: Interpolators,
     @Named("simulation") override val state: CottaState // Todo not expose as public
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial // the only real `var` here
@@ -100,18 +103,62 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         }
     }
 
-    override fun getPredictedEntities(): List<Entity> {
-        return predictionSimulation.getPredictedEntities()
-    }
-
-    override fun getDrawableEntities(vararg components: KClass<out Component<*>>): List<Entity> {
-        val predicted = this.getPredictedEntities()
-        val authoritative = this.state.entities(this.tickProvider.tick).all()
-        return (predicted + authoritative.filter { it.id !in predicted.map { it.id } }).filter { entity ->
-            components.all { entity.hasComponent(it) }
-        }.also {
+    override fun getDrawableEntities(alpha: Float, vararg components: KClass<out Component<*>>): List<Entity> {
+        if (tickProvider.tick == 0L) return emptyList()
+        val onlyNeeded: Collection<Entity>.() -> Collection<Entity> = {
+            filter { entity ->
+                components.all { entity.hasComponent(it) }
+            }
+        }
+        val predictedCurrent = this.predictionSimulation.getLocalPredictedEntities().onlyNeeded()
+        val predictedPrevious = this.predictionSimulation.getPreviousLocalPredictedEntities().onlyNeeded()
+        val authoritativeCurrent = this.state.entities(this.tickProvider.tick).dynamic().onlyNeeded()
+        val authoritativePrevious = this.state.entities(this.tickProvider.tick - 1).dynamic().onlyNeeded()
+        val predicted = interpolate(predictedPrevious, predictedCurrent, alpha, components.toList())
+        val authoritative = interpolate(authoritativePrevious, authoritativeCurrent, alpha, components.toList())
+        return (predicted + authoritative.filter { it.id !in predicted.map { p -> p.id } }).also {
             logger.debug { "Entities found: ${it.map { it.id }}" }
         }
+    }
+
+    private fun interpolate(
+        previous: Collection<Entity>,
+        current: Collection<Entity>,
+        alpha: Float,
+        components: List<KClass<out Component<*>>>
+    ): List<Entity> {
+        return current.mapNotNull { curr ->
+            val prev = previous.find { it.id == curr.id }
+            if (prev == null) null else {
+                val interpolated = (curr as EntityImpl).deepCopy()
+                components.forEach {
+                    interpolate(prev, curr, interpolated, it, alpha)
+                }
+                interpolated
+            }
+        }
+    }
+
+    private fun interpolate(
+        prev: Entity,
+        curr: Entity,
+        interpolated: Entity,
+        component: KClass<out Component<*>>,
+        alpha: Float
+    ) {
+        val prevComponent = prev.getComponent(component)
+        val currComponent = curr.getComponent(component)
+        val interpolatedComponent = interpolated.getComponent(component)
+        interpolateComponent(prevComponent, currComponent, interpolatedComponent, alpha)
+    }
+
+    private fun <C : Component<C>> interpolateComponent(
+        prev: Any,
+        curr: Any,
+        interpolated: Any,
+        alpha: Float
+    ) {
+        interpolators.interpolate(prev as C, curr as C, interpolated as C, alpha)
     }
 
     private fun getCurrentTick(): Long {
@@ -209,6 +256,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     private fun registerComponents() {
         game.componentClasses.forEach {
             componentsRegistry.registerComponentClass(it)
+            interpolators.register(it)
         }
         game.inputComponentClasses.forEach {
             componentsRegistry.registerInputComponentClass(it)

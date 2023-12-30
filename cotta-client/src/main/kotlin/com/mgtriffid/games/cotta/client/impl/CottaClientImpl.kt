@@ -112,8 +112,8 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         }
         val predictedCurrent = this.predictionSimulation.getLocalPredictedEntities().onlyNeeded()
         val predictedPrevious = this.predictionSimulation.getPreviousLocalPredictedEntities().onlyNeeded()
-        val authoritativeCurrent = this.state.entities(this.tickProvider.tick).dynamic().onlyNeeded()
-        val authoritativePrevious = this.state.entities(this.tickProvider.tick - 1).dynamic().onlyNeeded()
+        val authoritativeCurrent = this.state.entities(this.tickProvider.tick).all().onlyNeeded()
+        val authoritativePrevious = this.state.entities(this.tickProvider.tick - 1).all().onlyNeeded()
         val predicted = interpolate(predictedPrevious, predictedCurrent, alpha, components.toList())
         val authoritative = interpolate(authoritativePrevious, authoritativeCurrent, alpha, components.toList())
         return (predicted + authoritative.filter { it.id !in predicted.map { p -> p.id } }).also {

@@ -10,4 +10,8 @@ class CottaClockImpl(
     override fun time(): Long {
         return tickProvider.tick * tickLength
     }
+
+    override fun delta(): Long {
+        return tickLength
+    }
 }

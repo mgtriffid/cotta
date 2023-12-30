@@ -12,6 +12,8 @@ import com.mgtriffid.games.cotta.client.invokers.impl.*
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.clock.CottaClock
+import com.mgtriffid.games.cotta.core.clock.impl.CottaClockImpl
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
 import com.mgtriffid.games.cotta.core.entities.CottaState
@@ -56,7 +58,11 @@ class CottaClientModule(
         bind(Int::class.java).annotatedWith(Names.named("stateHistoryLength")).toInstance(128)
 
         bind(ClientSimulation::class.java).to(ClientSimulationImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
+
+        val simulationTickProvider = AtomicLongTickProvider()
+        bind(TickProvider::class.java).toInstance(simulationTickProvider)
+        bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
+
         bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
         bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
         bind(object : TypeLiteral<ClientIncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>() {})
@@ -104,9 +110,13 @@ class CottaClientModule(
             .annotatedWith(Names.named("prediction"))
             .to(PredictionInputProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
+        val predictionTickProvider = AtomicLongTickProvider()
         bind(TickProvider::class.java)
             .annotatedWith(Names.named("prediction"))
-            .toInstance(AtomicLongTickProvider())
+            .toInstance(predictionTickProvider)
+        bind(CottaClock::class.java)
+            .annotatedWith(Names.named("prediction"))
+            .toInstance(CottaClockImpl(predictionTickProvider, game.config.tickLength))
         bind(Entities::class.java).annotatedWith(Names.named("prediction")).to(PredictedLatestEntities::class.java)
         bind(PredictionEffectsConsumerSystemInvoker::class.java)
             .to(PredictionEffectsConsumerSystemInvokerImpl::class.java)

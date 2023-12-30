@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers.context.impl
 
+import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
@@ -21,6 +22,7 @@ class LagCompensatingEffectProcessingContext @Inject constructor(
     private val sawTickHolder: SawTickHolder,
     @Named("effectProcessing") private val createEntityStrategy: CreateEntityStrategy,
     private val tickProvider: TickProvider,
+    private val clock: CottaClock,
     private val traces: Traces
 ) : TracingEffectProcessingContext {
 
@@ -29,6 +31,10 @@ class LagCompensatingEffectProcessingContext @Inject constructor(
     override fun fire(effect: CottaEffect) {
         traces.set(effect, trace!!)
         lagCompensatingEffectBus.publisher().fire(effect)
+    }
+
+    override fun clock(): CottaClock {
+        return clock
     }
 
     override fun entities(): Entities {

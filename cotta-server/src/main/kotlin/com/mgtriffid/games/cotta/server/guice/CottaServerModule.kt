@@ -4,6 +4,8 @@ import com.google.inject.*
 import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
+import com.mgtriffid.games.cotta.core.clock.CottaClock
+import com.mgtriffid.games.cotta.core.clock.impl.CottaClockImpl
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
 import com.mgtriffid.games.cotta.core.entities.CottaState
@@ -39,7 +41,10 @@ class CottaServerModule(
             bind(ClientsGhosts::class.java).`in`(Scopes.SINGLETON)
 
             bind(ComponentsRegistryImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(TickProvider::class.java).to(AtomicLongTickProvider::class.java).`in`(Scopes.SINGLETON)
+
+            val simulationTickProvider = AtomicLongTickProvider()
+            bind(TickProvider::class.java).toInstance(simulationTickProvider)
+            bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
             bind(Int::class.java).annotatedWith(named("historyLength")).toInstance(8)
             bind(Int::class.java).annotatedWith(named("stateHistoryLength")).toInstance(128)
             bind(CottaState::class.java).annotatedWith(named("simulation")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)

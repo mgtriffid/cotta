@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.invokers.impl
 
+import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -12,6 +13,7 @@ import jakarta.inject.Named
 
 class PredictionInputProcessingContext @Inject constructor(
     @Named("prediction") private val effectBus: EffectBus,
+    @Named("prediction") private val clock: CottaClock,
     @Named("prediction") private val traces: Traces
 ) : TracingInputProcessingContext {
     override fun fire(effect: CottaEffect) {
@@ -30,5 +32,9 @@ class PredictionInputProcessingContext @Inject constructor(
 
     override fun getTrace(): CottaTrace? {
         return trace
+    }
+
+    override fun clock(): CottaClock {
+        return clock
     }
 }

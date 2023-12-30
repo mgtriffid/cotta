@@ -62,10 +62,10 @@ class GameScreen(
         input.accumulate()
 
         var tickHappened = false
-        val now = now() // 1010
-        if (nextTickAt <= now) { // 1000
+        val now = now()
+        if (nextTickAt <= now) {
             cottaClient.tick()
-            nextTickAt += tickLength // 1050
+            nextTickAt += tickLength
             tickHappened = true
         }
 

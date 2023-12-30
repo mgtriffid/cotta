@@ -26,7 +26,7 @@ class PredictedLatestEntities @Inject constructor(
     }
 
     override fun remove(id: EntityId) {
-        throw NotImplementedError("Is not supposed to be called on Server") // stupid comment btw
+        entities().remove(id)
     }
 
     override fun create(id: EntityId, ownedBy: Entity.OwnedBy): Entity {

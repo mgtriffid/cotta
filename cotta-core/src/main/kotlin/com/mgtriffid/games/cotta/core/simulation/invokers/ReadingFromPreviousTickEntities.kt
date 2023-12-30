@@ -39,6 +39,6 @@ class ReadingFromPreviousTickEntities(
 
     override fun remove(id: EntityId) {
         // TODO should be actually handled by a different subclass
-        throw NotImplementedError("Is not supposed to be called on Server")
+        getEntities().remove(id)
     }
 }

@@ -116,7 +116,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         val authoritativePrevious = this.state.entities(this.tickProvider.tick - 1).all().onlyNeeded()
         val predicted = interpolate(predictedPrevious, predictedCurrent, alpha, components.toList())
         val authoritative = interpolate(authoritativePrevious, authoritativeCurrent, alpha, components.toList())
-        return (predicted + authoritative.filter { it.id !in predicted.map { p -> p.id } }).also {
+        return (predicted + authoritative.filter { authoritativeToPredictedEntityIdMappings[it.id] == null }).also {
             logger.debug { "Entities found: ${it.map { it.id }}" }
         }
     }

@@ -22,6 +22,9 @@ private val logger = mu.KotlinLogging.logger {}
                 position.yPos += e.velocityY
                 position.orientation = if (e.velocityX > 0) ORIENTATION_RIGHT else ORIENTATION_LEFT
                 logger.debug { "position.xPos = ${position.xPos}" }
+                if (position.xPos < -50 || position.xPos > 1000 || position.yPos < -100 || position.yPos > 2000) {
+                    ctx.entities().remove(e.entityId)
+                }
             }
         }
     }

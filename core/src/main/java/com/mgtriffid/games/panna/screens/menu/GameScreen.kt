@@ -3,6 +3,7 @@ package com.mgtriffid.games.panna.screens.menu
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
@@ -88,14 +89,20 @@ class GameScreen(
     }
 
     private fun drawEntities(alpha: Float) {
-        logger.info { "Drawing entities, alpha = $alpha" }
+        logger.debug { "Drawing entities, alpha = $alpha" }
         getDrawableEntities(alpha).forEach {
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
             logger.debug { "Drawing entity ${it.id} owned by ${it.ownedBy}. Position: $position." }
-            val texture = textures[drawable.textureId]
+            val texture = TextureRegion(textures[drawable.textureId])
             logPositionIfChanged(it, position)
-            batch.draw(texture, position.xPos.toFloat(), position.yPos.toFloat())
+            batch.draw(
+                texture,
+                (position.xPos * 2).toFloat(), (position.yPos * 2).toFloat(),
+                0f, 0f,
+                texture.regionWidth.toFloat(), texture.regionHeight.toFloat(),
+                2f, 2f, 0f
+            )
         }
     }
 

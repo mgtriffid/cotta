@@ -196,8 +196,8 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
         val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
-            .also { logger.info { it.joinToString() } } // TODO explicit sorting
-        logger.info { "Setting initial predictions state with tick ${getCurrentTick()}" }
+            .also { logger.trace { it.joinToString() } } // TODO explicit sorting
+        logger.debug { "Setting initial predictions state with tick ${getCurrentTick()}" }
         predictionSimulation.predict(state.entities(currentTick), unprocessedTicks)
     }
 

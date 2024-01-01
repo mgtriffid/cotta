@@ -30,6 +30,8 @@ fun configureLogging() {
         "com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider" to Level.INFO,
         "com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer" to Level.INFO,
         "com.mgtriffid.games.panna.screens.menu.GameScreen" to Level.INFO,
+        "com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer" to Level.INFO,
+        "com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl" to Level.INFO,
     ).forEach { (logger, level) ->
         (LoggerFactory.getLogger(logger) as Logger).level = level
     }

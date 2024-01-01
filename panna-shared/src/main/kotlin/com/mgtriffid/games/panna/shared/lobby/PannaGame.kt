@@ -32,14 +32,14 @@ class PannaGame : CottaGame {
         graverobber.addComponent(GraverobberNpcComponent.create())
         graverobber.addInputComponent(WalkingInputComponent::class)
         graverobber.addComponent(WalkingComponent.create(30))
-        graverobber.addComponent(PositionComponent.create(300, 200, ORIENTATION_LEFT))
+        graverobber.addComponent(PositionComponent.create(30, 40, ORIENTATION_LEFT))
         graverobber.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_FOO_ENTITY))
     }
 
     override fun initializeStaticState(entities: Entities) {
         val terrain = entities.createStatic(StaticEntityId(1))
         terrain.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_TERRAIN))
-        terrain.addComponent(PositionComponent.create(400, 400, ORIENTATION_LEFT))
+        terrain.addComponent(PositionComponent.create(80, 100, ORIENTATION_LEFT))
     }
 
     override val componentClasses = setOf(
@@ -49,6 +49,7 @@ class PannaGame : CottaGame {
         WalkingComponent::class,
         GraverobberNpcComponent::class,
         SteamManPlayerComponent::class,
+        SolidTerrainComponent::class,
     )
 
     override val inputComponentClasses = setOf(
@@ -86,6 +87,6 @@ class PannaGame : CottaGame {
     }
 
     override val config: CottaConfig = object : CottaConfig {
-        override val tickLength: Long = 100L
+        override val tickLength: Long = 40L
     }
 }

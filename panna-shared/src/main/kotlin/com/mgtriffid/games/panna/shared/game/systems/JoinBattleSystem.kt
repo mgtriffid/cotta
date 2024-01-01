@@ -18,7 +18,7 @@ class JoinBattleSystem : InputProcessingSystem {
             if (join) {
                 // todo make sure it doesn't fire twice
                 // when this fires then we record some context
-                logger.info { "Firing JoinBattleEffect" }
+                logger.debug { "Firing JoinBattleEffect" }
                 ctx.fire(JoinBattleEffect.create(e.ownedBy))
             }
         }

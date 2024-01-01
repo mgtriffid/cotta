@@ -50,7 +50,7 @@ class PannaClientGdxInput : CottaClientInput {
             }
 
             ShootInputComponent::class -> {
-                logger.info { "Providing ${ShootInputComponent::class.simpleName}" }
+                logger.trace { "Providing ${ShootInputComponent::class.simpleName}" }
                 return ShootInputComponent.create(
                     storage.shootPressed
                 ) as T

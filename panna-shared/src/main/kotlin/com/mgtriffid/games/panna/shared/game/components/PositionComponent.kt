@@ -9,18 +9,18 @@ interface PositionComponent : MutableComponent<PositionComponent> {
         const val ORIENTATION_LEFT = 0
         const val ORIENTATION_RIGHT = 1
 
-        fun create(xPos: Int, yPos: Int, orientation: Int): PositionComponent {
+        fun create(xPos: Float, yPos: Float, orientation: Int): PositionComponent {
             return PositionComponentImpl(xPos, yPos, orientation)
         }
     }
 
-    @Interpolated @ComponentData var xPos: Int
-    @Interpolated @ComponentData var yPos: Int
+    @Interpolated @ComponentData var xPos: Float
+    @Interpolated @ComponentData var yPos: Float
     @ComponentData var orientation: Int
 }
 private data class PositionComponentImpl(
-    override var xPos: Int,
-    override var yPos: Int,
+    override var xPos: Float,
+    override var yPos: Float,
     override var orientation: Int
 ) : PositionComponent {
     override fun copy(): PositionComponent = this.copy(xPos = xPos, yPos = yPos, orientation = orientation)

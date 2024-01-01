@@ -8,6 +8,7 @@ import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_RIGHT
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
+import kotlin.math.roundToInt
 
 private val logger = mu.KotlinLogging.logger {}
 
@@ -18,8 +19,8 @@ private val logger = mu.KotlinLogging.logger {}
             val entity = ctx.entities().get(e.entityId)
             if (entity.hasComponent(PositionComponent::class)) {
                 val position = entity.getComponent(PositionComponent::class)
-                position.xPos += e.velocityX
-                position.yPos += e.velocityY
+                position.xPos += (e.velocityX * ctx.clock().delta()).roundToInt()
+                position.yPos += (e.velocityY * ctx.clock().delta()).roundToInt()
                 position.orientation = if (e.velocityX > 0) ORIENTATION_RIGHT else ORIENTATION_LEFT
                 logger.debug { "position.xPos = ${position.xPos}" }
                 if (position.xPos < -50 || position.xPos > 1000 || position.yPos < -100 || position.yPos > 2000) {

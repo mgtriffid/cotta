@@ -22,4 +22,11 @@ object PannaTextureIds {
     const val TEXTURE_ID_PLAYER_ENTITY = 2
     const val TEXTURE_ID_BULLET = 3
     const val TEXTURE_ID_TERRAIN = 4
+    object Terrain {
+        const val TEXTURE_ID_BROWN_BLOCK = 5
+    }
+
+    object Characters {
+        const val TEXTURE_ID_TRIGGERMAN = 6
+    }
 }

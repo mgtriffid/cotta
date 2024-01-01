@@ -6,6 +6,6 @@ interface PannaConfig {
 }
 
 object PannaConfigStatic: PannaConfig {
-    override val width = 1280
-    override val height = 720
+    override val width = 960
+    override val height = 540
 }

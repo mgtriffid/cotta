@@ -27,6 +27,7 @@ allprojects {
         ashleyVersion = '1.7.4'
         aiVersion = '1.8.2'
         gdxControllersVersion = '2.2.1'
+        shapedrawerVersion = '2.5.0'
 
         gsonVersion = '2.10.1'
         junitVersion = '5.9.1'
@@ -71,6 +72,7 @@ project(":core") {
         implementation project(":cotta-network-api")
         implementation "com.google.code.gson:gson:2.8.6"
         implementation "com.github.kittinunf.fuel:fuel:2.3.1"
+        implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
     }
 }
 
@@ -94,6 +96,11 @@ project(":panna-shared") {
         implementation project(":cotta-core")
         implementation project(":cotta-annotations")
         implementation project(":cotta-client")
+        implementation "org.mapeditor:libtiled:1.4.2"
+        implementation "javax.xml.bind:jaxb-api:2.3.1"
+        implementation "javax.activation:activation:1.1"
+        implementation "org.glassfish.jaxb:jaxb-runtime:2.3.0"
+        implementation "com.google.code.gson:gson:$gsonVersion"
     }
 }
 

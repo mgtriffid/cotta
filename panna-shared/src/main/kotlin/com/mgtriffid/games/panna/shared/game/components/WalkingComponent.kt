@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.Component
 interface WalkingComponent: Component<WalkingComponent> {
     @ComponentData
     val speed: Int
+
     companion object {
         fun create(speed: Int): WalkingComponent {
             return WalkingComponentImpl(speed)

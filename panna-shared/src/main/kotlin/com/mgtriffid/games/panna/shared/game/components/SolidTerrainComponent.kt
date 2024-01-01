@@ -1,16 +1,20 @@
 package com.mgtriffid.games.panna.shared.game.components
 
+import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.Component
 
 interface SolidTerrainComponent : Component<SolidTerrainComponent> {
+    @ComponentData val width: Int
+    @ComponentData val height: Int
     companion object {
-        object INSTANCE : SolidTerrainComponent
-        fun create(): SolidTerrainComponent {
-            return INSTANCE
+        fun create(width: Int, height: Int): SolidTerrainComponent {
+            return SolidTerrainComponentImpl(width, height)
         }
     }
+}
 
+data class SolidTerrainComponentImpl(override val width: Int, override val height: Int): SolidTerrainComponent {
     override fun copy(): SolidTerrainComponent {
-        return INSTANCE
+        return this.copy(width = width, height = height)
     }
 }

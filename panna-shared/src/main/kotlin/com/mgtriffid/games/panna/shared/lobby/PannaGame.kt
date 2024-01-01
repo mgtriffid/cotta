@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.shared.lobby
 
+import com.google.gson.Gson
 import com.mgtriffid.games.cotta.core.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
@@ -14,6 +15,8 @@ import com.mgtriffid.games.panna.shared.game.effects.JoinBattleEffect
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 import com.mgtriffid.games.panna.shared.game.effects.ShootEffect
 import com.mgtriffid.games.panna.shared.game.systems.*
+import com.mgtriffid.games.panna.shared.tiled.TiledMap
+import java.util.concurrent.atomic.AtomicInteger
 
 class PannaGame : CottaGame {
     override val serverSystems = listOf(
@@ -31,15 +34,35 @@ class PannaGame : CottaGame {
         val graverobber = entities.create()
         graverobber.addComponent(GraverobberNpcComponent.create())
         graverobber.addInputComponent(WalkingInputComponent::class)
-        graverobber.addComponent(WalkingComponent.create(30))
-        graverobber.addComponent(PositionComponent.create(30, 40, ORIENTATION_LEFT))
+        graverobber.addComponent(WalkingComponent.create(80))
+        graverobber.addComponent(PositionComponent.create(30f, 40f, ORIENTATION_LEFT))
         graverobber.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_FOO_ENTITY))
     }
 
     override fun initializeStaticState(entities: Entities) {
-        val terrain = entities.createStatic(StaticEntityId(1))
+        val ids = AtomicInteger()
+        val idGenerator = { ids.incrementAndGet() }
+        val terrain = entities.createStatic(StaticEntityId(idGenerator()))
         terrain.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_TERRAIN))
-        terrain.addComponent(PositionComponent.create(80, 100, ORIENTATION_LEFT))
+        terrain.addComponent(PositionComponent.create(80f, 100f, ORIENTATION_LEFT))
+
+        val tiles = readTerrainFromTiled()
+        tiles.forEachIndexed { rowNumber, row ->
+            row.forEachIndexed { colNumber, tile ->
+                when (tile) {
+                    0 -> Unit
+                    1 -> createBlock(entities, idGenerator, rowNumber, colNumber)
+                    else -> throw RuntimeException("Unknown tile $tile")
+                }
+            }
+        }
+    }
+
+    private fun createBlock(entities: Entities, idGenerator: () -> Int, rowNumber: Int, colNumber: Int) {
+        val block = entities.createStatic(StaticEntityId(idGenerator()))
+        block.addComponent(DrawableComponent.create(PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK))
+        block.addComponent(PositionComponent.create(8 + colNumber * 16f, 8 + rowNumber * 16f, ORIENTATION_LEFT))
+        block.addComponent(SolidTerrainComponent.create(16, 16))
     }
 
     override val componentClasses = setOf(
@@ -88,5 +111,11 @@ class PannaGame : CottaGame {
 
     override val config: CottaConfig = object : CottaConfig {
         override val tickLength: Long = 40L
+    }
+
+    private fun readTerrainFromTiled(): List<List<Int>> {
+        val res = javaClass.getResource("/maps/panna-level.tmj")
+        val map = Gson().fromJson(res.readText(), TiledMap::class.java)
+        return map.layers[0].data.toList().chunked(map.width).reversed()
     }
 }

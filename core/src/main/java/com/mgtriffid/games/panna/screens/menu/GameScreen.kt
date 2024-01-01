@@ -1,24 +1,28 @@
 package com.mgtriffid.games.panna.screens.menu
 
 import com.badlogic.gdx.ScreenAdapter
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
-import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
+import com.mgtriffid.games.panna.PannaGraphicsConfig
 import com.mgtriffid.games.panna.graphics.textures.PannaTextures
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
-import kotlin.reflect.KClass
+import space.earlygrey.shapedrawer.ShapeDrawer
+import kotlin.math.roundToInt
+
+const val SCALE = 3
 
 private val logger = KotlinLogging.logger {}
 
@@ -28,6 +32,11 @@ class GameScreen(
 ) : ScreenAdapter() {
     private lateinit var cottaClient: CottaClient
 
+    private val graphicsConfig: PannaGraphicsConfig = PannaGraphicsConfig()
+
+    private lateinit var debuggingTexture: Texture
+
+    private lateinit var drawer: ShapeDrawer
     lateinit var batch: SpriteBatch
     lateinit var img: Texture
 
@@ -38,11 +47,10 @@ class GameScreen(
 
     private lateinit var input: PannaClientGdxInput
 
-    private val debugPositions = mutableMapOf<EntityId, Pair<Int, Int>>()
-
     override fun show() {
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
+        initializeShapeDrawer()
         textures = PannaTextures()
         textures.init()
         input = PannaClientGdxInput()
@@ -80,6 +88,8 @@ class GameScreen(
     override fun dispose() {
         batch.dispose()
         img.dispose()
+        debuggingTexture.dispose()
+        textures.dispose()
     }
 
     private fun draw(alpha: Float) {
@@ -95,14 +105,35 @@ class GameScreen(
             val position = it.getComponent(PositionComponent::class)
             logger.debug { "Drawing entity ${it.id} owned by ${it.ownedBy}. Position: $position." }
             val texture = TextureRegion(textures[drawable.textureId])
-            logPositionIfChanged(it, position)
             batch.draw(
                 texture,
-                (position.xPos * 2).toFloat(), (position.yPos * 2).toFloat(),
+                (position.xPos.roundToInt() * SCALE).toFloat() - (texture.regionWidth * SCALE / 2) ,
+                (position.yPos.roundToInt() * SCALE).toFloat() - (texture.regionHeight * SCALE / 2),
                 0f, 0f,
                 texture.regionWidth.toFloat(), texture.regionHeight.toFloat(),
-                2f, 2f, 0f
+                SCALE.toFloat(), SCALE.toFloat(), 0f
             )
+            if (graphicsConfig.showTextureBounds) {
+                drawer.rectangle(
+                    position.xPos * SCALE - texture.regionWidth * SCALE / 2,
+                    position.yPos * SCALE - texture.regionHeight * SCALE / 2,
+                    texture.regionWidth * SCALE.toFloat(),
+                    texture.regionHeight * SCALE.toFloat(),
+                    Color.WHITE
+                )
+            }
+            if (graphicsConfig.showPosition) {
+                drawer.filledRectangle(
+                    position.xPos * SCALE - 1.5f, position.yPos * SCALE,
+                    3f, 1f,
+                    Color.WHITE
+                )
+                drawer.filledRectangle(
+                    position.xPos * SCALE, position.yPos * SCALE - 1.5f,
+                    1f, 3f,
+                    Color.WHITE
+                )
+            }
         }
     }
 
@@ -110,12 +141,15 @@ class GameScreen(
         return cottaClient.getDrawableEntities(alpha, DrawableComponent::class, PositionComponent::class)
     }
 
-    private fun logPositionIfChanged(entity: Entity, position: PositionComponent) {
-        val recorded = debugPositions[entity.id]
-        if (recorded != Pair(position.xPos, position.yPos)) {
-            logger.debug { "Entity ${entity.id} moved to ${position.xPos}, ${position.yPos}" }
-            debugPositions[entity.id] = Pair(position.xPos, position.yPos)
-        }
+    private fun initializeShapeDrawer() {
+        val pixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+        pixmap.setColor(Color.WHITE)
+        pixmap.drawPixel(0, 0)
+        debuggingTexture = Texture(pixmap) //remember to dispose of later
+
+        pixmap.dispose()
+        val region = TextureRegion(debuggingTexture, 0, 0, 1, 1)
+        drawer = ShapeDrawer(batch, region)
     }
 
     // <editor-fold desc="Draw lifecycle">

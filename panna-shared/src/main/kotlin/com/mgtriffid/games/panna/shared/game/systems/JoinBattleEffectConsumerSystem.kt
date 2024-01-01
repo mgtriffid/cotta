@@ -15,12 +15,12 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is JoinBattleEffect) {
             val dude = ctx.createEntity(ownedBy = e.ownedBy)
-            dude.addComponent(PositionComponent.create(20, 25, ORIENTATION_LEFT))
+            dude.addComponent(PositionComponent.create(20f, 25f, ORIENTATION_LEFT))
             dude.addInputComponent(WalkingInputComponent::class)
             dude.addInputComponent(ShootInputComponent::class)
-            dude.addComponent(WalkingComponent.create(15))
+            dude.addComponent(WalkingComponent.create(200))
             dude.addComponent(SteamManPlayerComponent.create())
-            dude.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_PLAYER_ENTITY))
+            dude.addComponent(DrawableComponent.create(PannaTextureIds.Characters.TEXTURE_ID_TRIGGERMAN))
         }
     }
 }

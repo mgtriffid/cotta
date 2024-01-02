@@ -37,15 +37,14 @@ class PannaClientGdxInput : CottaClientInput {
                 }
             }
 
-            WalkingInputComponent::class -> {
-                return WalkingInputComponent.create(
+            CharacterInputComponent::class -> {
+                return CharacterInputComponent.create(
                     when {
                         storage.leftPressed -> WALKING_DIRECTION_LEFT
                         storage.rightPressed -> WALKING_DIRECTION_RIGHT
-                        storage.upPressed -> WALKING_DIRECTION_UP
-                        storage.downPressed -> WALKING_DIRECTION_DOWN
                         else -> WALKING_DIRECTION_NONE
-                    }.also { logger.trace { "WalkingInputComponent created; direction == $it" } }
+                    }.also { logger.trace { "WalkingInputComponent created; direction == $it" } },
+                    storage.jumpPressed
                 ) as T
             }
 
@@ -63,9 +62,8 @@ class PannaClientGdxInput : CottaClientInput {
         with(storage) {
             leftPressed = leftPressed || Gdx.input.isKeyPressed(Input.Keys.A)
             rightPressed = rightPressed || Gdx.input.isKeyPressed(Input.Keys.D)
-            upPressed = upPressed || Gdx.input.isKeyPressed(Input.Keys.W)
-            downPressed = downPressed || Gdx.input.isKeyPressed(Input.Keys.S)
             shootPressed = shootPressed || Gdx.input.isKeyPressed(Input.Keys.J)
+            jumpPressed = jumpPressed || Gdx.input.isKeyPressed(Input.Keys.SPACE)
         }
     }
 
@@ -73,17 +71,15 @@ class PannaClientGdxInput : CottaClientInput {
         with(storage) {
             leftPressed = false
             rightPressed = false
-            upPressed = false
-            downPressed = false
             shootPressed = false
+            jumpPressed = false
         }
     }
 
     class Storage {
         var leftPressed: Boolean = false
         var rightPressed: Boolean = false
-        var upPressed: Boolean = false
-        var downPressed: Boolean = false
         var shootPressed: Boolean = false
+        var jumpPressed: Boolean = false
     }
 }

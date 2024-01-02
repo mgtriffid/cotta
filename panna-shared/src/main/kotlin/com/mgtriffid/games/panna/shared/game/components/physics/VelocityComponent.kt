@@ -1,11 +1,13 @@
-package com.mgtriffid.games.panna.shared.game.components
+package com.mgtriffid.games.panna.shared.game.components.physics
 
 import com.mgtriffid.games.cotta.ComponentData
-import com.mgtriffid.games.cotta.core.entities.Component
+import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
-interface VelocityComponent : Component<VelocityComponent> {
-    @ComponentData val velX: Int
-    @ComponentData val velY: Int
+interface VelocityComponent : MutableComponent<VelocityComponent> {
+    @ComponentData
+    var velX: Int
+    @ComponentData
+    var velY: Int
 
     companion object {
         fun create(velX: Int, velY: Int): VelocityComponent {
@@ -15,8 +17,8 @@ interface VelocityComponent : Component<VelocityComponent> {
 }
 
 private data class VelocityComponentImpl(
-    override val velX: Int,
-    override val velY: Int
+    override var velX: Int,
+    override var velY: Int
 ) : VelocityComponent {
     override fun copy(): VelocityComponent {
         return this.copy(velX = velX, velY = velY)

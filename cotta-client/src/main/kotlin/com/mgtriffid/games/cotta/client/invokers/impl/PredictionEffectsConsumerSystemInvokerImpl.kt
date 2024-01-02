@@ -13,20 +13,14 @@ import jakarta.inject.Named
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
+
 class PredictionEffectsConsumerSystemInvokerImpl @Inject constructor(
     @Named("prediction") private val effectBus: EffectBus,
     @Named("prediction") private val context: TracingEffectProcessingContext,
     @Named("prediction") private val traces: Traces,
 ) : PredictionEffectsConsumerSystemInvoker {
     override fun invoke(system: EffectsConsumerSystem) {
-        logger.debug { "Invoked ${system::class.qualifiedName}" }
-        if (system::class.simpleName == "MovementEffectConsumerSystem") {
-            logger.debug { "Invoked MovementEffectConsumerSystem in prediction" }
-        }
         effectBus.effects().forEach { process(it, system) }
-        if (system::class.simpleName == "MovementEffectConsumerSystem") {
-            logger.debug { "Done invoking MovementEffectConsumerSystem in prediction" }
-        }
     }
 
     private fun process(effect: CottaEffect, system: EffectsConsumerSystem) {

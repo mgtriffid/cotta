@@ -7,19 +7,19 @@ interface JumpingComponent : MutableComponent<JumpingComponent> {
     @ComponentData
     var inAir: Boolean
     @ComponentData
-    val jumpSpeed: Int
+    val jumpSpeed: Float
 
     companion object {
         fun create(
             inAir: Boolean,
-            jumpSpeed: Int
+            jumpSpeed: Float
         ): JumpingComponent {
             return JumpingComponentImpl(inAir, jumpSpeed)
         }
     }
 }
 
-private data class JumpingComponentImpl(override var inAir: Boolean, override val jumpSpeed: Int) : JumpingComponent {
+private data class JumpingComponentImpl(override var inAir: Boolean, override val jumpSpeed: Float) : JumpingComponent {
     override fun copy(): JumpingComponent {
         return this.copy(inAir = inAir, jumpSpeed = jumpSpeed)
     }

@@ -7,13 +7,13 @@ class CottaClockImpl(
     private val tickProvider: TickProvider,
     private val tickLength: Long
 ) : CottaClock {
-    private val tickLengthSeconds = tickLength / 1000.0
+    private val tickLengthSeconds = tickLength / 1000f
 
     override fun time(): Long {
         return tickProvider.tick * tickLength
     }
 
-    override fun delta(): Double {
+    override fun delta(): Float {
         return tickLengthSeconds
     }
 }

@@ -5,10 +5,10 @@ import com.mgtriffid.games.cotta.core.entities.Component
 
 interface WalkingComponent: Component<WalkingComponent> {
     @ComponentData
-    val speed: Int
+    val speed: Float
 
     companion object {
-        fun create(speed: Int): WalkingComponent {
+        fun create(speed: Float): WalkingComponent {
             return WalkingComponentImpl(speed)
         }
     }
@@ -18,4 +18,4 @@ interface WalkingComponent: Component<WalkingComponent> {
     }
 }
 
-private data class WalkingComponentImpl(override val speed: Int): WalkingComponent
+private data class WalkingComponentImpl(override val speed: Float): WalkingComponent

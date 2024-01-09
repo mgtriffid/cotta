@@ -14,7 +14,7 @@ import com.mgtriffid.games.panna.shared.game.effects.walking.JumpEffect
             val entity = ctx.entities().get(e.entityId)
             entity.getComponent(VelocityComponent::class).apply {
                 val component = entity.getComponent(JumpingComponent::class)
-                velY = 1 * component.jumpSpeed
+                velY = component.jumpSpeed
                 component.inAir = true
             }
         }

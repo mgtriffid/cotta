@@ -34,8 +34,8 @@ class MovementEffectConsumerSystem : EffectsConsumerSystem {
             } }
             if (entity.hasComponent(PositionComponent::class)) {
                 val position = entity.getComponent(PositionComponent::class)
-                var newXPos = position.xPos + (e.velocityX * ctx.clock().delta()).roundToInt()
-                var newYPos = position.yPos + (e.velocityY * ctx.clock().delta()).roundToInt()
+                var newXPos = position.xPos + e.velocityX
+                var newYPos = position.yPos + e.velocityY
 
                 when {
                     e.velocityX < 0 -> position.orientation = ORIENTATION_LEFT
@@ -72,13 +72,13 @@ class MovementEffectConsumerSystem : EffectsConsumerSystem {
                         e.velocityX > 0 -> newXPos = xColliding.fold(newXPos) { acc, t ->
                             val tPos = t.getComponent(PositionComponent::class)
                             val tCol = t.getComponent(ColliderComponent::class)
-                            velocityComponent.velX = 0
+                            velocityComponent.velX = 0f
                             acc.coerceAtMost(tPos.xPos - tCol.width / 2 - collider.width / 2)
                         }
                         e.velocityX < 0 -> newXPos = xColliding.fold(newXPos) { acc, t ->
                             val tPos = t.getComponent(PositionComponent::class)
                             val tCol = t.getComponent(ColliderComponent::class)
-                            velocityComponent.velX = 0
+                            velocityComponent.velX = 0f
                             acc.coerceAtLeast(tPos.xPos + tCol.width / 2 + collider.width / 2)
                         }
                     }
@@ -102,14 +102,14 @@ class MovementEffectConsumerSystem : EffectsConsumerSystem {
                         e.velocityY < 0 -> newYPos = yColliding.fold(newYPos) { acc, t ->
                             val tPos = t.getComponent(PositionComponent::class)
                             val tCol = t.getComponent(ColliderComponent::class)
-                            velocityComponent.velY = 0
+                            velocityComponent.velY = 0f
                             land()
                             acc.coerceAtLeast(tPos.yPos + tCol.height / 2 + collider.height / 2)
                         }
                         e.velocityY > 0 -> newYPos = yColliding.fold(newYPos) { acc, t ->
                             val tPos = t.getComponent(PositionComponent::class)
                             val tCol = t.getComponent(ColliderComponent::class)
-                            velocityComponent.velY = 0
+                            velocityComponent.velY = 0f
                             acc.coerceAtMost(tPos.yPos - tCol.height / 2 - collider.height / 2)
                         }
                     }

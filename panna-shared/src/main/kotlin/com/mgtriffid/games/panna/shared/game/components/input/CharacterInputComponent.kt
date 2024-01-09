@@ -17,7 +17,7 @@ interface CharacterInputComponent : InputComponent<CharacterInputComponent> {
         )
 
         fun create(direction: Byte, jump: Boolean): CharacterInputComponent {
-            return CharacterInputComponentImpl(direction, jump)
+            return CharacterInputComponentImpl (direction, jump)
         }
     }
 }

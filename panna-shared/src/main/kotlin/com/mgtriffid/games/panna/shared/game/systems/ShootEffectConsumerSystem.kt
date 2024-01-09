@@ -26,9 +26,9 @@ private val logger = KotlinLogging.logger {}
         bullet.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_BULLET))
         bullet.addComponent(
             VelocityComponent.create(when (position.orientation) {
-            PositionComponent.ORIENTATION_LEFT -> -80
-            PositionComponent.ORIENTATION_RIGHT -> 80
+            PositionComponent.ORIENTATION_LEFT -> -80f
+            PositionComponent.ORIENTATION_RIGHT -> 80f
             else -> throw IllegalStateException("Invalid orientation: ${position.orientation}")
-        }, 0))
+        }, 0f))
     }
 }

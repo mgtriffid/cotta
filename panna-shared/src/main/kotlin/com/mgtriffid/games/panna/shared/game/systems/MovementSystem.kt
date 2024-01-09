@@ -13,8 +13,8 @@ import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
             val velocity = e.getComponent(VelocityComponent::class)
             ctx.fire(
                 MovementEffect.create(
-                    velocity.velX,
-                    velocity.velY,
+                    velocity.velX * ctx.clock().delta(),
+                    velocity.velY * ctx.clock().delta(),
                     e.id
                 )
             )

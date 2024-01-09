@@ -52,8 +52,8 @@ class PannaGame : CottaGame {
         val graverobber = entities.create()
         graverobber.addComponent(GraverobberNpcComponent.create())
         graverobber.addInputComponent(CharacterInputComponent::class)
-        graverobber.addComponent(WalkingComponent.create(80))
-        graverobber.addComponent(VelocityComponent.create(0, 0))
+        graverobber.addComponent(WalkingComponent.create(80f))
+        graverobber.addComponent(VelocityComponent.create(0f, 0f))
         graverobber.addComponent(PositionComponent.create(30f, 40f, ORIENTATION_LEFT))
         graverobber.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_FOO_ENTITY))
     }

@@ -5,18 +5,18 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 
 interface MovementEffect : CottaEffect {
-    @EffectData val velocityX: Int
-    @EffectData val velocityY: Int
+    @EffectData val velocityX: Float
+    @EffectData val velocityY: Float
     @EffectData val entityId: EntityId // should be careful when transferring this over the wire
     companion object {
-        fun create(velocityX: Int, velocityY: Int, entityId: EntityId): MovementEffect {
+        fun create(velocityX: Float, velocityY: Float, entityId: EntityId): MovementEffect {
             return MovementEffectImpl(velocityX, velocityY, entityId)
         }
     }
 }
 
 private data class MovementEffectImpl(
-    override val velocityX: Int,
-    override val velocityY: Int,
+    override val velocityX: Float,
+    override val velocityY: Float,
     override val entityId: EntityId
 ) : MovementEffect

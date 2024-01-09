@@ -21,6 +21,7 @@ import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 import com.mgtriffid.games.panna.shared.game.systems.*
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleSystem
+import com.mgtriffid.games.panna.shared.game.systems.walking.CoyoteSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.JumpEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.WalkingEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.WalkingInputProcessingSystem
@@ -36,6 +37,7 @@ class PannaGame : CottaGame {
         MovementSystem::class,
         ShootEffectConsumerSystem::class,
         MovementEffectConsumerSystem::class,
+        CoyoteSystem::class,
         GravitySystem::class,
         JoinBattleSystem::class,
         JoinBattleEffectConsumerSystem::class,

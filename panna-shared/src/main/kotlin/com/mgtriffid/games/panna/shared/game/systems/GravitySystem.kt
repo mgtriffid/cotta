@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.panna.shared.game.components.JumpingComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 
+// Mutates component outside of effect processing. Is it even possible?
 @Predicted class GravitySystem : EntityProcessingSystem {
     override fun process(e: Entity, ctx: EntityProcessingContext) {
         if (e.hasComponent(JumpingComponent::class) && e.hasComponent(VelocityComponent::class)) {

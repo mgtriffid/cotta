@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client
 
+import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -15,4 +16,5 @@ interface CottaClient {
     // TODO better place or better beans. This is here now only for drawing. Incorrect.
     val state: CottaState
     val tickProvider: TickProvider
+    val localPlayer: LocalPlayer // TODO read-only view
 }

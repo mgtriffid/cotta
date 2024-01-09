@@ -21,16 +21,16 @@ private val logger = mu.KotlinLogging.logger {}
 class MovementEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is MovementEffect) {
-            logger.info { "Received MovementEffect: $e" }
+            logger.trace { "Received MovementEffect: $e" }
             val entity = ctx.entities().get(e.entityId)
             val velocityComponent = entity.getComponent(VelocityComponent::class)
             val land: () -> Unit = if (entity.hasComponent(JumpingComponent::class)) {
                 {
                     entity.getComponent(JumpingComponent::class).inAir = false
-                    logger.info { "Landed!" }
+                    logger.trace { "Landed!" }
                 }
             } else { {
-                logger.info { "Landed! but who cares" }
+                logger.trace { "Landed! but who cares" }
             } }
             if (entity.hasComponent(PositionComponent::class)) {
                 val position = entity.getComponent(PositionComponent::class)

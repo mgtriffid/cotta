@@ -40,7 +40,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
     private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
-    private val localPlayer: LocalPlayer,
+    override val localPlayer: LocalPlayer,
     private val interpolators: Interpolators,
     @Named("simulation") override val state: CottaState // Todo not expose as public
 ) : CottaClient {

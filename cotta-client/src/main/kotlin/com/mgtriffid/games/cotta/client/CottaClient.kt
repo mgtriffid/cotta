@@ -14,7 +14,5 @@ interface CottaClient {
     fun getDrawableEntities(alpha: Float, vararg components: KClass<out Component<*>>): List<Entity>
 
     // TODO better place or better beans. This is here now only for drawing. Incorrect.
-    val state: CottaState
-    val tickProvider: TickProvider
     val localPlayer: LocalPlayer // TODO read-only view
 }

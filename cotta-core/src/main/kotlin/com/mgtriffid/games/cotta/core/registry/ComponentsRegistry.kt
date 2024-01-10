@@ -27,6 +27,9 @@ interface ComponentsRegistry {
     fun <C: Component<C>> registerComponentClass(kClass: KClass<C>)
     fun <C: InputComponent<C>> registerInputComponentClass(kClass: KClass<C>)
     fun <C: CottaEffect> registerEffectClass(kClass: KClass<C>)
+    fun addRegistrationListener(listener: ComponentRegistrationListener)
+    fun addInputComponentRegistrationListener(listener: InputComponentRegistrationListener)
+    fun addEffectRegistrationListener(listener: EffectRegistrationListener)
 }
 
 class ComponentsRegistryImpl: ComponentsRegistry {
@@ -136,15 +139,15 @@ class ComponentsRegistryImpl: ComponentsRegistry {
         return spec
     }
 
-    fun addRegistrationListener(listener: ComponentRegistrationListener) {
+    override fun addRegistrationListener(listener: ComponentRegistrationListener) {
         componentRegistrationListeners.add(listener)
     }
 
-    fun addInputComponentRegistrationListener(listener: InputComponentRegistrationListener) {
+    override fun addInputComponentRegistrationListener(listener: InputComponentRegistrationListener) {
         inputComponentsRegistrationListeners.add(listener)
     }
 
-    fun addEffectRegistrationListener(listener: EffectRegistrationListener) {
+    override fun addEffectRegistrationListener(listener: EffectRegistrationListener) {
         effectRegistrationListeners.add(listener)
     }
 }

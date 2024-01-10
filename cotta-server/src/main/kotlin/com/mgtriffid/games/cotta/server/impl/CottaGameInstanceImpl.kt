@@ -1,10 +1,10 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
+import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger {}
 
 class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
     private val game: CottaGame,
-    private val engine: CottaEngine<SR, DR, IR>,
+    private val componentsRegistry: ComponentsRegistry,
     private val network: CottaServerNetworkTransport,
     private val clientsGhosts: ClientsGhosts,
     private val tickProvider: TickProvider,
@@ -54,13 +54,13 @@ class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @
     // TODO probably this is wrong place
     private fun registerComponents() {
         game.componentClasses.forEach {
-            engine.getComponentsRegistry().registerComponentClass(it)
+            componentsRegistry.registerComponentClass(it)
         }
         game.inputComponentClasses.forEach {
-            engine.getComponentsRegistry().registerInputComponentClass(it)
+            componentsRegistry.registerInputComponentClass(it)
         }
         game.effectClasses.forEach {
-            engine.getComponentsRegistry().registerEffectClass(it)
+            componentsRegistry.registerEffectClass(it)
         }
         serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
     }

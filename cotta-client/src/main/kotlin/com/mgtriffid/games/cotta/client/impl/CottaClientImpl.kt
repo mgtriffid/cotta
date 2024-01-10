@@ -5,13 +5,13 @@ import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.interpolation.Interpolators
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.client.network.NetworkClient
-import com.mgtriffid.games.cotta.core.CottaEngine
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
+import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
@@ -30,22 +30,21 @@ private val logger = KotlinLogging.logger {}
 // TODO bloated constructor
 class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inject constructor(
     val game: CottaGame,
-    engine: CottaEngine<SR, DR, IR>, // weird type parameterization
     private val network: NetworkClient,
     private val localInput: CottaClientInput,
     private val clientInputs: ClientInputs,
     private val clientSimulation: ClientSimulation,
     private val predictionSimulation: PredictionSimulation,
-    override val tickProvider: TickProvider,
+    private val tickProvider: TickProvider,
     private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     override val localPlayer: LocalPlayer,
+    private val componentsRegistry: ComponentsRegistry,
     private val interpolators: Interpolators,
-    @Named("simulation") override val state: CottaState // Todo not expose as public
+    @Named("simulation") private val state: CottaState
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial // the only real `var` here
-    private val componentsRegistry = engine.getComponentsRegistry()
 
     override fun initialize() {
         registerComponents()
@@ -254,6 +253,7 @@ class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inj
 
     // TODO probably this is wrong place
     private fun registerComponents() {
+        logger.info { "Registering components to ${componentsRegistry.hashCode()}" }
         game.componentClasses.forEach {
             componentsRegistry.registerComponentClass(it)
             interpolators.register(it)

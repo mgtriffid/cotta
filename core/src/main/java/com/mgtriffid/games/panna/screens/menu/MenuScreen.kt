@@ -18,6 +18,7 @@ import com.mgtriffid.games.panna.PannaGdxGame
 import com.mgtriffid.games.panna.graphics.actors.AnimatedImage
 import com.mgtriffid.games.panna.graphics.animation.Animation
 import com.mgtriffid.games.panna.graphics.animation.FrameConfig
+import com.mgtriffid.games.panna.screens.game.GameScreen
 import com.mgtriffid.games.panna.screens.menu.components.LoginForm
 import com.mgtriffid.games.panna.screens.menu.components.StatusDialogWindow
 import com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterListModel

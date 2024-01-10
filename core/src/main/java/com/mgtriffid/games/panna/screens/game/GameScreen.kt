@@ -1,4 +1,4 @@
-package com.mgtriffid.games.panna.screens.menu
+package com.mgtriffid.games.panna.screens.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
@@ -12,7 +12,6 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaConfigStatic.height

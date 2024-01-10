@@ -36,7 +36,7 @@ class CottaServerModule(
 ) : Module {
     override fun configure(binder: Binder) {
         with (binder) {
-            bind(CottaGameInstance::class.java).to(object : TypeLiteral<CottaGameInstanceImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>() {})
+            bind(CottaGameInstance::class.java).to(object : TypeLiteral<CottaGameInstanceImpl>() {})
             bind(CottaGame::class.java).toInstance(game)
             bind(ClientsGhosts::class.java).`in`(Scopes.SINGLETON)
 

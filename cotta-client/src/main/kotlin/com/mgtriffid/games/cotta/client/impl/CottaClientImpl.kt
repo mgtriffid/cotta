@@ -28,7 +28,7 @@ const val STATE_WAITING_THRESHOLD = 5000L
 private val logger = KotlinLogging.logger {}
 
 // TODO bloated constructor
-class CottaClientImpl<SR : StateRecipe, DR : DeltaRecipe, IR : InputRecipe> @Inject constructor(
+class CottaClientImpl @Inject constructor(
     val game: CottaGame,
     private val network: NetworkClient,
     private val localInput: CottaClientInput,

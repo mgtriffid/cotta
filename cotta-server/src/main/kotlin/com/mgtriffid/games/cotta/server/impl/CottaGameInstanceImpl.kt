@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class CottaGameInstanceImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
+class CottaGameInstanceImpl @Inject constructor(
     private val game: CottaGame,
     private val componentsRegistry: ComponentsRegistry,
     private val network: CottaServerNetworkTransport,

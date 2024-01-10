@@ -53,7 +53,7 @@ class CottaClientModule(
         bind(NetworkClient::class.java)
             .to(NetworkClientImpl::class.java).`in`(Scopes.SINGLETON)
         bind(CottaClient::class.java)
-            .to(object: TypeLiteral<CottaClientImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
+            .to(object: TypeLiteral<CottaClientImpl>(){})
         bind(Int::class.java).annotatedWith(Names.named("historyLength")).toInstance(8)
         bind(Int::class.java).annotatedWith(Names.named("stateHistoryLength")).toInstance(128)
 

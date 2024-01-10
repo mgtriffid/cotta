@@ -125,7 +125,7 @@ class GameScreen(
 
     private fun drawEntities(entities: List<Entity>, alpha: Float) {
         logger.debug { "Drawing entities, alpha = $alpha" }
-        getDrawableEntities(alpha).forEach {
+        entities.forEach {
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
             logger.debug { "Drawing entity ${it.id} owned by ${it.ownedBy}. Position: $position." }

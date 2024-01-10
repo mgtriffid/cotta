@@ -44,7 +44,6 @@ class GameScreen(
 
     private lateinit var drawer: ShapeDrawer
     lateinit var batch: SpriteBatch
-    lateinit var img: Texture
 
     lateinit var textures: PannaTextures
     lateinit var camera: OrthographicCamera
@@ -56,7 +55,6 @@ class GameScreen(
 
     override fun show() {
         batch = SpriteBatch()
-        img = Texture("badlogic.jpg")
         initializeShapeDrawer()
         textures = PannaTextures()
         textures.init()
@@ -106,7 +104,6 @@ class GameScreen(
 
     override fun dispose() {
         batch.dispose()
-        img.dispose()
         debuggingTexture.dispose()
         textures.dispose()
     }

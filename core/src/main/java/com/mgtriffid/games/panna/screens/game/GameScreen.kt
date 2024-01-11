@@ -64,7 +64,6 @@ class GameScreen(
 
     override fun dispose() {
         graphics.dispose()
-
     }
 
     private fun draw(alpha: Float) {
@@ -72,7 +71,7 @@ class GameScreen(
             return
         }
         val entities = getDrawableEntities(alpha)
-        graphics.draw(entities, alpha, cottaClient.localPlayer.playerId)
+        graphics.draw(entities, cottaClient.localPlayer.playerId)
 
     }
 

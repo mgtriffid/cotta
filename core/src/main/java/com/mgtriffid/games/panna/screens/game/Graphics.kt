@@ -22,6 +22,8 @@ import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger {}
 
+const val centerAtPlayer = true
+
 class Graphics {
 
     private lateinit var batch: SpriteBatch
@@ -52,7 +54,6 @@ class Graphics {
 
     fun draw(
         entities: List<Entity>,
-        alpha: Float,
         playerId: PlayerId
     ) {
         val dudePosition = entities.find {
@@ -61,12 +62,11 @@ class Graphics {
         }?.getComponent(PositionComponent::class)
         updateCamera(dudePosition?.xPos, dudePosition?.yPos)
         beginDraw()
-        drawEntities(entities, alpha)
+        drawEntities(entities)
         endDraw()
     }
 
-    fun drawEntities(entities: List<Entity>, alpha: Float) {
-        logger.debug { "Drawing entities, alpha = $alpha" }
+    private fun drawEntities(entities: List<Entity>) {
         entities.forEach {
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
@@ -132,12 +132,16 @@ class Graphics {
     }
 
     private fun updateCamera(xPos: Float?, yPos: Float?) {
-        val mouseX = Gdx.input.x
-        val mouseY = Gdx.input.y
-        // position camera so that middle of line between mouse and dude is in the middle of the screen:
-        val cameraX = (xPos ?: 0f) * SCALE + (mouseX - PannaConfigStatic.width / 2)
-        val cameraY = (yPos ?: 0f) * SCALE + (PannaConfigStatic.height / 2 - mouseY)
-        camera.position.set(cameraX, cameraY, 0f)
+        if (centerAtPlayer) {
+            camera.position.set((xPos ?: 0f) * SCALE, (yPos ?: 0f) * SCALE, 0f)
+        } else {
+            val mouseX = Gdx.input.x
+            val mouseY = Gdx.input.y
+            // position camera so that middle of line between mouse and dude is in the middle of the screen:
+            val cameraX = (xPos ?: 0f) * SCALE + (mouseX - PannaConfigStatic.width / 2)
+            val cameraY = (yPos ?: 0f) * SCALE + (PannaConfigStatic.height / 2 - mouseY)
+            camera.position.set(cameraX, cameraY, 0f)
+        }
         camera.update()
         batch.projectionMatrix = camera.combined
     }

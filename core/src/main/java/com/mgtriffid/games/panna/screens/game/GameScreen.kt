@@ -1,31 +1,16 @@
 package com.mgtriffid.games.panna.screens.game
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.utils.ScreenUtils
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
-import com.mgtriffid.games.panna.PannaConfigStatic.height
-import com.mgtriffid.games.panna.PannaConfigStatic.width
 import com.mgtriffid.games.panna.PannaGdxGame
-import com.mgtriffid.games.panna.PannaGraphicsConfig
-import com.mgtriffid.games.panna.graphics.textures.PannaTextures
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
-import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
-import space.earlygrey.shapedrawer.ShapeDrawer
-import kotlin.math.roundToInt
 
 const val SCALE = 3
 
@@ -36,10 +21,6 @@ class GameScreen(
     private val gdxGame: PannaGdxGame
 ) : ScreenAdapter() {
     private lateinit var cottaClient: CottaClient
-
-
-
-
 
     private var nextTickAt: Long = -1
     private var tickLength: Long = -1

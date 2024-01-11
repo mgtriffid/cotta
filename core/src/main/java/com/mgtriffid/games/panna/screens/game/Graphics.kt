@@ -24,12 +24,12 @@ private val logger = KotlinLogging.logger {}
 
 class Graphics {
 
-    lateinit var batch: SpriteBatch
-    lateinit var textures: PannaTextures
-    lateinit var camera: OrthographicCamera
-    private val graphicsConfig: PannaGraphicsConfig = PannaGraphicsConfig()
+    private lateinit var batch: SpriteBatch
+    private lateinit var textures: PannaTextures
+    private lateinit var camera: OrthographicCamera
     private lateinit var debuggingTexture: Texture
     private lateinit var drawer: ShapeDrawer
+    private val graphicsConfig: PannaGraphicsConfig = PannaGraphicsConfig()
 
     fun initialize() {
         batch = SpriteBatch()
@@ -37,7 +37,6 @@ class Graphics {
         textures = PannaTextures()
         textures.init()
         camera = OrthographicCamera(960f, 960 * 9 / 16f)
-
     }
 
     private fun initializeShapeDrawer() {

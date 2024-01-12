@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.screens.game.graphics
 
+import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -40,6 +41,12 @@ class Graphics {
         textures = PannaTextures()
         textures.init()
         camera = OrthographicCamera(960f, 960 * 9 / 16f)
+        setCrosshairCursor()
+    }
+
+    private fun setCrosshairCursor() {
+        val pm = Pixmap(Gdx.files.getFileHandle("panna/crosshair/crosshair.png", Files.FileType.Classpath))
+        Gdx.graphics.setCursor(Gdx.graphics.newCursor(pm, 7, 7))
     }
 
     private fun initializeShapeDrawer() {

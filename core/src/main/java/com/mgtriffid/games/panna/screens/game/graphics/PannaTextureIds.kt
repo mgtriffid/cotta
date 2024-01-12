@@ -11,5 +11,6 @@ object PannaTextureIds {
 
     object Characters {
         val TEXTURE_ID_DUDE_BLUE = TextureId(6)
+        val TEXTURE_ID_DUDE_BLUE_JUMPING = TextureId(7)
     }
 }

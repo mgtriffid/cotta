@@ -15,9 +15,11 @@ class PannaTextures {
         textures[PannaTextureIds.TEXTURE_ID_TERRAIN] = TextureRegion(Texture("terrain.png"))
         textures[PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK] = TextureRegion(Texture("panna/terrain/brown-block.png"))
         textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE] = TextureRegion(Texture("panna/characters/dude_blue.png"), 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_JUMPING] = TextureRegion(Texture("panna/characters/dude_blue_jumping.png"), 16, 16)
     }
 
     fun dispose() {
+        // TODO make sure no texture is disposed twice
         textures.values.forEach { it.texture.dispose() }
     }
 

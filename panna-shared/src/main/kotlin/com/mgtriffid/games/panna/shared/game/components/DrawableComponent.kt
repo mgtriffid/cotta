@@ -4,29 +4,15 @@ import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.Component
 
 interface DrawableComponent : Component<DrawableComponent> {
-    @ComponentData val textureId: Int
+    @ComponentData val drawStrategy: Int
 
     companion object {
-        fun create(textureId: Int): DrawableComponent {
-            return DrawableComponentImpl(textureId)
+        fun create(drawStrategy: Int): DrawableComponent {
+            return DrawableComponentImpl(drawStrategy)
         }
     }
 
     override fun copy(): DrawableComponent = this
 }
 
-data class DrawableComponentImpl(override val textureId: Int): DrawableComponent
-
-object PannaTextureIds {
-    const val TEXTURE_ID_FOO_ENTITY = 1
-    const val TEXTURE_ID_PLAYER_ENTITY = 2
-    const val TEXTURE_ID_BULLET = 3
-    const val TEXTURE_ID_TERRAIN = 4
-    object Terrain {
-        const val TEXTURE_ID_BROWN_BLOCK = 5
-    }
-
-    object Characters {
-        const val TEXTURE_ID_TRIGGERMAN = 6
-    }
-}
+data class DrawableComponentImpl(override val drawStrategy: Int): DrawableComponent

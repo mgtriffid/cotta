@@ -1,4 +1,4 @@
-package com.mgtriffid.games.panna.screens.game
+package com.mgtriffid.games.panna.screens.game.graphics
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
@@ -12,7 +12,8 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.panna.PannaConfigStatic
 import com.mgtriffid.games.panna.PannaGraphicsConfig
-import com.mgtriffid.games.panna.graphics.textures.PannaTextures
+import com.mgtriffid.games.panna.screens.game.graphics.textures.PannaTextures
+import com.mgtriffid.games.panna.screens.game.SCALE
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
@@ -71,7 +72,7 @@ class Graphics {
             val drawable = it.getComponent(DrawableComponent::class)
             val position = it.getComponent(PositionComponent::class)
             logger.debug { "Drawing entity ${it.id} owned by ${it.ownedBy}. Position: $position." }
-            val texture = TextureRegion(textures[drawable.textureId])
+            val texture = textures[getStrategy(drawable.drawStrategy).getTexture(it)]
             batch.draw(
                 texture,
                 (position.xPos.roundToInt() * SCALE).toFloat() - (texture.regionWidth * SCALE / 2),

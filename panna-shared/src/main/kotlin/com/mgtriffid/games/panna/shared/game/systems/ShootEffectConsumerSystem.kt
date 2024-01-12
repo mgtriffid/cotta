@@ -4,8 +4,8 @@ import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
+import com.mgtriffid.games.panna.shared.BULLET_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
-import com.mgtriffid.games.panna.shared.game.components.PannaTextureIds
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.ShootEffect
@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger {}
         val bullet = ctx.createEntity(ownedBy = shooter.ownedBy)
         logger.info { "Created bullet ${bullet.id}" }
         bullet.addComponent(PositionComponent.create(position.xPos, position.yPos, position.orientation))
-        bullet.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_BULLET))
+        bullet.addComponent(DrawableComponent.create(BULLET_STRATEGY))
         bullet.addComponent(
             VelocityComponent.create(when (position.orientation) {
             PositionComponent.ORIENTATION_LEFT -> -80f

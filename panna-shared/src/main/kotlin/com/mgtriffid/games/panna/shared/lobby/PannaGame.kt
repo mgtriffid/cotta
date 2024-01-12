@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
+import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.*
@@ -55,7 +56,9 @@ class PannaGame : CottaGame {
         graverobber.addComponent(WalkingComponent.create(80f))
         graverobber.addComponent(VelocityComponent.create(0f, 0f))
         graverobber.addComponent(PositionComponent.create(30f, 40f, ORIENTATION_LEFT))
-        graverobber.addComponent(DrawableComponent.create(PannaTextureIds.TEXTURE_ID_FOO_ENTITY))
+        graverobber.addComponent(DrawableComponent.create(
+            TODO("Should not be created as is, should be redone as general NPC")
+        ))
     }
 
     override fun initializeStaticState(entities: Entities) {
@@ -76,7 +79,7 @@ class PannaGame : CottaGame {
 
     private fun createBlock(entities: Entities, idGenerator: () -> Int, rowNumber: Int, colNumber: Int) {
         val block = entities.createStatic(StaticEntityId(idGenerator()))
-        block.addComponent(DrawableComponent.create(PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK))
+        block.addComponent(DrawableComponent.create(SOLID_TERRAIN_TILE_STRATEGY))
         block.addComponent(PositionComponent.create(8 + colNumber * 16f, 8 + rowNumber * 16f, ORIENTATION_LEFT))
         block.addComponent(SolidTerrainComponent.create())
         block.addComponent(ColliderComponent.create(16, 16))

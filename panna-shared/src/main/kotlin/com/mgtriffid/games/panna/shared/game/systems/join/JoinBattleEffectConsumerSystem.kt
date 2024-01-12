@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
+import com.mgtriffid.games.panna.shared.CHARACTER_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.ShootInputComponent
@@ -25,7 +26,7 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
             dude.addComponent(VelocityComponent.create(0f, 0f))
             dude.addComponent(SteamManPlayerComponent.create())
             dude.addComponent(ColliderComponent.create(16, 16))
-            dude.addComponent(DrawableComponent.create(PannaTextureIds.Characters.TEXTURE_ID_TRIGGERMAN))
+            dude.addComponent(DrawableComponent.create(CHARACTER_STRATEGY))
         }
     }
 }

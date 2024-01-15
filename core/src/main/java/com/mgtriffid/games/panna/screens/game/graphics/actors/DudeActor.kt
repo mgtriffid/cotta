@@ -15,7 +15,11 @@ class DudeActor(
 
     override fun draw(batch: Batch, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
-        batch.draw(textureRegion, x - textureRegion.regionWidth / 2, y - textureRegion.regionHeight / 2)
+        batch.draw(
+            textureRegion,
+            x - textureRegion.regionWidth / 2,
+            y - textureRegion.regionHeight / 2
+        )
     }
 
     override fun update(entity: Entity) {

@@ -8,8 +8,8 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		PannaConfig pannaConfig = PannaConfigStatic.INSTANCE;
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		config.setForegroundFPS(60);
-		config.setTitle("Cotta");
+//		config.setForegroundFPS(60);
+		config.setTitle("Panna");
 		config.setWindowedMode(pannaConfig.getWidth(), pannaConfig.getHeight());
 		new Lwjgl3Application(new PannaGdxGame(pannaConfig), config);
 	}

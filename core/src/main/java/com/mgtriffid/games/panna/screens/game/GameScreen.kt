@@ -7,7 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
-import com.mgtriffid.games.panna.screens.game.graphics.Graphics
+import com.mgtriffid.games.panna.screens.game.graphics.GraphicsV2
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
@@ -25,7 +25,8 @@ class GameScreen(
 
     private var nextTickAt: Long = -1
     private var tickLength: Long = -1
-    private val graphics: Graphics = Graphics()
+//    private val graphics: Graphics = Graphics()
+    private val graphics: GraphicsV2 = GraphicsV2()
 
     private lateinit var input: PannaClientGdxInput
 
@@ -60,20 +61,19 @@ class GameScreen(
             input.clear()
         }
 
-        draw(1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat())
+        draw(1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat(), delta)
     }
 
     override fun dispose() {
         graphics.dispose()
     }
 
-    private fun draw(alpha: Float) {
+    private fun draw(alpha: Float, delta: Float) {
         if (!cottaClient.localPlayer.isReady()) {
             return
         }
         val entities = getDrawableEntities(alpha)
-        graphics.draw(entities, cottaClient.localPlayer.playerId)
-
+        graphics.draw(entities, cottaClient.localPlayer.playerId, delta)
     }
 
     private fun getDrawableEntities(alpha: Float): List<Entity> {

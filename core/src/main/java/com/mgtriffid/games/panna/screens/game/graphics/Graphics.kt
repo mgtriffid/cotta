@@ -26,6 +26,7 @@ private val logger = KotlinLogging.logger {}
 
 const val centerAtPlayer = true
 
+// TODO delete as obsolete
 class Graphics {
 
     private lateinit var batch: SpriteBatch

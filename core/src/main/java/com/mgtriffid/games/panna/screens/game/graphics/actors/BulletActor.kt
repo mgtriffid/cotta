@@ -3,16 +3,11 @@ package com.mgtriffid.games.panna.screens.game.graphics.actors
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.panna.flipped
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 
-class BulletActor(val textureRegion: TextureRegion) : PannaActor() {
-    private val leftVersion = TextureRegion(
-        textureRegion.texture,
-        textureRegion.regionX,
-        textureRegion.regionY,
-        textureRegion.regionWidth,
-        textureRegion.regionHeight
-    ).also { it.flip(true, false) }
+class BulletActor(private val textureRegion: TextureRegion) : PannaActor() {
+    private val leftVersion = textureRegion.flipped() // TODO don't create a new region for every new actor
 
     private var orientedRight = true
 

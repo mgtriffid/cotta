@@ -1,7 +1,12 @@
 package com.mgtriffid.games.panna
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.math.MathUtils.atan2Deg
+import com.badlogic.gdx.math.MathUtils.atan2Deg360
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
@@ -13,7 +18,10 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class PannaClientGdxInput : CottaClientInput {
+class PannaClientGdxInput(
+    // TODO either remove or use for determining lookAt and other things
+    private val viewport: Viewport
+) : CottaClientInput {
     private var sentJoinBattle = false
     private val storage = Storage()
 
@@ -44,7 +52,8 @@ class PannaClientGdxInput : CottaClientInput {
                         storage.rightPressed -> WALKING_DIRECTION_RIGHT
                         else -> WALKING_DIRECTION_NONE
                     }.also { logger.trace { "WalkingInputComponent created; direction == $it" } },
-                    storage.jumpPressed
+                    storage.jumpPressed,
+                    storage.lookAt
                 ) as T
             }
 
@@ -64,7 +73,16 @@ class PannaClientGdxInput : CottaClientInput {
             rightPressed = rightPressed || Gdx.input.isKeyPressed(Input.Keys.D)
             shootPressed = shootPressed || Gdx.input.isKeyPressed(Input.Keys.J)
             jumpPressed = jumpPressed || Gdx.input.isKeyPressed(Input.Keys.SPACE)
+            lookAt = getLookAt()
         }
+    }
+
+    private fun getLookAt(): Float {
+        val x = Gdx.input.x
+        val y = Gdx.input.y
+        val relX = x - Gdx.graphics.width / 2f
+        val relY = Gdx.graphics.height / 2f - y
+        return atan2Deg360(relY, relX)
     }
 
     fun clear() {
@@ -81,5 +99,6 @@ class PannaClientGdxInput : CottaClientInput {
         var rightPressed: Boolean = false
         var shootPressed: Boolean = false
         var jumpPressed: Boolean = false
+        var lookAt: Float = 0f
     }
 }

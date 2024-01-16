@@ -5,12 +5,16 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
+import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.panna.screens.game.SCALE
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_JUMPING
+import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_DOWN
+import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT
+import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_UP
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.TEXTURE_ID_BULLET
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK
 import com.mgtriffid.games.panna.screens.game.graphics.actors.BulletActor
@@ -29,6 +33,7 @@ class GraphicsV2 {
 
     private lateinit var textures: PannaTextures
     private lateinit var stage: Stage
+    lateinit var viewport: Viewport
     private val entityActors = HashMap<EntityId, PannaActor>()
 
     fun initialize() {
@@ -38,7 +43,8 @@ class GraphicsV2 {
     }
 
     private fun prepareStage() {
-        stage = Stage(ExtendViewport(960f, 960 * 9 / 16f))
+        viewport = ExtendViewport(960f, 960 * 9 / 16f)
+        stage = Stage(viewport)
     }
 
     fun dispose() {
@@ -53,7 +59,7 @@ class GraphicsV2 {
         val dudePosition = dudeEntity?.getComponent(PositionComponent::class)
         val x = dudePosition?.xPos ?: 0f
         val y = dudePosition?.yPos ?: 0f
-        stage.viewport.run {
+        viewport.run {
             (camera as OrthographicCamera).zoom = 1f / SCALE
             camera.position.set(x, y, 0f)
             camera.update()
@@ -80,7 +86,10 @@ class GraphicsV2 {
             // TODO abstract fucking factory
             CHARACTER_STRATEGY -> DudeActor(
                 textures[TEXTURE_ID_DUDE_BLUE],
-                textures[TEXTURE_ID_DUDE_BLUE_JUMPING]
+                textures[TEXTURE_ID_DUDE_BLUE_JUMPING],
+                textures[TEXTURE_ID_EYES_BLUE_LOOKING_UP],
+                textures[TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT],
+                textures[TEXTURE_ID_EYES_BLUE_LOOKING_DOWN],
             )
             SOLID_TERRAIN_TILE_STRATEGY -> SolidTerrainTileActor(textures[TEXTURE_ID_BROWN_BLOCK])
             BULLET_STRATEGY -> BulletActor(textures[TEXTURE_ID_BULLET])

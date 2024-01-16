@@ -14,8 +14,12 @@ class PannaTextures {
         textures[PannaTextureIds.TEXTURE_ID_BULLET] = TextureRegion(Texture("bullet.png"))
         textures[PannaTextureIds.TEXTURE_ID_TERRAIN] = TextureRegion(Texture("terrain.png"))
         textures[PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK] = TextureRegion(Texture("panna/terrain/brown-block.png"))
-        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE] = TextureRegion(Texture("panna/characters/dude_blue.png"), 16, 16)
-        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_JUMPING] = TextureRegion(Texture("panna/characters/dude_blue_jumping.png"), 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE] = TextureRegion(Texture("panna/characters/dude/dude_blue.png"), 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_JUMPING] = TextureRegion(Texture("panna/characters/dude/dude_blue_jumping.png"), 16, 16)
+        val eyesTexture = Texture("panna/characters/dude/eyes.png")
+        textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_UP] = TextureRegion(eyesTexture, 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT] = TextureRegion(eyesTexture, 16, 0, 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_DOWN] = TextureRegion(eyesTexture, 32, 0, 16, 16)
     }
 
     fun dispose() {

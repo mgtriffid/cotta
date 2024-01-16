@@ -32,7 +32,7 @@ class GameScreen(
 
     override fun show() {
         graphics.initialize()
-        input = PannaClientGdxInput()
+        input = PannaClientGdxInput(graphics.viewport)
         val game = PannaGame()
         logger.debug { "Tick length is ${game.config.tickLength}" }
         tickLength = game.config.tickLength

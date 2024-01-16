@@ -23,6 +23,7 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
             dude.addInputComponent(ShootInputComponent::class)
             dude.addComponent(JumpingComponent.create(false, 250f))
             dude.addComponent(WalkingComponent.create(100f))
+            dude.addComponent(LookingAtComponent.create(0f))
             dude.addComponent(VelocityComponent.create(0f, 0f))
             dude.addComponent(SteamManPlayerComponent.create())
             dude.addComponent(ColliderComponent.create(16, 16))

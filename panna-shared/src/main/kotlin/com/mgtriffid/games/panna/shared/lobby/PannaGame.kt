@@ -22,16 +22,14 @@ import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 import com.mgtriffid.games.panna.shared.game.systems.*
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleSystem
-import com.mgtriffid.games.panna.shared.game.systems.walking.CoyoteSystem
-import com.mgtriffid.games.panna.shared.game.systems.walking.JumpEffectConsumerSystem
-import com.mgtriffid.games.panna.shared.game.systems.walking.WalkingEffectConsumerSystem
-import com.mgtriffid.games.panna.shared.game.systems.walking.WalkingInputProcessingSystem
+import com.mgtriffid.games.panna.shared.game.systems.walking.*
 import com.mgtriffid.games.panna.shared.tiled.TiledMap
 import java.util.concurrent.atomic.AtomicInteger
 
 class PannaGame : CottaGame {
     override val serverSystems = listOf(
         WalkingInputProcessingSystem::class,
+        LookingAtInputProcessingSystem::class,
         ShootingInputProcessingSystem::class,
         WalkingEffectConsumerSystem::class,
         JumpEffectConsumerSystem::class,
@@ -88,6 +86,7 @@ class PannaGame : CottaGame {
     override val componentClasses = setOf(
         VelocityComponent::class,
         PositionComponent::class,
+        LookingAtComponent::class,
         DrawableComponent::class,
         WalkingComponent::class,
         GraverobberNpcComponent::class,
@@ -129,7 +128,8 @@ class PannaGame : CottaGame {
                 it.id to listOf(
                     CharacterInputComponent.create(
                         direction = if (goingLeft) WALKING_DIRECTION_LEFT else WALKING_DIRECTION_RIGHT,
-                        jump = false
+                        jump = false,
+                        lookAt = if (goingLeft) 180f else 0f
                     )
                 )
             }

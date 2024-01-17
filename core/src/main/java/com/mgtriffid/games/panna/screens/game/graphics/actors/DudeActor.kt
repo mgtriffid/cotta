@@ -6,7 +6,6 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.panna.flipped
 import com.mgtriffid.games.panna.shared.game.components.JumpingComponent
 import com.mgtriffid.games.panna.shared.game.components.LookingAtComponent
-import javax.xml.soap.Text
 
 class DudeActor(
     private val onFeetRegion: TextureRegion,

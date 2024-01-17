@@ -105,10 +105,9 @@ class GraphicsV2 {
     private fun createActor(entity: Entity, playerId: PlayerId): PannaActor {
         val drawableComponent = entity.getComponent(DrawableComponent::class)
         return when (drawableComponent.drawStrategy) {
-            // TODO abstract fucking factory
             CHARACTER_STRATEGY -> actorFactory.createDude()
-            SOLID_TERRAIN_TILE_STRATEGY -> SolidTerrainTileActor(textures[TEXTURE_ID_BROWN_BLOCK])
-            BULLET_STRATEGY -> BulletActor(textures[TEXTURE_ID_BULLET])
+            SOLID_TERRAIN_TILE_STRATEGY -> actorFactory.createSolidTerrainTile()
+            BULLET_STRATEGY -> actorFactory.createBullet()
             else -> {
                 throw RuntimeException("Unknown draw strategy: ${drawableComponent.drawStrategy}")
             }
@@ -124,7 +123,7 @@ class GraphicsV2 {
         }
     }
 
-    fun updateActor(actor: PannaActor, entity: Entity, playerId: PlayerId) {
+    private fun updateActor(actor: PannaActor, entity: Entity, playerId: PlayerId) {
         val positionComponent = entity.getComponent(PositionComponent::class)
         actor.x = positionComponent.xPos
         actor.y = positionComponent.yPos

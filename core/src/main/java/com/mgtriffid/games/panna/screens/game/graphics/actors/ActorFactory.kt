@@ -21,7 +21,7 @@ class ActorFactory {
                 )
             ),
             bullet = textures[PannaTextureIds.TEXTURE_ID_BULLET],
-            terrain = textures[PannaTextureIds.TEXTURE_ID_TERRAIN],
+            terrain = textures[PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK]
         )
     }
 
@@ -29,6 +29,14 @@ class ActorFactory {
         return DudeActor(
             regions.dude
         )
+    }
+
+    fun createSolidTerrainTile(): SolidTerrainTileActor {
+        return SolidTerrainTileActor(regions.terrain)
+    }
+
+    fun createBullet(): BulletActor {
+        return BulletActor(regions.bullet)
     }
 
     class Regions(

@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds
 import com.mgtriffid.games.panna.screens.game.graphics.TextureId
-import javax.xml.soap.Text
 
 class PannaTextures {
     private val textures = HashMap<TextureId, TextureRegion>()

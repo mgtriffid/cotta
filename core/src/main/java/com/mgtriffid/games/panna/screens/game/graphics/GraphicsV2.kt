@@ -14,13 +14,6 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.panna.screens.game.SCALE
-import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE
-import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_JUMPING
-import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_DOWN
-import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT
-import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_UP
-import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.TEXTURE_ID_BULLET
-import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK
 import com.mgtriffid.games.panna.screens.game.graphics.actors.*
 import com.mgtriffid.games.panna.screens.game.graphics.textures.PannaTextures
 import com.mgtriffid.games.panna.shared.BULLET_STRATEGY

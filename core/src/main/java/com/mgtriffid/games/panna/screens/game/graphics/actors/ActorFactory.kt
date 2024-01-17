@@ -14,6 +14,10 @@ class ActorFactory {
                 body = textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_BODY],
                 feetInAir = LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_IN_AIR]),
                 feetOnGround = LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_ON_GROUND]),
+                feetRunning = listOf(
+                    100L to LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_RUNNING_FRAME_0]),
+                    100L to LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_RUNNING_FRAME_1]),
+                ),
                 eyes = Regions.DudeRegions.EyesRegions(
                     lookingUp = LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_UP]),
                     lookingStraight = LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT]),
@@ -48,6 +52,7 @@ class ActorFactory {
             val body: TextureRegion,
             val feetInAir: LeftRightRegions,
             val feetOnGround: LeftRightRegions,
+            val feetRunning: List<Pair<Long, LeftRightRegions>>,
             val eyes: EyesRegions,
         ) {
             class EyesRegions(

@@ -23,6 +23,8 @@ class PannaTextures {
 
         val feetTexture = Texture("panna/characters/dude/feet.png")
         textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_ON_GROUND] = TextureRegion(feetTexture, 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_RUNNING_FRAME_0] = TextureRegion(feetTexture, 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_RUNNING_FRAME_1] = TextureRegion(feetTexture, 16, 0,  16, 16)
         textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_IN_AIR] = TextureRegion(feetTexture, 32, 0, 16, 16)
     }
 

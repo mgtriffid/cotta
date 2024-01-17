@@ -8,44 +8,44 @@ import com.mgtriffid.games.panna.shared.game.components.JumpingComponent
 import com.mgtriffid.games.panna.shared.game.components.LookingAtComponent
 
 class DudeActor(
-    private val onFeetRegion: TextureRegion,
-    private val inAirRegion: TextureRegion,
-    private val eyesLookingUpRegion: TextureRegion,
-    private val eyesLookingStraightRegion: TextureRegion,
-    private val eyesLookingDownRegion: TextureRegion,
+    private val regions: ActorFactory.Regions.DudeRegions,
 ) : PannaActor() {
-
-    private var textureRegion: TextureRegion = onFeetRegion
-    private var eyesRegion: TextureRegion = eyesLookingStraightRegion
+    private var feetRegion: TextureRegion = regions.feetOnGround.right
+    private var eyesRegion: TextureRegion = regions.eyes.lookingStraight.right
 
     override fun draw(batch: Batch, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         batch.draw(
-            textureRegion,
-            x - textureRegion.regionWidth / 2,
-            y - textureRegion.regionHeight / 2
+            regions.body,
+            x - regions.body.regionWidth / 2,
+            y - regions.body.regionHeight / 2
         )
+        batch.draw(feetRegion, x - feetRegion.regionWidth / 2, y - feetRegion.regionHeight / 2)
         batch.draw(eyesRegion, x - eyesRegion.regionWidth / 2, y - eyesRegion.regionHeight / 2)
     }
 
     override fun update(entity: Entity) {
-        if (entity.getComponent(JumpingComponent::class).inAir) {
-            this.textureRegion = inAirRegion
+        val feet = if (entity.getComponent(JumpingComponent::class).inAir) {
+            regions.feetInAir
         } else {
-            this.textureRegion = onFeetRegion
+            regions.feetOnGround
         }
 
         val lookAt = entity.getComponent(LookingAtComponent::class).lookAt
-        when (lookAt) {
-            in 0f..30f -> eyesRegion = eyesLookingStraightRegion
-            in 30f..150f -> eyesRegion = eyesLookingUpRegion
-            in 150f..210f -> eyesRegion = eyesLookingStraightRegion
-            in 210f..330f -> eyesRegion = eyesLookingDownRegion
-            in 330f..360f -> eyesRegion = eyesLookingDownRegion
+        val eyes = when (lookAt) {
+            in 0f..30f -> regions.eyes.lookingStraight
+            in 30f..150f -> regions.eyes.lookingUp
+            in 150f..210f -> regions.eyes.lookingStraight
+            in 210f..330f -> regions.eyes.lookingDown
+            in 330f..360f -> regions.eyes.lookingDown
+            else -> throw IllegalStateException("Look at angle $lookAt is not in range 0..360")
         }
         if (lookAt in 90f..270f) {
-            this.textureRegion = this.textureRegion.flipped() // TODO wild memory waste, need to fix
-            this.eyesRegion = this.eyesRegion.flipped()
+            feetRegion = feet.left
+            eyesRegion = eyes.left
+        } else {
+            feetRegion = feet.right
+            eyesRegion = eyes.right
         }
     }
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds
 import com.mgtriffid.games.panna.screens.game.graphics.TextureId
+import javax.xml.soap.Text
 
 class PannaTextures {
     private val textures = HashMap<TextureId, TextureRegion>()
@@ -14,12 +15,16 @@ class PannaTextures {
         textures[PannaTextureIds.TEXTURE_ID_BULLET] = TextureRegion(Texture("bullet.png"))
         textures[PannaTextureIds.TEXTURE_ID_TERRAIN] = TextureRegion(Texture("terrain.png"))
         textures[PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK] = TextureRegion(Texture("panna/terrain/brown-block.png"))
-        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE] = TextureRegion(Texture("panna/characters/dude/dude_blue.png"), 16, 16)
-        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_JUMPING] = TextureRegion(Texture("panna/characters/dude/dude_blue_jumping.png"), 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_BODY] = TextureRegion(Texture("panna/characters/dude/body.png"), 16, 16)
+
         val eyesTexture = Texture("panna/characters/dude/eyes.png")
         textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_UP] = TextureRegion(eyesTexture, 16, 16)
         textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT] = TextureRegion(eyesTexture, 16, 0, 16, 16)
         textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_DOWN] = TextureRegion(eyesTexture, 32, 0, 16, 16)
+
+        val feetTexture = Texture("panna/characters/dude/feet.png")
+        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_ON_GROUND] = TextureRegion(feetTexture, 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_IN_AIR] = TextureRegion(feetTexture, 32, 0, 16, 16)
     }
 
     fun dispose() {

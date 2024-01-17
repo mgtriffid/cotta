@@ -21,10 +21,7 @@ import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Character
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_UP
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.TEXTURE_ID_BULLET
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK
-import com.mgtriffid.games.panna.screens.game.graphics.actors.BulletActor
-import com.mgtriffid.games.panna.screens.game.graphics.actors.DudeActor
-import com.mgtriffid.games.panna.screens.game.graphics.actors.PannaActor
-import com.mgtriffid.games.panna.screens.game.graphics.actors.SolidTerrainTileActor
+import com.mgtriffid.games.panna.screens.game.graphics.actors.*
 import com.mgtriffid.games.panna.screens.game.graphics.textures.PannaTextures
 import com.mgtriffid.games.panna.shared.BULLET_STRATEGY
 import com.mgtriffid.games.panna.shared.CHARACTER_STRATEGY
@@ -36,6 +33,7 @@ import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 class GraphicsV2 {
 
     private lateinit var textures: PannaTextures
+    private val actorFactory = ActorFactory()
     private lateinit var stage: Stage
     lateinit var viewport: Viewport
     private val entityActors = HashMap<EntityId, PannaActor>()
@@ -43,6 +41,7 @@ class GraphicsV2 {
     fun initialize() {
         textures = PannaTextures()
         textures.init()
+        actorFactory.initialize(textures)
         prepareStage()
         setCrosshairCursor()
     }
@@ -59,6 +58,7 @@ class GraphicsV2 {
 
     fun dispose() {
         stage.dispose()
+        textures.dispose()
     }
 
     fun draw(state: DrawableState, playerId: PlayerId, delta: Float) {
@@ -106,13 +106,7 @@ class GraphicsV2 {
         val drawableComponent = entity.getComponent(DrawableComponent::class)
         return when (drawableComponent.drawStrategy) {
             // TODO abstract fucking factory
-            CHARACTER_STRATEGY -> DudeActor(
-                textures[TEXTURE_ID_DUDE_BLUE],
-                textures[TEXTURE_ID_DUDE_BLUE_JUMPING],
-                textures[TEXTURE_ID_EYES_BLUE_LOOKING_UP],
-                textures[TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT],
-                textures[TEXTURE_ID_EYES_BLUE_LOOKING_DOWN],
-            )
+            CHARACTER_STRATEGY -> actorFactory.createDude()
             SOLID_TERRAIN_TILE_STRATEGY -> SolidTerrainTileActor(textures[TEXTURE_ID_BROWN_BLOCK])
             BULLET_STRATEGY -> BulletActor(textures[TEXTURE_ID_BULLET])
             else -> {

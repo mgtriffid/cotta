@@ -15,5 +15,8 @@ object PannaTextureIds {
         val TEXTURE_ID_EYES_BLUE_LOOKING_UP = TextureId(8)
         val TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT = TextureId(9)
         val TEXTURE_ID_EYES_BLUE_LOOKING_DOWN = TextureId(10)
+        val TEXTURE_ID_DUDE_BLUE_BODY = TextureId(11)
+        val TEXTURE_ID_DUDE_FEET_IN_AIR = TextureId(12)
+        val TEXTURE_ID_DUDE_FEET_ON_GROUND = TextureId(13)
     }
 }

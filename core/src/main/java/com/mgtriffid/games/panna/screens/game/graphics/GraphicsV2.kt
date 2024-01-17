@@ -1,6 +1,9 @@
 package com.mgtriffid.games.panna.screens.game.graphics
 
+import com.badlogic.gdx.Files
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -41,6 +44,12 @@ class GraphicsV2 {
         textures = PannaTextures()
         textures.init()
         prepareStage()
+        setCrosshairCursor()
+    }
+
+    private fun setCrosshairCursor() {
+        val pm = Pixmap(Gdx.files.getFileHandle("panna/crosshair/crosshair.png", Files.FileType.Classpath))
+        Gdx.graphics.setCursor(Gdx.graphics.newCursor(pm, 7, 7))
     }
 
     private fun prepareStage() {

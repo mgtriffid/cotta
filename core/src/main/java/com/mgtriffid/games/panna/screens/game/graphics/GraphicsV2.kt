@@ -1,13 +1,14 @@
 package com.mgtriffid.games.panna.screens.game.graphics
 
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.panna.screens.game.SCALE
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE
@@ -51,11 +52,11 @@ class GraphicsV2 {
         stage.dispose()
     }
 
-    fun draw(entities: List<Entity>, playerId: PlayerId, delta: Float) {
-        processEntities(entities, playerId)
+    fun draw(state: DrawableState, playerId: PlayerId, delta: Float) {
+        processEntities(state, playerId)
         stage.act(delta)
         ScreenUtils.clear(1f, 0f, 0f, 1f)
-        val dudeEntity = entities.find { it.hasComponent(SteamManPlayerComponent::class) && it.ownedBy == Entity.OwnedBy.Player(playerId) }
+        val dudeEntity = state.entities.find { it.hasComponent(SteamManPlayerComponent::class) && it.ownedBy == Entity.OwnedBy.Player(playerId) }
         val dudePosition = dudeEntity?.getComponent(PositionComponent::class)
         val x = dudePosition?.xPos ?: 0f
         val y = dudePosition?.yPos ?: 0f
@@ -67,17 +68,29 @@ class GraphicsV2 {
         stage.draw()
     }
 
-    private fun processEntities(entities: List<Entity>, playerId: PlayerId) {
-        entities.forEach { entity ->
-            var actor = entityActors[entity.id]
+    // GROOM 4 levels of indent is too many
+    private fun processEntities(state: DrawableState, playerId: PlayerId) {
+        state.entities.forEach { entity ->
+            val id = entity.id
+            var actor = entityActors[id]
+            if (actor == null && id is AuthoritativeEntityId) {
+                val predictedId = state.authoritativeToPredictedEntityIds[id]
+                if (predictedId != null) {
+                    actor = entityActors[predictedId]
+                    if (actor != null) {
+                        entityActors.remove(predictedId)
+                        entityActors[id] = actor
+                    }
+                }
+            }
             if (actor == null) {
                 actor = createActor(entity, playerId)
-                entityActors[entity.id] = actor
+                entityActors[id] = actor
                 stage.addActor(actor)
             }
             updateActor(actor, entity, playerId)
         }
-        cleanUpActors(entities)
+        cleanUpActors(state.entities)
     }
 
     private fun createActor(entity: Entity, playerId: PlayerId): PannaActor {

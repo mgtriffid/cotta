@@ -1,11 +1,14 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
+// TODO clear old mappings
 class AuthoritativeToPredictedEntityIdMappingsImpl : AuthoritativeToPredictedEntityIdMappings {
     private val data = HashMap<EntityId, EntityId>() // TODO stricter typing; authoritative to predicted only
 
@@ -16,5 +19,15 @@ class AuthoritativeToPredictedEntityIdMappingsImpl : AuthoritativeToPredictedEnt
 
     override operator fun get(entityId: EntityId): EntityId? {
         return data[entityId]
+    }
+
+    override fun all(): Map<AuthoritativeEntityId, PredictedEntityId> {
+        val ret = HashMap<AuthoritativeEntityId, PredictedEntityId>()
+        data.forEach { (k, v) ->
+            if (k is AuthoritativeEntityId && v is PredictedEntityId) {
+                ret[k] = v
+            }
+        }
+        return ret
     }
 }

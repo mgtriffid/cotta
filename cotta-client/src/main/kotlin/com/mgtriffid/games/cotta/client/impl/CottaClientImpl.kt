@@ -8,6 +8,8 @@ import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
@@ -102,8 +104,8 @@ class CottaClientImpl @Inject constructor(
         }
     }
 
-    override fun getDrawableEntities(alpha: Float, vararg components: KClass<out Component<*>>): List<Entity> {
-        if (tickProvider.tick == 0L) return emptyList()
+    override fun getDrawableState(alpha: Float, vararg components: KClass<out Component<*>>): DrawableState {
+        if (tickProvider.tick == 0L) return DrawableState.EMPTY
         val onlyNeeded: Collection<Entity>.() -> Collection<Entity> = {
             filter { entity ->
                 components.all { entity.hasComponent(it) }
@@ -115,8 +117,12 @@ class CottaClientImpl @Inject constructor(
         val authoritativePrevious = this.state.entities(this.tickProvider.tick - 1).all().onlyNeeded()
         val predicted = interpolate(predictedPrevious, predictedCurrent, alpha, components.toList())
         val authoritative = interpolate(authoritativePrevious, authoritativeCurrent, alpha, components.toList())
-        return (predicted + authoritative.filter { authoritativeToPredictedEntityIdMappings[it.id] == null }).also {
+        val entities = (predicted + authoritative.filter { authoritativeToPredictedEntityIdMappings[it.id] == null }).also {
             logger.debug { "Entities found: ${it.map { it.id }}" }
+        }
+        return object : DrawableState {
+            override val entities: List<Entity> = entities
+            override val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId> = authoritativeToPredictedEntityIdMappings.all()
         }
     }
 

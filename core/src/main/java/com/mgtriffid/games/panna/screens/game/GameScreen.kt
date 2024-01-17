@@ -3,7 +3,7 @@ package com.mgtriffid.games.panna.screens.game
 import com.badlogic.gdx.ScreenAdapter
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
-import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
@@ -72,11 +72,11 @@ class GameScreen(
         if (!cottaClient.localPlayer.isReady()) {
             return
         }
-        val entities = getDrawableEntities(alpha)
+        val entities = getDrawableState(alpha)
         graphics.draw(entities, cottaClient.localPlayer.playerId, delta)
     }
 
-    private fun getDrawableEntities(alpha: Float): List<Entity> {
-        return cottaClient.getDrawableEntities(alpha, DrawableComponent::class, PositionComponent::class)
+    private fun getDrawableState(alpha: Float): DrawableState {
+        return cottaClient.getDrawableState(alpha, DrawableComponent::class, PositionComponent::class)
     }
 }

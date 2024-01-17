@@ -9,6 +9,7 @@ import com.mgtriffid.games.panna.shared.BULLET_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.LookingAtComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.ShootEffect
 import mu.KotlinLogging
@@ -30,6 +31,7 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem {
         logger.info { "Created bullet ${bullet.id}" }
         bullet.addComponent(PositionComponent.create(position.xPos, position.yPos, position.orientation))
         bullet.addComponent(DrawableComponent.create(BULLET_STRATEGY))
+        bullet.addComponent(GravityComponent.create())
         bullet.addComponent(
             VelocityComponent.create(velocity.x, velocity.y)
         )

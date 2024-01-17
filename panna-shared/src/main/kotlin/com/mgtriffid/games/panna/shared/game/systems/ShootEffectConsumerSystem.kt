@@ -26,7 +26,7 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem {
         val position = shooter.getComponent(PositionComponent::class)
         val direction = shooter.getComponent(LookingAtComponent::class)
         val bullet = ctx.createEntity(ownedBy = shooter.ownedBy)
-        val velocity = (Vector2(80f, 0f)).rotateDeg(direction.lookAt)
+        val velocity = (Vector2(400f, 0f)).rotateDeg(direction.lookAt)
         logger.info { "Created bullet ${bullet.id}" }
         bullet.addComponent(PositionComponent.create(position.xPos, position.yPos, position.orientation))
         bullet.addComponent(DrawableComponent.create(BULLET_STRATEGY))

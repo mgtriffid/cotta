@@ -71,7 +71,7 @@ class PannaClientGdxInput(
         with(storage) {
             leftPressed = leftPressed || Gdx.input.isKeyPressed(Input.Keys.A)
             rightPressed = rightPressed || Gdx.input.isKeyPressed(Input.Keys.D)
-            shootPressed = shootPressed || Gdx.input.isKeyPressed(Input.Keys.J)
+            shootPressed = shootPressed || Gdx.input.isTouched
             jumpPressed = jumpPressed || Gdx.input.isKeyPressed(Input.Keys.SPACE)
             lookAt = getLookAt()
         }

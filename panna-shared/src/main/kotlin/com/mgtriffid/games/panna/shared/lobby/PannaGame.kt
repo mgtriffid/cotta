@@ -13,6 +13,7 @@ import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
@@ -85,6 +86,7 @@ class PannaGame : CottaGame {
 
     override val componentClasses = setOf(
         VelocityComponent::class,
+        GravityComponent::class,
         PositionComponent::class,
         LookingAtComponent::class,
         DrawableComponent::class,

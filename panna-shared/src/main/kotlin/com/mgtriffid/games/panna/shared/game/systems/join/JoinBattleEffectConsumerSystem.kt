@@ -10,6 +10,7 @@ import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Compan
 import com.mgtriffid.games.panna.shared.game.components.input.ShootInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.CharacterInputComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
 
@@ -18,11 +19,12 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is JoinBattleEffect) {
             val dude = ctx.createEntity(ownedBy = e.ownedBy)
-            dude.addComponent(PositionComponent.create(32f, 25f, ORIENTATION_LEFT))
+            dude.addComponent(PositionComponent.create(32f, 24f, ORIENTATION_LEFT))
             dude.addInputComponent(CharacterInputComponent::class)
             dude.addInputComponent(ShootInputComponent::class)
             dude.addComponent(JumpingComponent.create(false, 250f))
             dude.addComponent(WalkingComponent.create(100f))
+            dude.addComponent(GravityComponent.Instance)
             dude.addComponent(LookingAtComponent.create(0f))
             dude.addComponent(VelocityComponent.create(0f, 0f))
             dude.addComponent(SteamManPlayerComponent.create())

@@ -14,9 +14,6 @@ import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
-import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.InputRecipe
-import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.utils.now
@@ -176,6 +173,7 @@ class CottaClientImpl @Inject constructor(
 
         serverCreatedEntitiesRegistry.data = delta.tracesOfCreatedEntities.toMutableList()
         fillEntityIdMappings(delta)
+        remapPredictedCreatedEntityTraces()
         // tick is advanced inside;
         clientSimulation.tick(delta.input)
         delta.applyDiff(state.entities(getCurrentTick())) // unnecessary for deterministic simulation
@@ -185,8 +183,14 @@ class CottaClientImpl @Inject constructor(
 
     private fun fillEntityIdMappings(delta: Delta.Present) {
         delta.authoritativeToPredictedEntities.forEach { (authoritativeId, predictedId) ->
+            logger.info { "Recording mapping $authoritativeId to $predictedId" }
             authoritativeToPredictedEntityIdMappings[authoritativeId] = predictedId
         }
+    }
+
+    private fun remapPredictedCreatedEntityTraces() {
+        // TODO analyze performance and optimize
+        predictedCreatedEntitiesRegistry.useAuthoritativeEntitiesWherePossible(authoritativeToPredictedEntityIdMappings.all())
     }
 
     private fun sendDataToServer() {

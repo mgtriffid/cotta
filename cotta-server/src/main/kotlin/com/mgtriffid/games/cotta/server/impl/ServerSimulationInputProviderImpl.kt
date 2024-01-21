@@ -36,6 +36,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
     private val inputSnapper: InputSnapper<MapsInputRecipe>,
     private val stateSnapper: StateSnapper<MapsStateRecipe, MapsDeltaRecipe>,
     private val snapsSerialization: SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe>,
+    private val idsRemapper: IdsRemapper,
     private val clientsGhosts: ClientsGhosts,
 ) : ServerSimulationInputProvider {
     private val buffers = HashMap<PlayerId, ServerIncomingDataBuffer>()
@@ -45,7 +46,27 @@ class ServerSimulationInputProviderImpl @Inject constructor(
 
         val nonPlayerInput = nonPlayerInputProvider.input(state.entities(tickProvider.tick))
 
-        val remappedInput = clientsInput.input.mapKeys { (entityId, _) ->
+        val remappedInput = replacePredictedEntityIdsWithAuthoritative(clientsInput)
+
+        val inputs = remappedInput + nonPlayerInput
+
+        val input = object : SimulationInput {
+            // TODO protect against malicious client sending input for entity not belonging to them
+            override fun inputsForEntities() = inputs
+
+            override fun playersSawTicks() = clientsInput.playersSawTicks
+        }
+
+        simulationInputHolder.set(input)
+        listOf(1, 2).fold(0) { acc, i -> acc * 10 + i }
+        return ServerDelta(
+            input = input,
+            createdEntities = predictedClientEntities
+        )
+    }
+
+    private fun replacePredictedEntityIdsWithAuthoritative(clientsInput: ClientsInput) =
+        clientsInput.input.mapKeys { (entityId, _) ->
             when (entityId) {
                 is PredictedEntityId -> {
                     val authoritativeId = predictedToAuthoritativeIdMappings[entityId]
@@ -66,24 +87,13 @@ class ServerSimulationInputProviderImpl @Inject constructor(
 
                 is StaticEntityId -> throw IllegalStateException("Static entity $entityId cannot be controlled")
             }
+        }.mapValues { (_, input: Collection<InputComponent<*>>) ->
+            input.map { replacePredictedIdsWithAuthoritative(it) }
         }
 
-        val inputs = remappedInput + nonPlayerInput
-
-        val input = object : SimulationInput {
-            // TODO protect against malicious client sending input for entity not belonging to them
-            override fun inputsForEntities() = inputs
-
-            override fun playersSawTicks() = clientsInput.playersSawTicks
-        }
-
-        simulationInputHolder.set(input)
-
-        return ServerDelta(
-            input = input,
-            createdEntities = predictedClientEntities
-        )
-    }
+    private fun replacePredictedIdsWithAuthoritative(
+        inputComponent: InputComponent<*>
+    ) = idsRemapper.remap(inputComponent, predictedToAuthoritativeIdMappings::get)
 
     override fun fetch() {
         val inputDtos = networkTransport.drainInputs()

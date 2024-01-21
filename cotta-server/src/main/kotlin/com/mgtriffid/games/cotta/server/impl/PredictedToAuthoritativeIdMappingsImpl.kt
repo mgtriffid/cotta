@@ -1,7 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.server.PredictedToAuthoritativeIdMappings
@@ -14,20 +13,20 @@ private val logger = KotlinLogging.logger {}
 class PredictedToAuthoritativeIdMappingsImpl @Inject constructor(
     private val tickProvider: TickProvider
 ) : PredictedToAuthoritativeIdMappings {
-    private val data = TreeMap<Long, MutableMap<PredictedEntityId, EntityId>>()
+    private val data = TreeMap<Long, MutableMap<PredictedEntityId, AuthoritativeEntityId>>()
 
-    private val all = HashMap<PredictedEntityId, EntityId>()
+    private val all = HashMap<PredictedEntityId, AuthoritativeEntityId>()
 
-    override fun record(predictedEntityId: PredictedEntityId, id: EntityId) {
+    override fun record(predictedEntityId: PredictedEntityId, id: AuthoritativeEntityId) {
         logger.trace { "Recorded mapping $predictedEntityId -> $id" }
-        data.computeIfAbsent(tickProvider.tick) { HashMap() }[predictedEntityId] = id
+        data.computeIfAbsent(tickProvider.tick) { HashMap() } [predictedEntityId] = id
         all[predictedEntityId] = id
         cleanUpOld()
     }
 
     override fun forTick(tick: Long): List<Pair<PredictedEntityId, AuthoritativeEntityId>> {
         return data[tick]?.map { (predicted, authoritative) ->
-            predicted to authoritative as AuthoritativeEntityId
+            predicted to authoritative
         } ?: emptyList()
     }
 

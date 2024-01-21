@@ -1,6 +1,8 @@
 package com.mgtriffid.games.cotta.client.invokers.impl
 
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 
 interface PredictedCreatedEntitiesRegistry {
@@ -9,4 +11,5 @@ interface PredictedCreatedEntitiesRegistry {
     // TODO maybe tick should become a part of trace?
     fun find(trace: CottaTrace, tick: Long): EntityId?
     fun find(tick: Long): List<Pair<CottaTrace, EntityId>>
+    fun useAuthoritativeEntitiesWherePossible(mappings: Map<AuthoritativeEntityId, PredictedEntityId>)
 }

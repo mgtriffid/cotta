@@ -84,7 +84,7 @@ class CottaGameInstanceImpl @Inject constructor(
         serverSimulationInputProvider.fetch()
         val delta = serverSimulationInputProvider.getDelta()
         entitiesCreatedOnClientsRegistry.populate(delta.createdEntities)
-        val intents = network.drainEnterGameIntents()
+        val intents = network.drainEnterGameIntents() // TODO move into delta, for it's used to perform simulation
         intents.forEach { (connectionId, intent) ->
             registerPlayer(connectionId, intent)
         }

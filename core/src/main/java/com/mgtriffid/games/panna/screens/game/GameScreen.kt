@@ -72,8 +72,8 @@ class GameScreen(
         if (!cottaClient.localPlayer.isReady()) {
             return
         }
-        val entities = getDrawableState(alpha)
-        graphics.draw(entities, cottaClient.localPlayer.playerId, delta)
+        val state = getDrawableState(alpha)
+        graphics.draw(state, cottaClient.localPlayer.playerId, delta)
     }
 
     private fun getDrawableState(alpha: Float): DrawableState {

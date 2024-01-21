@@ -27,6 +27,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private val inputComponentsKeyByClass = HashMap<KClass<*>, StringComponentKey>()
     private val classByKey = HashMap<StringComponentKey, KClass<Component<*>>>()
     private val inputComponentsClassByKey = HashMap<StringComponentKey, KClass<InputComponent<*>>>()
+    // TODO delete
     private val factoryMethodsByClass = HashMap<ComponentKey, KCallable<*>>()
     // GROOM extract out
     private val effectSnappers = HashMap<EffectKey, EffectSnapper<*>>()

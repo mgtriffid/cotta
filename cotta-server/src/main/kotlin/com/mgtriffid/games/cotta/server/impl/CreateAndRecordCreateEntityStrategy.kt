@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
@@ -9,6 +10,9 @@ import com.mgtriffid.games.cotta.server.EntitiesCreatedOnClientsRegistry
 import com.mgtriffid.games.cotta.server.PredictedToAuthoritativeIdMappings
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 class CreateAndRecordCreateEntityStrategy @Inject constructor(
     @Named("latest") private val entities: Entities,
@@ -24,8 +28,11 @@ class CreateAndRecordCreateEntityStrategy @Inject constructor(
         val entity = entities.create(ownedBy)
         val predictedEntityWithSimilarTrace = entitiesCreatedOnClientsRegistry.find(trace)
         if (predictedEntityWithSimilarTrace != null) {
+            logger.debug { "Found predicted entity with similar trace: $predictedEntityWithSimilarTrace" }
             // GROOM express that the second argument here is an AuthoritativeEntityId
-            predictedToAuthoritativeIdMappings.record(predictedEntityWithSimilarTrace, entity.id)
+            predictedToAuthoritativeIdMappings.record(predictedEntityWithSimilarTrace, entity.id as AuthoritativeEntityId)
+        } else {
+            logger.debug { "No predicted entity with similar trace found" }
         }
         createdEntities.record(
             trace = trace,

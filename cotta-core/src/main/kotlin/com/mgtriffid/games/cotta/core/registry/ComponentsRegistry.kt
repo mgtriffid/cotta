@@ -86,7 +86,6 @@ class ComponentsRegistryImpl: ComponentsRegistry {
                     Boolean::class.createType() -> FieldType.BOOLEAN
                     Long::class.createType() -> FieldType.LONG
                     Double::class.createType() -> FieldType.DOUBLE
-                    Entity.OwnedBy::class.createType() -> FieldType.OWNED_BY
                     EntityId::class.createType() -> FieldType.ENTITY_ID
                     else -> throw IllegalArgumentException("Unexpected type of field ${kClass.qualifiedName}#${prop.name}")
                 }
@@ -124,7 +123,6 @@ class ComponentsRegistryImpl: ComponentsRegistry {
                     Boolean::class.createType() -> FieldType.BOOLEAN
                     Long::class.createType() -> FieldType.LONG
                     Double::class.createType() -> FieldType.DOUBLE
-                    Entity.OwnedBy::class.createType() -> FieldType.OWNED_BY
                     EntityId::class.createType() -> FieldType.ENTITY_ID
                     else -> throw IllegalArgumentException("Unexpected type of field ${kClass.qualifiedName}#${prop.name}")
                 }

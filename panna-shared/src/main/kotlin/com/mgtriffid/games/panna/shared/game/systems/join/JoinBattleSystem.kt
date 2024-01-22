@@ -14,7 +14,7 @@ class JoinBattleSystem : InputProcessingSystem {
             val join = e.getInputComponent(JoinBattleMetaEntityInputComponent::class).join
             if (join) {
                 // todo make sure it doesn't fire twice
-                ctx.fire(JoinBattleEffect.create(e.ownedBy))
+                ctx.fire(JoinBattleEffect.create(e.id))
             }
         }
     }

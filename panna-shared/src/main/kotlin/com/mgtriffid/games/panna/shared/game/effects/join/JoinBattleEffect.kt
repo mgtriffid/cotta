@@ -3,17 +3,18 @@ package com.mgtriffid.games.panna.shared.game.effects.join
 import com.mgtriffid.games.cotta.EffectData
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 
 interface JoinBattleEffect : CottaEffect {
     @EffectData
-    val ownedBy: Entity.OwnedBy
+    val metaEntityId: EntityId
     companion object {
-        fun create(ownedBy: Entity.OwnedBy): JoinBattleEffect {
-            return JoinBattleEffectImpl(ownedBy)
+        fun create(metaEntityId: EntityId): JoinBattleEffect {
+            return JoinBattleEffectImpl(metaEntityId)
         }
     }
 }
 
 private data class JoinBattleEffectImpl(
-    override val ownedBy: Entity.OwnedBy
+    override val metaEntityId: EntityId
 ) : JoinBattleEffect

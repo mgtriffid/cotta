@@ -53,10 +53,8 @@ class Interpolators {
         fun interpolate(from: T, to: T, target: T, alpha: Float) {
             fieldInterpolators.forEach { p: KMutableProperty1<T, *>, fi: FieldInterpolator<*> ->
                 p as KMutableProperty1<T, Any>
-                @Suppress("UNCHECKED_CAST")
-                val fromValue = p.get(from) as Any
-                @Suppress("UNCHECKED_CAST")
-                val toValue = p.get(to) as Any
+                val fromValue = p.get(from)
+                val toValue = p.get(to)
                 fi as FieldInterpolator<Any>
                 val interpolatedValue = fi.interpolate(fromValue, toValue, alpha)
                 p.set(target, interpolatedValue)

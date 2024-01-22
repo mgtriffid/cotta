@@ -50,9 +50,7 @@ class ClientSimulationImpl @Inject constructor(
     }
 
     private fun putInputIntoEntities(input: SimulationInput) {
-        state.entities(tick.tick).all().filter {
-            it.hasInputComponents()
-        }.forEach { e ->
+        getEntitiesWithInputComponents().forEach { e ->
             logger.trace { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
                 val component = input.inputForEntityAndComponent(e.id, c)
@@ -60,5 +58,9 @@ class ClientSimulationImpl @Inject constructor(
                 e.setInputComponent(c, component)
             }
         }
+    }
+
+    private fun getEntitiesWithInputComponents() = state.entities(tick.tick).all().filter {
+        it.hasInputComponents()
     }
 }

@@ -28,7 +28,7 @@ private val logger = KotlinLogging.logger {}
 
 // TODO bloated constructor
 class CottaClientImpl @Inject constructor(
-    val game: CottaGame,
+    private val game: CottaGame,
     private val network: NetworkClient,
     private val localInput: CottaClientInput,
     private val clientInputs: ClientInputs,
@@ -43,7 +43,7 @@ class CottaClientImpl @Inject constructor(
     private val interpolators: Interpolators,
     @Named("simulation") private val state: CottaState
 ) : CottaClient {
-    private var clientState: ClientState = ClientState.Initial // the only real `var` here
+    private var clientState: ClientState = ClientState.Initial
 
     override fun initialize() {
         registerComponents()

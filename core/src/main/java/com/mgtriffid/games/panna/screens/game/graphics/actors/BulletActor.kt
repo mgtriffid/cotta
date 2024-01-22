@@ -7,28 +7,26 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 
 class BulletActor(private val textureRegion: TextureRegion) : PannaActor() {
-    private var orientedRight = true
     private var angle: Float = 0f
 
     override fun draw(batch: Batch, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         batch.draw(
-            textureRegion,
-            x - textureRegion.regionWidth / 2,
-            y - textureRegion.regionHeight / 2,
-            textureRegion.regionWidth / 2f,
-            textureRegion.regionHeight / 2f,
-            textureRegion.regionWidth.toFloat(),
-            textureRegion.regionHeight.toFloat(),
-            1f,
-            1f,
-            angle
+            /* region = */ textureRegion,
+            /* x = */ x - textureRegion.regionWidth / 2,
+            /* y = */ y - textureRegion.regionHeight / 2,
+            /* originX = */ textureRegion.regionWidth / 2f,
+            /* originY = */ textureRegion.regionHeight / 2f,
+            /* width = */ textureRegion.regionWidth.toFloat(),
+            /* height = */ textureRegion.regionHeight.toFloat(),
+            /* scaleX = */ 1f,
+            /* scaleY = */ 1f,
+            /* rotation = */ angle
         )
     }
 
     override fun update(entity: Entity) {
         val velocityComponent = entity.getComponent(VelocityComponent::class)
         angle = MathUtils.atan2Deg360(velocityComponent.velY, velocityComponent.velX)
-        orientedRight = velocityComponent.velX > 0
     }
 }

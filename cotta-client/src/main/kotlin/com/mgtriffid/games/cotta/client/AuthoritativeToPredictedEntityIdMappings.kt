@@ -6,6 +6,6 @@ import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 
 interface AuthoritativeToPredictedEntityIdMappings {
     operator fun get(entityId: EntityId): EntityId?
-    operator fun set(authoritativeEntityId: EntityId, predictedEntityId: EntityId)
+    operator fun set(authoritativeEntityId: AuthoritativeEntityId, predictedEntityId: PredictedEntityId)
     fun all(): Map<AuthoritativeEntityId, PredictedEntityId>
 }

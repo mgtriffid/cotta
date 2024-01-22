@@ -10,9 +10,9 @@ private val logger = KotlinLogging.logger {}
 
 // TODO clear old mappings
 class AuthoritativeToPredictedEntityIdMappingsImpl : AuthoritativeToPredictedEntityIdMappings {
-    private val data = HashMap<EntityId, EntityId>() // TODO stricter typing; authoritative to predicted only
+    private val data = HashMap<AuthoritativeEntityId, PredictedEntityId>()
 
-    override operator fun set(authoritativeEntityId: EntityId, predictedEntityId: EntityId) {
+    override operator fun set(authoritativeEntityId: AuthoritativeEntityId, predictedEntityId: PredictedEntityId) {
         logger.debug { "Mapping $authoritativeEntityId to $predictedEntityId"  }
         data[authoritativeEntityId] = predictedEntityId
     }
@@ -24,9 +24,7 @@ class AuthoritativeToPredictedEntityIdMappingsImpl : AuthoritativeToPredictedEnt
     override fun all(): Map<AuthoritativeEntityId, PredictedEntityId> {
         val ret = HashMap<AuthoritativeEntityId, PredictedEntityId>()
         data.forEach { (k, v) ->
-            if (k is AuthoritativeEntityId && v is PredictedEntityId) {
-                ret[k] = v
-            }
+            ret[k] = v
         }
         return ret
     }

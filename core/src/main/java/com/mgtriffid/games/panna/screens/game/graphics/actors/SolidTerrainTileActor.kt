@@ -11,6 +11,10 @@ class SolidTerrainTileActor(private val terrainTextureRegion: TextureRegion) : P
 
     override fun draw(batch: Batch, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
-        batch.draw(terrainTextureRegion, x - terrainTextureRegion.regionWidth / 2, y - terrainTextureRegion.regionHeight / 2)
+        batch.draw(
+            terrainTextureRegion,
+            x - terrainTextureRegion.regionWidth / 2,
+            y - terrainTextureRegion.regionHeight / 2
+        )
     }
 }

@@ -13,7 +13,8 @@ import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponen
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 import com.mgtriffid.games.panna.shared.utils.intersect
-import kotlin.math.*
+import kotlin.math.max
+import kotlin.math.min
 
 private val logger = mu.KotlinLogging.logger {}
 

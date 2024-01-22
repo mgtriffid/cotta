@@ -13,7 +13,6 @@ import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.ShootEffect
 import mu.KotlinLogging
-import java.util.Vector
 
 private val logger = KotlinLogging.logger {}
 

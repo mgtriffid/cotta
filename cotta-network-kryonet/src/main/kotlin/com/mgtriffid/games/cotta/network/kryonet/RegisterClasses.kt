@@ -5,11 +5,7 @@ import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
-import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
-import com.mgtriffid.games.cotta.network.protocol.KindOfData
-import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
+import com.mgtriffid.games.cotta.network.protocol.*
 
 fun Kryo.registerClasses() {
     register(EnterTheGameDto::class.java)

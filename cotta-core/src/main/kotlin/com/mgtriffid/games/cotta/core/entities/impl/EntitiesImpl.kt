@@ -1,8 +1,8 @@
 package com.mgtriffid.games.cotta.core.entities.impl
 
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.exceptions.EntityNotExistsException
 import java.util.concurrent.atomic.AtomicInteger

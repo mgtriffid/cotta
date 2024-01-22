@@ -2,9 +2,7 @@ package com.mgtriffid.games.cotta.client.invokers
 
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.getConstructor
-import com.mgtriffid.games.cotta.core.simulation.invokers.impl.EntityProcessingSystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem

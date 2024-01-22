@@ -1,14 +1,20 @@
 package com.mgtriffid.games.cotta.client.network.impl
 
 import com.mgtriffid.games.cotta.client.impl.AuthoritativeState
-import com.mgtriffid.games.cotta.client.impl.Delta
 import com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer
+import com.mgtriffid.games.cotta.client.impl.Delta
 import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.client.network.NetworkClient
-import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.Entities
+import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.ClientInput
-import com.mgtriffid.games.cotta.core.serialization.*
+import com.mgtriffid.games.cotta.core.serialization.InputSerialization
+import com.mgtriffid.games.cotta.core.serialization.InputSnapper
+import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
+import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe

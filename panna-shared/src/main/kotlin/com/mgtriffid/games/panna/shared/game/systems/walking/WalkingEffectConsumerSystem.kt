@@ -4,11 +4,11 @@ import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
-import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_NONE
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
+import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 
 @Predicted class WalkingEffectConsumerSystem : EffectsConsumerSystem {

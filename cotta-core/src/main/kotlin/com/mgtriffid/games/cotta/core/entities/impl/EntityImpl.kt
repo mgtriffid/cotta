@@ -1,6 +1,9 @@
 package com.mgtriffid.games.cotta.core.entities.impl
 
-import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.Component
+import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import kotlin.reflect.KClass
 

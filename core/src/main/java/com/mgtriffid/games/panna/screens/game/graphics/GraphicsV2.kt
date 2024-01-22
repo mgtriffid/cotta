@@ -14,7 +14,8 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.panna.screens.game.SCALE
-import com.mgtriffid.games.panna.screens.game.graphics.actors.*
+import com.mgtriffid.games.panna.screens.game.graphics.actors.ActorFactory
+import com.mgtriffid.games.panna.screens.game.graphics.actors.PannaActor
 import com.mgtriffid.games.panna.screens.game.graphics.textures.PannaTextures
 import com.mgtriffid.games.panna.shared.BULLET_STRATEGY
 import com.mgtriffid.games.panna.shared.CHARACTER_STRATEGY

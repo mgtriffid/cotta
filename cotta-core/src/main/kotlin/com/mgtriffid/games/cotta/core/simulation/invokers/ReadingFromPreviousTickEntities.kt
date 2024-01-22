@@ -1,6 +1,9 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
-import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.Entities
+import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 
 class ReadingFromPreviousTickEntities(

@@ -1,6 +1,8 @@
 package com.mgtriffid.games.cotta.client.guice
 
-import com.google.inject.*
+import com.google.inject.AbstractModule
+import com.google.inject.Scopes
+import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.impl.*
@@ -34,7 +36,10 @@ import com.mgtriffid.games.cotta.core.simulation.impl.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.*
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingEffectProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingInputProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.core.tracing.Traces

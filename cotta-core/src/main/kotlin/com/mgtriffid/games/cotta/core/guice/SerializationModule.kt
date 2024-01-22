@@ -1,6 +1,9 @@
 package com.mgtriffid.games.cotta.core.guice
 
-import com.google.inject.*
+import com.google.inject.Binder
+import com.google.inject.Module
+import com.google.inject.Scopes
+import com.google.inject.TypeLiteral
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent

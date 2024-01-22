@@ -4,7 +4,6 @@ import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingInputProcessingContext
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.core.tracing.Traces

@@ -1,7 +1,7 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers.context.impl
 
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import jakarta.inject.Inject

@@ -4,8 +4,8 @@ import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import mu.KotlinLogging
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1

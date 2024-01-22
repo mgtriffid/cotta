@@ -8,7 +8,6 @@ import com.mgtriffid.games.panna.shared.game.components.JumpingComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import kotlin.math.max
-import kotlin.math.min
 
 // Mutates component outside of effect processing. Is it even possible?
 @Predicted class GravitySystem : EntityProcessingSystem {

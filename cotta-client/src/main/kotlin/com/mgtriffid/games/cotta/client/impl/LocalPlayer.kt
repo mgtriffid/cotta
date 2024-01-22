@@ -1,8 +1,9 @@
 package com.mgtriffid.games.cotta.client.impl
 
-import com.mgtriffid.games.cotta.client.impl.LocalPlayer.Data.*
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.client.impl.LocalPlayer.Data.Absent
+import com.mgtriffid.games.cotta.client.impl.LocalPlayer.Data.Present
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import kotlin.reflect.KProperty1
 
 class LocalPlayer {

@@ -1,11 +1,8 @@
 package com.mgtriffid.games.panna
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Graphics
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.math.MathUtils.atan2Deg
 import com.badlogic.gdx.math.MathUtils.atan2Deg360
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity

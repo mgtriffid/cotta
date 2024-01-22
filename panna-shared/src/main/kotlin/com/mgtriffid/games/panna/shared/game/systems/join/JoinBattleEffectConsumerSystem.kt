@@ -7,8 +7,8 @@ import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.panna.shared.CHARACTER_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_LEFT
-import com.mgtriffid.games.panna.shared.game.components.input.ShootInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.CharacterInputComponent
+import com.mgtriffid.games.panna.shared.game.components.input.ShootInputComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent

@@ -10,27 +10,26 @@ import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSubclassOf
 
 class Interpolators {
-    private val interpolators = HashMap<KClass<out Component<*>>, Interpolator<*>>()
+    private val interpolators = HashMap<KClass<out Component<*>>, ComponentInterpolator<*>>()
 
     fun <C: Component<C>> register(klass: KClass<out Component<C>>) {
-        val interpolatedFields = klass.declaredMemberProperties.filter { it.hasAnnotation<Interpolated>() }
+        var interpolatedFields = klass.declaredMemberProperties.filter { it.hasAnnotation<Interpolated>() }
         if (interpolatedFields.isEmpty()) {
             return
         }
-        if (interpolatedFields.any { it !is KMutableProperty1<*, *> }) {
-            throw IllegalArgumentException("Only mutable properties can be interpolated")
-        }
-        interpolators[klass] = createInterpolator(interpolatedFields as List<KMutableProperty1<C, *>>)
+        interpolatedFields = interpolatedFields.filterIsInstance<KMutableProperty1<C, *>>()
+
+        interpolators[klass] = createInterpolator(interpolatedFields)
     }
 
-    private fun <C: Component<C>> createInterpolator(fields: List<KMutableProperty1<C, *>>): Interpolator<*> {
-        val fieldInterpolators: Map<KMutableProperty1<C, *>, FieldInterpolator<*>> = fields.associateWith { createFieldInterpolator(it) }
-        return Interpolator(fieldInterpolators)
+    private fun <C: Component<C>> createInterpolator(fields: List<KMutableProperty1<C, *>>): ComponentInterpolator<*> {
+        val fieldInterpolators: List<FieldInterpolator<C, *>> = fields.map { createFieldInterpolator(it) }
+        return ComponentInterpolator(fieldInterpolators)
     }
 
-    private fun <C: Component<C>> createFieldInterpolator(property: KMutableProperty1<C, *>): FieldInterpolator<*> {
+    private fun <C: Component<C>, V> createFieldInterpolator(property: KMutableProperty1<C, V>): FieldInterpolator<C, V> {
         val type = property.returnType
-        return when (type.classifier) {
+        val interpolator = when (type.classifier) {
             Float::class -> FloatInterpolator()
             Double::class -> DoubleInterpolator()
             Int::class -> IntInterpolator()
@@ -38,59 +37,68 @@ class Interpolators {
             Short::class -> ShortInterpolator()
             else -> throw IllegalArgumentException("Cannot interpolate type ${type.classifier}")
         }
+        @Suppress("UNCHECKED_CAST")
+        return FieldInterpolator(property, interpolator as Interpolator<V>)
     }
 
     // TODO somehow refactor and make this return interpolated component; refactor in CottaClientImpl accordingly
     fun <C: Component<C>> interpolate(prev: C, curr: C, interpolated: C, alpha: Float) {
         interpolators.keys.find { prev::class.isSubclassOf(it) }?.let {
-            (interpolators[it] as? Interpolator<C>)?.interpolate(prev, curr, interpolated, alpha)
+            @Suppress("UNCHECKED_CAST")
+            (interpolators[it] as? ComponentInterpolator<C>)?.interpolate(prev, curr, interpolated, alpha)
         }
     }
 
-    private class Interpolator<T : Component<T>>(
-        private val fieldInterpolators: Map<KMutableProperty1<T, *>, FieldInterpolator<*>>
+    private class FieldInterpolator<T: Component<T>, V>(
+        val property: KMutableProperty1<T, V>,
+        val interpolator: Interpolator<V>)
+    {
+        fun interpolate(from: T, to: T, target: T, alpha: Float) {
+            val fromValue = property.get(from)
+            val toValue = property.get(to)
+            val interpolatedValue = interpolator.interpolate(fromValue, toValue, alpha)
+            property.set(target, interpolatedValue)
+        }
+    }
+
+    private class ComponentInterpolator<T : Component<T>>(
+        private val fieldInterpolators: List<FieldInterpolator<T, *>>
     ) {
         fun interpolate(from: T, to: T, target: T, alpha: Float) {
-            fieldInterpolators.forEach { p: KMutableProperty1<T, *>, fi: FieldInterpolator<*> ->
-                p as KMutableProperty1<T, Any>
-                val fromValue = p.get(from)
-                val toValue = p.get(to)
-                fi as FieldInterpolator<Any>
-                val interpolatedValue = fi.interpolate(fromValue, toValue, alpha)
-                p.set(target, interpolatedValue)
-            }
+            fieldInterpolators.forEach { i -> i.interpolate(from, to, target, alpha) }
         }
     }
 
-    interface FieldInterpolator<C> {
+    interface Interpolator<C> {
         fun interpolate(from: C, to: C, alpha: Float): C
     }
 
-    class FloatInterpolator: FieldInterpolator<Float> {
+    class FloatInterpolator: Interpolator<Float> {
         override fun interpolate(from: Float, to: Float, alpha: Float): Float {
             return from + (to - from) * alpha
         }
     }
 
-    class DoubleInterpolator: FieldInterpolator<Double> {
+    class DoubleInterpolator: Interpolator<Double> {
         override fun interpolate(from: Double, to: Double, alpha: Float): Double {
             return from + (to - from) * alpha
         }
     }
 
-    class IntInterpolator: FieldInterpolator<Int> {
+    class IntInterpolator: Interpolator<Int> {
         override fun interpolate(from: Int, to: Int, alpha: Float): Int {
             return from + ((to - from) * alpha).roundToInt()
         }
     }
 
-    class LongInterpolator: FieldInterpolator<Long> {
+    class LongInterpolator:
+        Interpolator<Long> {
         override fun interpolate(from: Long, to: Long, alpha: Float): Long {
             return from + ((to - from) * alpha).roundToInt()
         }
     }
 
-    class ShortInterpolator: FieldInterpolator<Short> {
+    class ShortInterpolator: Interpolator<Short> {
         override fun interpolate(from: Short, to: Short, alpha: Float): Short {
             return (from + ((to - from) * alpha).roundToInt()).toShort()
         }

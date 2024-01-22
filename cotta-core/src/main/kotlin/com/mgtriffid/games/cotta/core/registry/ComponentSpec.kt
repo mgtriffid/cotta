@@ -22,7 +22,7 @@ enum class FieldType {
     BOOLEAN,
     LONG,
     DOUBLE,
-    OWNED_BY,
+    OWNED_BY, // TODO get rid of
     ENTITY_ID
 }
 

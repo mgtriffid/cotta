@@ -5,8 +5,8 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import kotlin.reflect.KClass
 
 interface CottaClientInput {
-    fun <T: InputComponent<T>> input(
+    fun <T : InputComponent<T>> input(
         entity: Entity,
         clazz: KClass<T>
-        ): T
+    ): T
 }

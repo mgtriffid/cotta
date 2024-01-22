@@ -157,8 +157,6 @@ class NetworkClientImpl @Inject constructor(
         stateSnapper.unpackDeltaRecipe(entities, incomingDataBuffer.deltas[tick]!!)
     }
 
-    private fun blankEntities() = Entities.getInstance()
-
     private fun stateAvailable(): Boolean {
         val stateArrived = incomingDataBuffer.states.isNotEmpty()
         if (!stateArrived) return false

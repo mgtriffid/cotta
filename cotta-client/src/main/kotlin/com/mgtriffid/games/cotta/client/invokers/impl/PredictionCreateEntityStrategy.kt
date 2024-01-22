@@ -18,10 +18,6 @@ class PredictionCreateEntityStrategy @Inject constructor(
     private val predictedEntityIdGenerator: PredictedEntityIdGenerator
 ): CreateEntityStrategy {
 
-    // IF this prediction happens for the first time
-    // - we create a new Entity, generate an id (predicted), record trace to id
-    // IF this prediction already happened before, if we have trace there
-    // - we create entity wth that exact id
     override fun createEntity(ownedBy: Entity.OwnedBy, trace: CottaTrace): Entity {
         val entityId = registry.find(trace, tickProvider.tick)
         return if (entityId != null) {

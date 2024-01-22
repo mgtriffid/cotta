@@ -183,7 +183,7 @@ class CottaClientImpl @Inject constructor(
 
     private fun fillEntityIdMappings(delta: Delta.Present) {
         delta.authoritativeToPredictedEntities.forEach { (authoritativeId, predictedId) ->
-            logger.info { "Recording mapping $authoritativeId to $predictedId" }
+            logger.debug { "Recording mapping $authoritativeId to $predictedId" }
             authoritativeToPredictedEntityIdMappings[authoritativeId] = predictedId
         }
     }

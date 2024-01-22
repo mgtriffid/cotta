@@ -16,7 +16,7 @@ class EntitiesTest {
     fun `should return hasComponent of true after component added`() {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
-        val entity = entities.createEntity()
+        val entity = entities.create()
         entity.addComponent(PositionTestComponent.create(0, 0))
 
         assertTrue(entity.hasComponent(PositionTestComponent::class))
@@ -26,7 +26,7 @@ class EntitiesTest {
     fun `should return component with correct values after added`() {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
-        val entity = entities.createEntity()
+        val entity = entities.create()
         entity.addComponent(PositionTestComponent.create(1, 1))
 
         assertEquals(1, entity.getComponent(PositionTestComponent::class).x)
@@ -36,7 +36,7 @@ class EntitiesTest {
     fun `should say hasComponent is false if it was removed`() {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
-        val entity = entities.createEntity()
+        val entity = entities.create()
         entity.addComponent(PositionTestComponent.create(0, 0))
         entity.removeComponent(PositionTestComponent::class)
 
@@ -47,7 +47,7 @@ class EntitiesTest {
     fun `cottaState should use the same Entities if called repeatedly`() {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
-        val entity = entities.createEntity()
+        val entity = entities.create()
         entity.addComponent(PositionTestComponent.create(1, 1))
         val entityId = entity.id
 
@@ -61,7 +61,7 @@ class EntitiesTest {
     fun `should have the same value for components after advancing a tick`() {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
-        val entity = entities.createEntity()
+        val entity = entities.create()
         entity.addComponent(PositionTestComponent.create(1, 1))
         val entityId = entity.id
 
@@ -77,7 +77,7 @@ class EntitiesTest {
     fun `should remember previous value after advancing`() {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
-        val entity = entities.createEntity()
+        val entity = entities.create()
         entity.addComponent(PositionTestComponent.create(1, 1))
         val entityId = entity.id
         val tick = tickProvider.tick
@@ -94,7 +94,7 @@ class EntitiesTest {
     fun `should remember previous value after advancing and altering value`() {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
-        val entity = entities.createEntity()
+        val entity = entities.create()
         entity.addComponent(PositionTestComponent.create(1, 1))
         val entityId = entity.id
         val tick = tickProvider.tick
@@ -113,7 +113,7 @@ class EntitiesTest {
     fun `should be possible to advance like 100 times`() {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
-        val entity = entities.createEntity()
+        val entity = entities.create()
         entity.addComponent(PositionTestComponent.create(1, 1))
         val entityId = entity.id
 

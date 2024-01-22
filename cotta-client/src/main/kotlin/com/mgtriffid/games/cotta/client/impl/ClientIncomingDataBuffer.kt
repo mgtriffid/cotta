@@ -18,7 +18,6 @@ class ClientIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
     val deltas = TreeMap<Long, DR>()
     val inputs = TreeMap<Long, Map<EntityId, Collection<InputComponent<*>>>>() // GROOM class with naming
     val createdEntities = TreeMap<Long, CreatedEntitiesWithTracesRecipe>() // GROOM class with naming
-    val metaEntityIds = TreeMap<Long, EntityId>() // not really needed but for the uniformity
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
 
     fun storeDelta(tick: Long, delta: DR) {

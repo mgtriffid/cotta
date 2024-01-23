@@ -5,7 +5,12 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
-import com.badlogic.gdx.scenes.scene2d.ui.*
+import com.badlogic.gdx.scenes.scene2d.ui.Container
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton
+import com.badlogic.gdx.scenes.scene2d.ui.Stack
+import com.badlogic.gdx.scenes.scene2d.ui.Table
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton
+import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.mgtriffid.games.panna.screens.menu.MenuScreen
@@ -120,7 +125,7 @@ class CharacterListWindow(
     private fun updateCharactersInTable(characters: List<CharacterModel>) {
         logger.debug { "Updating characters table with ${characters.size} characters" }
         // for cells that correspond to these characters, first update drawable
-        selectionFrames.forEach { it.overlay.addAction(Actions.removeActor())}
+        selectionFrames.forEach { it.overlay.addAction(Actions.removeActor()) }
         selectionFrames.clear()
         characters.forEachIndexed { index, character ->
             val cell = cells[index]
@@ -128,7 +133,7 @@ class CharacterListWindow(
             val stack = Stack()
             cell.actor = stack
             val imageButton = ImageButton(TextureRegionDrawable(menuTextures.character))
-            imageButton.addListener(object: ClickListener() {
+            imageButton.addListener(object : ClickListener() {
                 override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
                     logger.debug { "Cell $index clicked" }
                     super.touchUp(event, x, y, pointer, button)
@@ -136,8 +141,8 @@ class CharacterListWindow(
                         characterListModel.selectedCharacterIndex = index
                     }
                 }
-
             })
+
             stack.add(imageButton)
             val selectionFrame = SelectionFrame(menuTextures.selection)
             selectionFrames.add(selectionFrame)

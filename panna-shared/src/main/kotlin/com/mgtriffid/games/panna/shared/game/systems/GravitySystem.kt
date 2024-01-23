@@ -18,7 +18,7 @@ import kotlin.math.max
             }
             val velocityComponent = e.getComponent(VelocityComponent::class)
             // TODO move that max Y vel down to the Gravity Component: air resistance is different for different things.
-            velocityComponent.velY = max(velocityComponent.velY - 500 * ctx.clock().delta(), -300f)
+            velocityComponent.velY = max(velocityComponent.velY - 500 * ctx.clock().delta(), -1200f)
         }
     }
 }

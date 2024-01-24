@@ -1,5 +1,6 @@
 package com.mgtriffid.games.panna.screens.game.graphics.textures
 
+import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.mgtriffid.games.panna.screens.game.graphics.PannaTextureIds
@@ -26,6 +27,8 @@ class PannaTextures {
         textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_RUNNING_FRAME_0] = TextureRegion(feetTexture, 16, 16)
         textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_RUNNING_FRAME_1] = TextureRegion(feetTexture, 16, 0,  16, 16)
         textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_IN_AIR] = TextureRegion(feetTexture, 32, 0, 16, 16)
+        textures[PannaTextureIds.Characters.TEXTURE_ID_HEALTH_BAR_BACKGROUND] = TextureRegion(Texture("panna/characters/dude/health-bar-background.png"))
+        textures[PannaTextureIds.Characters.TEXTURE_ID_HEALTH_BAR_FOREGROUND] = TextureRegion(Texture("panna/characters/dude/health-bar-foreground.png"))
     }
 
     fun dispose() {

@@ -22,6 +22,10 @@ class ActorFactory {
                     lookingUp = LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_UP]),
                     lookingStraight = LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_STRAIGHT]),
                     lookingDown = LeftRightRegions(textures[PannaTextureIds.Characters.TEXTURE_ID_EYES_BLUE_LOOKING_DOWN])
+                ),
+                healthBar = Regions.DudeRegions.HealthBarRegions(
+                    healthBarBackground = textures[PannaTextureIds.Characters.TEXTURE_ID_HEALTH_BAR_BACKGROUND],
+                    healthBarForeground = textures[PannaTextureIds.Characters.TEXTURE_ID_HEALTH_BAR_FOREGROUND]
                 )
             ),
             bullet = textures[PannaTextureIds.TEXTURE_ID_BULLET],
@@ -54,11 +58,16 @@ class ActorFactory {
             val feetOnGround: LeftRightRegions,
             val feetRunning: List<Pair<Long, LeftRightRegions>>,
             val eyes: EyesRegions,
+            val healthBar: HealthBarRegions
         ) {
             class EyesRegions(
                 val lookingUp: LeftRightRegions,
                 val lookingStraight: LeftRightRegions,
                 val lookingDown: LeftRightRegions,
+            )
+            class HealthBarRegions(
+                val healthBarBackground: TextureRegion,
+                val healthBarForeground: TextureRegion
             )
         }
     }

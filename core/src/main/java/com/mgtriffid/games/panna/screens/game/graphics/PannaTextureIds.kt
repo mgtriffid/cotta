@@ -20,5 +20,7 @@ object PannaTextureIds {
         val TEXTURE_ID_DUDE_FEET_ON_GROUND = TextureId(13)
         val TEXTURE_ID_DUDE_FEET_RUNNING_FRAME_0 = TextureId(14)
         val TEXTURE_ID_DUDE_FEET_RUNNING_FRAME_1 = TextureId(15)
+        val TEXTURE_ID_HEALTH_BAR_BACKGROUND = TextureId(16)
+        val TEXTURE_ID_HEALTH_BAR_FOREGROUND = TextureId(17)
     }
 }

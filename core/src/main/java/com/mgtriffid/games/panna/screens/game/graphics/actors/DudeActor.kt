@@ -2,9 +2,12 @@ package com.mgtriffid.games.panna.screens.game.graphics.actors
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.screens.game.graphics.textures.LeftRightRegions
+import com.mgtriffid.games.panna.shared.game.components.HealthComponent
 import com.mgtriffid.games.panna.shared.game.components.JumpingComponent
 import com.mgtriffid.games.panna.shared.game.components.LookingAtComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
@@ -14,23 +17,19 @@ import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponen
 
 class DudeActor(
     private val regions: ActorFactory.Regions.DudeRegions,
-) : PannaActor() {
+) : PannaActor {
+    val healthBarActor = HealthBarActor()
+    override val actor = object : Group() {
+        init {
+            addActor(DudeBodyActor())
+            addActor(healthBarActor)
+        }
+    }
     private var feetRegion: TextureRegion = regions.feetOnGround.right
     private var eyesRegion: TextureRegion = regions.eyes.lookingStraight.right
 
     private var walkingState: WalkingState = WalkingState.Standing
     private val animationLength = regions.feetRunning.sumOf { it.first }
-
-    override fun draw(batch: Batch, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
-        batch.draw(
-            regions.body,
-            x - regions.body.regionWidth / 2,
-            y - regions.body.regionHeight / 2
-        )
-        batch.draw(feetRegion, x - feetRegion.regionWidth / 2, y - feetRegion.regionHeight / 2)
-        batch.draw(eyesRegion, x - eyesRegion.regionWidth / 2, y - eyesRegion.regionHeight / 2)
-    }
 
     override fun update(entity: Entity) {
         val feet = if (entity.getComponent(JumpingComponent::class).inAir) {
@@ -58,6 +57,17 @@ class DudeActor(
         } else {
             feetRegion = feet.right
             eyesRegion = eyes.right
+        }
+        updateHealthBar(entity)
+    }
+
+    private fun updateHealthBar(entity: Entity) {
+        if (entity.hasComponent(HealthComponent::class)) {
+            healthBarActor.isVisible = true
+            val component = entity.getComponent(HealthComponent::class)
+            healthBarActor.percentage = component.health.toFloat() / component.max
+        } else {
+            healthBarActor.isVisible = false
         }
     }
 
@@ -125,6 +135,52 @@ class DudeActor(
                     }
                 }
             }
+        }
+    }
+
+    inner class DudeBodyActor : Actor() {
+        override fun draw(batch: Batch, parentAlpha: Float) {
+            super.draw(batch, parentAlpha)
+            batch.draw(
+                regions.body,
+                -regions.body.regionWidth / 2f,
+                -regions.body.regionHeight / 2f
+            )
+            batch.draw(feetRegion, -feetRegion.regionWidth / 2f, -feetRegion.regionHeight / 2f)
+            batch.draw(eyesRegion, -eyesRegion.regionWidth / 2f, -eyesRegion.regionHeight / 2f)
+        }
+    }
+
+    inner class HealthBarActor : Actor() {
+        var percentage: Float = 1f
+        override fun draw(batch: Batch, parentAlpha: Float) {
+            super.draw(batch, parentAlpha)
+            val positionX = -regions.body.regionWidth / 2f
+            val positionY = regions.body.regionHeight / 2f + 4
+            batch.draw(
+                /* region = */ regions.healthBar.healthBarBackground,
+                /* x = */ positionX,
+                /* y = */ positionY,
+                /* originX = */ 0f,
+                /* originY = */ 0f,
+                /* width = */ 1f,
+                /* height = */ 1f,
+                /* scaleX = */ regions.body.regionWidth.toFloat(),
+                /* scaleY = */ 4f,
+                /* rotation = */ 0f
+            )
+            batch.draw(
+                /* region = */ regions.healthBar.healthBarForeground,
+                /* x = */ positionX,
+                /* y = */ positionY,
+                /* originX = */ 0f,
+                /* originY = */ 0f,
+                /* width = */ 1f,
+                /* height = */ 1f,
+                /* scaleX = */ regions.body.regionWidth.toFloat() * percentage,
+                /* scaleY = */ 4f,
+                /* rotation = */ 0f
+            )
         }
     }
 }

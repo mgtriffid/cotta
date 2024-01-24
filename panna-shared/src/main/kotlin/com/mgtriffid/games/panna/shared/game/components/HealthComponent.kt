@@ -7,16 +7,18 @@ interface HealthComponent : Component<HealthComponent> {
 
     @ComponentData
     var health: Int
+    @ComponentData val max: Int
 
     companion object {
-        fun create(health: Int): HealthComponent {
-            return HealthComponentImpl(health)
+        fun create(health: Int, max: Int): HealthComponent {
+            return HealthComponentImpl(health, max)
         }
     }
 }
 
 private data class HealthComponentImpl(
-    override var health: Int
+    override var health: Int,
+    override val max: Int
 ) : HealthComponent {
     override fun copy(): HealthComponent = this.copy(health = health)
 }

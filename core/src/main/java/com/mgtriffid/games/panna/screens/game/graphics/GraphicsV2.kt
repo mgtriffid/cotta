@@ -4,6 +4,7 @@ import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -89,7 +90,7 @@ class GraphicsV2 {
             if (actor == null) {
                 actor = createActor(entity, playerId)
                 entityActors[id] = actor
-                stage.addActor(actor)
+                stage.addActor(actor.actor)
             }
             updateActor(actor, entity, playerId)
         }
@@ -113,14 +114,14 @@ class GraphicsV2 {
             entities.none { it.id == entityId }
         }
         entitiesToRemove.forEach { entityId ->
-            entityActors.remove(entityId)?.remove()
+            entityActors.remove(entityId)?.actor?.remove()
         }
     }
 
     private fun updateActor(actor: PannaActor, entity: Entity, playerId: PlayerId) {
         val positionComponent = entity.getComponent(PositionComponent::class)
-        actor.x = positionComponent.xPos
-        actor.y = positionComponent.yPos
+        actor.actor.x = positionComponent.xPos
+        actor.actor.y = positionComponent.yPos
         actor.update(entity)
     }
 }

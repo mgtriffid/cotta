@@ -26,6 +26,7 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
             dude.addComponent(WalkingComponent.create(100f))
             dude.addComponent(GravityComponent.Instance)
             dude.addComponent(LookingAtComponent.create(0f))
+            dude.addComponent(HealthComponent.create(77, 100))
             dude.addComponent(VelocityComponent.create(0f, 0f))
             dude.addComponent(SteamManPlayerComponent.create())
             dude.addComponent(ColliderComponent.create(16, 16))

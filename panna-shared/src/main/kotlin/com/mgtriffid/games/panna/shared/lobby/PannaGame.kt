@@ -15,6 +15,7 @@ import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
+import com.mgtriffid.games.panna.shared.game.effects.CollisionEffect
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 import com.mgtriffid.games.panna.shared.game.effects.ShootEffect
 import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
@@ -54,7 +55,7 @@ class PannaGame : CottaGame {
         graverobber.addInputComponent(CharacterInputComponent::class)
         graverobber.addComponent(WalkingComponent.create(80f))
         graverobber.addComponent(VelocityComponent.create(0f, 0f))
-        graverobber.addComponent(PositionComponent.create(30f, 40f, ORIENTATION_LEFT))
+        graverobber.addComponent(PositionComponent.create(30f, 40f))
         graverobber.addComponent(DrawableComponent.create(
             TODO("Should not be created as is, should be redone as general NPC")
         ))
@@ -79,7 +80,7 @@ class PannaGame : CottaGame {
     private fun createBlock(entities: Entities, idGenerator: () -> Int, rowNumber: Int, colNumber: Int) {
         val block = entities.createStatic(StaticEntityId(idGenerator()))
         block.addComponent(DrawableComponent.create(SOLID_TERRAIN_TILE_STRATEGY))
-        block.addComponent(PositionComponent.create(8 + colNumber * 16f, 8 + rowNumber * 16f, ORIENTATION_LEFT))
+        block.addComponent(PositionComponent.create(8 + colNumber * 16f, 8 + rowNumber * 16f))
         block.addComponent(SolidTerrainComponent.create())
         block.addComponent(ColliderComponent.create(16, 16))
     }
@@ -97,6 +98,7 @@ class PannaGame : CottaGame {
         JumpingComponent::class,
         ColliderComponent::class,
         HealthComponent::class,
+        BulletComponent::class
     )
 
     override val inputComponentClasses = setOf(
@@ -111,6 +113,7 @@ class PannaGame : CottaGame {
         JoinBattleEffect::class,
         MovementEffect::class,
         ShootEffect::class,
+        CollisionEffect::class
     )
 
     override val metaEntitiesInputComponents = setOf(

@@ -19,7 +19,7 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is JoinBattleEffect) {
             val dude = ctx.createEntity(ctx.entities().get(e.metaEntityId).ownedBy)
-            dude.addComponent(PositionComponent.create(32f, 24f, ORIENTATION_LEFT))
+            dude.addComponent(PositionComponent.create(32f, 24f))
             dude.addInputComponent(CharacterInputComponent::class)
             dude.addInputComponent(ShootInputComponent::class)
             dude.addComponent(JumpingComponent.create(false, 250f))

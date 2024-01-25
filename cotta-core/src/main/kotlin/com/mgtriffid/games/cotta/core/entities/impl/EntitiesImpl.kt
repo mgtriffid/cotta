@@ -26,7 +26,7 @@ class EntitiesImpl : Entities {
 
     @Throws(EntityNotExistsException::class)
     override fun get(id: EntityId): Entity {
-        return dynamic[id] ?: throw EntityNotExistsException("Entity $id does not exist")
+        return dynamic[id] ?: static[id] ?: throw EntityNotExistsException("Entity $id does not exist")
     }
 
     override fun all(): Collection<Entity> {

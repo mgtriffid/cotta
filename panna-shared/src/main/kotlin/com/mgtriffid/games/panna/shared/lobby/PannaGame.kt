@@ -10,20 +10,23 @@ import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
-import com.mgtriffid.games.panna.shared.game.components.PositionComponent.Companion.ORIENTATION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.CollisionEffect
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
-import com.mgtriffid.games.panna.shared.game.effects.ShootEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
 import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.BulletHitsDudeEffect
+import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsDudeVisualEffect
+import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsGroundVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.walking.JumpEffect
 import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 import com.mgtriffid.games.panna.shared.game.systems.*
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleSystem
+import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletCollisionSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.*
 import com.mgtriffid.games.panna.shared.tiled.TiledMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -42,6 +45,7 @@ class PannaGame : CottaGame {
         GravitySystem::class,
         JoinBattleSystem::class,
         JoinBattleEffectConsumerSystem::class,
+        BulletCollisionSystem::class,
     )
 
     override fun initializeServerState(entities: Entities) {
@@ -113,7 +117,10 @@ class PannaGame : CottaGame {
         JoinBattleEffect::class,
         MovementEffect::class,
         ShootEffect::class,
-        CollisionEffect::class
+        CollisionEffect::class,
+        BulletHitsGroundVisualEffect::class,
+        BulletHitsDudeEffect::class,
+        BulletHitsDudeVisualEffect::class
     )
 
     override val metaEntitiesInputComponents = setOf(

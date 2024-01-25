@@ -16,7 +16,7 @@ class LatestEntities @Inject constructor(
         return entities().create(ownedBy)
     }
 
-    override fun get(id: EntityId): Entity {
+    override fun get(id: EntityId): Entity? {
         return entities().get(id)
     }
 
@@ -29,7 +29,7 @@ class LatestEntities @Inject constructor(
     }
 
     override fun remove(id: EntityId) {
-        throw NotImplementedError("Is not supposed to be called on Server")
+        return entities().remove(id)
     }
 
     override fun create(id: EntityId, ownedBy: Entity.OwnedBy): Entity {

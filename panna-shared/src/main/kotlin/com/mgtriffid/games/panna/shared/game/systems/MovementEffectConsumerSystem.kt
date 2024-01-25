@@ -24,7 +24,7 @@ class MovementEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is MovementEffect) {
             logger.trace { "Received MovementEffect: $e" }
-            val entity = ctx.entities().get(e.entityId)
+            val entity = ctx.entities().get(e.entityId) ?: return
             val velocityComponent = entity.getComponent(VelocityComponent::class)
             if (entity.hasComponent(PositionComponent::class)) {
                 val position = entity.getComponent(PositionComponent::class)

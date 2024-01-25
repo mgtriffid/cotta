@@ -9,7 +9,7 @@ import com.mgtriffid.games.cotta.server.workload.effects.EntityShotEffect
 class EntityShotTestEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is EntityShotEffect) {
-            val entity = ctx.entities().get(e.entityId)
+            val entity = ctx.entities().get(e.entityId) ?: return
             if (entity.hasComponent(HealthTestComponent::class)) {
                 entity.getComponent(HealthTestComponent::class).health -= 5
             }

@@ -1,4 +1,4 @@
-package com.mgtriffid.games.panna.shared.game.effects
+package com.mgtriffid.games.panna.shared.game.effects.shooting
 
 import com.mgtriffid.games.cotta.EffectData
 import com.mgtriffid.games.cotta.core.effects.CottaEffect

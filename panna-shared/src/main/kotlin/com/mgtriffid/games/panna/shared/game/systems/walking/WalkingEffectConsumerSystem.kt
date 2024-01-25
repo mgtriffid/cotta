@@ -14,7 +14,7 @@ import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 @Predicted class WalkingEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is WalkingEffect) {
-            val entity = ctx.entities().get(e.entityId)
+            val entity = ctx.entities().get(e.entityId) ?: return
             entity.getComponent(VelocityComponent::class).apply {
                 velX = when (e.direction) {
                     WALKING_DIRECTION_NONE -> 0

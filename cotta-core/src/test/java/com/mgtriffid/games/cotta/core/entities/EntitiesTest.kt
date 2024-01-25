@@ -53,7 +53,7 @@ class EntitiesTest {
 
         assertEquals(
             1,
-            cottaState.entities().get(entityId).getComponent(PositionTestComponent::class).x
+            cottaState.entities().get(entityId)?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
@@ -69,7 +69,7 @@ class EntitiesTest {
 
         assertEquals(
             1,
-            cottaState.entities().get(entityId).getComponent(PositionTestComponent::class).x
+            cottaState.entities().get(entityId)?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
@@ -86,7 +86,7 @@ class EntitiesTest {
 
         assertEquals(
             1,
-            cottaState.entities(tick).get(entityId).getComponent(PositionTestComponent::class).x
+            cottaState.entities(tick).get(entityId)?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
@@ -101,11 +101,11 @@ class EntitiesTest {
 
         cottaState.advance()
 
-        cottaState.entities().get(entityId).getComponent(PositionTestComponent::class).x = 2
+        cottaState.entities().get(entityId)?.getComponent(PositionTestComponent::class)?.x = 2
 
         assertEquals(
             1,
-            cottaState.entities(tick).get(entityId).getComponent(PositionTestComponent::class).x
+            cottaState.entities(tick).get(entityId)?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
@@ -123,7 +123,7 @@ class EntitiesTest {
 
         assertEquals(
             1,
-            cottaState.entities().get(entityId).getComponent(PositionTestComponent::class).x
+            cottaState.entities().get(entityId)?.getComponent(PositionTestComponent::class)?.x
         )
     }
 

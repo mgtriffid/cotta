@@ -10,9 +10,10 @@ import com.mgtriffid.games.panna.shared.game.components.BulletComponent
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.LookingAtComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
-import com.mgtriffid.games.panna.shared.game.effects.ShootEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -23,7 +24,7 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem {
         if (e !is ShootEffect) {
             return
         }
-        val shooter = ctx.entities().get(e.shooterId)
+        val shooter = ctx.entities().get(e.shooterId) ?: return
         val position = shooter.getComponent(PositionComponent::class)
         val direction = shooter.getComponent(LookingAtComponent::class)
         val bullet = ctx.createEntity(ownedBy = shooter.ownedBy)
@@ -31,8 +32,9 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem {
         logger.debug { "Created bullet ${bullet.id}" }
         bullet.addComponent(PositionComponent.create(position.xPos, position.yPos))
         bullet.addComponent(DrawableComponent.create(BULLET_STRATEGY))
+        bullet.addComponent(ColliderComponent.create(2, 2))
         bullet.addComponent(GravityComponent.create())
-        bullet.addComponent(BulletComponent.create())
+        bullet.addComponent(BulletComponent.create(e.shooterId))
         bullet.addComponent(
             VelocityComponent.create(velocity.x, velocity.y)
         )

@@ -9,7 +9,9 @@ import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestE
 class HealthRegenerationTestEffectsConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is HealthRegenerationTestEffect) {
-            ctx.entities().get(e.entityId).getComponent(HealthTestComponent::class).health += e.health
+            ctx.entities().get(e.entityId)?.let {
+                it.getComponent(HealthTestComponent::class).health += e.health
+            }
         }
     }
 }

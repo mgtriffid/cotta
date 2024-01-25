@@ -354,7 +354,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
 
     private fun unpackChangedEntities(entities: Entities, changedEntities: List<MapsChangedEntityRecipe>) {
         changedEntities.forEach { recipe ->
-            val entity = entities.get(recipe.entityId)
+            val entity = entities.get(recipe.entityId) ?: return@forEach
             recipe.addedComponents.forEach {
                 entity.addComponent(unpackComponentRecipe(it))
             }

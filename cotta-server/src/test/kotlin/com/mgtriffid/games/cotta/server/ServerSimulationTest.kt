@@ -72,7 +72,7 @@ class ServerSimulationTest {
 
         assertEquals(
             1,
-            state.entities().get(entityId).getComponent(HealthTestComponent::class).health
+            state.entities().get(entityId)?.getComponent(HealthTestComponent::class)?.health
         )
     }
 
@@ -97,7 +97,7 @@ class ServerSimulationTest {
 
         assertEquals(
             2,
-            state.entities().get(entityId).getComponent(HealthTestComponent::class).health
+            state.entities().get(entityId)?.getComponent(HealthTestComponent::class)?.health
         )
     }
 
@@ -161,7 +161,7 @@ class ServerSimulationTest {
 
         assertEquals(
             15,
-            state.entities().get(damageableId).getComponent(HealthTestComponent::class).health
+            state.entities().get(damageableId)?.getComponent(HealthTestComponent::class)?.health
         )
     }
 
@@ -219,7 +219,7 @@ class ServerSimulationTest {
 
         assertEquals(
             15,
-            state.entities().get(damageableId).getComponent(HealthTestComponent::class).health
+            state.entities().get(damageableId)?.getComponent(HealthTestComponent::class)?.health
         )
     }
 

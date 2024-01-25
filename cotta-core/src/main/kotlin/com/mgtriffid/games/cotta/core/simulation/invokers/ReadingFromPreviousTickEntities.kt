@@ -15,7 +15,7 @@ class ReadingFromPreviousTickEntities(
         return getEntities().create(ownedBy)
     }
 
-    override fun get(id: EntityId): Entity {
+    override fun get(id: EntityId): Entity? {
         val entities = sawTickHolder.tick?.let { state.entities(atTick = it) } ?: getEntities()
         return entities.get(id)
     }

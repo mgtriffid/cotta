@@ -11,7 +11,7 @@ import com.mgtriffid.games.panna.shared.game.effects.walking.JumpEffect
 @Predicted class JumpEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is JumpEffect) {
-            val entity = ctx.entities().get(e.entityId)
+            val entity = ctx.entities().get(e.entityId) ?: return
             entity.getComponent(VelocityComponent::class).apply {
                 val component = entity.getComponent(JumpingComponent::class)
                 velY = component.jumpSpeed

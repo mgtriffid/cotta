@@ -16,7 +16,7 @@ class PredictedLatestEntities @Inject constructor(
         return entities().create(ownedBy)
     }
 
-    override fun get(id: EntityId): Entity {
+    override fun get(id: EntityId): Entity? {
         return entities().get(id)
     }
 

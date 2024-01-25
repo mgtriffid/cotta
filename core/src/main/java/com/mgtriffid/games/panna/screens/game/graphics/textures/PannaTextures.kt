@@ -10,10 +10,7 @@ class PannaTextures {
     private val textures = HashMap<TextureId, TextureRegion>()
 
     fun init() {
-        textures[PannaTextureIds.TEXTURE_ID_FOO_ENTITY] = TextureRegion(Texture("characters-free-sprites/2 GraveRobber/Graverobber.png"))
-        textures[PannaTextureIds.TEXTURE_ID_PLAYER_ENTITY] = TextureRegion(Texture("characters-free-sprites/3 SteamMan/SteamMan.png"))
         textures[PannaTextureIds.TEXTURE_ID_BULLET] = TextureRegion(Texture("bullet.png"))
-        textures[PannaTextureIds.TEXTURE_ID_TERRAIN] = TextureRegion(Texture("terrain.png"))
         textures[PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK] = TextureRegion(Texture("panna/terrain/brown-block.png"))
         textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_BLUE_BODY] = TextureRegion(Texture("panna/characters/dude/body.png"), 16, 16)
 

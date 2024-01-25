@@ -13,4 +13,8 @@ interface DrawableState {
 
     val entities: List<Entity>
     val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId>
+    // Need to add effects now.
+    // Effects can come from prediction or from authoritative simulation.
+    // Those coming from prediction can be in fact mis-predicted, and then we should allow developer to handle that:
+    // like, stop playing music, or stop showing some animation.
 }

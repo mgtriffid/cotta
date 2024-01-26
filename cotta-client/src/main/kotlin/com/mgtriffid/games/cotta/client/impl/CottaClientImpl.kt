@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRe
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.annotations.Predicted
+import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
@@ -120,6 +121,7 @@ class CottaClientImpl @Inject constructor(
         return object : DrawableState {
             override val entities: List<Entity> = entities
             override val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId> = authoritativeToPredictedEntityIdMappings.all()
+            override val effects: Collection<CottaEffect> = emptyList()
         }
     }
 

@@ -64,7 +64,9 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
                     data.createdEntities(tick).map { (trace, id) ->
                         Pair(stateSnapper.snapTrace(trace), id)
                     },
-                    data.confirmedEntities(tick).associate { (predictedId, authoritativeId) ->
+                    data.confirmedEntities(tick).filter { (predictedId, _) ->
+                        predictedId.playerId == playerId
+                    }.associate { (predictedId, authoritativeId) ->
                         authoritativeId to predictedId
                     }
                 ))

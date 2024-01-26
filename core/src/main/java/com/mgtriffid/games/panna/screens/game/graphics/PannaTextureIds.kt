@@ -18,4 +18,11 @@ object PannaTextureIds {
         val TEXTURE_ID_HEALTH_BAR_BACKGROUND = TextureId(16)
         val TEXTURE_ID_HEALTH_BAR_FOREGROUND = TextureId(17)
     }
+
+    object Effects {
+        val TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_0 = TextureId(18)
+        val TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_1 = TextureId(19)
+        val TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_2 = TextureId(20)
+        val TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_3 = TextureId(21)
+    }
 }

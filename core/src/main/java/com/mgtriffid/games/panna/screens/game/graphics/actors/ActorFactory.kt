@@ -6,7 +6,7 @@ import com.mgtriffid.games.panna.screens.game.graphics.textures.LeftRightRegions
 import com.mgtriffid.games.panna.screens.game.graphics.textures.PannaTextures
 
 class ActorFactory {
-    private lateinit var regions: Regions
+    private lateinit var regions: Regions // TODO name this better, it's not only regions
 
     fun initialize(textures: PannaTextures) {
         regions = Regions(
@@ -29,7 +29,13 @@ class ActorFactory {
                 )
             ),
             bullet = textures[PannaTextureIds.TEXTURE_ID_BULLET],
-            terrain = textures[PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK]
+            terrain = textures[PannaTextureIds.Terrain.TEXTURE_ID_BROWN_BLOCK],
+            bulletHitsGround = listOf(
+                textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_0],
+                textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_1],
+                textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_2],
+                textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_3],
+            )
         )
     }
 
@@ -47,10 +53,15 @@ class ActorFactory {
         return BulletActor(regions.bullet)
     }
 
+    fun createBulletHitsGroundVisualEffect(): BulletHitsGroundVisualEffectActor {
+        return BulletHitsGroundVisualEffectActor(regions.bulletHitsGround)
+    }
+
     class Regions(
         val dude: DudeRegions,
         val bullet: TextureRegion,
         val terrain: TextureRegion,
+        val bulletHitsGround: List<TextureRegion>,
     ) {
         class DudeRegions(
             val body: TextureRegion,

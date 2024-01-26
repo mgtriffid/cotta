@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.actions.Actions
+import com.badlogic.gdx.scenes.scene2d.actions.DelayAction
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -24,6 +27,7 @@ import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
+import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsGroundVisualEffect
 
 class GraphicsV2 {
 
@@ -58,9 +62,12 @@ class GraphicsV2 {
 
     fun draw(state: DrawableState, playerId: PlayerId, delta: Float) {
         processEntities(state, playerId)
+        processEffects(state)
         stage.act(delta)
         ScreenUtils.clear(1f, 0f, 0f, 1f)
-        val dudeEntity = state.entities.find { it.hasComponent(SteamManPlayerComponent::class) && it.ownedBy == Entity.OwnedBy.Player(playerId) }
+        val dudeEntity = state.entities.find {
+            it.hasComponent(SteamManPlayerComponent::class) && it.ownedBy == Entity.OwnedBy.Player(playerId)
+        }
         val dudePosition = dudeEntity?.getComponent(PositionComponent::class)
         val x = dudePosition?.xPos ?: 0f
         val y = dudePosition?.yPos ?: 0f
@@ -95,6 +102,23 @@ class GraphicsV2 {
             updateActor(actor, entity, playerId)
         }
         cleanUpActors(state.entities)
+    }
+
+    private fun processEffects(state: DrawableState) {
+        state.effects.forEach { effect ->
+            if (effect is BulletHitsGroundVisualEffect) {
+                val actor = actorFactory.createBulletHitsGroundVisualEffect()
+                actor.x = effect.x
+                actor.y = effect.y
+                actor.addAction(
+                    Actions.sequence(
+                        Actions.delay(0.4f),
+                        Actions.removeActor()
+                    )
+                )
+                stage.addActor(actor)
+            }
+        }
     }
 
     private fun createActor(entity: Entity, playerId: PlayerId): PannaActor {

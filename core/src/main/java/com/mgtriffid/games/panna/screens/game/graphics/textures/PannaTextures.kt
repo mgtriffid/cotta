@@ -26,6 +26,12 @@ class PannaTextures {
         textures[PannaTextureIds.Characters.TEXTURE_ID_DUDE_FEET_IN_AIR] = TextureRegion(feetTexture, 32, 0, 16, 16)
         textures[PannaTextureIds.Characters.TEXTURE_ID_HEALTH_BAR_BACKGROUND] = TextureRegion(Texture("panna/characters/dude/health-bar-background.png"))
         textures[PannaTextureIds.Characters.TEXTURE_ID_HEALTH_BAR_FOREGROUND] = TextureRegion(Texture("panna/characters/dude/health-bar-foreground.png"))
+
+        val bulletHitsTerrainTexture = Texture("panna/effects/bullet-hits-terrain.png")
+        textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_0] = TextureRegion(bulletHitsTerrainTexture, 0, 0, 8, 8)
+        textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_1] = TextureRegion(bulletHitsTerrainTexture, 8, 0, 8, 8)
+        textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_2] = TextureRegion(bulletHitsTerrainTexture, 16, 0, 8, 8)
+        textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_3] = TextureRegion(bulletHitsTerrainTexture, 24, 0, 8, 8)
     }
 
     fun dispose() {

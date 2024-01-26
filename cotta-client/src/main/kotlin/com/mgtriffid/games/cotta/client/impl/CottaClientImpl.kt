@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
+import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
@@ -42,6 +43,7 @@ class CottaClientImpl @Inject constructor(
     override val localPlayer: LocalPlayer,
     private val componentsRegistry: ComponentsRegistry,
     private val interpolators: Interpolators,
+    private val effectBus: EffectBus,
     @Named("simulation") private val state: CottaState
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial
@@ -102,6 +104,8 @@ class CottaClientImpl @Inject constructor(
         }
     }
 
+    private var lastTickEffectsWereReturned: Long = -1
+
     override fun getDrawableState(alpha: Float, vararg components: KClass<out Component<*>>): DrawableState {
         if (tickProvider.tick == 0L) return DrawableState.EMPTY
         val onlyNeeded: Collection<Entity>.() -> Collection<Entity> = {
@@ -118,10 +122,17 @@ class CottaClientImpl @Inject constructor(
         val entities = (predicted + authoritative.filter { authoritativeToPredictedEntityIdMappings[it.id] == null }).also {
             logger.debug { "Entities found: ${it.map { it.id }}" }
         }
+        val effects = if (lastTickEffectsWereReturned < tickProvider.tick) {
+            lastTickEffectsWereReturned = tickProvider.tick
+            effectBus.effects()
+        } else {
+            emptyList()
+        }
+
         return object : DrawableState {
             override val entities: List<Entity> = entities
             override val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId> = authoritativeToPredictedEntityIdMappings.all()
-            override val effects: Collection<CottaEffect> = emptyList()
+            override val effects: Collection<CottaEffect> = effects
         }
     }
 

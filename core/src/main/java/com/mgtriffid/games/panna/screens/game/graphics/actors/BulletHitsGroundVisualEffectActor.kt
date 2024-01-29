@@ -11,7 +11,9 @@ class BulletHitsGroundVisualEffectActor(val bulletHitsGround: List<TextureRegion
 
     override fun draw(batch: Batch, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
-        val region = bulletHitsGround[min((now() - createdAt) / 100L, 3L).toInt()]
+        val region = chooseAnimationFrame()
         batch.draw(region, x - region.regionWidth / 2, y - region.regionHeight / 2)
     }
+
+    private fun chooseAnimationFrame() = bulletHitsGround[min((now() - createdAt) / 100L, 3L).toInt()]
 }

@@ -32,6 +32,8 @@ class BulletCollisionSystem : EffectsConsumerSystem {
 
                     collidedWith.hasComponent(SolidTerrainComponent::class) -> {
                         ctx.fire(BulletHitsGroundVisualEffect.create(e.x, e.y))
+                        // TODO remove on the next tick? Now it looks like bullet never hits
+                        //  the ground. But okay we will see after we increase tick rate to 60. Not Cotta's problem.
                         entities.remove(e.id)
                     }
                 }

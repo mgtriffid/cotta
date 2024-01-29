@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client
 
+import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
@@ -14,4 +15,5 @@ interface PredictionSimulation {
 
     fun getLocalPredictedEntities(): Collection<Entity>
     fun getPreviousLocalPredictedEntities(): List<Entity>
+    val effectBus: EffectBus
 }

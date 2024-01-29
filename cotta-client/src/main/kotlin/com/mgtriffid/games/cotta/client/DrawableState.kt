@@ -12,7 +12,7 @@ interface DrawableState {
         // TODO this is a bit odd, it exposes internal implementation details which dev should not have to care about.
         //  Would be nice to have just one `entityId` that is always used by graphics (GDX client).
         override val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId> = emptyMap()
-        override val effects: Collection<CottaEffect> = emptyList()
+        override val effects = DrawableEffects.EMPTY
     }
 
     val entities: List<Entity>
@@ -25,5 +25,23 @@ interface DrawableState {
     // For now we'll make two sets of Effects: real and predicted. And will figure out what to draw outside of this
     // interface and implementation. Then, when the algorithm and convenient structure is more clear, we'll add some
     // component that manages visual effects automatically.
-    val effects: Collection<CottaEffect>
+    val effects: DrawableEffects
 }
+
+// Visual effects are REALLY data-powered. It's about equality not identity, for they are to be rendered purely based on
+// data.
+interface DrawableEffects {
+    val real: Collection<DrawableEffect>
+    val predicted: Collection<DrawableEffect>
+    val mispredicted: Collection<DrawableEffect>
+
+    object EMPTY : DrawableEffects {
+        override val real: Collection<DrawableEffect> = emptyList()
+        override val predicted: Collection<DrawableEffect> = emptyList()
+        override val mispredicted: Collection<DrawableEffect> = emptyList()
+    }
+}
+
+data class DrawableEffect(
+    val effect: CottaEffect
+)

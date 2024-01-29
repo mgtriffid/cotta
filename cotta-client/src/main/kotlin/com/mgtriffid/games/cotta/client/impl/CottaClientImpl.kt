@@ -122,17 +122,22 @@ class CottaClientImpl @Inject constructor(
         val entities = (predicted + authoritative.filter { authoritativeToPredictedEntityIdMappings[it.id] == null }).also {
             logger.debug { "Entities found: ${it.map { it.id }}" }
         }
+
+        // TODO consider possible edge cases when the number of ticks we're ahead of server changes due to changing
+        //  network conditions.
         val effects = if (lastTickEffectsWereReturned < tickProvider.tick) {
             lastTickEffectsWereReturned = tickProvider.tick
-            effectBus.effects()
-        } else {
-            emptyList()
-        }
+            object : DrawableEffects {
+                override val real: Collection<DrawableEffect> = effectBus.effects().map(::DrawableEffect)
+                override val predicted: Collection<DrawableEffect> = predictionSimulation.effectBus.effects().map(::DrawableEffect)
+                override val mispredicted: Collection<DrawableEffect> = emptyList()
+            }
+        } else { DrawableEffects.EMPTY }
 
         return object : DrawableState {
             override val entities: List<Entity> = entities
             override val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId> = authoritativeToPredictedEntityIdMappings.all()
-            override val effects: Collection<CottaEffect> = effects
+            override val effects: DrawableEffects = effects
         }
     }
 

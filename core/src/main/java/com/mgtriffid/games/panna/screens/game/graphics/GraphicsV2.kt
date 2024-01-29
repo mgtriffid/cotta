@@ -105,7 +105,7 @@ class GraphicsV2 {
     }
 
     private fun processEffects(state: DrawableState) {
-        state.effects.forEach { effect ->
+        (state.effects.predicted.map { it.effect } + state.effects.real.map { it.effect }).forEach { effect ->
             if (effect is BulletHitsGroundVisualEffect) {
                 val actor = actorFactory.createBulletHitsGroundVisualEffect()
                 actor.x = effect.x

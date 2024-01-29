@@ -23,7 +23,7 @@ class PredictionSimulationImpl @Inject constructor(
     @Named("prediction") private val invokersFactory: InvokersFactory,
     @Named("prediction") private val state: CottaState,
     private val clientInputs: ClientInputs,
-    @Named("prediction") private val effectBus: EffectBus,
+    @Named("prediction") override val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
     private val localPlayer: LocalPlayer,
     private val idMappings: AuthoritativeToPredictedEntityIdMappings

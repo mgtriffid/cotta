@@ -4,12 +4,14 @@ import com.badlogic.gdx.ScreenAdapter
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
 import com.mgtriffid.games.cotta.client.DrawableState
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
 import com.mgtriffid.games.panna.screens.game.graphics.GraphicsV2
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
+import com.mgtriffid.games.panna.shared.game.components.input.CharacterInputComponent
 import com.mgtriffid.games.panna.shared.lobby.PannaGame
 import mu.KotlinLogging
 
@@ -25,7 +27,6 @@ class GameScreen(
 
     private var nextTickAt: Long = -1
     private var tickLength: Long = -1
-//    private val graphics: Graphics = Graphics()
     private val graphics: GraphicsV2 = GraphicsV2()
 
     private lateinit var input: PannaClientGdxInput
@@ -73,7 +74,17 @@ class GameScreen(
             return
         }
         val state = getDrawableState(alpha)
-        graphics.draw(state, cottaClient.localPlayer.playerId, delta)
+        if (noDude(state)) {
+            input.mayJoin = true
+        }
+        graphics.draw(state, cottaClient.localPlayer.playerId, delta, input.mayJoin)
+    }
+
+    private fun noDude(state: DrawableState) : Boolean {
+        return state.entities.none {
+            it.hasInputComponent(CharacterInputComponent::class) &&
+                it.ownedBy == Entity.OwnedBy.Player(cottaClient.localPlayer.playerId)
+        }
     }
 
     private fun getDrawableState(alpha: Float): DrawableState {

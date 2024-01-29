@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.client.invokers.impl
 import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.effects.EffectBus
+import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingInputProcessingContext
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
@@ -13,15 +14,16 @@ import jakarta.inject.Named
 class PredictionInputProcessingContext @Inject constructor(
     @Named("prediction") private val effectBus: EffectBus,
     @Named("prediction") private val clock: CottaClock,
-    @Named("prediction") private val traces: Traces
+    @Named("prediction") private val traces: Traces,
+    @Named("prediction") private val entities: Entities
 ) : TracingInputProcessingContext {
     override fun fire(effect: CottaEffect) {
         traces.set(effect, trace!!)
         effectBus.publisher().fire(effect)
     }
 
-    override fun entities(): List<Entity> {
-        TODO("Not yet implemented")
+    override fun entities(): Entities {
+        return entities
     }
 
     private var trace: CottaTrace? = null

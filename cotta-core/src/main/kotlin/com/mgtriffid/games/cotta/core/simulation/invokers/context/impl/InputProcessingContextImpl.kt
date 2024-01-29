@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.simulation.invokers.context.impl
 
 import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
+import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBus
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingInputProcessingContext
@@ -13,7 +14,8 @@ import jakarta.inject.Named
 class InputProcessingContextImpl @Inject constructor(
     @Named("lagCompensated") private val lagCompensatingEffectBus: LagCompensatingEffectBus,
     private val clock: CottaClock,
-    private val traces: Traces
+    private val traces: Traces,
+    @Named("latest") private val entities: Entities
 ) : TracingInputProcessingContext {
     private var trace: CottaTrace? = null
 
@@ -34,7 +36,7 @@ class InputProcessingContextImpl @Inject constructor(
         lagCompensatingEffectBus.publisher().fire(effect)
     }
 
-    override fun entities(): List<Entity> {
-        TODO("Not yet implemented")
+    override fun entities(): Entities {
+        return entities
     }
 }

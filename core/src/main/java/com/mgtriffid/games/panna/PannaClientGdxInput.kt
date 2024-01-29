@@ -3,6 +3,7 @@ package com.mgtriffid.games.panna
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils.atan2Deg360
+import com.badlogic.gdx.math.MathUtils.log
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -19,7 +20,7 @@ class PannaClientGdxInput(
     // TODO either remove or use for determining lookAt and other things
     private val viewport: Viewport
 ) : CottaClientInput {
-    private var sentJoinBattle = false
+    var mayJoin = false
     private val storage = Storage()
 
     /**
@@ -30,10 +31,18 @@ class PannaClientGdxInput(
         clazz: KClass<T>
     ): T {
         when (clazz) {
+            // GROOM
             JoinBattleMetaEntityInputComponent::class -> {
-                return if (!sentJoinBattle) {
-                    sentJoinBattle = true
-                    JoinBattleMetaEntityInputComponent.create(JOIN_BATTLE) as T
+                logger.info { "Looking for JoinBattleMetaEntityInputComponent" }
+                logger.info { "mayJoin=$mayJoin" }
+                return if (mayJoin) {
+                    logger.info { "storage.joinPressed=${storage.joinPressed}" }
+                    if (storage.joinPressed) {
+                        mayJoin = false
+                        JoinBattleMetaEntityInputComponent.create(JOIN_BATTLE) as T
+                    } else {
+                        JoinBattleMetaEntityInputComponent.create(IDLE) as T
+                    }
                 } else {
                     // TODO allow to assume blank
                     JoinBattleMetaEntityInputComponent.create(IDLE) as T
@@ -71,6 +80,7 @@ class PannaClientGdxInput(
             shootPressed = shootPressed || Gdx.input.isTouched
             jumpPressed = jumpPressed || Gdx.input.isKeyPressed(Input.Keys.SPACE)
             lookAt = getLookAt()
+            joinPressed = joinPressed || Gdx.input.isTouched
         }
     }
 
@@ -88,6 +98,7 @@ class PannaClientGdxInput(
             rightPressed = false
             shootPressed = false
             jumpPressed = false
+            joinPressed = false
         }
     }
 
@@ -97,5 +108,6 @@ class PannaClientGdxInput(
         var shootPressed: Boolean = false
         var jumpPressed: Boolean = false
         var lookAt: Float = 0f
+        var joinPressed: Boolean = false
     }
 }

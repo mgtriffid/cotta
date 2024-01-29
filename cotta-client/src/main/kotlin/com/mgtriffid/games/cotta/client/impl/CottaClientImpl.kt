@@ -243,13 +243,13 @@ class CottaClientImpl @Inject constructor(
     private fun gatherLocalInput(): ClientInput {
         val playerId = localPlayer.playerId
         val localEntities = getEntitiesOwnedByPlayer(playerId)
-        logger.debug { "Found ${localEntities.size} entities owned by player $playerId" }
+        logger.info { "Found ${localEntities.size} entities owned by player $playerId" }
         val localEntitiesWithInputComponents = localEntities.filter {
             it.hasInputComponents()
         }
-        logger.debug { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
-        val inputs = localEntitiesWithInputComponents.associate { entity ->
-            logger.debug { "Retrieving input for entity '${entity.id}'" }
+        logger.info { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
+        val inputs = localEntitiesWithInputComponents.distinctBy { it.id }.associate { entity ->
+            logger.info { "Retrieving input for entity '${entity.id}'" }
             entity.id to getInputs(entity)
         }
         return ClientInputImpl(inputs)

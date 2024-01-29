@@ -48,6 +48,7 @@ class PannaGame : CottaGame {
         JoinBattleEffectConsumerSystem::class,
         BulletCollisionSystem::class,
         BulletHitsDudeEffectConsumer::class,
+        DeathSystem::class,
     )
 
     override fun initializeServerState(entities: Entities) {

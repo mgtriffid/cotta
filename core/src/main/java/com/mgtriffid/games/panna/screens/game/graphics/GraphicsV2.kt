@@ -2,13 +2,17 @@ package com.mgtriffid.games.panna.screens.game.graphics
 
 import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.actions.DelayAction
 import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction
+import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -36,6 +40,7 @@ class GraphicsV2 {
     private lateinit var stage: Stage
     lateinit var viewport: Viewport
     private val entityActors = HashMap<EntityId, PannaActor>()
+    private lateinit var clickToJoinLabel: Label
 
     fun initialize() {
         textures = PannaTextures()
@@ -53,6 +58,8 @@ class GraphicsV2 {
     private fun prepareStage() {
         viewport = ExtendViewport(960f, 960 * 9 / 16f)
         stage = Stage(viewport)
+        clickToJoinLabel = createClickToJoinLabel()
+        stage.addActor(clickToJoinLabel)
     }
 
     fun dispose() {
@@ -60,7 +67,12 @@ class GraphicsV2 {
         textures.dispose()
     }
 
-    fun draw(state: DrawableState, playerId: PlayerId, delta: Float) {
+    fun draw(
+        state: DrawableState,
+        playerId: PlayerId,
+        delta: Float,
+        mayJoin: Boolean
+    ) {
         processEntities(state, playerId)
         processEffects(state)
         stage.act(delta)
@@ -147,5 +159,9 @@ class GraphicsV2 {
         actor.actor.x = positionComponent.xPos
         actor.actor.y = positionComponent.yPos
         actor.update(entity)
+    }
+
+    private fun createClickToJoinLabel(): Label {
+        return Label("Click anywhere to join", LabelStyle(BitmapFont(), Color.GREEN))
     }
 }

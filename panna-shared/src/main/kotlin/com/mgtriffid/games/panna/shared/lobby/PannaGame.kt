@@ -27,6 +27,7 @@ import com.mgtriffid.games.panna.shared.game.systems.*
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletCollisionSystem
+import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletHitsDudeEffectConsumer
 import com.mgtriffid.games.panna.shared.game.systems.walking.*
 import com.mgtriffid.games.panna.shared.tiled.TiledMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -46,6 +47,7 @@ class PannaGame : CottaGame {
         JoinBattleSystem::class,
         JoinBattleEffectConsumerSystem::class,
         BulletCollisionSystem::class,
+        BulletHitsDudeEffectConsumer::class,
     )
 
     override fun initializeServerState(entities: Entities) {

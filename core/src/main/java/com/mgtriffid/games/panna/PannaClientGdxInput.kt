@@ -81,6 +81,13 @@ class PannaClientGdxInput(
             jumpPressed = jumpPressed || Gdx.input.isKeyPressed(Input.Keys.SPACE)
             lookAt = getLookAt()
             joinPressed = joinPressed || Gdx.input.isTouched
+            switchWeapon = if (switchWeapon == 0.toByte()) {
+                when {
+                    Gdx.input.isKeyPressed(Input.Keys.NUM_2) -> 2
+                    Gdx.input.isKeyPressed(Input.Keys.NUM_3) -> 3
+                    else -> 0
+                }
+            } else switchWeapon
         }
     }
 
@@ -99,6 +106,7 @@ class PannaClientGdxInput(
             shootPressed = false
             jumpPressed = false
             joinPressed = false
+            switchWeapon = 0
         }
     }
 
@@ -109,5 +117,6 @@ class PannaClientGdxInput(
         var jumpPressed: Boolean = false
         var lookAt: Float = 0f
         var joinPressed: Boolean = false
+        var switchWeapon: Byte = 0
     }
 }

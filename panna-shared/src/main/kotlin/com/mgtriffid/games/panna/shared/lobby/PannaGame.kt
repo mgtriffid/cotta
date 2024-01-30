@@ -145,7 +145,8 @@ class PannaGame : CottaGame {
                     CharacterInputComponent.create(
                         direction = if (goingLeft) WALKING_DIRECTION_LEFT else WALKING_DIRECTION_RIGHT,
                         jump = false,
-                        lookAt = if (goingLeft) 180f else 0f
+                        lookAt = if (goingLeft) 180f else 0f,
+                        switchWeapon = 0
                     )
                 )
             }

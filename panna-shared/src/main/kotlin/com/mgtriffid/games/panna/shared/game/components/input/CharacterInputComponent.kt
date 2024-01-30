@@ -11,16 +11,24 @@ interface CharacterInputComponent : InputComponent<CharacterInputComponent> {
     val jump: Boolean
     @ComponentData
     val lookAt: Float
+    @ComponentData
+    val switchWeapon: Byte
 
     companion object {
         fun createBlank(): CharacterInputComponent = CharacterInputComponentImpl(
             direction = WALKING_DIRECTION_NONE,
             lookAt = 0f,
-            jump = false
+            jump = false,
+            switchWeapon = 0
         )
 
-        fun create(direction: Byte, jump: Boolean, lookAt: Float): CharacterInputComponent {
-            return CharacterInputComponentImpl(direction, jump, lookAt)
+        fun create(
+            direction: Byte,
+            jump: Boolean,
+            lookAt: Float,
+            switchWeapon: Byte
+        ): CharacterInputComponent {
+            return CharacterInputComponentImpl(direction, jump, lookAt, switchWeapon)
         }
     }
 }
@@ -28,9 +36,13 @@ interface CharacterInputComponent : InputComponent<CharacterInputComponent> {
 private data class CharacterInputComponentImpl(
     override val direction: Byte,
     override val jump: Boolean,
-    override val lookAt: Float
+    override val lookAt: Float,
+    override val switchWeapon: Byte
 ) : CharacterInputComponent
 
 const val WALKING_DIRECTION_NONE: Byte = 0x00
 const val WALKING_DIRECTION_LEFT: Byte = 0x01
 const val WALKING_DIRECTION_RIGHT: Byte = 0x02
+
+const val SWITCH_WEAPON_PISTOL: Byte = 0x02
+const val SWITCH_WEAPON_RAILGUN: Byte = 0x03

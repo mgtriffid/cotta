@@ -3,7 +3,6 @@ package com.mgtriffid.games.panna
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils.atan2Deg360
-import com.badlogic.gdx.math.MathUtils.log
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -59,7 +58,8 @@ class PannaClientGdxInput(
                         else -> WALKING_DIRECTION_NONE
                     }.also { logger.trace { "WalkingInputComponent created; direction == $it" } },
                     storage.jumpPressed,
-                    storage.lookAt
+                    storage.lookAt,
+                    storage.switchWeapon
                 ) as T
             }
 
@@ -83,8 +83,8 @@ class PannaClientGdxInput(
             joinPressed = joinPressed || Gdx.input.isTouched
             switchWeapon = if (switchWeapon == 0.toByte()) {
                 when {
-                    Gdx.input.isKeyPressed(Input.Keys.NUM_2) -> 2
-                    Gdx.input.isKeyPressed(Input.Keys.NUM_3) -> 3
+                    Gdx.input.isKeyPressed(Input.Keys.NUM_2) -> SWITCH_WEAPON_PISTOL
+                    Gdx.input.isKeyPressed(Input.Keys.NUM_3) -> SWITCH_WEAPON_RAILGUN
                     else -> 0
                 }
             } else switchWeapon

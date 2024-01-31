@@ -25,14 +25,24 @@ class PredictionSimulationImpl @Inject constructor(
     private val clientInputs: ClientInputs,
     @Named("prediction") override val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
+    private val predictionCottaClock: PredictionCottaClockImpl,
     private val localPlayer: LocalPlayer,
     private val idMappings: AuthoritativeToPredictedEntityIdMappings
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
-    override fun predict(initialEntities: Entities, ticks: List<Long>) {
+    override fun predict(initialEntities: Entities, ticks: List<Long>, authoritativeTick: Long) {
+        predictionCottaClock.lagBehind = authoritativeTick - ticks.first()
         startPredictionFrom(initialEntities, ticks.first())
         run(ticks)
+    }
+
+    private fun startPredictionFrom(entities: Entities, tick: Long) {
+        state.wipe()
+        tickProvider.tick = tick
+        if (entities is EntitiesImpl) {
+            state.set(tick, entities.deepCopy())
+        }
     }
 
     private fun run(ticks: List<Long>) {
@@ -40,6 +50,7 @@ class PredictionSimulationImpl @Inject constructor(
         for (tick in ticks) {
             logger.debug { "Running prediction simulation for tick $tick" }
             effectBus.clear()
+            logger.debug { "Advancing state: to tick ${tickProvider.tick}" }
             state.advance(tickProvider.tick)
             tickProvider.tick++
             putInputIntoEntities(tick, localPlayer.playerId)
@@ -91,14 +102,6 @@ class PredictionSimulationImpl @Inject constructor(
         for ((invoker, system) in systemInvokers) {
             logger.debug { "Running prediction simulation for system ${system::class.simpleName}" }
             (invoker as SystemInvoker<CottaSystem>).invoke(system)
-        }
-    }
-
-    private fun startPredictionFrom(entities: Entities, tick: Long) {
-        state.wipe()
-        tickProvider.tick = tick
-        if (entities is EntitiesImpl) {
-            state.set(tick, entities.deepCopy())
         }
     }
 

@@ -11,6 +11,7 @@ interface PredictionSimulation {
     fun predict(
         initialEntities: Entities,
         ticks: List<Long>,
+        authoritativeTick: Long,
     )
 
     fun getLocalPredictedEntities(): Collection<Entity>

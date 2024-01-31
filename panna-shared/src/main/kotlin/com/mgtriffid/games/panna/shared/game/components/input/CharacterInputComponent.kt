@@ -43,6 +43,3 @@ private data class CharacterInputComponentImpl(
 const val WALKING_DIRECTION_NONE: Byte = 0x00
 const val WALKING_DIRECTION_LEFT: Byte = 0x01
 const val WALKING_DIRECTION_RIGHT: Byte = 0x02
-
-const val SWITCH_WEAPON_PISTOL: Byte = 0x02
-const val SWITCH_WEAPON_RAILGUN: Byte = 0x03

@@ -105,7 +105,8 @@ class PannaGame : CottaGame {
         JumpingComponent::class,
         ColliderComponent::class,
         HealthComponent::class,
-        BulletComponent::class
+        BulletComponent::class,
+        WeaponEquippedComponent::class,
     )
 
     override val inputComponentClasses = setOf(

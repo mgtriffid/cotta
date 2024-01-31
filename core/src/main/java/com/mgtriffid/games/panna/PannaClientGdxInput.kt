@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.panna.shared.game.components.WEAPON_PISTOL
+import com.mgtriffid.games.panna.shared.game.components.WEAPON_RAILGUN
 import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.IDLE
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.JOIN_BATTLE
@@ -83,8 +85,8 @@ class PannaClientGdxInput(
             joinPressed = joinPressed || Gdx.input.isTouched
             switchWeapon = if (switchWeapon == 0.toByte()) {
                 when {
-                    Gdx.input.isKeyPressed(Input.Keys.NUM_2) -> SWITCH_WEAPON_PISTOL
-                    Gdx.input.isKeyPressed(Input.Keys.NUM_3) -> SWITCH_WEAPON_RAILGUN
+                    Gdx.input.isKeyPressed(Input.Keys.NUM_2) -> WEAPON_PISTOL
+                    Gdx.input.isKeyPressed(Input.Keys.NUM_3) -> WEAPON_RAILGUN
                     else -> 0
                 }
             } else switchWeapon

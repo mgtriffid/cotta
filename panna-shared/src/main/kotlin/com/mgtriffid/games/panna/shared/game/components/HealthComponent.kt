@@ -2,8 +2,9 @@ package com.mgtriffid.games.panna.shared.game.components
 
 import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.Component
+import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
-interface HealthComponent : Component<HealthComponent> {
+interface HealthComponent : MutableComponent<HealthComponent> {
 
     @ComponentData
     var health: Int

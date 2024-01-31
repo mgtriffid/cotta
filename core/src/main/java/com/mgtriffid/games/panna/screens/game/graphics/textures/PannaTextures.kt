@@ -32,6 +32,8 @@ class PannaTextures {
         textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_1] = TextureRegion(bulletHitsTerrainTexture, 8, 0, 8, 8)
         textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_2] = TextureRegion(bulletHitsTerrainTexture, 16, 0, 8, 8)
         textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_3] = TextureRegion(bulletHitsTerrainTexture, 24, 0, 8, 8)
+
+        textures[PannaTextureIds.Weapons.TEXTURE_ID_PISTOL] = TextureRegion(Texture("panna/weapons/pistol.png"), 0, 0, 14, 12)
     }
 
     fun dispose() {

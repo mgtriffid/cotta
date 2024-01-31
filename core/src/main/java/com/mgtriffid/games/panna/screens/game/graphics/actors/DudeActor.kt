@@ -17,12 +17,15 @@ import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponen
 
 class DudeActor(
     private val regions: ActorFactory.Regions.DudeRegions,
+    private val weaponRegions: ActorFactory.Regions.WeaponsRegions,
 ) : PannaActor {
-    val healthBarActor = HealthBarActor()
+    private val healthBarActor = HealthBarActor()
+    private val weaponActor = WeaponActor()
     override val actor = object : Group() {
         init {
             addActor(DudeBodyActor())
             addActor(healthBarActor)
+            addActor(weaponActor)
         }
     }
     private var feetRegion: TextureRegion = regions.feetOnGround.right
@@ -59,6 +62,7 @@ class DudeActor(
             eyesRegion = eyes.right
         }
         updateHealthBar(entity)
+        updateWeapon(lookAt)
     }
 
     private fun updateHealthBar(entity: Entity) {
@@ -69,6 +73,9 @@ class DudeActor(
         } else {
             healthBarActor.isVisible = false
         }
+    }
+    private fun updateWeapon(lookAt: Float) {
+        weaponActor.lookAt = lookAt
     }
 
     private fun chooseFeetOnGroundSprite(inputComponent: VelocityComponent): LeftRightRegions {
@@ -138,7 +145,7 @@ class DudeActor(
         }
     }
 
-    inner class DudeBodyActor : Actor() {
+    private inner class DudeBodyActor : Actor() {
         override fun draw(batch: Batch, parentAlpha: Float) {
             super.draw(batch, parentAlpha)
             batch.draw(
@@ -151,7 +158,7 @@ class DudeActor(
         }
     }
 
-    inner class HealthBarActor : Actor() {
+    private inner class HealthBarActor : Actor() {
         var percentage: Float = 1f
         override fun draw(batch: Batch, parentAlpha: Float) {
             super.draw(batch, parentAlpha)
@@ -181,6 +188,42 @@ class DudeActor(
                 /* scaleY = */ 4f,
                 /* rotation = */ 0f
             )
+        }
+    }
+
+    private inner class WeaponActor : Actor() {
+        var lookAt: Float = 0f // perhaps Actor#rotation can do the trick
+
+        override fun draw(batch: Batch, parentAlpha: Float) {
+            with (weaponRegions.pistol) {
+                if (lookAt in 90f..270f) {
+                    batch.draw(
+                        /* region = */ left,
+                        /* x = */ -left.regionWidth.toFloat(),
+                        /* y = */ -left.regionHeight / 2f,
+                        /* originX = */ left.regionWidth.toFloat(),
+                        /* originY = */ right.regionHeight / 2f,
+                        /* width = */ left.regionWidth.toFloat(),
+                        /* height = */ left.regionHeight.toFloat(),
+                        /* scaleX = */ 1f,
+                        /* scaleY = */ 1f,
+                        /* rotation = */ lookAt + 180f
+                    )
+                } else {
+                    batch.draw(
+                        /* region = */ right,
+                        /* x = */ 0f,
+                        /* y = */ -right.regionHeight / 2f,
+                        /* originX = */ 0f,
+                        /* originY = */ right.regionHeight / 2f,
+                        /* width = */ right.regionWidth.toFloat(),
+                        /* height = */ right.regionHeight.toFloat(),
+                        /* scaleX = */ 1f,
+                        /* scaleY = */ 1f,
+                        /* rotation = */ lookAt
+                    )
+                }
+            }
         }
     }
 }

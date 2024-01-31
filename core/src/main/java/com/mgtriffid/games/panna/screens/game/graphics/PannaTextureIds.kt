@@ -25,4 +25,8 @@ object PannaTextureIds {
         val TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_2 = TextureId(20)
         val TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_3 = TextureId(21)
     }
+
+    object Weapons {
+        val TEXTURE_ID_PISTOL = TextureId(22)
+    }
 }

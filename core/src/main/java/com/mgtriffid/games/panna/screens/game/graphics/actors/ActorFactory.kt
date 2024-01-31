@@ -35,13 +35,17 @@ class ActorFactory {
                 textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_1],
                 textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_2],
                 textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_3],
+            ),
+            weapons = Regions.WeaponsRegions(
+                pistol = LeftRightRegions(textures[PannaTextureIds.Weapons.TEXTURE_ID_PISTOL])
             )
         )
     }
 
     fun createDude(): DudeActor {
         return DudeActor(
-            regions.dude
+            regions.dude,
+            regions.weapons
         )
     }
 
@@ -62,6 +66,7 @@ class ActorFactory {
         val bullet: TextureRegion,
         val terrain: TextureRegion,
         val bulletHitsGround: List<TextureRegion>,
+        val weapons: WeaponsRegions,
     ) {
         class DudeRegions(
             val body: TextureRegion,
@@ -81,5 +86,9 @@ class ActorFactory {
                 val healthBarForeground: TextureRegion
             )
         }
+
+        class WeaponsRegions(
+            val pistol: LeftRightRegions
+        )
     }
 }

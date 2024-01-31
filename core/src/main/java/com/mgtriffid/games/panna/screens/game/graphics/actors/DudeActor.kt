@@ -74,6 +74,8 @@ class DudeActor(
             healthBarActor.isVisible = false
         }
     }
+
+    // TODO make use of actual cursor position not just lookAt. It would make gameplay snappier.
     private fun updateWeapon(lookAt: Float) {
         weaponActor.lookAt = lookAt
     }

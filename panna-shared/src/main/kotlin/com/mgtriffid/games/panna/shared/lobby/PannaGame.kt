@@ -21,6 +21,7 @@ import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.BulletHitsDudeEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsDudeVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsGroundVisualEffect
+import com.mgtriffid.games.panna.shared.game.effects.visual.RailgunVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.walking.JumpEffect
 import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 import com.mgtriffid.games.panna.shared.game.systems.*
@@ -128,7 +129,8 @@ class PannaGame : CottaGame {
         CollisionEffect::class,
         BulletHitsGroundVisualEffect::class,
         BulletHitsDudeEffect::class,
-        BulletHitsDudeVisualEffect::class
+        BulletHitsDudeVisualEffect::class,
+        RailgunVisualEffect::class
     )
 
     override val metaEntitiesInputComponents = setOf(

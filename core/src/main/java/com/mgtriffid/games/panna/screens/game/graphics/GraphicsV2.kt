@@ -32,6 +32,7 @@ import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsGroundVisualEffect
+import com.mgtriffid.games.panna.shared.game.effects.visual.RailgunVisualEffect
 
 class GraphicsV2 {
 
@@ -118,17 +119,34 @@ class GraphicsV2 {
 
     private fun processEffects(state: DrawableState) {
         (state.effects.predicted.map { it.effect } + state.effects.real.map { it.effect }).forEach { effect ->
-            if (effect is BulletHitsGroundVisualEffect) {
-                val actor = actorFactory.createBulletHitsGroundVisualEffect()
-                actor.x = effect.x
-                actor.y = effect.y
-                actor.addAction(
-                    Actions.sequence(
-                        Actions.delay(0.4f),
-                        Actions.removeActor()
+            when (effect) {
+                is BulletHitsGroundVisualEffect -> {
+                    val actor = actorFactory.createBulletHitsGroundVisualEffect()
+                    actor.x = effect.x
+                    actor.y = effect.y
+                    actor.addAction(
+                        Actions.sequence(
+                            Actions.delay(0.4f),
+                            Actions.removeActor()
+                        )
                     )
-                )
-                stage.addActor(actor)
+                    stage.addActor(actor)
+                }
+                is RailgunVisualEffect -> {
+                    val actor = actorFactory.createRailgunVisualEffect(
+                        effect.x1,
+                        effect.y1,
+                        effect.x2,
+                        effect.y2
+                    )
+                    actor.addAction(
+                        Actions.sequence(
+                            Actions.delay(0.3f),
+                            Actions.removeActor()
+                        )
+                    )
+                    stage.addActor(actor)
+                }
             }
         }
     }

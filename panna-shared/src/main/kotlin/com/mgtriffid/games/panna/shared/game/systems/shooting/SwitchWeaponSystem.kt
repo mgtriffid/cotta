@@ -13,7 +13,7 @@ class SwitchWeaponSystem : EntityProcessingSystem {
             val weaponEquipped = e.getComponent(WeaponEquippedComponent::class)
             if (weaponEquipped.wantToEquip != 0.toByte() &&
                 weaponEquipped.wantToEquip != weaponEquipped.equipped &&
-                weaponEquipped.cooldownUntil < ctx.clock().time()
+                weaponEquipped.cooldownUntil < ctx.clock().time() + ctx.clock().delta() * 1000f
             ) {
                 weaponEquipped.equipped = weaponEquipped.wantToEquip
                 weaponEquipped.wantToEquip = 0

@@ -19,6 +19,8 @@ import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
 import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.BulletHitsDudeEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunHitsDudeEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsDudeVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsGroundVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.RailgunVisualEffect
@@ -29,6 +31,8 @@ import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsum
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletCollisionSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletHitsDudeEffectConsumer
+import com.mgtriffid.games.panna.shared.game.systems.shooting.RailgunHitsDudeEffectConsumer
+import com.mgtriffid.games.panna.shared.game.systems.shooting.RailgunShotEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponInputProcessingSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.*
@@ -53,6 +57,8 @@ class PannaGame : CottaGame {
         JoinBattleEffectConsumerSystem::class,
         BulletCollisionSystem::class,
         BulletHitsDudeEffectConsumer::class,
+        RailgunShotEffectConsumerSystem::class,
+        RailgunHitsDudeEffectConsumer::class,
         DeathSystem::class,
     )
 
@@ -130,7 +136,9 @@ class PannaGame : CottaGame {
         BulletHitsGroundVisualEffect::class,
         BulletHitsDudeEffect::class,
         BulletHitsDudeVisualEffect::class,
-        RailgunVisualEffect::class
+        RailgunVisualEffect::class,
+        RailgunHitsDudeEffect::class,
+        RailgunShotEffect::class,
     )
 
     override val metaEntitiesInputComponents = setOf(

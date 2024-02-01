@@ -224,6 +224,65 @@ class ServerSimulationTest {
     }
 
     @Test
+    fun `should compensate lags if effect creates another effect`() {
+        val playerId = PlayerId(0)
+        val damageable = state.entities().create()
+        val damageableId = damageable.id
+        damageable.addComponent(HealthTestComponent.create(20))
+        damageable.addComponent(LinearPositionTestComponent.create(0))
+        damageable.addComponent(VelocityTestComponent.create(2))
+
+        val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
+        val damageDealerId = damageDealer.id
+        damageDealer.addInputComponent(PlayerInputTestComponent::class)
+        val input = PlayerInputTestComponent.create(aim = 4, shoot = true)
+        serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
+        serverSimulation.registerSystem(StepOneShotFiredTestEffectConsumerSystem::class)
+        serverSimulation.registerSystem(LagCompensatedActualShotFiredTestEffectConsumer::class)
+        serverSimulation.registerSystem(MovementTestSystem::class)
+        serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
+        repeat(6) {
+            serverSimulation.tick(object : SimulationInput {
+                override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                    return emptyMap()
+                }
+
+                override fun playersSawTicks(): Map<PlayerId, Long> {
+                    return emptyMap()
+                }
+            })
+        }
+
+        serverSimulation.tick(object : SimulationInput {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                return mapOf(
+                    damageDealerId to setOf(input)
+                )
+            }
+
+            override fun playersSawTicks() = mapOf(playerId to 2L)
+        })
+        val input2 = PlayerInputTestComponent.create(
+            aim = 4,
+            shoot = false
+        )
+        serverSimulation.tick(object : SimulationInput {
+            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
+                return mapOf(
+                    damageDealerId to setOf(input2)
+                )
+            }
+
+            override fun playersSawTicks() = mapOf(playerId to 3L)
+        })
+
+        assertEquals(
+            15,
+            state.entities().get(damageableId)?.getComponent(HealthTestComponent::class)?.health
+        )
+    }
+
+    @Test
     fun `should invoke systems`() {
         state.entities().create()
         serverSimulation.registerSystem(BlankTestSystem::class)

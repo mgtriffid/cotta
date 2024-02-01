@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.simulation.invokers.impl
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBus
+import com.mgtriffid.games.cotta.core.simulation.invokers.SawTickHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingEffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
@@ -16,7 +17,8 @@ private val logger = KotlinLogging.logger {}
 
 class SimpleEffectsConsumerSystemInvoker @Inject constructor(
     @Named("lagCompensated") private val effectBus: LagCompensatingEffectBus,
-    @Named("lagCompensated") private val context: TracingEffectProcessingContext,
+    @Named("simple") private val context: TracingEffectProcessingContext,
+    private val sawTickHolder: SawTickHolder,
     private val traces: Traces
 ) : SystemInvoker<EffectsConsumerSystem> {
     override fun invoke(system: EffectsConsumerSystem) {
@@ -30,7 +32,9 @@ class SimpleEffectsConsumerSystemInvoker @Inject constructor(
             traces.get(effect)?.plus(TraceElement.EffectTraceElement(effect))
                 ?: CottaTrace.from(TraceElement.EffectTraceElement(effect))
         )
+        sawTickHolder.tick = effectBus.getTickForEffect(effect)
         system.handle(effect, context)
+        sawTickHolder.tick = null
         context.setTrace(null)
     }
 }

@@ -22,6 +22,7 @@ import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.RailgunVisualEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -125,12 +126,23 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem {
         val intersectionPoint = if (intersectionPoints.isNotEmpty()) {
             intersectionPoints.minByOrNull { it.cpy().sub(railStart).len() }
         } else null
-        ctx.fire(RailgunVisualEffect.create(
-            railStart.x,
-            railStart.y,
-            (intersectionPoint ?: railEnd).x,
-            (intersectionPoint ?: railEnd).y
-        ))
+        ctx.fire(
+            RailgunVisualEffect.create(
+                railStart.x,
+                railStart.y,
+                (intersectionPoint ?: railEnd).x,
+                (intersectionPoint ?: railEnd).y
+            )
+        )
+        ctx.fire(
+            RailgunShotEffect.create(
+                shooter.id,
+                railStart.x,
+                railStart.y,
+                (intersectionPoint ?: railEnd).x,
+                (intersectionPoint ?: railEnd).y
+            )
+        )
     }
 
     private fun lineIntersection(p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2): Vector2? {

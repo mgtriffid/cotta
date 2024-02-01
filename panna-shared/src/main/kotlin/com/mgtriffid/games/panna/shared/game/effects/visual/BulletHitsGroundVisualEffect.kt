@@ -12,7 +12,7 @@ interface BulletHitsGroundVisualEffect : CottaEffect {
     }
 }
 
-data class BulletHitsGroundVisualEffectImpl(
+private data class BulletHitsGroundVisualEffectImpl(
     override val x: Float,
     override val y: Float
 ) : BulletHitsGroundVisualEffect

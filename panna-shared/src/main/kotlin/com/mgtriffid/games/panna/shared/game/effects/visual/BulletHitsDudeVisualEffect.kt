@@ -14,7 +14,7 @@ interface BulletHitsDudeVisualEffect : CottaEffect {
     }
 }
 
-data class BulletHitsDudeVisualEffectImpl(
+private data class BulletHitsDudeVisualEffectImpl(
     override val x: Float,
     override val y: Float
 ) : BulletHitsDudeVisualEffect

@@ -15,6 +15,7 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
+// TODO forbid creation of Entities here or make Entities created in the latest tick
 class LagCompensatingEffectsConsumerInvoker @Inject constructor(
     @Named("historical") private val effectBus: LagCompensatingEffectBus,
     private val sawTickHolder: SawTickHolder,

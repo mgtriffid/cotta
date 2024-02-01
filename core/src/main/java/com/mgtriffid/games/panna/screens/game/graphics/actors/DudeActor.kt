@@ -10,6 +10,9 @@ import com.mgtriffid.games.panna.screens.game.graphics.textures.LeftRightRegions
 import com.mgtriffid.games.panna.shared.game.components.HealthComponent
 import com.mgtriffid.games.panna.shared.game.components.JumpingComponent
 import com.mgtriffid.games.panna.shared.game.components.LookingAtComponent
+import com.mgtriffid.games.panna.shared.game.components.WEAPON_PISTOL
+import com.mgtriffid.games.panna.shared.game.components.WEAPON_RAILGUN
+import com.mgtriffid.games.panna.shared.game.components.WeaponEquippedComponent
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_NONE
 import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
@@ -62,7 +65,8 @@ class DudeActor(
             eyesRegion = eyes.right
         }
         updateHealthBar(entity)
-        updateWeapon(lookAt)
+        val weaponEquipped = entity.getComponent(WeaponEquippedComponent::class)
+        updateWeapon(lookAt, weaponEquipped.equipped)
     }
 
     private fun updateHealthBar(entity: Entity) {
@@ -76,8 +80,9 @@ class DudeActor(
     }
 
     // TODO make use of actual cursor position not just lookAt. It would make gameplay snappier.
-    private fun updateWeapon(lookAt: Float) {
+    private fun updateWeapon(lookAt: Float, weaponEquipped: Byte) {
         weaponActor.lookAt = lookAt
+        weaponActor.weapon = weaponEquipped
     }
 
     private fun chooseFeetOnGroundSprite(inputComponent: VelocityComponent): LeftRightRegions {
@@ -195,9 +200,15 @@ class DudeActor(
 
     private inner class WeaponActor : Actor() {
         var lookAt: Float = 0f // perhaps Actor#rotation can do the trick
+        var weapon: Byte = WEAPON_PISTOL
 
         override fun draw(batch: Batch, parentAlpha: Float) {
-            with (weaponRegions.pistol) {
+            val weaponRegion = when (weapon) {
+                WEAPON_PISTOL -> weaponRegions.pistol
+                WEAPON_RAILGUN -> weaponRegions.railgun
+                else -> throw IllegalStateException("Unknown weapon: $weapon")
+            }
+            with (weaponRegion) {
                 if (lookAt in 90f..270f) {
                     batch.draw(
                         /* region = */ left,

@@ -5,21 +5,23 @@ import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 interface WeaponEquippedComponent : MutableComponent<WeaponEquippedComponent> {
     @ComponentData var equipped: Byte
+    @ComponentData var wantToEquip: Byte
     @ComponentData var cooldownUntil: Long
 
     companion object {
-        fun create(equipped: Byte, cooldownUntil: Long): WeaponEquippedComponent {
-            return WeaponEquippedComponentImpl(equipped, cooldownUntil)
+        fun create(equipped: Byte, wantToEquip: Byte, cooldownUntil: Long): WeaponEquippedComponent {
+            return WeaponEquippedComponentImpl(equipped, wantToEquip, cooldownUntil)
         }
     }
 
     override fun copy(): WeaponEquippedComponent {
-        return WeaponEquippedComponentImpl(equipped, cooldownUntil)
+        return WeaponEquippedComponentImpl(equipped, wantToEquip, cooldownUntil)
     }
 }
 
 private data class WeaponEquippedComponentImpl(
     override var equipped: Byte,
+    override var wantToEquip: Byte,
     override var cooldownUntil: Long
 ): WeaponEquippedComponent
 

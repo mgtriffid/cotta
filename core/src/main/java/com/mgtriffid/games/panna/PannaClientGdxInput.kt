@@ -34,10 +34,10 @@ class PannaClientGdxInput(
         when (clazz) {
             // GROOM
             JoinBattleMetaEntityInputComponent::class -> {
-                logger.info { "Looking for JoinBattleMetaEntityInputComponent" }
-                logger.info { "mayJoin=$mayJoin" }
+                logger.debug { "Looking for JoinBattleMetaEntityInputComponent" }
+                logger.debug { "mayJoin=$mayJoin" }
                 return if (mayJoin) {
-                    logger.info { "storage.joinPressed=${storage.joinPressed}" }
+                    logger.debug { "storage.joinPressed=${storage.joinPressed}" }
                     if (storage.joinPressed) {
                         mayJoin = false
                         JoinBattleMetaEntityInputComponent.create(JOIN_BATTLE) as T

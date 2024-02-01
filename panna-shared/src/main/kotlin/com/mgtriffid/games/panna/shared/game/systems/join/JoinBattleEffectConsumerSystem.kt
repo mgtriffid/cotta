@@ -31,7 +31,7 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
             dude.addComponent(SteamManPlayerComponent.create())
             dude.addComponent(ColliderComponent.create(16, 16))
             dude.addComponent(DrawableComponent.create(CHARACTER_STRATEGY))
-            dude.addComponent(WeaponEquippedComponent.create(WEAPON_PISTOL, 0))
+            dude.addComponent(WeaponEquippedComponent.create(WEAPON_PISTOL, 0, 0))
         }
     }
 }

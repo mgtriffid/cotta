@@ -28,5 +28,6 @@ object PannaTextureIds {
 
     object Weapons {
         val TEXTURE_ID_PISTOL = TextureId(22)
+        val TEXTURE_ID_RAILGUN = TextureId(23)
     }
 }

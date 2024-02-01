@@ -28,6 +28,8 @@ import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsum
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletCollisionSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletHitsDudeEffectConsumer
+import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponInputProcessingSystem
+import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.*
 import com.mgtriffid.games.panna.shared.tiled.TiledMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -36,6 +38,8 @@ class PannaGame : CottaGame {
     override val serverSystems = listOf(
         WalkingInputProcessingSystem::class,
         LookingAtInputProcessingSystem::class,
+        SwitchWeaponInputProcessingSystem::class,
+        SwitchWeaponSystem::class,
         ShootingInputProcessingSystem::class,
         WalkingEffectConsumerSystem::class,
         JumpEffectConsumerSystem::class,

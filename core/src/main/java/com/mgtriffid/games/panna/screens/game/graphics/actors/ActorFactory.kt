@@ -37,7 +37,8 @@ class ActorFactory {
                 textures[PannaTextureIds.Effects.TEXTURE_ID_BULLET_HITS_TERRAIN_FRAME_3],
             ),
             weapons = Regions.WeaponsRegions(
-                pistol = LeftRightRegions(textures[PannaTextureIds.Weapons.TEXTURE_ID_PISTOL])
+                pistol = LeftRightRegions(textures[PannaTextureIds.Weapons.TEXTURE_ID_PISTOL]),
+                railgun = LeftRightRegions(textures[PannaTextureIds.Weapons.TEXTURE_ID_RAILGUN])
             )
         )
     }
@@ -88,7 +89,8 @@ class ActorFactory {
         }
 
         class WeaponsRegions(
-            val pistol: LeftRightRegions
+            val pistol: LeftRightRegions,
+            val railgun: LeftRightRegions
         )
     }
 }

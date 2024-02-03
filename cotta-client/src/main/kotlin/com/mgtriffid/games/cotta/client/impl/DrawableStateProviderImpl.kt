@@ -61,6 +61,7 @@ class DrawableStateProviderImpl @Inject constructor(
             logger.info { "lastMyInputProcessedByServerSimulation + 1: ${lastMyInputProcessedByServerSimulation + 1}" }
             lastTickEffectsWereReturned = simulationTickProvider.tick
             val predicted = predictionSimulation.effectBus.effects().map(::DrawableEffect)
+            // TODO This is WAY too hard to understand. Consider making prediction simulation ahead of real, not in-sync.
             val previouslyPredictedEffects = previouslyPredicted[lastMyInputProcessedByServerSimulation + 1]
             logger.info { "previouslyPredictedEffects: $previouslyPredictedEffects" }
             val real = effectBus.effects().map(::DrawableEffect)

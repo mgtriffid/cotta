@@ -123,7 +123,9 @@ class CottaClientImpl @Inject constructor(
         // tick is advanced inside;
         clientSimulation.tick(delta.input)
         delta.applyDiff(state.entities(getCurrentTick())) // unnecessary for deterministic simulation
-        predict(delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L)
+        val lastMyInputProcessedByServerSimulation = delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L
+        drawableStateProvider.lastMyInputProcessedByServerSimulation = lastMyInputProcessedByServerSimulation
+        predict(lastMyInputProcessedByServerSimulation)
         sendDataToServer()
     }
 
@@ -150,6 +152,7 @@ class CottaClientImpl @Inject constructor(
     private fun predict(lastMyInputProcessedByServerSimulation: Long) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
+        drawableStateProvider.lastMyInputProcessedByServerSimulation = lastMyInputProcessedByServerSimulation
         val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
             .also { logger.debug { it.joinToString() } } // TODO explicit sorting
         logger.debug { "Setting initial predictions state with tick ${getCurrentTick()}" }

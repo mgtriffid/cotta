@@ -17,22 +17,26 @@ import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import java.util.*
 import kotlin.reflect.KClass
 
 private val logger = mu.KotlinLogging.logger {}
 
 class DrawableStateProviderImpl @Inject constructor(
-    private val tickProvider: TickProvider,
+    private val simulationTickProvider: TickProvider,
+    @Named("prediction") private val predictionTickProvider: TickProvider,
     private val interpolators: Interpolators,
     @Named("simulation") private val state: CottaState,
     private val predictionSimulation: PredictionSimulation,
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val effectBus: EffectBus
 ) : DrawableStateProvider {
+    override var lastMyInputProcessedByServerSimulation: Long = -1
     private var lastTickEffectsWereReturned: Long = -1
+    private val previouslyPredicted = TreeMap<Long, Collection<DrawableEffect>>()
 
     override fun get(alpha: Float, components: Array<out KClass<out Component<*>>>): DrawableState {
-        if (tickProvider.tick == 0L) return DrawableState.EMPTY
+        if (simulationTickProvider.tick == 0L) return DrawableState.EMPTY
         val onlyNeeded: Collection<Entity>.() -> Collection<Entity> = {
             filter { entity ->
                 components.all { entity.hasComponent(it) }
@@ -40,25 +44,35 @@ class DrawableStateProviderImpl @Inject constructor(
         }
         val predictedCurrent = this.predictionSimulation.getLocalPredictedEntities().onlyNeeded()
         val predictedPrevious = this.predictionSimulation.getPreviousLocalPredictedEntities().onlyNeeded()
-        val authoritativeCurrent = this.state.entities(this.tickProvider.tick).all().onlyNeeded()
-        val authoritativePrevious = this.state.entities(this.tickProvider.tick - 1).all().onlyNeeded()
+        val authoritativeCurrent = this.state.entities(this.simulationTickProvider.tick).all().onlyNeeded()
+        val authoritativePrevious = this.state.entities(this.simulationTickProvider.tick - 1).all().onlyNeeded()
         val predicted = interpolate(predictedPrevious, predictedCurrent, alpha, components.toList())
         val authoritative = interpolate(authoritativePrevious, authoritativeCurrent, alpha, components.toList())
         val entities =
             (predicted + authoritative.filter { authoritativeToPredictedEntityIdMappings[it.id] == null }).also {
-                logger.debug { "Entities found: ${it.map { it.id }}" }
+                logger.trace { "Entities found: ${it.map { it.id }}" }
             }
 
         // TODO consider possible edge cases when the number of ticks we're ahead of server changes due to changing
         //  network conditions.
-        val effects = if (lastTickEffectsWereReturned < tickProvider.tick) {
-            lastTickEffectsWereReturned = tickProvider.tick
-            object : DrawableEffects {
-                override val real: Collection<DrawableEffect> = effectBus.effects().map(::DrawableEffect)
-                override val predicted: Collection<DrawableEffect> =
-                    predictionSimulation.effectBus.effects().map(::DrawableEffect)
+        val effects = if (lastTickEffectsWereReturned < simulationTickProvider.tick) {
+            logger.info { "Simulation tick: ${simulationTickProvider.tick}" }
+            logger.info { "Prediction tick: ${predictionTickProvider.tick}" }
+            logger.info { "lastMyInputProcessedByServerSimulation + 1: ${lastMyInputProcessedByServerSimulation + 1}" }
+            lastTickEffectsWereReturned = simulationTickProvider.tick
+            val predicted = predictionSimulation.effectBus.effects().map(::DrawableEffect)
+            val previouslyPredictedEffects = previouslyPredicted[lastMyInputProcessedByServerSimulation + 1]
+            logger.info { "previouslyPredictedEffects: $previouslyPredictedEffects" }
+            val real = effectBus.effects().map(::DrawableEffect)
+            logger.info { "Real effects: $real" }
+            val effects = object : DrawableEffects {
+                override val real: Collection<DrawableEffect> = real - (previouslyPredictedEffects ?: emptyList())
+                override val predicted: Collection<DrawableEffect> = predicted
                 override val mispredicted: Collection<DrawableEffect> = emptyList()
             }
+            previouslyPredicted[simulationTickProvider.tick] = predicted
+            cleanUpOldPredictedEffects()
+            effects
         } else {
             DrawableEffects.EMPTY
         }
@@ -69,6 +83,11 @@ class DrawableStateProviderImpl @Inject constructor(
                 authoritativeToPredictedEntityIdMappings.all()
             override val effects: DrawableEffects = effects
         }
+    }
+
+    private fun cleanUpOldPredictedEffects() {
+        val old = previouslyPredicted.keys.filter { it < lastMyInputProcessedByServerSimulation - 128 }
+        old.forEach { previouslyPredicted.remove(it) }
     }
 
     private fun interpolate(

@@ -34,6 +34,7 @@ fun configureLogging() {
         "com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl" to Level.INFO,
         "com.mgtriffid.games.cotta.client.impl.AuthoritativeToPredictedEntityIdMappingsImpl" to Level.INFO,
         "com.mgtriffid.games.panna.shared.game.systems.ShootEffectConsumerSystem" to Level.INFO,
+        "com.mgtriffid.games.panna.PannaClientGdxInput" to Level.INFO,
     ).forEach { (logger, level) ->
         (LoggerFactory.getLogger(logger) as Logger).level = level
     }

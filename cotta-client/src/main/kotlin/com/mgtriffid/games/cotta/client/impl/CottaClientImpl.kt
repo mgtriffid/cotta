@@ -243,13 +243,13 @@ class CottaClientImpl @Inject constructor(
     private fun gatherLocalInput(): ClientInput {
         val playerId = localPlayer.playerId
         val localEntities = getEntitiesOwnedByPlayer(playerId)
-        logger.info { "Found ${localEntities.size} entities owned by player $playerId" }
+        logger.debug { "Found ${localEntities.size} entities owned by player $playerId" }
         val localEntitiesWithInputComponents = localEntities.filter {
             it.hasInputComponents()
         }
-        logger.info { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
+        logger.debug { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
         val inputs = localEntitiesWithInputComponents.distinctBy { it.id }.associate { entity ->
-            logger.info { "Retrieving input for entity '${entity.id}'" }
+            logger.debug { "Retrieving input for entity '${entity.id}'" }
             entity.id to getInputs(entity)
         }
         return ClientInputImpl(inputs)
@@ -281,7 +281,7 @@ class CottaClientImpl @Inject constructor(
 
     // TODO probably this is wrong place
     private fun registerComponents() {
-        logger.info { "Registering components to ${componentsRegistry.hashCode()}" }
+        logger.debug { "Registering components to ${componentsRegistry.hashCode()}" }
         game.componentClasses.forEach {
             componentsRegistry.registerComponentClass(it)
             interpolators.register(it)

@@ -56,16 +56,16 @@ class DrawableStateProviderImpl @Inject constructor(
         // TODO consider possible edge cases when the number of ticks we're ahead of server changes due to changing
         //  network conditions.
         val effects = if (lastTickEffectsWereReturned < simulationTickProvider.tick) {
-            logger.info { "Simulation tick: ${simulationTickProvider.tick}" }
-            logger.info { "Prediction tick: ${predictionTickProvider.tick}" }
-            logger.info { "lastMyInputProcessedByServerSimulation + 1: ${lastMyInputProcessedByServerSimulation + 1}" }
+            logger.debug { "Simulation tick: ${simulationTickProvider.tick}" }
+            logger.debug { "Prediction tick: ${predictionTickProvider.tick}" }
+            logger.debug { "lastMyInputProcessedByServerSimulation + 1: ${lastMyInputProcessedByServerSimulation + 1}" }
             lastTickEffectsWereReturned = simulationTickProvider.tick
             val predicted = predictionSimulation.effectBus.effects().map(::DrawableEffect)
             // TODO This is WAY too hard to understand. Consider making prediction simulation ahead of real, not in-sync.
             val previouslyPredictedEffects = previouslyPredicted[lastMyInputProcessedByServerSimulation + 1]
-            logger.info { "previouslyPredictedEffects: $previouslyPredictedEffects" }
+            logger.debug { "previouslyPredictedEffects: $previouslyPredictedEffects" }
             val real = effectBus.effects().map(::DrawableEffect)
-            logger.info { "Real effects: $real" }
+            logger.debug { "Real effects: $real" }
             val effects = object : DrawableEffects {
                 override val real: Collection<DrawableEffect> = real - (previouslyPredictedEffects ?: emptyList())
                 override val predicted: Collection<DrawableEffect> = predicted

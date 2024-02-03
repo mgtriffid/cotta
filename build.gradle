@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlinVersion = '1.7.10'
+    ext.kotlinVersion = '1.9.22'
 
     repositories {
         mavenLocal()
@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:1.7.10-1.0.6"
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlinVersion-1.0.17"
     }
 }
 

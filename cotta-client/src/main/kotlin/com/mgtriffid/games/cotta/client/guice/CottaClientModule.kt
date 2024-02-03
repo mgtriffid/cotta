@@ -6,6 +6,7 @@ import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.impl.*
+import com.mgtriffid.games.cotta.client.interpolation.Interpolators
 import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionEffectsConsumerSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionEntityProcessingSystemInvoker
@@ -148,6 +149,9 @@ class CottaClientModule(
         bind(PredictedEntityIdGenerator::class.java).to(PredictedEntityIdGeneratorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)
         bind(LocalPlayer::class.java).toInstance(LocalPlayer())
+
+        bind(DrawableStateProvider::class.java).to(DrawableStateProviderImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Interpolators::class.java).`in`(Scopes.SINGLETON)
 
         bind(AuthoritativeToPredictedEntityIdMappings::class.java).to(AuthoritativeToPredictedEntityIdMappingsImpl::class.java).`in`(Scopes.SINGLETON)
         install(SerializationModule())

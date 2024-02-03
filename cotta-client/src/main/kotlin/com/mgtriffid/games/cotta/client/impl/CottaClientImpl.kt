@@ -7,12 +7,7 @@ import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRe
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.annotations.Predicted
-import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
-import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
@@ -43,7 +38,6 @@ class CottaClientImpl @Inject constructor(
     override val localPlayer: LocalPlayer,
     private val componentsRegistry: ComponentsRegistry,
     private val interpolators: Interpolators,
-    private val effectBus: EffectBus,
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider
 ) : CottaClient {

@@ -137,7 +137,13 @@ class ServerSimulationInputProviderImpl @Inject constructor(
             playersSawTicks[playerId] = tick
             inputRecipes.add(buffer.inputs[tick]!!)
             createdEntities.addAll(buffer.createdEntities[tick + 1]!!)
-            ghost.setLastUsedInput(tick)
+            ghost.setLastUsedTick(tick)
+            ghost.setLastUsedIncomingInput(buffer.inputs[tick]!!)
+        }
+        val usePrevious: (PlayerId, ClientGhost, Long) -> Unit =  { playerId, ghost, tick ->
+            playersSawTicks[playerId] = tick
+            inputRecipes.add(ghost.getLastUsedIncomingInput())
+            ghost.setLastUsedTick(tick)
         }
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val buffer = getBuffer(playerId)
@@ -159,7 +165,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
                     if (buffer.inputs.containsKey(tick) && buffer.createdEntities.containsKey(tick + 1)) {
                         use(playerId, ghost, tick)
                     } else {
-                        TODO("Not supported yet, need to take care of this legit missing packets case")
+                        usePrevious(playerId, ghost, tick)
                     }
                 }
             }

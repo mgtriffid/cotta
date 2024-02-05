@@ -43,60 +43,21 @@ class MyAnnotationProcessor(
             ProcessableComponentFieldSpec(prop.simpleName.asString(), prop.type.resolve().toTypeName(), prop.isMutable)
         }.toList()
         if (properties.isNotEmpty()) {
-        val fileSpec = FileSpec.builder(pkg, "${componentName}Impl")
-            .addFunction(FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
-                .returns(component.asStarProjectedType().toTypeName())
-                .addParameters(
-                    properties.map { spec ->
-                        ParameterSpec.builder(spec.name, spec.type).build()
-                    }
+            val fileSpec = FileSpec.builder(pkg, "${componentName}Impl")
+                .addFunction(
+                    factoryMethod(componentName, component, properties)
                 )
-                .addStatement("return ${componentName}Impl(${properties.joinToString(", ") { it.name }})")
-                .build()
-            )
-            .addType(
-                TypeSpec.classBuilder("${componentName}Impl")
-                    .addSuperinterface(component.asStarProjectedType().toTypeName())
-                     .addModifiers(KModifier.DATA, KModifier.PRIVATE)
-                    .primaryConstructor(
-                        FunSpec.constructorBuilder()
-                            .addParameters(
-                                properties.map { prop ->
-                                    ParameterSpec.builder(prop.name, prop.type)
-                                        .build()
-                                }
-                            )
-                            .build()
-                    )
-                    .addFunction(
-                        FunSpec.builder("copy").addStatement(
-                            if (properties.filter { p -> p.isMutable }.isEmpty())
-                                "return this"
-                            else
-                                "return this.copy(${properties.filter { p -> p.isMutable }.joinToString(", ") { "${it.name} = ${it.name}" }})"
-                        )
-                            .addModifiers(KModifier.OVERRIDE)
-                            .returns(component.asStarProjectedType().toTypeName())
-                            .build()
-                    )
-                    .addProperties(
-                        properties.map { prop ->
-                            PropertySpec.builder(prop.name, prop.type)
-                                .initializer(prop.name)
-                                .addModifiers(KModifier.OVERRIDE)
-                                .also { if (prop.isMutable) it.mutable() }
-                                .build()
-                        }
-                    )
-                    .build()
-            ).build()
+                .addType(
+                    implementation(componentName, component, properties)
+                ).build()
             fileSpec.writeTo(codeGenerator, false)
         } else {
             val fileSpec = FileSpec.builder(pkg, "${componentName}Impl")
-                .addFunction(FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
-                    .returns(component.asStarProjectedType().toTypeName())
-                    .addStatement("return ${componentName}Instance")
-                    .build()
+                .addFunction(
+                    FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
+                        .returns(component.asStarProjectedType().toTypeName())
+                        .addStatement("return ${componentName}Instance")
+                        .build()
                 )
                 .addType(
                     TypeSpec.objectBuilder("${componentName}Instance")
@@ -112,4 +73,68 @@ class MyAnnotationProcessor(
             fileSpec.writeTo(codeGenerator, false)
         }
     }
+
+    private fun implementation(
+        componentName: String,
+        component: KSClassDeclaration,
+        properties: List<ProcessableComponentFieldSpec>
+    ) = TypeSpec.classBuilder("${componentName}Impl")
+        .addSuperinterface(component.asStarProjectedType().toTypeName())
+        .addModifiers(KModifier.DATA, KModifier.PRIVATE)
+        .primaryConstructor(
+            implPrimaryConstructor(properties)
+        )
+        .addFunction(
+            copy(properties, component)
+        )
+        .addProperties(
+            properties.map { prop ->
+                PropertySpec.builder(prop.name, prop.type)
+                    .initializer(prop.name)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .also { if (prop.isMutable) it.mutable() }
+                    .build()
+            }
+        )
+        .build()
+
+    private fun copy(
+        properties: List<ProcessableComponentFieldSpec>,
+        component: KSClassDeclaration
+    ) = FunSpec.builder("copy").addStatement(
+        if (properties.filter { p -> p.isMutable }.isEmpty())
+            "return this"
+        else
+            "return this.copy(${
+                properties.filter { p -> p.isMutable }
+                    .joinToString(", ") { "${it.name} = ${it.name}" }
+            })"
+    )
+        .addModifiers(KModifier.OVERRIDE)
+        .returns(component.asStarProjectedType().toTypeName())
+        .build()
+
+    private fun implPrimaryConstructor(properties: List<ProcessableComponentFieldSpec>) =
+        FunSpec.constructorBuilder()
+            .addParameters(
+                properties.map { prop ->
+                    ParameterSpec.builder(prop.name, prop.type)
+                        .build()
+                }
+            )
+            .build()
+
+    private fun factoryMethod(
+        componentName: String,
+        component: KSClassDeclaration,
+        properties: List<ProcessableComponentFieldSpec>
+    ) = FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
+        .returns(component.asStarProjectedType().toTypeName())
+        .addParameters(
+            properties.map { spec ->
+                ParameterSpec.builder(spec.name, spec.type).build()
+            }
+        )
+        .addStatement("return ${componentName}Impl(${properties.joinToString(", ") { it.name }})")
+        .build()
 }

@@ -14,6 +14,7 @@ import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import mu.KotlinLogging
 import kotlin.reflect.*
 import kotlin.reflect.full.*
+import kotlin.reflect.jvm.kotlinFunction
 
 private val logger = KotlinLogging.logger {}
 
@@ -56,19 +57,11 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     }
 
     private fun <C : Component<C>> registerSnapper(kClass: KClass<C>, spec: ComponentSpec) {
-        val companion = kClass.companionObject
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} does not have a companion object")
-        val companionInstance =
-            kClass.companionObjectInstance ?: throw IllegalArgumentException("Could not find companion instance")
-        val factoryMethod: KCallable<C> = (companion.members.find { it.name == "create" }
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")) as KCallable<C>
         val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<ComponentData>() }
-
+        val factoryMethod: KCallable<C> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }!!.kotlinFunction as KCallable<C>
         val fieldsByName = fields.associateBy { it.name }
 
         val factoryParameters = factoryMethod.parameters
-        val factoryInstanceParameter = factoryParameters.find { it.kind == KParameter.Kind.INSTANCE }
-            ?: throw IllegalArgumentException("No instance parameter on factory")
         val valueParameters = factoryParameters.filter { it.kind == KParameter.Kind.VALUE }
         val valueParametersToNames = valueParameters.associateWith { it.name }
 
@@ -85,8 +78,6 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         snappers[spec.key] = ComponentSnapper(
             key = spec.key as StringComponentKey,
             factoryMethod = factoryMethod,
-            factoryInstanceParameter = factoryInstanceParameter,
-            companionInstance = companionInstance,
             valueParametersToNames = valueParametersToNames,
             fieldsByName = fieldsByName
         )
@@ -140,8 +131,6 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private inner class ComponentSnapper<C : Component<C>>(
         val key: StringComponentKey,
         val factoryMethod: KCallable<C>,
-        val factoryInstanceParameter: KParameter,
-        val companionInstance: Any,
         val valueParametersToNames: Map<KParameter, String?>,
         val fieldsByName: Map<String, KProperty1<C, *>>
     ) {
@@ -159,7 +148,6 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         }
 
         fun unpackComponent(recipe: MapComponentRecipe): C {
-            val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
             val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
                 val propertyName = valueParametersToNames[p]
                 deserializeProperty(
@@ -169,7 +157,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
                 )
             }
             return factoryMethod.callBy(
-                firstParam + otherParams
+                otherParams
             )
         }
     }

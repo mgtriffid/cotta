@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlinVersion = '1.9.22'
+    ext.kotlinVersion = '1.9.20'
 
     repositories {
         mavenLocal()
@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlinVersion-1.0.17"
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlinVersion-1.0.13"
     }
 }
 
@@ -53,6 +53,7 @@ project(":desktop") {
     dependencies {
         implementation project(":core")
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     }
@@ -90,6 +91,7 @@ project(":panna-server") {
 }
 
 project(":panna-shared") {
+    apply plugin: "com.google.devtools.ksp"
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -102,6 +104,7 @@ project(":panna-shared") {
         implementation "org.glassfish.jaxb:jaxb-runtime:2.3.0"
         implementation "com.google.code.gson:gson:$gsonVersion"
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        ksp project(":cotta-annotations-processor")
 
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
@@ -134,15 +137,19 @@ project(":panna-devutils") {
 }
 
 project(":cotta-server") {
-
+    apply {
+        plugin("com.google.devtools.ksp")
+    }
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
         implementation project(":cotta-utils")
+        implementation project(":cotta-annotations")
         implementation project(":cotta-network-api")
         implementation project(":cotta-network-kryonet") // TODO not needed directly
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+        ksp project(":cotta-annotations-processor")
 
         implementation "com.google.inject:guice:7.0.0"
     }
@@ -155,12 +162,14 @@ project(":cotta-annotations-processor") {
 
     dependencies {
         implementation project(":cotta-annotations")
+        implementation project(":cotta-core")
         implementation "com.google.devtools.ksp:symbol-processing-api:1.7.10-1.0.6"
+        implementation "com.squareup:kotlinpoet:1.16.0"
+        implementation "com.squareup:kotlinpoet-ksp:1.16.0"
     }
 }
 
 project(":cotta-core") {
-//    apply plugin: "com.google.devtools.ksp"
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         api "org.slf4j:slf4j-api:2.0.3"
@@ -169,7 +178,6 @@ project(":cotta-core") {
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation project(":cotta-annotations")
         implementation "com.esotericsoftware:kryo:5.0.0"
-//        ksp project(":cotta-annotations-processor")
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
         implementation "com.google.inject:guice:7.0.0" // TODO not really needed

@@ -17,9 +17,15 @@ import com.mgtriffid.games.panna.shared.game.components.WEAPON_PISTOL
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_RAILGUN
 import com.mgtriffid.games.panna.shared.game.components.WeaponCooldowns
 import com.mgtriffid.games.panna.shared.game.components.WeaponEquippedComponent
+import com.mgtriffid.games.panna.shared.game.components.createBulletComponent
+import com.mgtriffid.games.panna.shared.game.components.createDrawableComponent
+import com.mgtriffid.games.panna.shared.game.components.createPositionComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.createColliderComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.createGravityComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.createVelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.RailgunVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
@@ -85,13 +91,13 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem {
         val bullet = ctx.createEntity(ownedBy = shooter.ownedBy)
         val velocity = (Vector2(530f, 0f)).rotateDeg(direction.lookAt)
         logger.debug { "Created bullet ${bullet.id}" }
-        bullet.addComponent(PositionComponent.create(position.xPos, position.yPos))
-        bullet.addComponent(DrawableComponent.create(BULLET_STRATEGY))
-        bullet.addComponent(ColliderComponent.create(2, 2))
-        bullet.addComponent(GravityComponent.create())
-        bullet.addComponent(BulletComponent.create(shooter.id))
+        bullet.addComponent(createPositionComponent(position.xPos, position.yPos))
+        bullet.addComponent(createDrawableComponent(BULLET_STRATEGY))
+        bullet.addComponent(createColliderComponent(2, 2))
+        bullet.addComponent(createGravityComponent())
+        bullet.addComponent(createBulletComponent(shooter.id))
         bullet.addComponent(
-            VelocityComponent.create(velocity.x, velocity.y)
+            createVelocityComponent(velocity.x, velocity.y)
         )
     }
 

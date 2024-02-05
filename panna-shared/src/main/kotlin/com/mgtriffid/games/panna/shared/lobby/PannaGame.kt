@@ -14,6 +14,8 @@ import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.createColliderComponent
+import com.mgtriffid.games.panna.shared.game.components.physics.createVelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.CollisionEffect
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
@@ -71,10 +73,10 @@ class PannaGame : CottaGame {
         val graverobber = entities.create()
         graverobber.addComponent(GraverobberNpcComponent.create())
         graverobber.addInputComponent(CharacterInputComponent::class)
-        graverobber.addComponent(WalkingComponent.create(80f))
-        graverobber.addComponent(VelocityComponent.create(0f, 0f))
-        graverobber.addComponent(PositionComponent.create(30f, 40f))
-        graverobber.addComponent(DrawableComponent.create(
+        graverobber.addComponent(createWalkingComponent(80f))
+        graverobber.addComponent(createVelocityComponent(0f, 0f))
+        graverobber.addComponent(createPositionComponent(30f, 40f))
+        graverobber.addComponent(createDrawableComponent(
             TODO("Should not be created as is, should be redone as general NPC")
         ))
     }
@@ -97,10 +99,10 @@ class PannaGame : CottaGame {
 
     private fun createBlock(entities: Entities, idGenerator: () -> Int, rowNumber: Int, colNumber: Int) {
         val block = entities.createStatic(StaticEntityId(idGenerator()))
-        block.addComponent(DrawableComponent.create(SOLID_TERRAIN_TILE_STRATEGY))
-        block.addComponent(PositionComponent.create(8 + colNumber * 16f, 8 + rowNumber * 16f))
-        block.addComponent(SolidTerrainComponent.create())
-        block.addComponent(ColliderComponent.create(16, 16))
+        block.addComponent(createDrawableComponent(SOLID_TERRAIN_TILE_STRATEGY))
+        block.addComponent(createPositionComponent(8 + colNumber * 16f, 8 + rowNumber * 16f))
+        block.addComponent(createSolidTerrainComponent())
+        block.addComponent(createColliderComponent(16, 16))
     }
 
     override val componentClasses = setOf(

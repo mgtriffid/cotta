@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.IDLE
 
+@com.mgtriffid.games.cotta.Component
 interface JoinBattleMetaEntityInputComponent : InputComponent<JoinBattleMetaEntityInputComponent> {
     @ComponentData
     val join: Boolean

@@ -17,6 +17,9 @@ import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.VelocityTestComponent
+import com.mgtriffid.games.cotta.server.workload.components.createHealthTestComponent
+import com.mgtriffid.games.cotta.server.workload.components.createLinearPositionTestComponent
+import com.mgtriffid.games.cotta.server.workload.components.createVelocityTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.systems.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -56,7 +59,7 @@ class ServerSimulationTest {
     fun `systems should listen to effects`() {
         val entity = state.entities().create()
         val entityId = entity.id
-        entity.addComponent(HealthTestComponent.create(0))
+        entity.addComponent(createHealthTestComponent(0))
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
@@ -80,7 +83,7 @@ class ServerSimulationTest {
     fun `effects should be processed within given tick once`() {
         val entity = state.entities().create()
         val entityId = entity.id
-        entity.addComponent(HealthTestComponent.create(0))
+        entity.addComponent(createHealthTestComponent(0))
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
         repeat(2) {
@@ -105,9 +108,9 @@ class ServerSimulationTest {
     fun `should consume input`() {
         val damageable = state.entities().create()
         val damageableId = damageable.id
-        damageable.addComponent(HealthTestComponent.create(20))
-        damageable.addComponent(LinearPositionTestComponent.create(0))
-        damageable.addComponent(VelocityTestComponent.create(2))
+        damageable.addComponent(createHealthTestComponent(20))
+        damageable.addComponent(createLinearPositionTestComponent(0))
+        damageable.addComponent(createVelocityTestComponent(2))
 
         val damageDealer = state.entities().create()
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
@@ -170,9 +173,9 @@ class ServerSimulationTest {
         val playerId = PlayerId(0)
         val damageable = state.entities().create()
         val damageableId = damageable.id
-        damageable.addComponent(HealthTestComponent.create(20))
-        damageable.addComponent(LinearPositionTestComponent.create(0))
-        damageable.addComponent(VelocityTestComponent.create(2))
+        damageable.addComponent(createHealthTestComponent(20))
+        damageable.addComponent(createLinearPositionTestComponent(0))
+        damageable.addComponent(createVelocityTestComponent(2))
 
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         val damageDealerId = damageDealer.id
@@ -228,9 +231,9 @@ class ServerSimulationTest {
         val playerId = PlayerId(0)
         val damageable = state.entities().create()
         val damageableId = damageable.id
-        damageable.addComponent(HealthTestComponent.create(20))
-        damageable.addComponent(LinearPositionTestComponent.create(0))
-        damageable.addComponent(VelocityTestComponent.create(2))
+        damageable.addComponent(createHealthTestComponent(20))
+        damageable.addComponent(createLinearPositionTestComponent(0))
+        damageable.addComponent(createVelocityTestComponent(2))
 
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         val damageDealerId = damageDealer.id
@@ -307,7 +310,7 @@ class ServerSimulationTest {
     fun `should return effects that are to be returned to clients`() {
         val entity = state.entities().create()
         val entityId = entity.id
-        entity.addComponent(HealthTestComponent.create(0))
+        entity.addComponent(createHealthTestComponent(0))
         serverSimulation.registerSystem(RegenerationTestSystem::class)
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 

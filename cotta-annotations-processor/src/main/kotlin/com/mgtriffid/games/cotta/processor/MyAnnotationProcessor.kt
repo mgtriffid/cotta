@@ -13,7 +13,6 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
@@ -23,8 +22,7 @@ class MyAnnotationProcessor(
     private val codeGenerator: CodeGenerator
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        logger.warn("Hehe hello processing!")
-
+        logger.info("Processing Cotta components...")
         val components = getComponentInterfaces(resolver)
         components.forEach {
             writeComponentImplementation(it)
@@ -41,19 +39,19 @@ class MyAnnotationProcessor(
     private fun writeComponentImplementation(component: KSClassDeclaration) {
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
-        val properties: List<Triple<String, TypeName, Boolean>> = component.getDeclaredProperties().map { prop ->
-            Triple(prop.simpleName.asString(), prop.type.resolve().toTypeName(), prop.isMutable)
+        val properties: List<ProcessableComponentFieldSpec> = component.getDeclaredProperties().map { prop ->
+            ProcessableComponentFieldSpec(prop.simpleName.asString(), prop.type.resolve().toTypeName(), prop.isMutable)
         }.toList()
         if (properties.isNotEmpty()) {
         val fileSpec = FileSpec.builder(pkg, "${componentName}Impl")
             .addFunction(FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
                 .returns(component.asStarProjectedType().toTypeName())
                 .addParameters(
-                    properties.map { prop ->
-                        ParameterSpec.builder(prop.first, prop.second).build()
+                    properties.map { spec ->
+                        ParameterSpec.builder(spec.name, spec.type).build()
                     }
                 )
-                .addStatement("return ${componentName}Impl(${properties.joinToString(", ") { it.first }})")
+                .addStatement("return ${componentName}Impl(${properties.joinToString(", ") { it.name }})")
                 .build()
             )
             .addType(
@@ -64,7 +62,7 @@ class MyAnnotationProcessor(
                         FunSpec.constructorBuilder()
                             .addParameters(
                                 properties.map { prop ->
-                                    ParameterSpec.builder(prop.first, prop.second)
+                                    ParameterSpec.builder(prop.name, prop.type)
                                         .build()
                                 }
                             )
@@ -72,10 +70,10 @@ class MyAnnotationProcessor(
                     )
                     .addFunction(
                         FunSpec.builder("copy").addStatement(
-                            if (properties.filter { p -> p.third }.isEmpty())
+                            if (properties.filter { p -> p.isMutable }.isEmpty())
                                 "return this"
                             else
-                                "return this.copy(${properties.filter { p -> p.third }.joinToString(", ") { "${it.first} = ${it.first}" }})"
+                                "return this.copy(${properties.filter { p -> p.isMutable }.joinToString(", ") { "${it.name} = ${it.name}" }})"
                         )
                             .addModifiers(KModifier.OVERRIDE)
                             .returns(component.asStarProjectedType().toTypeName())
@@ -83,10 +81,10 @@ class MyAnnotationProcessor(
                     )
                     .addProperties(
                         properties.map { prop ->
-                            PropertySpec.builder(prop.first, prop.second)
-                                .initializer(prop.first)
+                            PropertySpec.builder(prop.name, prop.type)
+                                .initializer(prop.name)
                                 .addModifiers(KModifier.OVERRIDE)
-                                .also { if (prop.third) it.mutable() }
+                                .also { if (prop.isMutable) it.mutable() }
                                 .build()
                         }
                     )

@@ -1,6 +1,7 @@
 package com.mgtriffid.games.panna.shared.lobby
 
 import com.google.gson.Gson
+import com.mgtriffid.games.cotta.Game
 import com.mgtriffid.games.cotta.core.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
@@ -41,6 +42,7 @@ import com.mgtriffid.games.panna.shared.game.systems.walking.*
 import com.mgtriffid.games.panna.shared.tiled.TiledMap
 import java.util.concurrent.atomic.AtomicInteger
 
+@Game
 class PannaGame : CottaGame {
     override val serverSystems = listOf(
         WalkingInputProcessingSystem::class,
@@ -104,23 +106,6 @@ class PannaGame : CottaGame {
         block.addComponent(createSolidTerrainComponent())
         block.addComponent(createColliderComponent(16, 16))
     }
-
-    override val componentClasses = setOf(
-        VelocityComponent::class,
-        GravityComponent::class,
-        PositionComponent::class,
-        LookingAtComponent::class,
-        DrawableComponent::class,
-        WalkingComponent::class,
-        GraverobberNpcComponent::class,
-        SteamManPlayerComponent::class,
-        SolidTerrainComponent::class,
-        JumpingComponent::class,
-        ColliderComponent::class,
-        HealthComponent::class,
-        BulletComponent::class,
-        WeaponEquippedComponent::class,
-    )
 
     override val inputComponentClasses = setOf(
         CharacterInputComponent::class,

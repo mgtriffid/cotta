@@ -18,8 +18,6 @@ interface CottaGame {
     // TODO make it not possible to add input components, ensure it only operates on static part, etc. More safety.
     fun initializeStaticState(entities: Entities)
 
-    val componentClasses: Set<KClass<out Component<*>>>
-
     val inputComponentClasses: Set<KClass<out InputComponent<*>>>
 
     val effectClasses: Set<KClass<out CottaEffect>>

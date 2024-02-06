@@ -13,6 +13,7 @@ import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.guice.CottaServerModule
+import com.mgtriffid.games.cotta.server.workload.GameStub
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
@@ -37,7 +38,7 @@ class ServerSimulationTest {
 
     @BeforeEach
     fun setUp() {
-        val injector = Guice.createInjector(CottaServerModule(GameStub))
+        val injector = Guice.createInjector(CottaServerModule(GameStub()))
         tickProvider = injector.getInstance(TickProvider::class.java)
         simulationInputHolder = injector.getInstance(SimulationInputHolder::class.java)
         simulationInputHolder.set(object : SimulationInput {
@@ -387,24 +388,6 @@ class ServerSimulationTest {
             false,
             (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
-    }
-
-    private object GameStub : CottaGame {
-        override val serverSystems: List<KClass<*>> = emptyList()
-        override val nonPlayerInputProvider = object : NonPlayerInputProvider {
-            override fun input(entities: Entities) = emptyMap<EntityId, Collection<InputComponent<*>>>()
-        }
-
-        override fun initializeServerState(entities: Entities) {}
-        override fun initializeStaticState(entities: Entities) {}
-
-        override val componentClasses: Set<KClass<out Component<*>>> = emptySet()
-        override val inputComponentClasses: Set<KClass<out InputComponent<*>>> = emptySet()
-        override val effectClasses: Set<KClass<out CottaEffect>> = emptySet()
-        override val metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>> = emptySet()
-        override val config: CottaConfig = object : CottaConfig {
-            override val tickLength: Long = 20
-        }
     }
 
     private fun CottaState.entities() = entities(tickProvider.tick)

@@ -207,7 +207,7 @@ class CottaClientImpl @Inject constructor(
     // TODO probably this is wrong place
     private fun registerComponents() {
         logger.debug { "Registering components to ${componentsRegistry.hashCode()}" }
-        game.componentClasses.forEach {
+        getComponentClasses().forEach {
             componentsRegistry.registerComponentClass(it)
             interpolators.register(it)
         }
@@ -216,6 +216,16 @@ class CottaClientImpl @Inject constructor(
         }
         game.effectClasses.forEach { effectClass ->
             componentsRegistry.registerEffectClass(effectClass)
+        }
+    }
+
+    private fun getComponentClasses(): Set<KClass<out Component<*>>> {
+        val gameClass = game::class
+        return Class.forName(gameClass.qualifiedName + "Components").let {
+            val method = it.getMethod("getComponents")
+            @Suppress("UNCHECKED_CAST")
+            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
+            components.map { it as KClass<out Component<*>> }.toSet()
         }
     }
 

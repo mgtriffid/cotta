@@ -7,15 +7,24 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.mgtriffid.games.cotta.Game
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.WildcardTypeName
+import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
+import kotlin.reflect.KClass
 
 class CottaAnnotationProcessor(
     private val logger: KSPLogger,
@@ -23,10 +32,12 @@ class CottaAnnotationProcessor(
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("Processing Cotta components...")
-        val components = getComponentInterfaces(resolver)
+        val components = getComponentInterfaces(resolver).toList()
+        val game = getGame(resolver) ?: return emptyList()
         components.forEach {
             writeComponentImplementation(it)
         }
+        writeComponentsClassRegistry(components, game)
         return emptyList()
     }
 
@@ -36,42 +47,68 @@ class CottaAnnotationProcessor(
             .filter { it.superTypes.none { it.resolve().declaration.qualifiedName?.asString() == InputComponent::class.qualifiedName } }
     }
 
+    private fun getGame(resolver: Resolver): KSClassDeclaration? {
+        val games = resolver.getSymbolsWithAnnotation(com.mgtriffid.games.cotta.Game::class.qualifiedName!!)
+            .filterIsInstance<KSClassDeclaration>()
+            .toList()
+        if (games.size > 1) {
+            logger.error("Found more than one game class annotated with @${com.mgtriffid.games.cotta.Game::class.simpleName}")
+            throw IllegalStateException("There should be exactly one class annotated with @Game")
+        }
+        return games.firstOrNull()
+    }
+
     private fun writeComponentImplementation(component: KSClassDeclaration) {
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
         val properties: List<ProcessableComponentFieldSpec> = component.getDeclaredProperties().map { prop ->
             ProcessableComponentFieldSpec(prop.simpleName.asString(), prop.type.resolve().toTypeName(), prop.isMutable)
         }.toList()
+        val fileSpecBuilder = FileSpec.builder(pkg, "${componentName}Impl")
         if (properties.isNotEmpty()) {
-            val fileSpec = FileSpec.builder(pkg, "${componentName}Impl")
-                .addFunction(
-                    factoryMethod(componentName, component, properties)
-                )
-                .addType(
-                    implementation(componentName, component, properties)
-                ).build()
-            fileSpec.writeTo(codeGenerator, false)
+            buildDataClassImplementation(fileSpecBuilder, componentName, component, properties)
         } else {
-            val fileSpec = FileSpec.builder(pkg, "${componentName}Impl")
-                .addFunction(
-                    FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
-                        .returns(component.asStarProjectedType().toTypeName())
-                        .addStatement("return ${componentName}Instance")
-                        .build()
-                )
-                .addType(
-                    TypeSpec.objectBuilder("${componentName}Instance")
-                        .addSuperinterface(component.asStarProjectedType().toTypeName())
-                        .addFunction(
-                            FunSpec.builder("copy").addStatement("return this")
-                                .addModifiers(KModifier.OVERRIDE)
-                                .returns(component.asStarProjectedType().toTypeName())
-                                .build()
-                        )
-                        .build()
-                ).build()
-            fileSpec.writeTo(codeGenerator, false)
+            buildSingletonImplementation(fileSpecBuilder, componentName, component)
         }
+        fileSpecBuilder.build().writeTo(codeGenerator, false)
+    }
+
+    private fun buildSingletonImplementation(
+        fileSpecBuilder: FileSpec.Builder,
+        componentName: String,
+        component: KSClassDeclaration
+    ) {
+        fileSpecBuilder.addFunction(
+            FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
+                .returns(component.asStarProjectedType().toTypeName())
+                .addStatement("return ${componentName}Instance")
+                .build()
+        )
+            .addType(
+                TypeSpec.objectBuilder("${componentName}Instance")
+                    .addSuperinterface(component.asStarProjectedType().toTypeName())
+                    .addFunction(
+                        FunSpec.builder("copy").addStatement("return this")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .returns(component.asStarProjectedType().toTypeName())
+                            .build()
+                    )
+                    .build()
+            )
+    }
+
+    private fun buildDataClassImplementation(
+        fileSpecBuilder: FileSpec.Builder,
+        componentName: String,
+        component: KSClassDeclaration,
+        properties: List<ProcessableComponentFieldSpec>
+    ) {
+        fileSpecBuilder.addFunction(
+            factoryMethod(componentName, component, properties)
+        )
+            .addType(
+                implementation(componentName, component, properties)
+            )
     }
 
     private fun implementation(
@@ -137,4 +174,34 @@ class CottaAnnotationProcessor(
         )
         .addStatement("return ${componentName}Impl(${properties.joinToString(", ") { it.name }})")
         .build()
+
+    private fun writeComponentsClassRegistry(
+        components: List<KSClassDeclaration>,
+        game: KSClassDeclaration
+    ) {
+        if (components.isEmpty()) return
+        val pkg = game.packageName.asString()
+        val gameName = game.simpleName.asString()
+        val fileSpecBuilder = FileSpec.builder(pkg, "${gameName}Components")
+        fileSpecBuilder.addType(
+            TypeSpec.classBuilder("${gameName}Components")
+                .addFunction(
+                    FunSpec.builder("getComponents")
+                        .returns(
+                            List::class.asTypeName().parameterizedBy(
+                                ClassName(
+                                    KClass::class.java.`package`.name,
+                                    KClass::class.simpleName!!
+                                ).parameterizedBy(STAR)
+                            )
+                        )
+                        .addModifiers(KModifier.PUBLIC)
+                        .addStatement("return listOf(" +
+                            components.joinToString(", ") { "${it.qualifiedName!!.asString()}::class" } +
+                            ")")
+                        .build()
+                ).build()
+        )
+        fileSpecBuilder.build().writeTo(codeGenerator, false)
+    }
 }

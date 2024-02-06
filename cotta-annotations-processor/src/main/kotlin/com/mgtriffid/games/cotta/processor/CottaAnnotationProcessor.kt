@@ -17,7 +17,7 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 
-class MyAnnotationProcessor(
+class CottaAnnotationProcessor(
     private val logger: KSPLogger,
     private val codeGenerator: CodeGenerator
 ) : SymbolProcessor {

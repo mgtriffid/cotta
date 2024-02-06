@@ -1,1 +1,1 @@
-com.mgtriffid.games.cotta.processor.MyAnnotationProcessorProvider
+com.mgtriffid.games.cotta.processor.CottaAnnotationProcessorProvider

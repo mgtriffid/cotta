@@ -7,20 +7,17 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.mgtriffid.games.cotta.Game
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.processor.serialization.SerializerGenerator
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.WildcardTypeName
-import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
@@ -33,10 +30,11 @@ class CottaAnnotationProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("Processing Cotta components...")
         val components = getComponentInterfaces(resolver).toList()
-        val game = getGame(resolver) ?: return emptyList()
         components.forEach {
             writeComponentImplementation(it)
         }
+        writeSerializers(resolver, components)
+        val game = getGame(resolver) ?: return emptyList()
         writeComponentsClassRegistry(components, game)
         return emptyList()
     }
@@ -61,9 +59,7 @@ class CottaAnnotationProcessor(
     private fun writeComponentImplementation(component: KSClassDeclaration) {
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
-        val properties: List<ProcessableComponentFieldSpec> = component.getDeclaredProperties().map { prop ->
-            ProcessableComponentFieldSpec(prop.simpleName.asString(), prop.type.resolve().toTypeName(), prop.isMutable)
-        }.toList()
+        val properties: List<ProcessableComponentFieldSpec> = getProcessableComponentFieldSpecs(component)
         val fileSpecBuilder = FileSpec.builder(pkg, "${componentName}Impl")
         if (properties.isNotEmpty()) {
             buildDataClassImplementation(fileSpecBuilder, componentName, component, properties)
@@ -117,7 +113,7 @@ class CottaAnnotationProcessor(
         properties: List<ProcessableComponentFieldSpec>
     ) = TypeSpec.classBuilder("${componentName}Impl")
         .addSuperinterface(component.asStarProjectedType().toTypeName())
-        .addModifiers(KModifier.DATA, KModifier.PRIVATE)
+        .addModifiers(KModifier.DATA, KModifier.INTERNAL)
         .primaryConstructor(
             implPrimaryConstructor(properties)
         )
@@ -203,5 +199,9 @@ class CottaAnnotationProcessor(
                 ).build()
         )
         fileSpecBuilder.build().writeTo(codeGenerator, false)
+    }
+
+    private fun writeSerializers(resolver: Resolver, components: List<KSClassDeclaration>) {
+        SerializerGenerator(resolver, codeGenerator).generate(components)
     }
 }

@@ -2,6 +2,6 @@ include 'desktop', 'core',
         'panna-server',
         'panna-shared', 'panna-lobby', 'panna-graphics',
         'panna-devutils',
-        'cotta-server', 'cotta-core', 'cotta-client',
+        'cotta-server', 'cotta-core', 'cotta-client', 'cotta-serialization',
         'cotta-network-api', 'cotta-network-kryonet',
         'cotta-gdx', 'cotta-annotations-processor', 'cotta-annotations', 'cotta-utils'

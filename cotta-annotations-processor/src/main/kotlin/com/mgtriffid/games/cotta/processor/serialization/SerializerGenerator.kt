@@ -6,8 +6,14 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.mgtriffid.games.cotta.core.serialization.bytes.ConversionUtils
 import com.mgtriffid.games.cotta.processor.ProcessableComponentFieldSpec
 import com.mgtriffid.games.cotta.processor.getProcessableComponentFieldSpecs
+import com.squareup.kotlinpoet.BYTE
+import com.squareup.kotlinpoet.DOUBLE
+import com.squareup.kotlinpoet.FLOAT
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.INT
+import com.squareup.kotlinpoet.LONG
+import com.squareup.kotlinpoet.SHORT
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -71,7 +77,12 @@ class SerializerGenerator(
 
     private fun serializeField(field: ProcessableComponentFieldSpec, offset: Int): String {
         val function = when (field.type) {
-            Int::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeInt.name
+            INT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeInt.name
+            LONG -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeLong.name
+            FLOAT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeFloat.name
+            DOUBLE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeDouble.name
+            BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeByte.name
+            SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeShort.name
             else -> "TODO()//"
         }
         return "$function(bytes, component.${field.name}, $offset)"
@@ -79,7 +90,12 @@ class SerializerGenerator(
 
     private fun deserializeField(field: ProcessableComponentFieldSpec, offset: Int): String {
         val function = when (field.type) {
-            Int::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readInt.name
+            INT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readInt.name
+            LONG -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readLong.name
+            FLOAT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readFloat.name
+            DOUBLE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readDouble.name
+            BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readByte.name
+            SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readShort.name
             else -> "TODO()//"
         }
         return "val ${field.name} = $function(bytes, $offset)"

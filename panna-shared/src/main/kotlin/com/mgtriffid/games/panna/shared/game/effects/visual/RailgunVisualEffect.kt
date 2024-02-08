@@ -15,18 +15,4 @@ interface RailgunVisualEffect : CottaEffect {
 
     @EffectData
     val y2: Float
-
-    companion object {
-        fun create(
-            x1: Float, y1: Float,
-            x2: Float, y2: Float
-        ): RailgunVisualEffect = RailgunVisualEffectImpl(x1, y1, x2, y2)
-    }
 }
-
-private data class RailgunVisualEffectImpl(
-    override val x1: Float,
-    override val y1: Float,
-    override val x2: Float,
-    override val y2: Float
-) : RailgunVisualEffect

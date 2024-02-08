@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessin
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.ShotFiredTestEffect
+import com.mgtriffid.games.cotta.server.workload.effects.createShotFiredTestEffect
 
 class PlayerInputProcessingTestSystem : InputProcessingSystem {
 
@@ -12,7 +13,7 @@ class PlayerInputProcessingTestSystem : InputProcessingSystem {
         if (e.inputComponents().contains(PlayerInputTestComponent::class)) {
             val input = e.getInputComponent(PlayerInputTestComponent::class)
             if (input.shoot) {
-                ctx.fire(ShotFiredTestEffect(x = input.aim))
+                ctx.fire(createShotFiredTestEffect(x = input.aim))
             }
         }
     }

@@ -8,13 +8,4 @@ interface BulletHitsDudeEffect : CottaEffect {
 
     @EffectData val shotId: EntityId
 
-    companion object {
-        fun create(shotId: EntityId): BulletHitsDudeEffect {
-            return BulletHitsDudeEffectImpl(shotId)
-        }
-    }
 }
-
-private data class BulletHitsDudeEffectImpl(
-    override val shotId: EntityId
-) : BulletHitsDudeEffect

@@ -29,6 +29,8 @@ import com.mgtriffid.games.panna.shared.game.components.physics.createVelocityCo
 import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.RailgunVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.createRailgunShotEffect
+import com.mgtriffid.games.panna.shared.game.effects.visual.createRailgunVisualEffect
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -133,7 +135,7 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem {
             intersectionPoints.minByOrNull { it.cpy().sub(railStart).len() }
         } else null
         ctx.fire(
-            RailgunVisualEffect.create(
+            createRailgunVisualEffect(
                 railStart.x,
                 railStart.y,
                 (intersectionPoint ?: railEnd).x,
@@ -141,7 +143,7 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem {
             )
         )
         ctx.fire(
-            RailgunShotEffect.create(
+            createRailgunShotEffect(
                 shooter.id,
                 railStart.x,
                 railStart.y,

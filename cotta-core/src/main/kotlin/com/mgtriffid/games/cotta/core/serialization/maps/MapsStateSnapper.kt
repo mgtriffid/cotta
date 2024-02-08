@@ -84,19 +84,12 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     }
 
     fun <C: CottaEffect> registerEffectSnapper(kClass: KClass<C>, spec: EffectSpec) {
-        val companion = kClass.companionObject
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} does not have a companion object")
-        val companionInstance =
-            kClass.companionObjectInstance ?: throw IllegalArgumentException("Could not find companion instance")
-        val factoryMethod: KCallable<C> = (companion.members.find { it.name == "create" }
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")) as KCallable<C>
+        val factoryMethod: KCallable<C> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }!!.kotlinFunction as KCallable<C>
         val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<EffectData>() }
 
         val fieldsByName = fields.associateBy { it.name }
 
         val factoryParameters = factoryMethod.parameters
-        val factoryInstanceParameter = factoryParameters.find { it.kind == KParameter.Kind.INSTANCE }
-            ?: throw IllegalArgumentException("No instance parameter on factory")
         val valueParameters = factoryParameters.filter { it.kind == KParameter.Kind.VALUE }
         val valueParametersToNames = valueParameters.associateWith { it.name }
 
@@ -111,8 +104,6 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         effectSnappers[spec.key] = EffectSnapper(
             key = spec.key as StringEffectKey,
             factoryMethod = factoryMethod,
-            factoryInstanceParameter = factoryInstanceParameter,
-            companionInstance = companionInstance,
             valueParametersToNames = valueParametersToNames,
             fieldsByName = fieldsByName
         )
@@ -190,8 +181,6 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     private inner class EffectSnapper<E : CottaEffect>(
         private val key: StringEffectKey,
         private val factoryMethod: KCallable<E>,
-        private val factoryInstanceParameter: KParameter,
-        private val companionInstance: Any,
         private val valueParametersToNames: Map<KParameter, String?>,
         private val fieldsByName: Map<String, KProperty1<E, *>>
     ) {
@@ -209,7 +198,6 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         }
 
         fun unpackEffect(recipe: MapEffectRecipe): CottaEffect {
-            val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
             val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
                 val propertyName = valueParametersToNames[p]
                 deserializeProperty(
@@ -219,7 +207,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
                 )
             }
             return factoryMethod.callBy(
-                firstParam + otherParams
+                otherParams
             )
         }
     }

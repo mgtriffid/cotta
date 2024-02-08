@@ -8,13 +8,4 @@ import com.mgtriffid.games.cotta.core.entities.id.EntityId
 interface JoinBattleEffect : CottaEffect {
     @EffectData
     val metaEntityId: EntityId
-    companion object {
-        fun create(metaEntityId: EntityId): JoinBattleEffect {
-            return JoinBattleEffectImpl(metaEntityId)
-        }
-    }
 }
-
-private data class JoinBattleEffectImpl(
-    override val metaEntityId: EntityId
-) : JoinBattleEffect

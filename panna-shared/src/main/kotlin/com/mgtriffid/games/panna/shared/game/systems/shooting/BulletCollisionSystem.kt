@@ -9,8 +9,11 @@ import com.mgtriffid.games.panna.shared.game.components.HealthComponent
 import com.mgtriffid.games.panna.shared.game.components.SolidTerrainComponent
 import com.mgtriffid.games.panna.shared.game.effects.CollisionEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.BulletHitsDudeEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.createBulletHitsDudeEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsDudeVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsGroundVisualEffect
+import com.mgtriffid.games.panna.shared.game.effects.visual.createBulletHitsDudeVisualEffect
+import com.mgtriffid.games.panna.shared.game.effects.visual.createBulletHitsGroundVisualEffect
 
 @Predicted
 class BulletCollisionSystem : EffectsConsumerSystem {
@@ -25,13 +28,13 @@ class BulletCollisionSystem : EffectsConsumerSystem {
                         val bulletComponent = entity.getComponent(BulletComponent::class)
                         if (e.id2 == bulletComponent.shooterId) return
 
-                        ctx.fire(BulletHitsDudeVisualEffect.create(e.x, e.y))
-                        ctx.fire(BulletHitsDudeEffect.create(e.id2))
+                        ctx.fire(createBulletHitsDudeVisualEffect(e.x, e.y))
+                        ctx.fire(createBulletHitsDudeEffect(e.id2))
                         entities.remove(e.id)
                     }
 
                     collidedWith.hasComponent(SolidTerrainComponent::class) -> {
-                        ctx.fire(BulletHitsGroundVisualEffect.create(e.x, e.y))
+                        ctx.fire(createBulletHitsGroundVisualEffect(e.x, e.y))
                         // TODO remove on the next tick? Now it looks like bullet never hits
                         //  the ground. But okay we will see after we increase tick rate to 60. Not Cotta's problem.
                         entities.remove(e.id)

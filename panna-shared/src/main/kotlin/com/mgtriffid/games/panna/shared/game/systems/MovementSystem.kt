@@ -6,13 +6,14 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessi
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
+import com.mgtriffid.games.panna.shared.game.effects.createMovementEffect
 
 @Predicted class MovementSystem : EntityProcessingSystem {
     override fun process(e: Entity, ctx: EntityProcessingContext) {
         if (e.hasComponent(VelocityComponent::class)) {
             val velocity = e.getComponent(VelocityComponent::class)
             ctx.fire(
-                MovementEffect.create(
+                createMovementEffect(
                     velocity.velX * ctx.clock().delta(),
                     velocity.velY * ctx.clock().delta(),
                     e.id

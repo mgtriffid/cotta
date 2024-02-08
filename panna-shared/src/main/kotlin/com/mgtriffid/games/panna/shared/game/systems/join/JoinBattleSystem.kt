@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent
 import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
+import com.mgtriffid.games.panna.shared.game.effects.join.createJoinBattleEffect
 
 @Predicted
 class JoinBattleSystem : InputProcessingSystem {
@@ -18,7 +19,7 @@ class JoinBattleSystem : InputProcessingSystem {
                     it.hasComponent(SteamManPlayerComponent::class) &&
                         it.ownedBy == e.ownedBy
                     }) {
-                    ctx.fire(JoinBattleEffect.create(e.id))
+                    ctx.fire(createJoinBattleEffect(e.id))
                 }
             }
         }

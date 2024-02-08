@@ -12,6 +12,7 @@ import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
 import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunHitsDudeEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.createRailgunHitsDudeEffect
 
 @LagCompensated
 class RailgunShotEffectConsumerSystem : EffectsConsumerSystem {
@@ -25,7 +26,7 @@ class RailgunShotEffectConsumerSystem : EffectsConsumerSystem {
             it.id != e.shooterId
         }.filter {
             it.isHitBy(e)
-        }.forEach { ctx.fire(RailgunHitsDudeEffect.create(it.id)) }
+        }.forEach { ctx.fire(createRailgunHitsDudeEffect(it.id)) }
     }
 
     private fun Entity.isHitBy(e: RailgunShotEffect): Boolean {

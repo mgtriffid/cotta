@@ -5,11 +5,12 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessi
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
+import com.mgtriffid.games.cotta.server.workload.effects.createHealthRegenerationTestEffect
 
 class RegenerationTestSystem : EntityProcessingSystem {
     override fun process(e: Entity, ctx: EntityProcessingContext) {
         if (e.hasComponent(HealthTestComponent::class)) {
-            ctx.fire(HealthRegenerationTestEffect(e.id, 1))
+            ctx.fire(createHealthRegenerationTestEffect(e.id, 1))
         }
     }
 }

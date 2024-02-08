@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessin
 import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.panna.shared.game.components.input.ShootInputComponent
 import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.createShootEffect
 
 @Predicted class ShootingInputProcessingSystem : InputProcessingSystem {
     override fun process(e: Entity, ctx: InputProcessingContext) {
@@ -13,7 +14,7 @@ import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
             val shootInput = e.getInputComponent(ShootInputComponent::class)
             if (shootInput.isShooting) {
                 ctx.fire(
-                    ShootEffect.create(e.id)
+                    createShootEffect(e.id)
                 )
             }
         }

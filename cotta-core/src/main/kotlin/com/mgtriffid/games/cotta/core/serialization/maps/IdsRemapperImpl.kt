@@ -135,19 +135,12 @@ class IdsRemapperImpl : IdsRemapper {
     }
 
     private fun <T : CottaEffect> registerEffectMapper(kClass: KClass<T>, spec: EffectSpec) {
-        val companion = kClass.companionObject
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} does not have a companion object")
-        val companionInstance =
-            kClass.companionObjectInstance ?: throw IllegalArgumentException("Could not find companion instance")
-        val factoryMethod: KCallable<CottaEffect> = (companion.members.find { it.name == "create" }
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")) as KCallable<CottaEffect>
+        val factoryMethod: KCallable<T> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }!!.kotlinFunction as KCallable<T>
         val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<EffectData>() }
 
         val fieldsByName = fields.associateBy { it.name }
 
         val factoryParameters = factoryMethod.parameters
-        val factoryInstanceParameter = factoryParameters.find { it.kind == KParameter.Kind.INSTANCE }
-            ?: throw IllegalArgumentException("No instance parameter on factory")
         val valueParameters = factoryParameters.filter { it.kind == KParameter.Kind.VALUE }
         val valueParametersToNames = valueParameters.associateWith { it.name }
 
@@ -165,11 +158,9 @@ class IdsRemapperImpl : IdsRemapper {
             IdentityEffectRemapper
         } else {
             EffectRemapperImpl(
-                factoryInstanceParameter,
                 factoryMethod,
                 valueParametersToNames,
                 fieldsByName,
-                companionInstance
             )
         }
     }
@@ -253,14 +244,11 @@ class IdsRemapperImpl : IdsRemapper {
     }
 
     private class EffectRemapperImpl<C: CottaEffect>(
-        private val factoryInstanceParameter: KParameter,
         private val factoryMethod: KCallable<CottaEffect>,
         private val valueParametersToNames: Map<KParameter, String?>,
         private val fieldsByName: Map<String, KProperty1<C, *>>,
-        private val companionInstance: Any
     ) : EffectRemapper {
         override fun remap(e: CottaEffect, ids: (PredictedEntityId) -> AuthoritativeEntityId?): CottaEffect {
-            val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
             val otherParams: Map<KParameter, Any?> = valueParametersToNames.mapValues { (param, name) ->
                 val field = fieldsByName[name]
                 val value = field?.getter?.call(e)
@@ -272,7 +260,7 @@ class IdsRemapperImpl : IdsRemapper {
                     value
                 }
             }
-            return factoryMethod.callBy(firstParam + otherParams)
+            return factoryMethod.callBy(otherParams)
         }
     }
 

@@ -22,6 +22,7 @@ import com.mgtriffid.games.cotta.server.workload.components.createHealthTestComp
 import com.mgtriffid.games.cotta.server.workload.components.createLinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.createVelocityTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
+import com.mgtriffid.games.cotta.server.workload.effects.createHealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.systems.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -326,7 +327,7 @@ class ServerSimulationTest {
         })
 
         assertEquals(
-            HealthRegenerationTestEffect(entityId, 1),
+            createHealthRegenerationTestEffect(entityId, 1),
             dataForClients.effects(tick = tickProvider.tick).first()
         )
     }

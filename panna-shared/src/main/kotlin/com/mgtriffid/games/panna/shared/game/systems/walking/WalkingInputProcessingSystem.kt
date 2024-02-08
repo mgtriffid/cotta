@@ -9,15 +9,17 @@ import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
 import com.mgtriffid.games.panna.shared.game.components.input.CharacterInputComponent
 import com.mgtriffid.games.panna.shared.game.effects.walking.JumpEffect
 import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
+import com.mgtriffid.games.panna.shared.game.effects.walking.createJumpEffect
+import com.mgtriffid.games.panna.shared.game.effects.walking.createWalkingEffect
 
 @Predicted
 class WalkingInputProcessingSystem : InputProcessingSystem {
     override fun process(e: Entity, ctx: InputProcessingContext) {
         if (e.hasInputComponent(CharacterInputComponent::class) && e.hasComponent(WalkingComponent::class)) {
             val input = e.getInputComponent(CharacterInputComponent::class)
-            ctx.fire(WalkingEffect.create(e.id, input.direction))
+            ctx.fire(createWalkingEffect(e.id, input.direction))
             if (input.jump && e.hasComponent(JumpingComponent::class) && !e.getComponent(JumpingComponent::class).inAir) {
-                ctx.fire(JumpEffect.create(e.id))
+                ctx.fire(createJumpEffect(e.id))
             }
         }
     }

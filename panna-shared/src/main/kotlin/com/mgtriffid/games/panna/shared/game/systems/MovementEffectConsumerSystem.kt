@@ -13,6 +13,7 @@ import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponen
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.CollisionEffect
 import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
+import com.mgtriffid.games.panna.shared.game.effects.createCollisionEffect
 import com.mgtriffid.games.panna.shared.utils.intersect
 import kotlin.math.max
 import kotlin.math.min
@@ -172,7 +173,7 @@ class MovementEffectConsumerSystem : EffectsConsumerSystem {
             val ey1 = position.yPos - collider.height / 2 - entityCollider.height / 2
             val ey2 = position.yPos + collider.height / 2 + entityCollider.height / 2
             findIntersectionPoint(x1, y1, x2, y2, ex1, ey1, ex2, ey2)?.let { intersection ->
-                CollisionEffect.create(entity.id, e.id, intersection.first, intersection.second)
+                createCollisionEffect(entity.id, e.id, intersection.first, intersection.second)
             }
         }
         collisionsEffects.sortedBy { effect ->

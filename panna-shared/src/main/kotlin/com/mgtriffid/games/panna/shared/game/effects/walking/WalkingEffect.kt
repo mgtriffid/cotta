@@ -9,15 +9,4 @@ interface WalkingEffect : CottaEffect {
     val entityId: EntityId
     @EffectData
     val direction: Byte
-
-    companion object {
-        fun create(entityId: EntityId, direction: Byte): WalkingEffect {
-            return WalkingEffectImpl(entityId, direction)
-        }
-    }
 }
-
-private data class WalkingEffectImpl(
-    override val entityId: EntityId,
-    override val direction: Byte
-) : WalkingEffect

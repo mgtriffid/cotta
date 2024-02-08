@@ -97,12 +97,9 @@ class ComponentProcessor(
         component: KSClassDeclaration,
         properties: List<ProcessableComponentFieldSpec>
     ) {
-        fileSpecBuilder.addFunction(
-            factoryMethod(componentName, component, properties)
-        )
-            .addType(
-                implementation(componentName, component, properties)
-            )
+        fileSpecBuilder
+            .addFunction(factoryMethod(componentName, component, properties))
+            .addType(implementation(componentName, component, properties))
     }
 
     private fun implementation(

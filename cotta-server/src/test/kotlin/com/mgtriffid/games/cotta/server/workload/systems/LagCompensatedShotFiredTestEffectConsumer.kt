@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.EntityShotEffect
 import com.mgtriffid.games.cotta.server.workload.effects.ShotFiredTestEffect
+import com.mgtriffid.games.cotta.server.workload.effects.createEntityShotEffect
 
 @LagCompensated
 class LagCompensatedShotFiredTestEffectConsumer : EffectsConsumerSystem {
@@ -16,7 +17,7 @@ class LagCompensatedShotFiredTestEffectConsumer : EffectsConsumerSystem {
                 it.hasComponent(LinearPositionTestComponent::class)
                         && it.getComponent(LinearPositionTestComponent::class).x == e.x
             }.forEach {
-                ctx.fire(EntityShotEffect(it.id))
+                ctx.fire(createEntityShotEffect(it.id))
             }
         }
     }

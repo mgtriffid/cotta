@@ -5,11 +5,12 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessi
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.server.workload.effects.ActualShotFiredEffect
 import com.mgtriffid.games.cotta.server.workload.effects.ShotFiredTestEffect
+import com.mgtriffid.games.cotta.server.workload.effects.createActualShotFiredEffect
 
 class StepOneShotFiredTestEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is ShotFiredTestEffect) {
-            ctx.fire(ActualShotFiredEffect(x = e.x))
+            ctx.fire(createActualShotFiredEffect(x = e.x))
         }
     }
 }

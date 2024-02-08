@@ -7,12 +7,4 @@ interface BulletHitsGroundVisualEffect : CottaEffect {
     @EffectData val x: Float
     @EffectData val y: Float
 
-    companion object {
-        fun create(x: Float, y: Float): BulletHitsGroundVisualEffect = BulletHitsGroundVisualEffectImpl(x, y)
-    }
 }
-
-private data class BulletHitsGroundVisualEffectImpl(
-    override val x: Float,
-    override val y: Float
-) : BulletHitsGroundVisualEffect

@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.processor
 
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.mgtriffid.games.cotta.core.entities.Component
@@ -25,7 +26,8 @@ const val IMPL_SUFFIX = "Impl"
 
 class ComponentProcessor(
     private val resolver: Resolver,
-    private val codeGenerator: CodeGenerator
+    private val codeGenerator: CodeGenerator,
+    private val logger: KSPLogger
 ) {
     fun process(game: KSClassDeclaration) {
         val components = getComponentInterfaces(game)
@@ -197,6 +199,6 @@ class ComponentProcessor(
     }
 
     private fun writeSerializers(components: List<KSClassDeclaration>) {
-        SerializerGenerator(resolver, codeGenerator).generate(components)
+        SerializerGenerator(resolver, codeGenerator, logger).generate(components)
     }
 }

@@ -1,13 +1,16 @@
 package com.mgtriffid.games.cotta.processor.serialization
 
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.serialization.bytes.ConversionUtils
 import com.mgtriffid.games.cotta.processor.ProcessableComponentFieldSpec
 import com.mgtriffid.games.cotta.processor.getProcessableComponentFieldSpecs
 import com.mgtriffid.games.cotta.utils.divideRoundUp
 import com.squareup.kotlinpoet.BYTE
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.DOUBLE
 import com.squareup.kotlinpoet.FLOAT
 import com.squareup.kotlinpoet.FileSpec
@@ -20,12 +23,14 @@ import com.squareup.kotlinpoet.UNIT
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
+import javax.swing.text.html.parser.Entity
 
 private const val DELTA_MASK_VARIABLE = "deltaMask"
 
 class SerializerGenerator(
     private val resolver: Resolver,
-    private val codeGenerator: CodeGenerator
+    private val codeGenerator: CodeGenerator,
+    private val logger: KSPLogger
 ) {
     fun generate(components: List<KSClassDeclaration>) {
         components
@@ -160,6 +165,8 @@ class SerializerGenerator(
             DOUBLE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeDouble.name
             BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeByte.name
             SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeShort.name
+            EntityId::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeEntityId.name
+//            ClassName("com.mgtriffid.games.cotta.core.entities.id", "EntityId") -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeEntityId.name
             else -> "TODO()//"
         }
         return "$function(bytes, component.${field.name}, $offset)"
@@ -173,20 +180,24 @@ class SerializerGenerator(
             DOUBLE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeDouble.name
             BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeByte.name
             SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeShort.name
+            EntityId::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeEntityId.name
+//            ClassName("com.mgtriffid.games.cotta.core.entities.id", "EntityId") -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeEntityId.name
             else -> "TODO()//"
         }
         return "$function(bytes, component.${field.name}, $offsetVariable)"
     }
 
     private fun deserializeField(field: ProcessableComponentFieldSpec, offset: Int): String {
-        val function = when (field.type) {
+        val function = when (val type = field.type) {
             INT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readInt.name
             LONG -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readLong.name
             FLOAT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readFloat.name
             DOUBLE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readDouble.name
             BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readByte.name
             SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readShort.name
-            else -> "TODO()//"
+            EntityId::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readEntityId.name
+//            ClassName("com.mgtriffid.games.cotta.core.entities.id", "EntityId") -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readEntityId.name
+            else -> "TODO()//".also { logger.warn(field.type.toString()) }
         }
         return "val ${field.name} = $function(bytes, $offset)"
     }
@@ -199,6 +210,8 @@ class SerializerGenerator(
             DOUBLE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readDouble.name
             BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readByte.name
             SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readShort.name
+            EntityId::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readEntityId.name
+//            ClassName("com.mgtriffid.games.cotta.core.entities.id", "EntityId") -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readEntityId.name
             else -> "TODO()//"
         }
         return "val ${field.name} = $function(bytes, $offsetVariable)"
@@ -220,5 +233,6 @@ private fun ProcessableComponentFieldSpec.getByteLength() = when (type) {
     DOUBLE -> 8
     BYTE -> 1
     SHORT -> 2
+    EntityId::class.asTypeName() -> 8
     else -> 4 // TODO
 }

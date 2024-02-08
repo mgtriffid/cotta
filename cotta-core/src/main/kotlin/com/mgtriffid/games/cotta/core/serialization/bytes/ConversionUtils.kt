@@ -1,5 +1,11 @@
 package com.mgtriffid.games.cotta.core.serialization.bytes
 
+import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
+import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
+
 object ConversionUtils {
     fun writeInt(bytes: ByteArray, value: Int, offset: Int) {
         bytes[offset] = (value ushr 24).toByte()
@@ -68,5 +74,31 @@ object ConversionUtils {
 
     fun readShort(byteArray: ByteArray, offset: Int): Short {
         return ((byteArray[offset].toInt() and 0xFF shl 8) or (byteArray[offset + 1].toInt() and 0xFF)).toShort()
+    }
+
+    fun writeEntityId(bytes: ByteArray, entityId: EntityId, offset: Int) {
+        when (entityId) {
+            is AuthoritativeEntityId -> {
+                writeInt(bytes, -1, offset)
+                writeInt(bytes, entityId.id, offset + 4)
+            }
+            is PredictedEntityId -> {
+                writeInt(bytes, entityId.playerId.id, offset)
+                writeInt(bytes, entityId.id, offset + 4)
+            }
+            is StaticEntityId -> {
+                writeInt(bytes, -2, offset)
+                writeInt(bytes, entityId.id, offset + 4)
+            }
+        }
+    }
+
+    fun readEntityId(byteArray: ByteArray, offset: Int): EntityId {
+        val type = readInt(byteArray, offset)
+        return when (type) {
+            -1 -> AuthoritativeEntityId(readInt(byteArray, offset + 4))
+            -2 -> StaticEntityId(readInt(byteArray, offset + 4))
+            else -> PredictedEntityId(PlayerId(readInt(byteArray, offset)), readInt(byteArray, offset + 4))
+        }
     }
 }

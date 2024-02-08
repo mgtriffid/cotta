@@ -16,6 +16,7 @@ class CottaAnnotationProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val game = getGame(resolver) ?: return emptyList()
         ComponentProcessor(resolver, codeGenerator).process(game)
+        EffectProcessor(resolver, codeGenerator, logger).process(game)
         return emptyList()
     }
 
@@ -25,7 +26,7 @@ class CottaAnnotationProcessor(
             .toList()
         if (games.size > 1) {
             logger.error("Found more than one game class annotated with @${Game::class.simpleName}")
-            throw IllegalStateException("There should be exactly one class annotated with @Game")
+            throw IllegalStateException("There should be exactly one class annotated with @${Game::class.simpleName}")
         }
         return games.firstOrNull()
     }

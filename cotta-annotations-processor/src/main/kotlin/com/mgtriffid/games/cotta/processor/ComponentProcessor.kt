@@ -21,6 +21,8 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import kotlin.reflect.KClass
 
+const val IMPL_SUFFIX = "Impl"
+
 class ComponentProcessor(
     private val resolver: Resolver,
     private val codeGenerator: CodeGenerator
@@ -39,15 +41,15 @@ class ComponentProcessor(
             .flatMap { it.declarations }
             .filterIsInstance<KSClassDeclaration>()
             .filter {
-                it.superTypes.any {
-                    it.resolve().declaration.qualifiedName?.asString() in
+                it.superTypes.any { superType ->
+                    superType.resolve().declaration.qualifiedName?.asString() in
                         listOf(
                             Component::class.qualifiedName,
                             MutableComponent::class.qualifiedName
                         )
                 }
             }
-            .filter { it.superTypes.none { it.resolve().declaration.qualifiedName?.asString() == InputComponent::class.qualifiedName } }
+            .filter { it.superTypes.none { superType -> superType.resolve().declaration.qualifiedName?.asString() == InputComponent::class.qualifiedName } }
             .filter { it.packageName.asString().startsWith(game.packageName.asString()) }.toList()
     }
 
@@ -55,7 +57,7 @@ class ComponentProcessor(
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
         val properties: List<ProcessableComponentFieldSpec> = getProcessableComponentFieldSpecs(component)
-        val fileSpecBuilder = FileSpec.builder(pkg, "${componentName}Impl")
+        val fileSpecBuilder = FileSpec.builder(pkg, "${componentName}$IMPL_SUFFIX")
         if (properties.isNotEmpty()) {
             buildDataClassImplementation(fileSpecBuilder, componentName, component, properties)
         } else {
@@ -107,7 +109,7 @@ class ComponentProcessor(
         componentName: String,
         component: KSClassDeclaration,
         properties: List<ProcessableComponentFieldSpec>
-    ) = TypeSpec.classBuilder("${componentName}Impl")
+    ) = TypeSpec.classBuilder("${componentName}${IMPL_SUFFIX}")
         .addSuperinterface(component.asStarProjectedType().toTypeName())
         .addModifiers(KModifier.DATA, KModifier.INTERNAL)
         .primaryConstructor(
@@ -131,7 +133,7 @@ class ComponentProcessor(
         properties: List<ProcessableComponentFieldSpec>,
         component: KSClassDeclaration
     ) = FunSpec.builder("copy").addStatement(
-        if (properties.filter { p -> p.isMutable }.isEmpty())
+        if (properties.none { p -> p.isMutable })
             "return this"
         else
             "return this.copy(${
@@ -164,7 +166,7 @@ class ComponentProcessor(
                 ParameterSpec.builder(spec.name, spec.type).build()
             }
         )
-        .addStatement("return ${componentName}Impl(${properties.joinToString(", ") { it.name }})")
+        .addStatement("return ${componentName}$IMPL_SUFFIX(${properties.joinToString(", ") { it.name }})")
         .build()
 
     private fun writeComponentsClassRegistry(

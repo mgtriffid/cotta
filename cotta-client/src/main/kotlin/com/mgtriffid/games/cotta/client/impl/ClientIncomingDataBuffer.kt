@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.CreatedEntitiesWithTracesRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.CreatedEntitiesWithTracesRecipe
 import mu.KotlinLogging
 import java.util.*
 import kotlin.math.min

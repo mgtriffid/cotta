@@ -15,9 +15,9 @@ import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport

@@ -9,10 +9,10 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.registry.*
 import com.mgtriffid.games.cotta.core.serialization.*
-import com.mgtriffid.games.cotta.core.serialization.impl.*
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.*
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
 import kotlin.reflect.KClass
 
 class SerializationModule : Module {

@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.network.ConnectionId
 import mu.KotlinLogging
 

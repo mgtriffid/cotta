@@ -1,7 +1,7 @@
 package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.MapsTraceRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsTraceRecipe
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 
 interface StateSnapper<SR: StateRecipe, DR: DeltaRecipe> {

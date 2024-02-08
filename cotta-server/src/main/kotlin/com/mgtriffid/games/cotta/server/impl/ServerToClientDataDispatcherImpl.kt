@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.*
-import com.mgtriffid.games.cotta.core.serialization.impl.recipe.CreatedEntitiesWithTracesRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto

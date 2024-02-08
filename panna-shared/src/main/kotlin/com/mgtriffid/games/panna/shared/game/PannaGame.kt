@@ -1,4 +1,4 @@
-package com.mgtriffid.games.panna.shared.lobby
+package com.mgtriffid.games.panna.shared.game
 
 import com.google.gson.Gson
 import com.mgtriffid.games.cotta.Game
@@ -12,9 +12,6 @@ import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.input.*
-import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
-import com.mgtriffid.games.panna.shared.game.components.physics.GravityComponent
-import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.createColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.createVelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.CollisionEffect

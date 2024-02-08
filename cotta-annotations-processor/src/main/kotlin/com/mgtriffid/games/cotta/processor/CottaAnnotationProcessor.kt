@@ -1,13 +1,15 @@
 package com.mgtriffid.games.cotta.processor
 
-import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.mgtriffid.games.cotta.Game
+import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import com.mgtriffid.games.cotta.processor.serialization.SerializerGenerator
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
@@ -27,9 +29,9 @@ class CottaAnnotationProcessor(
     private val logger: KSPLogger,
     private val codeGenerator: CodeGenerator
 ) : SymbolProcessor {
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        logger.info("Processing Cotta components...")
-        val components = getComponentInterfaces(resolver).toList()
+        val components = getComponentInterfaces(resolver)
         components.forEach {
             writeComponentImplementation(it)
         }
@@ -39,10 +41,23 @@ class CottaAnnotationProcessor(
         return emptyList()
     }
 
-    private fun getComponentInterfaces(resolver: Resolver): Sequence<KSClassDeclaration> {
-        return resolver.getSymbolsWithAnnotation(com.mgtriffid.games.cotta.Component::class.qualifiedName!!)
+    private fun getComponentInterfaces(resolver: Resolver): List<KSClassDeclaration> {
+        val games = resolver.getSymbolsWithAnnotation(Game::class.qualifiedName!!)
             .filterIsInstance<KSClassDeclaration>()
-            .filter { it.superTypes.none { it.resolve().declaration.qualifiedName?.asString() == InputComponent::class.qualifiedName } }
+            .toList()
+        return games.flatMap { game ->
+            resolver.getAllFiles()
+                .flatMap { it.declarations }
+                .filterIsInstance<KSClassDeclaration>()
+                .filter { it.superTypes.any { it.resolve().declaration.qualifiedName?.asString() in
+                    listOf(
+                        Component::class.qualifiedName,
+                        MutableComponent::class.qualifiedName
+                    )
+                } }
+                .filter { it.superTypes.none { it.resolve().declaration.qualifiedName?.asString() == InputComponent::class.qualifiedName } }
+                .filter { it.packageName.asString().startsWith(game.packageName.asString()) }
+        }
     }
 
     private fun getGame(resolver: Resolver): KSClassDeclaration? {

@@ -12,7 +12,7 @@ import com.mgtriffid.games.panna.screens.game.graphics.GraphicsV2
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.input.CharacterInputComponent
-import com.mgtriffid.games.panna.shared.lobby.PannaGame
+import com.mgtriffid.games.panna.shared.game.PannaGame
 import mu.KotlinLogging
 
 const val SCALE = 3

@@ -6,6 +6,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.mgtriffid.games.cotta.core.serialization.bytes.ConversionUtils
 import com.mgtriffid.games.cotta.processor.ProcessableComponentFieldSpec
 import com.mgtriffid.games.cotta.processor.getProcessableComponentFieldSpecs
+import com.mgtriffid.games.cotta.utils.divideRoundUp
 import com.squareup.kotlinpoet.BYTE
 import com.squareup.kotlinpoet.DOUBLE
 import com.squareup.kotlinpoet.FLOAT
@@ -15,9 +16,12 @@ import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.LONG
 import com.squareup.kotlinpoet.SHORT
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.UNIT
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
+
+private const val DELTA_MASK_VARIABLE = "deltaMask"
 
 class SerializerGenerator(
     private val resolver: Resolver,
@@ -31,6 +35,8 @@ class SerializerGenerator(
 
     private fun generate(component: KSClassDeclaration) {
         FileSpec.builder(getPackageName(component), getClassName(component))
+            .addImport("kotlin.experimental", "or")
+            .addImport("kotlin.experimental", "and")
             .addType(serializer(component))
             .build()
             .writeTo(codeGenerator, false)
@@ -44,6 +50,8 @@ class SerializerGenerator(
             .addFunction(
                 deserializeFunction(component)
             )
+            .addFunction(serializeDeltaFunction(component))
+            .addFunction(deserializeDeltaFunction(component))
             .build()
 
     private fun deserializeFunction(component: KSClassDeclaration) = FunSpec.builder("deserialize")
@@ -75,6 +83,75 @@ class SerializerGenerator(
         .addStatement("return bytes")
         .build()
 
+    private fun serializeDeltaFunction(component: KSClassDeclaration): FunSpec {
+        val mutableComponents = getMutableComponents(component)
+        val deltaMaskSize = divideRoundUp(mutableComponents.size, 8)
+        return FunSpec.builder("serializeDelta")
+            .addParameter("component", component.asStarProjectedType().toTypeName())
+            .addParameter("previous", component.asStarProjectedType().toTypeName())
+            .returns(ByteArray::class)
+            .addStatement(declareBytes(DELTA_MASK_VARIABLE, deltaMaskSize))
+            .addStatement("var dataSizeCounter = 0")
+            .apply {
+                mutableComponents.forEachIndexed { i, spec ->
+                    addCompareAndRecordDifferenceStatements(i, spec)
+                }
+            }
+            .addStatement(declareBytes("$deltaMaskSize + dataSizeCounter"))
+            .addStatement("System.arraycopy($DELTA_MASK_VARIABLE, 0, bytes, 0, $deltaMaskSize)")
+            .addStatement("var offset = $deltaMaskSize")
+            .apply {
+                mutableComponents.forEach { spec ->
+                    beginControlFlow("if (component.${spec.name} != previous.${spec.name})")
+                    addStatement(serializeField(spec, "offset"))
+                    addStatement("offset += ${spec.getByteLength()}")
+                    endControlFlow()
+                }
+            }
+            .addStatement("return bytes")
+            .build()
+    }
+
+    private fun deserializeDeltaFunction(component: KSClassDeclaration): FunSpec {
+        val mutableComponents = getMutableComponents(component)
+        val deltaMaskSize = divideRoundUp(mutableComponents.size, 8)
+        return FunSpec.builder("deserializeDelta")
+            .addParameter("bytes", ByteArray::class)
+            .addParameter("component", component.asStarProjectedType().toTypeName())
+            .returns(UNIT)
+            .addStatement(declareBytes(DELTA_MASK_VARIABLE, deltaMaskSize))
+            .addStatement("System.arraycopy(bytes, 0, $DELTA_MASK_VARIABLE, 0, $deltaMaskSize)")
+            .addStatement("var offset = $deltaMaskSize")
+            .apply {
+                mutableComponents.forEachIndexed { i, spec ->
+                    beginControlFlow("if ($DELTA_MASK_VARIABLE[$i / 8] and (1 shl ($i %% 8)).toByte() != 0.toByte())")
+                    addStatement(deserializeField(spec, "offset"))
+                    addStatement("component.${spec.name} = ${spec.name}")
+                    addStatement("offset += ${spec.getByteLength()}")
+                    endControlFlow()
+                }
+            }
+            .build()
+    }
+
+    private fun FunSpec.Builder.addCompareAndRecordDifferenceStatements(i: Int, spec: ProcessableComponentFieldSpec) {
+        beginControlFlow("if (component.${spec.name} != previous.${spec.name})")
+        addStatement("$DELTA_MASK_VARIABLE[$i / 8] = deltaMask[$i / 8] or (1 shl ($i %% 8)).toByte()")
+        addStatement("dataSizeCounter += ${spec.getByteLength()}")
+        endControlFlow()
+    }
+
+    private fun declareBytes(component: KSClassDeclaration) = declareBytes(getFullLength(component))
+
+    private fun declareBytes(size: Int) = declareBytes("bytes", size)
+
+    private fun declareBytes(varName: String, size: Int) = "val $varName = ByteArray($size)"
+
+    private fun declareBytes(size: String) = "val bytes = ByteArray($size)"
+
+    private fun getMutableComponents(component: KSClassDeclaration) = getProcessableComponentFieldSpecs(component)
+        .filter { it.isMutable }
+
     private fun serializeField(field: ProcessableComponentFieldSpec, offset: Int): String {
         val function = when (field.type) {
             INT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeInt.name
@@ -86,6 +163,19 @@ class SerializerGenerator(
             else -> "TODO()//"
         }
         return "$function(bytes, component.${field.name}, $offset)"
+    }
+
+    private fun serializeField(field: ProcessableComponentFieldSpec, offsetVariable: String): String {
+        val function = when (field.type) {
+            INT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeInt.name
+            LONG -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeLong.name
+            FLOAT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeFloat.name
+            DOUBLE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeDouble.name
+            BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeByte.name
+            SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeShort.name
+            else -> "TODO()//"
+        }
+        return "$function(bytes, component.${field.name}, $offsetVariable)"
     }
 
     private fun deserializeField(field: ProcessableComponentFieldSpec, offset: Int): String {
@@ -101,18 +191,34 @@ class SerializerGenerator(
         return "val ${field.name} = $function(bytes, $offset)"
     }
 
+    private fun deserializeField(field: ProcessableComponentFieldSpec, offsetVariable: String): String {
+        val function = when (field.type) {
+            INT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readInt.name
+            LONG -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readLong.name
+            FLOAT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readFloat.name
+            DOUBLE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readDouble.name
+            BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readByte.name
+            SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readShort.name
+            else -> "TODO()//"
+        }
+        return "val ${field.name} = $function(bytes, $offsetVariable)"
+    }
+
     private fun getPackageName(component: KSClassDeclaration) = component.packageName.asString()
 
     private fun getClassName(component: KSClassDeclaration) =
         "${component.simpleName.asString()}Serializer"
-
-    private fun declareBytes(component: KSClassDeclaration) = "val bytes = ByteArray(${getFullLength(component)})"
 
     private fun getFullLength(component: KSClassDeclaration) =
         getProcessableComponentFieldSpecs(component).sumOf { it.getByteLength() }
 }
 
 private fun ProcessableComponentFieldSpec.getByteLength() = when (type) {
-    Int::class.asTypeName() -> 4
+    INT -> 4
+    LONG -> 8
+    FLOAT -> 4
+    DOUBLE -> 8
+    BYTE -> 1
+    SHORT -> 2
     else -> 4 // TODO
 }

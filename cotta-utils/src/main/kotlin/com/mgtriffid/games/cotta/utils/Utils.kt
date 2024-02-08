@@ -13,3 +13,5 @@ fun <T> ConcurrentLinkedQueue<T>.drain(): Collection<T> {
 }
 
 fun now() = System.currentTimeMillis()
+
+fun divideRoundUp(dividend: Int, divisor: Int) = (dividend + divisor - 1) / divisor

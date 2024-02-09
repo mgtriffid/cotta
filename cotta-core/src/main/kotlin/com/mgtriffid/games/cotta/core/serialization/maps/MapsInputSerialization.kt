@@ -7,8 +7,8 @@ import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
-import com.mgtriffid.games.cotta.core.serialization.maps.dto.EntityIdDto
-import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapInputComponentRecipeDto
+import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
+import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapsInputComponentRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapsEntityInputRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapsInputRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputComponentRecipe
@@ -18,7 +18,7 @@ import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 class MapsInputSerialization: InputSerialization<MapsInputRecipe> {
     private val kryo = Kryo()
     init {
-        kryo.register(MapInputComponentRecipeDto::class.java)
+        kryo.register(MapsInputComponentRecipeDto::class.java)
         kryo.register(MapsEntityInputRecipeDto::class.java)
         kryo.register(EntityIdDto::class.java)
         kryo.register(EntityIdDto.Kind::class.java)
@@ -52,8 +52,8 @@ private fun MapsEntityInputRecipe.toDto(): MapsEntityInputRecipeDto {
     return ret
 }
 
-private fun MapsInputComponentRecipe.toDto(): MapInputComponentRecipeDto {
-    val ret = MapInputComponentRecipeDto()
+private fun MapsInputComponentRecipe.toDto(): MapsInputComponentRecipeDto {
+    val ret = MapsInputComponentRecipeDto()
     ret.key = componentKey.name
     ret.data = HashMap(data)
     return ret
@@ -67,7 +67,7 @@ private fun MapsEntityInputRecipeDto.toRecipe(): MapsEntityInputRecipe {
     return MapsEntityInputRecipe(entityId.toEntityId(), components.map { it.toRecipe() })
 }
 
-private fun MapInputComponentRecipeDto.toRecipe(): MapsInputComponentRecipe {
+private fun MapsInputComponentRecipeDto.toRecipe(): MapsInputComponentRecipe {
     return MapsInputComponentRecipe(StringComponentKey(key), HashMap(data))
 }
 // </editor-fold>

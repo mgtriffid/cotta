@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.core.serialization.maps.dto;
+package com.mgtriffid.games.cotta.core.serialization.dto;
 
 import java.util.Map;
 

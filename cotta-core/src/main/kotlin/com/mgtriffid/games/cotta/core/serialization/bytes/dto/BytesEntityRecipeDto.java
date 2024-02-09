@@ -1,13 +1,13 @@
-package com.mgtriffid.games.cotta.core.serialization.maps.dto;
+package com.mgtriffid.games.cotta.core.serialization.bytes.dto;
 
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto;
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityOwnedByDto;
 
 import java.util.ArrayList;
 
-public class MapsEntityRecipeDto {
+public class BytesEntityRecipeDto {
     public EntityIdDto entityId;
     public EntityOwnedByDto ownedBy;
-    public ArrayList<MapsComponentRecipeDto> components;
-    public ArrayList<String> inputComponents;
+    public ArrayList<BytesComponentRecipeDto> components;
+    public ArrayList<Short> inputComponents; // TODO array?
 }

@@ -7,7 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.*
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
-import com.mgtriffid.games.cotta.core.serialization.maps.dto.EntityIdDto
+import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.*
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement

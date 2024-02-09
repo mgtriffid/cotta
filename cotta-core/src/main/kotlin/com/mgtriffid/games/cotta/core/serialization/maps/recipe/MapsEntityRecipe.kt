@@ -8,6 +8,6 @@ import com.mgtriffid.games.cotta.core.serialization.EntityRecipe
 class MapsEntityRecipe(
     override val entityId: EntityId,
     override val ownedBy: Entity.OwnedBy,
-    override val components: List<MapComponentRecipe>,
+    override val components: List<MapsComponentRecipe>,
     override val inputComponents: List<StringComponentKey>
 ) : EntityRecipe

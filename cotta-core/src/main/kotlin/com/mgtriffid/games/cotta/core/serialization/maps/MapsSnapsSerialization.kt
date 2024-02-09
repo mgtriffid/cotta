@@ -108,7 +108,7 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         return output.toBytes()
     }
 
-    override fun serializeEntityCreationTracesV2(createdEntities: CreatedEntitiesWithTracesRecipe): ByteArray {
+    override fun serializeEntityCreationTracesV2(createdEntities: MapsCreatedEntitiesWithTracesRecipe): ByteArray {
         val dto = CreatedEntitiesWithTracesRecipeDto()
         val tracesDtos =  ArrayList<CreateEntityTraceDto>()
         createdEntities.traces.forEach { (trace, entityId) ->
@@ -151,7 +151,7 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         }
     }
 
-    override fun deserializeEntityCreationTracesV2(bytes: ByteArray): CreatedEntitiesWithTracesRecipe {
+    override fun deserializeEntityCreationTracesV2(bytes: ByteArray): MapsCreatedEntitiesWithTracesRecipe {
         val dto = kryo.readObject(Input(bytes), CreatedEntitiesWithTracesRecipeDto::class.java)
         val traces = dto.traces.map {
             val trace: CottaTraceDto = it.trace
@@ -176,7 +176,7 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         dto.predictedEntitiesIds.forEach { (authoritativeEntityIdDto, predictedEntityIdDto) ->
             mappedPredictedIds[authoritativeEntityIdDto.toEntityId() as AuthoritativeEntityId] = predictedEntityIdDto.toEntityId() as PredictedEntityId
         }
-        return CreatedEntitiesWithTracesRecipe(traces, mappedPredictedIds)
+        return MapsCreatedEntitiesWithTracesRecipe(traces, mappedPredictedIds)
     }
 
     override fun serializePlayersSawTicks(playersSawTicks: Map<PlayerId, Long>): ByteArray {
@@ -200,14 +200,14 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
 }
 
 // <editor-fold desc="Converters">
-fun MapComponentDeltaRecipe.toDto(): MapComponentDeltaRecipeDto {
+fun MapsComponentDeltaRecipe.toDto(): MapComponentDeltaRecipeDto {
     val ret = MapComponentDeltaRecipeDto()
     ret.key = componentKey.name
     ret.data = HashMap(this.data)
     return ret
 }
 
-fun MapComponentRecipe.toDto(): MapComponentRecipeDto {
+fun MapsComponentRecipe.toDto(): MapComponentRecipeDto {
     val ret = MapComponentRecipeDto()
     ret.key = componentKey.name
     ret.data = HashMap(this.data)
@@ -217,9 +217,9 @@ fun MapComponentRecipe.toDto(): MapComponentRecipeDto {
 fun MapsChangedEntityRecipe.toDto(): MapsChangedEntityRecipeDto {
     val ret = MapsChangedEntityRecipeDto()
     ret.entityId = entityId.toDto()
-    ret.addedComponents = ArrayList(this.addedComponents.map(MapComponentRecipe::toDto))
+    ret.addedComponents = ArrayList(this.addedComponents.map(MapsComponentRecipe::toDto))
     ret.removedComponents = ArrayList(removedComponents.map { it.name })
-    ret.changedComponents = ArrayList(this.changedComponents.map(MapComponentDeltaRecipe::toDto))
+    ret.changedComponents = ArrayList(this.changedComponents.map(MapsComponentDeltaRecipe::toDto))
     return ret
 }
 
@@ -246,12 +246,12 @@ fun MapsStateRecipe.toDto(): MapsStateRecipeDto {
     return ret
 }
 
-fun MapComponentDeltaRecipeDto.toRecipe() = MapComponentDeltaRecipe(
+fun MapComponentDeltaRecipeDto.toRecipe() = MapsComponentDeltaRecipe(
     componentKey = StringComponentKey(key),
     data = data
 )
 
-fun MapComponentRecipeDto.toRecipe() = MapComponentRecipe(
+fun MapComponentRecipeDto.toRecipe() = MapsComponentRecipe(
     componentKey = StringComponentKey(key),
     data = data
 )
@@ -354,15 +354,15 @@ private fun MapsTraceElementRecipe.toDto(): CottaTraceElementDto {
     return ret
 }
 
-private fun MapEffectRecipe.toDto(): MapEffectRecipeDto {
+private fun MapsEffectRecipe.toDto(): MapEffectRecipeDto {
     val ret = MapEffectRecipeDto()
     ret.key = effectKey.name
     ret.data = HashMap(data)
     return ret
 }
 
-private fun MapEffectRecipeDto.toRecipe(): MapEffectRecipe {
-    return MapEffectRecipe(
+private fun MapEffectRecipeDto.toRecipe(): MapsEffectRecipe {
+    return MapsEffectRecipe(
         effectKey = StringEffectKey(key),
         data = data
     )

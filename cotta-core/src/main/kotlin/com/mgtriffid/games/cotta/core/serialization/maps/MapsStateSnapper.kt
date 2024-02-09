@@ -127,8 +127,8 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     ) {
         private val valueParameters: Collection<KParameter> = valueParametersToNames.keys
 
-        fun packComponent(obj: C): MapComponentRecipe {
-            return MapComponentRecipe(componentKey = key, data = fieldsByName.mapValues { (_, field) ->
+        fun packComponent(obj: C): MapsComponentRecipe {
+            return MapsComponentRecipe(componentKey = key, data = fieldsByName.mapValues { (_, field) ->
                 try {
                     serializeProperty(field.get(obj), field) ?: throw IllegalStateException("Nullable fields are not allowed")
                 } catch (e: Exception) {
@@ -138,7 +138,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
             })
         }
 
-        fun unpackComponent(recipe: MapComponentRecipe): C {
+        fun unpackComponent(recipe: MapsComponentRecipe): C {
             val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
                 val propertyName = valueParametersToNames[p]
                 deserializeProperty(
@@ -157,8 +157,8 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         private val key: StringComponentKey,
         private val fieldsByName: Map<String, KMutableProperty1<C, *>>
     ) {
-        fun packDelta(prev: C, curr: C): MapComponentDeltaRecipe {
-            return MapComponentDeltaRecipe(
+        fun packDelta(prev: C, curr: C): MapsComponentDeltaRecipe {
+            return MapsComponentDeltaRecipe(
                 componentKey = key, data = fieldsByName.mapNotNull { (name, field) ->
                     val v0 = field.get(prev)
                     val v1 = field.get(curr)!!
@@ -171,7 +171,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
             )
         }
 
-        fun apply(delta: MapComponentDeltaRecipe, target: Any) {
+        fun apply(delta: MapsComponentDeltaRecipe, target: Any) {
             delta.data.forEach { (name, value) ->
                 (fieldsByName[name]!! as KMutableProperty1<Any, Any?>).set(target, value)
             }
@@ -186,8 +186,8 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     ) {
         private val valueParameters: Collection<KParameter> = valueParametersToNames.keys
 
-        fun packEffect(obj: E): MapEffectRecipe {
-            return MapEffectRecipe(effectKey = key, data = fieldsByName.mapValues { (_, field) ->
+        fun packEffect(obj: E): MapsEffectRecipe {
+            return MapsEffectRecipe(effectKey = key, data = fieldsByName.mapValues { (_, field) ->
                 try {
                     serializeProperty(field.get(obj), field) ?: throw IllegalStateException("Nullable fields are not allowed")
                 } catch (e: Exception) {
@@ -197,7 +197,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
             })
         }
 
-        fun unpackEffect(recipe: MapEffectRecipe): CottaEffect {
+        fun unpackEffect(recipe: MapsEffectRecipe): CottaEffect {
             val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
                 val propertyName = valueParametersToNames[p]
                 deserializeProperty(
@@ -277,16 +277,16 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         )
 
     // TODO shit wtf is this mess with unsafe casts
-    private fun <C : Component<C>> packComponent(obj: Any): MapComponentRecipe {
+    private fun <C : Component<C>> packComponent(obj: Any): MapsComponentRecipe {
         obj as C
         return (snappers[getKey(obj)] as ComponentSnapper<C>).packComponent(obj)
     }
 
-    fun <C : CottaEffect> packEffect(obj: Any): MapEffectRecipe {
+    fun <C : CottaEffect> packEffect(obj: Any): MapsEffectRecipe {
         obj as C
         return (effectSnappers[getKey(obj)] as EffectSnapper<C>).packEffect(obj)
     }
-    fun unpackEffectRecipe(recipe: MapEffectRecipe): CottaEffect {
+    fun unpackEffectRecipe(recipe: MapsEffectRecipe): CottaEffect {
         return effectSnappers[recipe.effectKey]?.unpackEffect(recipe)
             ?: throw java.lang.IllegalArgumentException("Effect Snapper not found for effect ${recipe.effectKey}")
     }
@@ -305,13 +305,13 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         recipe.inputComponents.forEach { inputComponent -> entity.addInputComponent(inputComponentsClassByKey[inputComponent] as KClass<out InputComponent<*>>) }
     }
 
-    private fun unpackComponentRecipe(recipe: MapComponentRecipe): Component<*> {
+    private fun unpackComponentRecipe(recipe: MapsComponentRecipe): Component<*> {
         return snappers[recipe.componentKey]?.unpackComponent(recipe)
             // mb not the best idea, malformed data should not break client
             ?: throw IllegalArgumentException("Component Snapper not found for component ${recipe.componentKey}")
     }
 
-    private fun unpackComponentDeltaRecipe(component: Any, recipe: MapComponentDeltaRecipe) {
+    private fun unpackComponentDeltaRecipe(component: Any, recipe: MapsComponentDeltaRecipe) {
         (deltaSnappers[recipe.componentKey] ?: throw IllegalArgumentException("Delta Snapper not found")).apply(
             recipe,
             component
@@ -380,7 +380,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         )
     }
 
-    private fun <C: Component<C>> packComponentDelta(c0: Component<*>, c1: Component<*>): MapComponentDeltaRecipe {
+    private fun <C: Component<C>> packComponentDelta(c0: Component<*>, c1: Component<*>): MapsComponentDeltaRecipe {
         val prev = c0 as C // I apologize
         val curr = c1 as C
         logger.debug { "Packing component delta: prev = $prev, curr = $curr" }

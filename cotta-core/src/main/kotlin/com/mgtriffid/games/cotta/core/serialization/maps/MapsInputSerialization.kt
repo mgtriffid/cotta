@@ -11,7 +11,7 @@ import com.mgtriffid.games.cotta.core.serialization.maps.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapInputComponentRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapsEntityInputRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapsInputRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapInputComponentRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputComponentRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsEntityInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 
@@ -52,7 +52,7 @@ private fun MapsEntityInputRecipe.toDto(): MapsEntityInputRecipeDto {
     return ret
 }
 
-private fun MapInputComponentRecipe.toDto(): MapInputComponentRecipeDto {
+private fun MapsInputComponentRecipe.toDto(): MapInputComponentRecipeDto {
     val ret = MapInputComponentRecipeDto()
     ret.key = componentKey.name
     ret.data = HashMap(data)
@@ -67,7 +67,7 @@ private fun MapsEntityInputRecipeDto.toRecipe(): MapsEntityInputRecipe {
     return MapsEntityInputRecipe(entityId.toEntityId(), components.map { it.toRecipe() })
 }
 
-private fun MapInputComponentRecipeDto.toRecipe(): MapInputComponentRecipe {
-    return MapInputComponentRecipe(StringComponentKey(key), HashMap(data))
+private fun MapInputComponentRecipeDto.toRecipe(): MapsInputComponentRecipe {
+    return MapsInputComponentRecipe(StringComponentKey(key), HashMap(data))
 }
 // </editor-fold>

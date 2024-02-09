@@ -7,7 +7,7 @@ import com.mgtriffid.games.cotta.core.registry.ComponentKey
 import com.mgtriffid.games.cotta.core.registry.ComponentSpec
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapInputComponentRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputComponentRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsEntityInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import mu.KotlinLogging
@@ -86,7 +86,7 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
         )
     }
 
-    private fun <C: InputComponent<C>> packComponent(obj: InputComponent<*>): MapInputComponentRecipe {
+    private fun <C: InputComponent<C>> packComponent(obj: InputComponent<*>): MapsInputComponentRecipe {
         obj as C
         return (snappers[getKey(obj)] as InputComponentSnapper<C>).packComponent(obj).also {
             if (it.componentKey == StringComponentKey("JoinBattleMetaEntityInputComponent")) {
@@ -114,8 +114,8 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
     ) {
         private val valueParameters: Collection<KParameter> = valueParametersToNames.keys
 
-        fun packComponent(obj: C): MapInputComponentRecipe {
-            return MapInputComponentRecipe(componentKey = key, data = fieldsByName.mapValues { (_, field) ->
+        fun packComponent(obj: C): MapsInputComponentRecipe {
+            return MapsInputComponentRecipe(componentKey = key, data = fieldsByName.mapValues { (_, field) ->
                 try {
                     field.get(obj) ?: throw IllegalStateException("Nullable fields are not allowed")
                 } catch (e: Exception) {
@@ -125,7 +125,7 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
             })
         }
 
-        fun unpackComponent(recipe: MapInputComponentRecipe): C {
+        fun unpackComponent(recipe: MapsInputComponentRecipe): C {
             val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
             val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
                 recipe.data[valueParametersToNames[p]]

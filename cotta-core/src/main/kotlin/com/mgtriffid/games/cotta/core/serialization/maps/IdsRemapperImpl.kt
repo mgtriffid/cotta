@@ -165,7 +165,6 @@ class IdsRemapperImpl : IdsRemapper {
         }
     }
 
-
     private interface ComponentRemapper {
         fun remap(c: Component<*>, ids: (PredictedEntityId) -> AuthoritativeEntityId?): Component<*>
     }

@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.CreatedEntitiesWithTracesRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
 import mu.KotlinLogging
 import java.util.*
 import kotlin.math.min
@@ -17,7 +17,7 @@ class ClientIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
     val inputs = TreeMap<Long, Map<EntityId, Collection<InputComponent<*>>>>() // GROOM class with naming
-    val createdEntities = TreeMap<Long, CreatedEntitiesWithTracesRecipe>() // GROOM class with naming
+    val createdEntities = TreeMap<Long, MapsCreatedEntitiesWithTracesRecipe>() // GROOM class with naming
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
 
     fun storeDelta(tick: Long, delta: DR) {
@@ -40,7 +40,7 @@ class ClientIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
         cleanUpOldInputs(tick)
     }
 
-    fun storeCreatedEntities(tick: Long, createdEntities: CreatedEntitiesWithTracesRecipe) {
+    fun storeCreatedEntities(tick: Long, createdEntities: MapsCreatedEntitiesWithTracesRecipe) {
         this.createdEntities[tick] = createdEntities
         cleanUpOldCreatedEntities(tick)
     }

@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.*
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.CreatedEntitiesWithTracesRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
@@ -60,7 +60,7 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
 
                 val createdEntitiesWithTracesDto = ServerToClientDto()
                 createdEntitiesWithTracesDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CREATED_ENTITIES_V2
-                createdEntitiesWithTracesDto.payload = snapsSerialization.serializeEntityCreationTracesV2(CreatedEntitiesWithTracesRecipe(
+                createdEntitiesWithTracesDto.payload = snapsSerialization.serializeEntityCreationTracesV2(MapsCreatedEntitiesWithTracesRecipe(
                     data.createdEntities(tick).map { (trace, id) ->
                         Pair(stateSnapper.snapTrace(trace), id)
                     },

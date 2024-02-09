@@ -22,24 +22,8 @@ interface CharacterInputComponent : InputComponent<CharacterInputComponent> {
             jump = false,
             switchWeapon = 0
         )
-
-        fun create(
-            direction: Byte,
-            jump: Boolean,
-            lookAt: Float,
-            switchWeapon: Byte
-        ): CharacterInputComponent {
-            return CharacterInputComponentImpl(direction, jump, lookAt, switchWeapon)
-        }
     }
 }
-
-private data class CharacterInputComponentImpl(
-    override val direction: Byte,
-    override val jump: Boolean,
-    override val lookAt: Float,
-    override val switchWeapon: Byte
-) : CharacterInputComponent
 
 const val WALKING_DIRECTION_NONE: Byte = 0x00
 const val WALKING_DIRECTION_LEFT: Byte = 0x01

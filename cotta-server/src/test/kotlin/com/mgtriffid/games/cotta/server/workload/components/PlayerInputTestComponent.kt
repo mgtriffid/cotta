@@ -8,17 +8,7 @@ interface PlayerInputTestComponent : InputComponent<PlayerInputTestComponent> {
             aim = 0,
             shoot = false
         )
-
-        fun create(aim: Int, shoot: Boolean): PlayerInputTestComponent = PlayerInputTestComponentImpl(
-            aim = aim,
-            shoot = shoot
-        )
     }
     val aim: Int
     val shoot: Boolean
 }
-
-private data class PlayerInputTestComponentImpl(
-    override val aim: Int,
-    override val shoot: Boolean
-): PlayerInputTestComponent

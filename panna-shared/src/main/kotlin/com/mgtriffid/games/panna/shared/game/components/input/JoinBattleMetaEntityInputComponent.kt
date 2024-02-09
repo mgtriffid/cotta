@@ -10,17 +10,9 @@ interface JoinBattleMetaEntityInputComponent : InputComponent<JoinBattleMetaEnti
     val join: Boolean
 
     companion object {
-        fun createBlank(): JoinBattleMetaEntityInputComponent = JoinBattleMetaEntityInputComponentImpl()
-
-        fun create(join: Boolean): JoinBattleMetaEntityInputComponent {
-            return JoinBattleMetaEntityInputComponentImpl(join)
-        }
+        fun createBlank(): JoinBattleMetaEntityInputComponent = JoinBattleMetaEntityInputComponentImpl(IDLE)
 
         const val JOIN_BATTLE: Boolean = true
         const val IDLE = false
     }
 }
-
-private data class JoinBattleMetaEntityInputComponentImpl(
-    override val join: Boolean = IDLE
-) : JoinBattleMetaEntityInputComponent

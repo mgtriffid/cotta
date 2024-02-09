@@ -16,6 +16,7 @@ class CottaAnnotationProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val game = getGame(resolver) ?: return emptyList()
         ComponentProcessor(resolver, codeGenerator, logger).process(game)
+        InputComponentProcessor(resolver, codeGenerator, logger).process(game)
         EffectProcessor(resolver, codeGenerator, logger).process(game)
         return emptyList()
     }

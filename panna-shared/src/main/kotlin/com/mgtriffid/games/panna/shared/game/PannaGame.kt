@@ -141,7 +141,7 @@ class PannaGame : CottaGame {
                     goingLeft = false
                 }
                 it.id to listOf(
-                    CharacterInputComponent.create(
+                    createCharacterInputComponent(
                         direction = if (goingLeft) WALKING_DIRECTION_LEFT else WALKING_DIRECTION_RIGHT,
                         jump = false,
                         lookAt = if (goingLeft) 180f else 0f,

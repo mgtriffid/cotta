@@ -40,20 +40,20 @@ class PannaClientGdxInput(
                     logger.debug { "storage.joinPressed=${storage.joinPressed}" }
                     if (storage.joinPressed) {
                         mayJoin = false
-                        JoinBattleMetaEntityInputComponent.create(JOIN_BATTLE) as T
+                        createJoinBattleMetaEntityInputComponent(JOIN_BATTLE) as T
                     } else {
-                        JoinBattleMetaEntityInputComponent.create(IDLE) as T
+                        createJoinBattleMetaEntityInputComponent(IDLE) as T
                     }
                 } else {
                     // TODO allow to assume blank
-                    JoinBattleMetaEntityInputComponent.create(IDLE) as T
+                    createJoinBattleMetaEntityInputComponent(IDLE) as T
                 }.also {
                     logger.trace { "Prepared ${JoinBattleMetaEntityInputComponent::class.simpleName} $it" }
                 }
             }
 
             CharacterInputComponent::class -> {
-                return CharacterInputComponent.create(
+                return createCharacterInputComponent(
                     when {
                         storage.leftPressed -> WALKING_DIRECTION_LEFT
                         storage.rightPressed -> WALKING_DIRECTION_RIGHT
@@ -67,7 +67,7 @@ class PannaClientGdxInput(
 
             ShootInputComponent::class -> {
                 logger.trace { "Providing ${ShootInputComponent::class.simpleName}" }
-                return ShootInputComponent.create(
+                return createShootInputComponent(
                     storage.shootPressed
                 ) as T
             }

@@ -13,3 +13,8 @@ fun getProcessableEffectFieldSpecs(component: KSClassDeclaration) =
     component.getDeclaredProperties().map { prop ->
         ProcessableEffectFieldSpec(prop.simpleName.asString(), prop.type.resolve().toTypeName())
     }.toList()
+
+fun getProcessableInputComponentFieldSpecs(component: KSClassDeclaration) =
+    component.getDeclaredProperties().map { prop ->
+        ProcessableInputComponentFieldSpec(prop.simpleName.asString(), prop.type.resolve().toTypeName())
+    }.toList()

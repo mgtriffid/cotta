@@ -13,13 +13,5 @@ interface ShootInputComponent : InputComponent<ShootInputComponent> {
         fun createBlank(): ShootInputComponent = ShootInputComponentImpl(
             isShooting = false
         )
-
-        fun create(isShooting: Boolean): ShootInputComponent {
-            return ShootInputComponentImpl(isShooting)
-        }
     }
 }
-
-private data class ShootInputComponentImpl(
-    override val isShooting: Boolean
-) : ShootInputComponent

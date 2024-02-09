@@ -16,6 +16,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.*
+import kotlin.reflect.jvm.kotlinFunction
 
 private val logger = KotlinLogging.logger {}
 
@@ -34,19 +35,16 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
     }
 
     private fun <C : InputComponent<C>> registerSnapper(kClass: KClass<C>, spec: ComponentSpec) {
-        val companion = kClass.companionObject
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} does not have a companion object")
-        val companionInstance =
-            kClass.companionObjectInstance ?: throw IllegalArgumentException("Could not find companion instance")
-        val factoryMethod: KCallable<C> = (companion.members.find { it.name == "create" }
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")) as KCallable<C>
+        val factoryMethod: KCallable<C> = kClass.java.classLoader
+            .loadClass("${kClass.qualifiedName}ImplKt")
+            .declaredMethods.find {
+                it.name == "create${kClass.simpleName}"
+            }?.kotlinFunction as? KCallable<C> ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")
         val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<ComponentData>() }
 
         val fieldsByName = fields.associateBy { it.name }
 
         val factoryParameters = factoryMethod.parameters
-        val factoryInstanceParameter = factoryParameters.find { it.kind == KParameter.Kind.INSTANCE }
-            ?: throw IllegalArgumentException("No instance parameter on factory")
         val valueParameters = factoryParameters.filter { it.kind == KParameter.Kind.VALUE }
         val valueParametersToNames = valueParameters.associateWith { it.name }
 
@@ -63,8 +61,6 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
         snappers[spec.key] = InputComponentSnapper(
             key = spec.key as StringComponentKey,
             factoryMethod = factoryMethod,
-            factoryInstanceParameter = factoryInstanceParameter,
-            companionInstance = companionInstance,
             valueParametersToNames = valueParametersToNames,
             fieldsByName = fieldsByName
         )
@@ -107,8 +103,6 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
     private inner class InputComponentSnapper<C : InputComponent<C>>(
         val key: StringComponentKey,
         val factoryMethod: KCallable<C>,
-        val factoryInstanceParameter: KParameter,
-        val companionInstance: Any,
         val valueParametersToNames: Map<KParameter, String?>,
         val fieldsByName: Map<String, KProperty1<C, *>>
     ) {
@@ -126,12 +120,11 @@ class MapsInputSnapper: InputSnapper<MapsInputRecipe> {
         }
 
         fun unpackComponent(recipe: MapsInputComponentRecipe): C {
-            val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
             val otherParams: Map<KParameter, Any?> = valueParameters.associateWith { p: KParameter ->
                 recipe.data[valueParametersToNames[p]]
             }
             return factoryMethod.callBy(
-                firstParam + otherParams
+                otherParams
             ).also { logger.trace { "Unpacked $it" } }
         }
     }

@@ -3,10 +3,6 @@ package com.mgtriffid.games.cotta.server
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Names
-import com.mgtriffid.games.cotta.core.CottaConfig
-import com.mgtriffid.games.cotta.core.CottaGame
-import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
-import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
@@ -15,19 +11,16 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.guice.CottaServerModule
 import com.mgtriffid.games.cotta.server.workload.GameStub
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
-import com.mgtriffid.games.cotta.server.workload.components.LinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
-import com.mgtriffid.games.cotta.server.workload.components.VelocityTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.createHealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.createLinearPositionTestComponent
+import com.mgtriffid.games.cotta.server.workload.components.createPlayerInputTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.createVelocityTestComponent
-import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.effects.createHealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.systems.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.reflect.KClass
 
 class ServerSimulationTest {
     private lateinit var tickProvider: TickProvider
@@ -134,7 +127,7 @@ class ServerSimulationTest {
             })
         }
 
-        val input1 = PlayerInputTestComponent.create(
+        val input1 = createPlayerInputTestComponent(
             aim = 4,
             shoot = true
         )
@@ -149,7 +142,7 @@ class ServerSimulationTest {
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
         })
 
-        val input2 = PlayerInputTestComponent.create(
+        val input2 = createPlayerInputTestComponent(
             aim = 4,
             shoot = true
         )
@@ -182,7 +175,7 @@ class ServerSimulationTest {
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         val damageDealerId = damageDealer.id
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
-        val input = PlayerInputTestComponent.create(aim = 4, shoot = true)
+        val input = createPlayerInputTestComponent(aim = 4, shoot = true)
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         serverSimulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
@@ -208,7 +201,7 @@ class ServerSimulationTest {
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
         })
-        val input2 = PlayerInputTestComponent.create(
+        val input2 = createPlayerInputTestComponent(
             aim = 4,
             shoot = false
         )
@@ -240,7 +233,7 @@ class ServerSimulationTest {
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         val damageDealerId = damageDealer.id
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
-        val input = PlayerInputTestComponent.create(aim = 4, shoot = true)
+        val input = createPlayerInputTestComponent(aim = 4, shoot = true)
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
         serverSimulation.registerSystem(StepOneShotFiredTestEffectConsumerSystem::class)
         serverSimulation.registerSystem(LagCompensatedActualShotFiredTestEffectConsumer::class)
@@ -267,7 +260,7 @@ class ServerSimulationTest {
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
         })
-        val input2 = PlayerInputTestComponent.create(
+        val input2 = createPlayerInputTestComponent(
             aim = 4,
             shoot = false
         )
@@ -339,7 +332,7 @@ class ServerSimulationTest {
         damageDealer.addInputComponent(PlayerInputTestComponent::class)
         val damageDealerId = damageDealer.id
         serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
-        val input1 = PlayerInputTestComponent.create(
+        val input1 = createPlayerInputTestComponent(
             aim = 4,
             shoot = true
         )
@@ -368,7 +361,7 @@ class ServerSimulationTest {
             true,
             (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).shoot
         )
-        val input2 = PlayerInputTestComponent.create(
+        val input2 = createPlayerInputTestComponent(
             aim = 4,
             shoot = false
         )

@@ -75,6 +75,7 @@ class EffectProcessor(
                     .build()
             )
     }
+
     private fun implementation(
         effectName: String,
         effect: KSClassDeclaration,

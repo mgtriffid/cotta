@@ -88,19 +88,13 @@ class IdsRemapperImpl : IdsRemapper {
     }
 
     fun <C: InputComponent<C>> registerInputComponentRemapper(kClass: KClass<C>, spec: ComponentSpec) {
-        val companion = kClass.companionObject
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} does not have a companion object")
-        val companionInstance =
-            kClass.companionObjectInstance ?: throw IllegalArgumentException("Could not find companion instance")
-        val factoryMethod: KCallable<C> = (companion.members.find { it.name == "create" }
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")) as KCallable<C>
+        val factoryMethod: KCallable<C> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }?.kotlinFunction as? KCallable<C>
+            ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")
         val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<ComponentData>() }
 
         val fieldsByName = fields.associateBy { it.name }
 
         val factoryParameters = factoryMethod.parameters
-        val factoryInstanceParameter = factoryParameters.find { it.kind == KParameter.Kind.INSTANCE }
-            ?: throw IllegalArgumentException("No instance parameter on factory")
         val valueParameters = factoryParameters.filter { it.kind == KParameter.Kind.VALUE }
         val valueParametersToNames = valueParameters.associateWith { it.name }
 
@@ -118,11 +112,9 @@ class IdsRemapperImpl : IdsRemapper {
             IdentityInputComponentRemapper
         } else {
             InputComponentRemapperImpl(
-                factoryInstanceParameter,
                 factoryMethod,
                 valueParametersToNames,
                 fieldsByName,
-                companionInstance
             )
         }
     }
@@ -202,15 +194,12 @@ class IdsRemapperImpl : IdsRemapper {
     }
 
     private class InputComponentRemapperImpl<C : InputComponent<C>>(
-        private val factoryInstanceParameter: KParameter,
         private val factoryMethod: KCallable<C>,
         private val valueParametersToNames: Map<KParameter, String?>,
         private val fieldsByName: Map<String, KProperty1<C, *>>,
-        private val companionInstance: Any
     ) : InputComponentRemapper {
 
         override fun remap(ic: InputComponent<*>, ids: (PredictedEntityId) -> AuthoritativeEntityId?): InputComponent<*> {
-            val firstParam: Map<KParameter, Any> = mapOf(factoryInstanceParameter to companionInstance)
             val otherParams: Map<KParameter, Any?> = valueParametersToNames.mapValues { (param, name) ->
                 val field = fieldsByName[name]
                 val value = field?.getter?.call(ic)
@@ -222,7 +211,7 @@ class IdsRemapperImpl : IdsRemapper {
                     value
                 }
             }
-            return factoryMethod.callBy(firstParam + otherParams)
+            return factoryMethod.callBy(otherParams)
         }
     }
 

@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.core.registry.impl
 
 import com.esotericsoftware.kryo.Kryo
+import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistrationListener
@@ -8,6 +9,9 @@ import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
 import com.mgtriffid.games.cotta.core.registry.EffectRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.InputComponentRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
+import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
+import com.mgtriffid.games.cotta.core.registry.createComponentSpec
+import com.mgtriffid.games.cotta.core.registry.createEffectSpec
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapper
 import com.mgtriffid.games.cotta.core.serialization.bytes.DataClassSerializer
 import com.mgtriffid.games.cotta.core.serialization.bytes.ObjectSerializer
@@ -53,6 +57,7 @@ class ComponentRegistry2Impl @Inject constructor(
         componentKeyByClass[kClass] = key
         componentKeyByClass[kClassImpl] = key
         registerForKryo(kClassImpl)
+        registerComponentForRemapping(key, kClass)
         componentClassByKey.add(kClass)
     }
 
@@ -60,8 +65,14 @@ class ComponentRegistry2Impl @Inject constructor(
         inputComponentKeyByClass[kClass] = key
         inputComponentKeyByClass[kClassImpl] = key
         registerForKryo(kClassImpl)
-        registerForRemapping(key, kClass)
+        registerInputComponentForRemapping(key, kClass)
         inputComponentClassByKey.add(kClass)
+    }
+
+    override fun registerEffect(key: ShortEffectKey, kClass: KClass<out CottaEffect>) {
+        registerForKryo(kClass)
+        registerEffectForRemapping(key, kClass)
+        (idsRemapper as IdsRemapperImpl).registerEffect(kClass, createEffectSpec(kClass))
     }
 
     private fun registerForKryo(kClass: KClass<*>) {
@@ -73,8 +84,16 @@ class ComponentRegistry2Impl @Inject constructor(
         kryo.register(kClass.java, serializer)
     }
 
-    private fun registerForRemapping(key: ShortComponentKey, kClass: KClass<out InputComponent<*>>) {
-        (idsRemapper as IdsRemapperImpl).registerInputComponent(key, kClass)
+    private fun registerComponentForRemapping(key: ShortComponentKey, kClass: KClass<out Component<*>>) {
+        (idsRemapper as IdsRemapperImpl).registerComponent(kClass, createComponentSpec(kClass))
+    }
+
+    private fun registerInputComponentForRemapping(key: ShortComponentKey, kClass: KClass<out InputComponent<*>>) {
+        (idsRemapper as IdsRemapperImpl).registerInputComponent(kClass, createComponentSpec(kClass))
+    }
+
+    private fun registerEffectForRemapping(key: ShortEffectKey, kClass: KClass<out CottaEffect>) {
+        (idsRemapper as IdsRemapperImpl).registerEffect(kClass, createEffectSpec(kClass))
     }
 
     override fun addRegistrationListener(listener: ComponentRegistrationListener) {
@@ -88,5 +107,4 @@ class ComponentRegistry2Impl @Inject constructor(
     override fun addEffectRegistrationListener(listener: EffectRegistrationListener) {
         effectRegistrationListeners.add(listener)
     }
-
 }

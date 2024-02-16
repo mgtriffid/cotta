@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.core.registry
 
+import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
@@ -25,4 +26,6 @@ interface ComponentRegistry2 {
         kClass: KClass<out InputComponent<*>>,
         kClassImpl: KClass<out InputComponent<*>>
     )
+
+    fun registerEffect(key: ShortEffectKey, kClass: KClass<out CottaEffect>)
 }

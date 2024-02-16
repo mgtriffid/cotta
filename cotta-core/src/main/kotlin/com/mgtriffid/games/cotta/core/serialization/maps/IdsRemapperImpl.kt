@@ -87,10 +87,6 @@ class IdsRemapperImpl : IdsRemapper {
         registerInputComponentRemapper(kClass, spec)
     }
 
-    fun <T: InputComponent<T>> registerInputComponent(key: ShortComponentKey, kClass: KClass<T>) {
-        inputComponentsKeyByClass[kClass] = key
-    }
-
     fun <C: InputComponent<C>> registerInputComponentRemapper(kClass: KClass<C>, spec: ComponentSpec) {
         val factoryMethod: KCallable<C> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }?.kotlinFunction as? KCallable<C>
             ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")

@@ -10,6 +10,7 @@ import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.*
+import com.mgtriffid.games.cotta.core.serialization.toEntityId
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import mu.KotlinLogging

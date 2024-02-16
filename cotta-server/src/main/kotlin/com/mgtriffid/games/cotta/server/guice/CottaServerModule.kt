@@ -23,6 +23,7 @@ import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistry2Impl
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
+import com.mgtriffid.games.cotta.core.serialization.maps.IdsRemapperImpl
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
@@ -96,7 +97,7 @@ class CottaServerModule(
                 CreateAndRecordCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
             bind(CreatedEntities::class.java).to(CreatedEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
-            install(MapsSerializationModule())
+            install(MapsSerializationModule(IdsRemapperImpl()))
             bind(ComponentRegistry2::class.java).to(ComponentRegistry2Impl::class.java).`in`(Scopes.SINGLETON)
             bind(Kryo::class.java).annotatedWith(named("snapper")).toInstance(Kryo())
             bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)

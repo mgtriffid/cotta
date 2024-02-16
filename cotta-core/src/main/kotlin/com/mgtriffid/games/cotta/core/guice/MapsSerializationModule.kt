@@ -15,7 +15,7 @@ import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
 import kotlin.reflect.KClass
 
-class MapsSerializationModule : Module {
+class MapsSerializationModule(val idsRemapper: IdsRemapperImpl) : Module {
     override fun configure(binder: Binder) {
         with(binder) {
             val stateSnapper = MapsStateSnapper()
@@ -23,7 +23,6 @@ class MapsSerializationModule : Module {
             val inputSnapper = MapsInputSnapper()
             val inputSerialization = MapsInputSerialization()
             val componentsRegistry = ComponentsRegistryImpl()
-            val idsRemapper = IdsRemapperImpl()
             bind(MapsStateSnapper::class.java).toInstance(stateSnapper)
             bind(object : TypeLiteral<StateSnapper<MapsStateRecipe, MapsDeltaRecipe>>() {}).toInstance(stateSnapper)
             bind(MapsSnapsSerialization::class.java).`in`(Scopes.SINGLETON)

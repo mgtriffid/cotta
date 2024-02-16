@@ -23,6 +23,9 @@ import com.mgtriffid.games.cotta.core.serialization.dto.PlayersSawTicksDto
 import com.mgtriffid.games.cotta.core.serialization.dto.TraceElementDtoKind
 import com.mgtriffid.games.cotta.core.serialization.maps.dto.*
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.*
+import com.mgtriffid.games.cotta.core.serialization.toDto
+import com.mgtriffid.games.cotta.core.serialization.toEntityId
+import com.mgtriffid.games.cotta.core.serialization.toOwnedBy
 
 private val logger = mu.KotlinLogging.logger {}
 
@@ -307,39 +310,6 @@ fun EntityId.toDto(): EntityIdDto {
             it.id = id
             it.kind = EntityIdDto.Kind.STATIC
         }
-    }
-}
-
-fun EntityIdDto.toEntityId(): EntityId {
-    return when (kind) {
-        EntityIdDto.Kind.AUTHORITATIVE -> AuthoritativeEntityId(id)
-        EntityIdDto.Kind.PREDICTED -> PredictedEntityId(PlayerId(playerId), id)
-        EntityIdDto.Kind.STATIC -> StaticEntityId(id)
-        null -> throw IllegalStateException("${EntityIdDto::class.simpleName}.${EntityIdDto::kind.name} is null")
-    }
-}
-
-fun Entity.OwnedBy.toDto(): EntityOwnedByDto {
-    val ret = EntityOwnedByDto();
-    when (this) {
-        is Entity.OwnedBy.Player -> {
-            ret.ownedBySystem = false
-            ret.playerId = playerId.id
-        }
-
-        is Entity.OwnedBy.System -> {
-            ret.ownedBySystem = true
-            ret.playerId = 0
-        }
-    }
-    return ret
-}
-
-fun EntityOwnedByDto.toOwnedBy(): Entity.OwnedBy {
-    return if (ownedBySystem) {
-        Entity.OwnedBy.System
-    } else {
-        Entity.OwnedBy.Player(PlayerId(playerId))
     }
 }
 

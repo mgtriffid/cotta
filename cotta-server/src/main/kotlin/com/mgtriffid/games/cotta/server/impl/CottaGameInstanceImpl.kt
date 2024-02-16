@@ -5,7 +5,9 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
+import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.ConnectionId
@@ -22,6 +24,7 @@ private val logger = KotlinLogging.logger {}
 class CottaGameInstanceImpl @Inject constructor(
     private val game: CottaGame,
     private val componentsRegistry: ComponentsRegistry,
+    private val componentsRegistry2: ComponentRegistry2,
     private val network: CottaServerNetworkTransport,
     private val clientsGhosts: ClientsGhosts,
     private val tickProvider: TickProvider,
@@ -37,6 +40,7 @@ class CottaGameInstanceImpl @Inject constructor(
 
     override fun run() {
         registerComponents()
+        registerComponents2()
         initializeState()
         registerSystems()
         logger.debug { "Tick length is ${game.config.tickLength}" }
@@ -61,6 +65,25 @@ class CottaGameInstanceImpl @Inject constructor(
             componentsRegistry.registerEffectClass(it)
         }
         serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
+    }
+
+    private fun registerComponents2() {
+        getComponentClasses2().forEachIndexed { index, kClass ->
+            componentsRegistry2.registerComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
+                Class.forName(it).kotlin as KClass<out Component<*>>
+            })
+        }
+        serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
+    }
+
+    private fun getComponentClasses2(): List<KClass<out Component<*>>> {
+        val gameClass = game::class
+        return Class.forName(gameClass.qualifiedName + "Components").let {
+            val method = it.getMethod("getComponents")
+            @Suppress("UNCHECKED_CAST")
+            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
+            components.map { it as KClass<out Component<*>> }
+        }
     }
 
     // TODO dry

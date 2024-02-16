@@ -25,6 +25,8 @@ import kotlin.reflect.KClass
 
 const val IMPL_SUFFIX = "Impl"
 
+// TODO this class is full of weird assumptions and should be refactored to return more specific objects defining the
+//  components and their properties, it should not rely on naming conventions.
 class ComponentProcessor(
     private val resolver: Resolver,
     private val codeGenerator: CodeGenerator,
@@ -77,11 +79,11 @@ class ComponentProcessor(
         fileSpecBuilder.addFunction(
             FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
                 .returns(component.asStarProjectedType().toTypeName())
-                .addStatement("return ${componentName}Instance")
+                .addStatement("return ${componentName}$IMPL_SUFFIX")
                 .build()
         )
             .addType(
-                TypeSpec.objectBuilder("${componentName}Instance")
+                TypeSpec.objectBuilder("${componentName}$IMPL_SUFFIX")
                     .addSuperinterface(component.asStarProjectedType().toTypeName())
                     .addSuperinterface(ComponentInternal::class.asTypeName())
                     .addFunction(

@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
@@ -29,7 +30,7 @@ import kotlin.reflect.KClass
 
 class BytesStateSnapper @Inject constructor(
     @Named("snapping") private val kryo: Kryo,
-    private val generatedComponentRegistry: GeneratedComponentRegistry
+    private val generatedComponentRegistry: ComponentRegistry2
 ) : StateSnapper<BytesStateRecipe, BytesDeltaRecipe> {
     override fun snapState(entities: Entities): BytesStateRecipe {
         return BytesStateRecipe(
@@ -99,7 +100,6 @@ class BytesStateSnapper @Inject constructor(
                 entity.addComponent(unpackComponentRecipe(it))
             }
             recipe.changedComponents.forEach {
-                // cast and fucking pray
                 val component = unpackComponentDeltaRecipe(it)
                 val clazz = generatedComponentRegistry.getDeclaredComponent(component::class)
                 if (entity.hasComponent(clazz)) {
@@ -118,7 +118,9 @@ class BytesStateSnapper @Inject constructor(
     private fun unpackEntityRecipe(entities: Entities, recipe: BytesEntityRecipe) {
         val entity = entities.create(recipe.entityId, recipe.ownedBy)
         recipe.components.forEach { componentRecipe -> entity.addComponent(unpackComponentRecipe(componentRecipe)) }
-        recipe.inputComponents.forEach { inputComponent -> entity.addInputComponent(generatedComponentRegistry.getInputComponentByKey(inputComponent.key)) }
+        recipe.inputComponents.forEach { inputComponent -> entity.addInputComponent(
+            generatedComponentRegistry.getInputComponentClassByKey(inputComponent)
+        ) }
     }
 
     private fun unpackComponentRecipe(componentRecipe: BytesComponentRecipe): Component<*> {

@@ -28,7 +28,7 @@ class IdsRemapperImpl : IdsRemapper {
 
     private val keyByClass = HashMap<KClass<*>, StringComponentKey>()
 
-    private val inputComponentsKeyByClass = HashMap<KClass<*>, StringComponentKey>()
+    private val inputComponentsKeyByClass = HashMap<KClass<*>, ComponentKey>()
     private val effectsKeyByClass = HashMap<KClass<*>, StringEffectKey>()
     override fun remap(c: Component<*>, ids: (PredictedEntityId) -> AuthoritativeEntityId?): Component<*> {
         // GROOM we have null-safe and we have IdentityThing. Redundant.
@@ -85,6 +85,10 @@ class IdsRemapperImpl : IdsRemapper {
         inputComponentsKeyByClass[kClass] = spec.key as StringComponentKey // hack, the fact that maps and componentregistry are connected leaks in here but okay
 
         registerInputComponentRemapper(kClass, spec)
+    }
+
+    fun <T: InputComponent<T>> registerInputComponent(key: ShortComponentKey, kClass: KClass<T>) {
+        inputComponentsKeyByClass[kClass] = key
     }
 
     fun <C: InputComponent<C>> registerInputComponentRemapper(kClass: KClass<C>, spec: ComponentSpec) {
@@ -266,7 +270,7 @@ class IdsRemapperImpl : IdsRemapper {
             ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
     }
 
-    private fun getInputComponentKey(kClass: KClass<out InputComponent<*>>): StringComponentKey {
+    private fun getInputComponentKey(kClass: KClass<out InputComponent<*>>): ComponentKey {
         val registeredClass = inputComponentsKeyByClass.keys.first { it.isSuperclassOf(kClass) }
         return inputComponentsKeyByClass[registeredClass]
             ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")

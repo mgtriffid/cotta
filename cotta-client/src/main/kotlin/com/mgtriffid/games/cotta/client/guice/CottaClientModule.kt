@@ -24,7 +24,7 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
-import com.mgtriffid.games.cotta.core.guice.SerializationModule
+import com.mgtriffid.games.cotta.core.guice.MapsSerializationModule
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
@@ -154,6 +154,6 @@ class CottaClientModule(
         bind(Interpolators::class.java).`in`(Scopes.SINGLETON)
 
         bind(AuthoritativeToPredictedEntityIdMappings::class.java).to(AuthoritativeToPredictedEntityIdMappingsImpl::class.java).`in`(Scopes.SINGLETON)
-        install(SerializationModule())
+        install(MapsSerializationModule())
     }
 }

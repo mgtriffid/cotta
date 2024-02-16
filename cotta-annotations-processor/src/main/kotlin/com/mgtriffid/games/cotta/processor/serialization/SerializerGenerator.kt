@@ -166,7 +166,6 @@ class SerializerGenerator(
             BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeByte.name
             SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeShort.name
             EntityId::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeEntityId.name
-//            ClassName("com.mgtriffid.games.cotta.core.entities.id", "EntityId") -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeEntityId.name
             else -> "TODO()//"
         }
         return "$function(bytes, component.${field.name}, $offset)"
@@ -181,7 +180,6 @@ class SerializerGenerator(
             BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeByte.name
             SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeShort.name
             EntityId::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeEntityId.name
-//            ClassName("com.mgtriffid.games.cotta.core.entities.id", "EntityId") -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::writeEntityId.name
             else -> "TODO()//"
         }
         return "$function(bytes, component.${field.name}, $offsetVariable)"
@@ -196,7 +194,6 @@ class SerializerGenerator(
             BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readByte.name
             SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readShort.name
             EntityId::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readEntityId.name
-//            ClassName("com.mgtriffid.games.cotta.core.entities.id", "EntityId") -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readEntityId.name
             else -> "TODO()//".also { logger.warn(field.type.toString()) }
         }
         return "val ${field.name} = $function(bytes, $offset)"
@@ -211,7 +208,6 @@ class SerializerGenerator(
             BYTE -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readByte.name
             SHORT -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readShort.name
             EntityId::class.asTypeName() -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readEntityId.name
-//            ClassName("com.mgtriffid.games.cotta.core.entities.id", "EntityId") -> ConversionUtils::class.qualifiedName + "." + ConversionUtils::readEntityId.name
             else -> "TODO()//"
         }
         return "val ${field.name} = $function(bytes, $offsetVariable)"

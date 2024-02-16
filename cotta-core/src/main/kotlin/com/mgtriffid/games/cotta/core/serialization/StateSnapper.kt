@@ -9,6 +9,6 @@ interface StateSnapper<SR: StateRecipe, DR: DeltaRecipe> {
     fun snapDelta(prev: Entities, curr: Entities): DR
     fun unpackStateRecipe(entities: Entities, recipe: SR)
     fun unpackDeltaRecipe(entities: Entities, recipe: DR)
-    fun snapTrace(trace: CottaTrace): MapsTraceRecipe
-    fun unpackTrace(trace: MapsTraceRecipe): CottaTrace
+    fun snapTrace(trace: CottaTrace): TraceRecipe
+    fun unpackTrace(trace: TraceRecipe): CottaTrace
 }

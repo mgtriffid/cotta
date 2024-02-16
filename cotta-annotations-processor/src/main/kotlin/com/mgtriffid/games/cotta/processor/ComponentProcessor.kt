@@ -7,6 +7,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
+import com.mgtriffid.games.cotta.core.entities.impl.ComponentInternal
 import com.mgtriffid.games.cotta.processor.serialization.SerializerGenerator
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
@@ -82,6 +83,7 @@ class ComponentProcessor(
             .addType(
                 TypeSpec.objectBuilder("${componentName}Instance")
                     .addSuperinterface(component.asStarProjectedType().toTypeName())
+                    .addSuperinterface(ComponentInternal::class.asTypeName())
                     .addFunction(
                         FunSpec.builder("copy").addStatement("return this")
                             .addModifiers(KModifier.OVERRIDE)
@@ -110,6 +112,7 @@ class ComponentProcessor(
         properties: List<ProcessableComponentFieldSpec>
     ) = TypeSpec.classBuilder("${componentName}${IMPL_SUFFIX}")
         .addSuperinterface(component.asStarProjectedType().toTypeName())
+        .addSuperinterface(ComponentInternal::class.asTypeName())
         .addModifiers(KModifier.DATA, KModifier.INTERNAL)
         .primaryConstructor(
             implPrimaryConstructor(properties)

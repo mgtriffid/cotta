@@ -15,6 +15,7 @@ import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
@@ -76,7 +77,7 @@ class NetworkClientImpl @Inject constructor(
 
                 KindOfData.CREATED_ENTITIES_V2 -> incomingDataBuffer.storeCreatedEntities(
                     it.tick,
-                    snapsSerialization.deserializeEntityCreationTracesV2(it.payload)
+                    snapsSerialization.deserializeEntityCreationTracesV2(it.payload) as MapsCreatedEntitiesWithTracesRecipe
                 )
 
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")

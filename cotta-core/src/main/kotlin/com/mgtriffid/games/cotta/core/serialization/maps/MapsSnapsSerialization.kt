@@ -13,7 +13,9 @@ import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.registry.StringComponentKey
 import com.mgtriffid.games.cotta.core.registry.StringEffectKey
+import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
+import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityOwnedByDto
 import com.mgtriffid.games.cotta.core.serialization.dto.MetaEntityPlayerIdDto
@@ -101,12 +103,12 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         return Pair(dto.entityId.toEntityId(), PlayerId(dto.playerId))
     }
 
-    override fun serializeEntityCreationTraces(traces: List<Pair<MapsTraceRecipe, EntityId>>): ByteArray {
+    override fun serializeEntityCreationTraces(traces: List<Pair<TraceRecipe, EntityId>>): ByteArray {
         val output = Output(64, 1024 * 1024)
         val entries = ArrayList<MapsCreateEntityTraceDto>()
         traces.forEach { (trace, entityId) -> entries.add(
             MapsCreateEntityTraceDto().also {
-                it.trace = trace.toDto()
+                it.trace = (trace as MapsTraceRecipe).toDto()
                 it.entityId = entityId.toDto()
             }
         ) }
@@ -115,7 +117,8 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         return output.toBytes()
     }
 
-    override fun serializeEntityCreationTracesV2(createdEntities: MapsCreatedEntitiesWithTracesRecipe): ByteArray {
+    override fun serializeEntityCreationTracesV2(createdEntities: CreatedEntitiesWithTracesRecipe): ByteArray {
+        createdEntities as MapsCreatedEntitiesWithTracesRecipe
         val dto =
             MapsCreatedEntitiesWithTracesRecipeDto()
         val tracesDtos =  ArrayList<MapsCreateEntityTraceDto>()

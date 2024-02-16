@@ -14,10 +14,10 @@ interface SnapsSerialization<SR : StateRecipe, DR : DeltaRecipe> {
     fun deserializeEntityId(bytes: ByteArray): EntityId
     fun serializeMetaEntityId(entityId: EntityId, playerId: PlayerId): ByteArray
     fun deserializeMetaEntityId(bytes: ByteArray): Pair<EntityId, PlayerId>
-    fun serializeEntityCreationTraces(traces: List<Pair<MapsTraceRecipe, EntityId>>): ByteArray
-    fun serializeEntityCreationTracesV2(createdEntities: MapsCreatedEntitiesWithTracesRecipe): ByteArray
-    fun deserializeEntityCreationTraces(bytes: ByteArray): List<Pair<MapsTraceRecipe, EntityId>>
-    fun deserializeEntityCreationTracesV2(bytes: ByteArray): MapsCreatedEntitiesWithTracesRecipe
+    fun serializeEntityCreationTraces(traces: List<Pair<TraceRecipe, EntityId>>): ByteArray
+    fun serializeEntityCreationTracesV2(createdEntities: CreatedEntitiesWithTracesRecipe): ByteArray
+    fun deserializeEntityCreationTraces(bytes: ByteArray): List<Pair<TraceRecipe, EntityId>>
+    fun deserializeEntityCreationTracesV2(bytes: ByteArray): CreatedEntitiesWithTracesRecipe
     fun serializePlayersSawTicks(playersSawTicks: Map<PlayerId, Long>): ByteArray
     fun deserializePlayersSawTicks(bytes: ByteArray): Map<PlayerId, Long>
 }

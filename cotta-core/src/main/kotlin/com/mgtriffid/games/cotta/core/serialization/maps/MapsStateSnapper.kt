@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.*
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
+import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.*
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
@@ -230,16 +231,15 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
     }
 
     override fun snapState(entities: Entities): MapsStateRecipe {
-        return MapsStateRecipe(entities.dynamic().map { e ->
-            packEntity(e)
-        })
+        return MapsStateRecipe(entities.dynamic().map(::packEntity))
     }
 
     override fun snapTrace(trace: CottaTrace): MapsTraceRecipe {
         return MapsTraceRecipe(trace.elements.map { it.toRecipe() })
     }
 
-    override fun unpackTrace(trace: MapsTraceRecipe): CottaTrace {
+    override fun unpackTrace(trace: TraceRecipe): CottaTrace {
+        trace as MapsTraceRecipe
         return CottaTrace(trace.elements.map { it.toTraceElement() })
     }
 
@@ -282,11 +282,12 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         return (snappers[getKey(obj)] as ComponentSnapper<C>).packComponent(obj)
     }
 
-    fun <C : CottaEffect> packEffect(obj: Any): MapsEffectRecipe {
+    private fun <C : CottaEffect> packEffect(obj: Any): MapsEffectRecipe {
         obj as C
         return (effectSnappers[getKey(obj)] as EffectSnapper<C>).packEffect(obj)
     }
-    fun unpackEffectRecipe(recipe: MapsEffectRecipe): CottaEffect {
+
+    private fun unpackEffectRecipe(recipe: MapsEffectRecipe): CottaEffect {
         return effectSnappers[recipe.effectKey]?.unpackEffect(recipe)
             ?: throw java.lang.IllegalArgumentException("Effect Snapper not found for effect ${recipe.effectKey}")
     }
@@ -363,7 +364,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
         val removedComponents = prevComponents.map(::getKey).filter { key ->
             currComponents.none { cc -> getKey(cc) == key }
         }
-        val adderComponents = currComponents.filter { cc ->
+        val addedComponents = currComponents.filter { cc ->
             prevComponents.none { pc -> getKey(cc) == getKey(pc) }
         }
         val changedComponents: Map<Component<*>, Component<*>> = currComponents.associateWith { cc ->
@@ -375,7 +376,7 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
             changedComponents = changedComponents.map { (cc, pc) ->
                 packComponentDelta(pc, cc)
             },
-            addedComponents = adderComponents.map { packComponent(it) },
+            addedComponents = addedComponents.map { packComponent(it) },
             removedComponents = removedComponents,
         )
     }

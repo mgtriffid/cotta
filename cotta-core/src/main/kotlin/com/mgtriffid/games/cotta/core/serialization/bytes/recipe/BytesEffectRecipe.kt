@@ -4,5 +4,5 @@ import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
 import com.mgtriffid.games.cotta.core.serialization.EffectRecipe
 
 class BytesEffectRecipe(
-    val effectKey: ShortEffectKey, val data: ByteArray
+    val data: ByteArray
 ) : EffectRecipe

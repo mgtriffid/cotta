@@ -28,7 +28,7 @@ class PredictionEntityProcessingSystemInvokerImpl @Inject constructor(
     private fun Entity.shouldBePredicted() = ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
 
     private fun process(entity: Entity, system: EntityProcessingSystem) {
-        logger.debug { "${system::class.simpleName} processing entity ${entity.id}" }
+        logger.trace { "${system::class.simpleName} processing entity ${entity.id}" }
         system.process(entity, context)
     }
 }

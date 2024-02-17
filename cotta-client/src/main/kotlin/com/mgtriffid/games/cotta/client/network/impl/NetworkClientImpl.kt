@@ -11,9 +11,13 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.ClientInput
+import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
+import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
+import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
@@ -30,13 +34,18 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-class NetworkClientImpl @Inject constructor(
+class NetworkClientImpl<
+    SR: StateRecipe,
+    DR: DeltaRecipe,
+    IR: InputRecipe,
+    CEWTR: CreatedEntitiesWithTracesRecipe
+    > @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
-    private val incomingDataBuffer: ClientIncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>,
-    private val snapsSerialization: SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe>,
-    private val inputSerialization: InputSerialization<MapsInputRecipe>,
-    private val inputSnapper: InputSnapper<MapsInputRecipe>,
-    private val stateSnapper: StateSnapper<MapsStateRecipe, MapsDeltaRecipe>,
+    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, IR, CEWTR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR>,
+    private val inputSerialization: InputSerialization<IR>,
+    private val inputSnapper: InputSnapper<IR>,
+    private val stateSnapper: StateSnapper<SR, DR, CEWTR>,
     private val localPlayer: LocalPlayer
 ) : NetworkClient {
     private val lagCompLimit: Int = 8 // TODO move to config and bind properly
@@ -77,7 +86,7 @@ class NetworkClientImpl @Inject constructor(
 
                 KindOfData.CREATED_ENTITIES_V2 -> incomingDataBuffer.storeCreatedEntities(
                     it.tick,
-                    snapsSerialization.deserializeEntityCreationTracesV2(it.payload) as MapsCreatedEntitiesWithTracesRecipe
+                    snapsSerialization.deserializeEntityCreationTracesV2(it.payload) as CEWTR
                 )
 
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")

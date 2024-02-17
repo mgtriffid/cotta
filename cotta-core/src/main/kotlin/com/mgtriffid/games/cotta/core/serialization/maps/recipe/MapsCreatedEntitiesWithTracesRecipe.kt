@@ -6,6 +6,6 @@ import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 
 class MapsCreatedEntitiesWithTracesRecipe(
-    val traces: List<Pair<MapsTraceRecipe, EntityId>>,
-    val mappedPredictedIds: Map<AuthoritativeEntityId, PredictedEntityId>
+    override val traces: List<Pair<MapsTraceRecipe, EntityId>>,
+    override val mappedPredictedIds: Map<AuthoritativeEntityId, PredictedEntityId>
 ) : CreatedEntitiesWithTracesRecipe

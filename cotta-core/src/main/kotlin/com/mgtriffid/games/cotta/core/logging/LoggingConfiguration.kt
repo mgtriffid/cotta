@@ -7,35 +7,36 @@ import org.slf4j.LoggerFactory
 
 fun configureLogging() {
     // KryoNet:
-    Log.set(Log.LEVEL_INFO)
+    Log.set(Log.LEVEL_DEBUG)
 
+    val default = Level.DEBUG
     mapOf(
-        "org.eclipse" to Level.INFO,
-        "com.mgtriffid.games.cotta.server.impl" to Level.INFO,
-        "com.mgtriffid.games.cotta.server.impl.invokers" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.invokers.impl" to Level.INFO,
-        "com.mgtriffid.games.cotta.core.serialization.impl" to Level.INFO,
-        "com.mgtriffid.games.cotta.network.kryonet" to Level.INFO,
-        "com.mgtriffid.games.cotta.core.simulation.invokers" to Level.INFO,
-        "com.mgtriffid.games.panna.shared.game.systems" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.impl.CottaClientImpl" to Level.INFO,
-        "com.mgtriffid.games.cotta.core.registry.ComponentsRegistry" to Level.INFO,
-        "com.mgtriffid.games.cotta.server.impl.ServerToClientDataDispatcherImpl" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.invokers.impl.PredictionCreateEntityStrategy" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.impl.PredictionSimulationImpl" to Level.INFO,
-        "com.mgtriffid.games.cotta.server.impl.PredictedToAuthoritativeIdMappingsImpl" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.impl.ClientSimulationInputProviderImpl" to Level.INFO,
-        "com.mgtriffid.games.cotta.core.simulation.SimulationInput" to Level.INFO,
-        "com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl" to Level.INFO,
-        "com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer" to Level.INFO,
-        "com.mgtriffid.games.panna.screens.menu.GameScreen" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.impl.AuthoritativeToPredictedEntityIdMappingsImpl" to Level.INFO,
-        "com.mgtriffid.games.panna.shared.game.systems.ShootEffectConsumerSystem" to Level.INFO,
-        "com.mgtriffid.games.cotta.client.impl.DrawableStateProviderImpl" to Level.INFO,
-        "com.mgtriffid.games.panna.PannaClientGdxInput" to Level.INFO,
+        "org.eclipse" to default,
+        "com.mgtriffid.games.cotta.server.impl" to default,
+        "com.mgtriffid.games.cotta.server.impl.invokers" to default,
+        "com.mgtriffid.games.cotta.client.invokers.impl" to default,
+        "com.mgtriffid.games.cotta.core.serialization.impl" to default,
+        "com.mgtriffid.games.cotta.network.kryonet" to default,
+        "com.mgtriffid.games.cotta.core.simulation.invokers" to default,
+        "com.mgtriffid.games.panna.shared.game.systems" to default,
+        "com.mgtriffid.games.cotta.client.impl.CottaClientImpl" to default,
+        "com.mgtriffid.games.cotta.core.registry.ComponentsRegistry" to default,
+        "com.mgtriffid.games.cotta.server.impl.ServerToClientDataDispatcherImpl" to default,
+        "com.mgtriffid.games.cotta.client.invokers.impl.PredictionCreateEntityStrategy" to default,
+        "com.mgtriffid.games.cotta.client.impl.PredictionSimulationImpl" to default,
+        "com.mgtriffid.games.cotta.server.impl.PredictedToAuthoritativeIdMappingsImpl" to default,
+        "com.mgtriffid.games.cotta.client.impl.ClientSimulationInputProviderImpl" to default,
+        "com.mgtriffid.games.cotta.core.simulation.SimulationInput" to default,
+        "com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl" to default,
+        "com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider" to default,
+        "com.mgtriffid.games.cotta.client.impl.IncomingDataBuffer" to default,
+        "com.mgtriffid.games.panna.screens.menu.GameScreen" to default,
+        "com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer" to default,
+        "com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl" to default,
+        "com.mgtriffid.games.cotta.client.impl.AuthoritativeToPredictedEntityIdMappingsImpl" to default,
+        "com.mgtriffid.games.panna.shared.game.systems.ShootEffectConsumerSystem" to default,
+        "com.mgtriffid.games.cotta.client.impl.DrawableStateProviderImpl" to default,
+        "com.mgtriffid.games.panna.PannaClientGdxInput" to default,
     ).forEach { (logger, level) ->
         (LoggerFactory.getLogger(logger) as Logger).level = level
     }

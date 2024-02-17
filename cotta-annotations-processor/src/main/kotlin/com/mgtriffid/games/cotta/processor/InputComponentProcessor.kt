@@ -5,14 +5,19 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
+import kotlin.reflect.KClass
 
 class InputComponentProcessor(
     private val resolver: Resolver,
@@ -24,6 +29,7 @@ class InputComponentProcessor(
         components.forEach { component ->
             writeComponentImplementation(component)
         }
+        writeComponentsClassRegistry(components, game)
     }
 
     private fun getInputComponentInterfaces(game: KSClassDeclaration): List<KSClassDeclaration> {
@@ -103,4 +109,34 @@ class InputComponentProcessor(
             }
         )
         .build()
+
+    private fun writeComponentsClassRegistry(
+        components: List<KSClassDeclaration>,
+        game: KSClassDeclaration
+    ) {
+        if (components.isEmpty()) return
+        val pkg = game.packageName.asString()
+        val gameName = game.simpleName.asString()
+        val fileSpecBuilder = FileSpec.builder(pkg, "${gameName}InputComponents")
+        fileSpecBuilder.addType(
+            TypeSpec.classBuilder("${gameName}InputComponents")
+                .addFunction(
+                    FunSpec.builder("getComponents")
+                        .returns(
+                            List::class.asTypeName().parameterizedBy(
+                                ClassName(
+                                    KClass::class.java.`package`.name,
+                                    KClass::class.simpleName!!
+                                ).parameterizedBy(STAR)
+                            )
+                        )
+                        .addModifiers(KModifier.PUBLIC)
+                        .addStatement("return listOf(" +
+                            components.joinToString(", ") { "${it.qualifiedName!!.asString()}::class" } +
+                            ")")
+                        .build()
+                ).build()
+        )
+        fileSpecBuilder.build().writeTo(codeGenerator, false)
+    }
 }

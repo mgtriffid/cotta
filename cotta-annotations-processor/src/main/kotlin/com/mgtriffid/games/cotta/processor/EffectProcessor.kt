@@ -5,14 +5,19 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.STAR
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
+import kotlin.reflect.KClass
 
 class EffectProcessor(
     private val resolver: Resolver,
@@ -24,6 +29,7 @@ class EffectProcessor(
         effects.forEach { effect ->
             writeEffectImplementation(effect)
         }
+        writeEffectsClassRegistry(effects, game)
     }
 
     private fun writeEffectImplementation(effect: KSClassDeclaration) {
@@ -127,4 +133,30 @@ class EffectProcessor(
             .filter { it.superTypes.any { superType -> superType.resolve().declaration.qualifiedName?.asString() == CottaEffect::class.qualifiedName } }
             .filter { it.packageName.asString().startsWith(game.packageName.asString()) }
             .toList()
+
+    private fun writeEffectsClassRegistry(effects: List<KSClassDeclaration>, game: KSClassDeclaration) {
+        if (effects.isEmpty()) return
+        val pkg = game.packageName.asString()
+        val gameName = game.simpleName.asString()
+        val fileSpecBuilder = FileSpec.builder(pkg, "${gameName}Effects")
+        fileSpecBuilder.addType(
+            TypeSpec.classBuilder("${gameName}Effects")
+                .addFunction(
+                    FunSpec.builder("getEffects")
+                        .returns(
+                            List::class.asTypeName().parameterizedBy(
+                                ClassName(
+                                    KClass::class.java.`package`.name,
+                                    KClass::class.simpleName!!
+                                ).parameterizedBy(STAR)
+                            )
+                        )
+                        .addModifiers(KModifier.PUBLIC)
+                        .addStatement("return listOf(" +
+                            effects.joinToString(", ") { "${it.qualifiedName!!.asString()}::class" } +
+                            ")")
+                        .build()
+                ).build()
+        )
+        fileSpecBuilder.build().writeTo(codeGenerator, false)    }
 }

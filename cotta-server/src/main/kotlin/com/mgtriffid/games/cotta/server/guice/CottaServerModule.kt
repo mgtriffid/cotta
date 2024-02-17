@@ -20,10 +20,12 @@ import com.mgtriffid.games.cotta.core.guice.MapsSerializationModule
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistry2Impl
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.IdsRemapperImpl
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
@@ -54,10 +56,8 @@ class CottaServerModule(
     private val game: CottaGame
 ) : Module {
     override fun configure(binder: Binder) {
-        with (binder) {
-            bind(CottaGameInstance::class.java).to(object : TypeLiteral<CottaGameInstanceImpl>() {})
+        with(binder) {
             bind(CottaGame::class.java).toInstance(game)
-            bind(ClientsGhosts::class.java).`in`(Scopes.SINGLETON)
 
             bind(ComponentsRegistryImpl::class.java).`in`(Scopes.SINGLETON)
 
@@ -66,14 +66,12 @@ class CottaServerModule(
             bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
             bind(Int::class.java).annotatedWith(named("historyLength")).toInstance(8)
             bind(Int::class.java).annotatedWith(named("stateHistoryLength")).toInstance(128)
-            bind(CottaState::class.java).annotatedWith(named("simulation")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(ServerToClientDataDispatcher::class.java)
-                .to(object : TypeLiteral<ServerToClientDataDispatcherImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>(){})
+            bind(CottaState::class.java).annotatedWith(named("simulation")).to(CottaStateImpl::class.java)
+                .`in`(Scopes.SINGLETON)
 
             bind(ServerSimulation::class.java).to(ServerSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 
             bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
-            bind(ServerSimulationInputProvider::class.java).to(ServerSimulationInputProviderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(MetaEntities::class.java).to(MetaEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
@@ -81,33 +79,89 @@ class CottaServerModule(
             bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
             bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(LagCompensatingEffectBus::class.java).annotatedWith(named("historical")).to(HistoricalLagCompensatingEffectBus::class.java).`in`(Scopes.SINGLETON)
-            bind(LagCompensatingEffectBus::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingEffectBusImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(LagCompensatingInputProcessingSystemInvoker::class.java).to(LagCompensatingInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(LagCompensatingEffectBus::class.java).annotatedWith(named("historical"))
+                .to(HistoricalLagCompensatingEffectBus::class.java).`in`(Scopes.SINGLETON)
+            bind(LagCompensatingEffectBus::class.java).annotatedWith(named("lagCompensated"))
+                .to(LagCompensatingEffectBusImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(LagCompensatingInputProcessingSystemInvoker::class.java).to(
+                LagCompensatingInputProcessingSystemInvokerImpl::class.java
+            ).`in`(Scopes.SINGLETON)
+            bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java)
+                .`in`(Scopes.SINGLETON)
             bind(Entities::class.java).annotatedWith(named("latest")).to(LatestEntities::class.java)
 
-            bind(TracingInputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(TracingInputProcessingContext::class.java).to(InputProcessingContextImpl::class.java)
+                .`in`(Scopes.SINGLETON)
             bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(EffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingTracingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
-            bind(TracingEffectProcessingContext::class.java).annotatedWith(named("lagCompensated")).to(LagCompensatingTracingEffectProcessingContext::class.java)
+            bind(EffectProcessingContext::class.java).annotatedWith(named("lagCompensated"))
+                .to(LagCompensatingTracingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
+            bind(TracingEffectProcessingContext::class.java).annotatedWith(named("lagCompensated"))
+                .to(LagCompensatingTracingEffectProcessingContext::class.java)
             bind(TracingEffectProcessingContext::class.java).annotatedWith(named("simple")).to(
-                SimpleTracingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
+                SimpleTracingEffectProcessingContext::class.java
+            ).`in`(Scopes.SINGLETON)
             bind(CreateEntityStrategy::class.java).annotatedWith(named("effectProcessing")).to(
-                CreateAndRecordCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
+                CreateAndRecordCreateEntityStrategy::class.java
+            ).`in`(Scopes.SINGLETON)
             bind(CreatedEntities::class.java).to(CreatedEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
-            install(MapsSerializationModule(IdsRemapperImpl()))
+            val idsRemapper = IdsRemapperImpl()
+            val serialization = "bytes"
+            val componentsRegistry = ComponentsRegistryImpl()
+            when (serialization) {
+                "maps" -> {
+                    install(MapsSerializationModule(idsRemapper, componentsRegistry))
+                    bind(ServerToClientDataDispatcher::class.java)
+                        .to(object :
+                            TypeLiteral<ServerToClientDataDispatcherImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe, MapsCreatedEntitiesWithTracesRecipe>>() {})
+                    bind(CottaGameInstance::class.java).to(object :
+                        TypeLiteral<CottaGameInstanceImpl<MapsInputRecipe>>() {})
+
+                    bind(ServerSimulationInputProvider::class.java)
+                        .to(object : TypeLiteral<ServerSimulationInputProviderImpl<
+                            MapsStateRecipe,
+                            MapsDeltaRecipe,
+                            MapsInputRecipe,
+                            MapsCreatedEntitiesWithTracesRecipe
+                            >>() {})
+                        .`in`(Scopes.SINGLETON)
+
+                    bind(object : TypeLiteral<ClientsGhosts<MapsInputRecipe>>(){}).`in`(Scopes.SINGLETON)
+                }
+
+                "bytes" -> {
+                    install(BytesSerializationModule(idsRemapper, componentsRegistry))
+                    bind(ServerToClientDataDispatcher::class.java)
+                        .to(object :
+                            TypeLiteral<ServerToClientDataDispatcherImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+                        .`in`(Scopes.SINGLETON)
+                    bind(CottaGameInstance::class.java).to(object :
+                        TypeLiteral<CottaGameInstanceImpl<BytesInputRecipe>>() {})
+
+                    bind(ServerSimulationInputProvider::class.java)
+                        .to(object : TypeLiteral<ServerSimulationInputProviderImpl<
+                            BytesStateRecipe,
+                            BytesDeltaRecipe,
+                            BytesInputRecipe,
+                            BytesCreatedEntitiesWithTracesRecipe
+                            >>() {})
+                        .`in`(Scopes.SINGLETON)
+
+                    bind(object : TypeLiteral<ClientsGhosts<BytesInputRecipe>>(){}).`in`(Scopes.SINGLETON)
+                }
+            }
             bind(ComponentRegistry2::class.java).to(ComponentRegistry2Impl::class.java).`in`(Scopes.SINGLETON)
-            bind(Kryo::class.java).annotatedWith(named("snapper")).toInstance(Kryo())
             bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
 
-            bind(PredictedToAuthoritativeIdMappings::class.java).to(PredictedToAuthoritativeIdMappingsImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(EntitiesCreatedOnClientsRegistry::class.java).to(EntitiesCreatedOnClientsRegistryImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(PredictedToAuthoritativeIdMappings::class.java).to(PredictedToAuthoritativeIdMappingsImpl::class.java)
+                .`in`(Scopes.SINGLETON)
+            bind(EntitiesCreatedOnClientsRegistry::class.java).to(EntitiesCreatedOnClientsRegistryImpl::class.java)
+                .`in`(Scopes.SINGLETON)
         }
     }
 
-    @Provides @Singleton // TODO game instance scoped
+    @Provides
+    @Singleton // TODO game instance scoped
     fun provideCottaServerNetwork(): CottaServerNetworkTransport {
         val network = KryonetCottaServerNetworkTransport()
         network.initialize()

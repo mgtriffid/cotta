@@ -8,6 +8,9 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
@@ -15,6 +18,7 @@ import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesChangedEntityRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEffectRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityRecipe
@@ -29,9 +33,9 @@ import jakarta.inject.Named
 import kotlin.reflect.KClass
 
 class BytesStateSnapper @Inject constructor(
-    @Named("snapping") private val kryo: Kryo,
+    @Named("snapper") private val kryo: Kryo,
     private val generatedComponentRegistry: ComponentRegistry2
-) : StateSnapper<BytesStateRecipe, BytesDeltaRecipe> {
+) : StateSnapper<BytesStateRecipe, BytesDeltaRecipe, BytesCreatedEntitiesWithTracesRecipe> {
     override fun snapState(entities: Entities): BytesStateRecipe {
         return BytesStateRecipe(
             entities.dynamic().map { entity -> packEntity(entity) }
@@ -85,6 +89,16 @@ class BytesStateSnapper @Inject constructor(
     override fun unpackTrace(trace: TraceRecipe): CottaTrace {
         trace as BytesTraceRecipe
         return CottaTrace(trace.elements.map { it.toTraceElement() })
+    }
+
+    override fun snapCreatedEntitiesWithTraces(
+        createdEntities: List<Pair<CottaTrace, EntityId>>,
+        associate: Map<AuthoritativeEntityId, PredictedEntityId>
+    ): BytesCreatedEntitiesWithTracesRecipe {
+        return BytesCreatedEntitiesWithTracesRecipe(
+            traces = createdEntities.map { (trace, entityId) -> Pair(snapTrace(trace), entityId) },
+            mappedPredictedIds = associate
+        )
     }
 
     override fun unpackDeltaRecipe(entities: Entities, recipe: BytesDeltaRecipe) {
@@ -197,6 +211,11 @@ class BytesStateSnapper @Inject constructor(
         )
     }
 
+    private fun unpackEffectRecipe(effectRecipe: BytesEffectRecipe): CottaEffect {
+        val input = Input(effectRecipe.data)
+        return kryo.readClassAndObject(input) as CottaEffect
+    }
+
     private fun TraceElement.toRecipe(): BytesTraceElementRecipe {
         return when (this) {
             is TraceElement.EffectTraceElement -> {
@@ -220,10 +239,5 @@ class BytesStateSnapper @Inject constructor(
 
             is BytesTraceElementRecipe.BytesEntityProcessingTraceElementRecipe -> TODO()
         }
-    }
-
-    private fun unpackEffectRecipe(effectRecipe: BytesEffectRecipe): CottaEffect {
-        val input = Input(effectRecipe.data)
-        return kryo.readClassAndObject(input) as CottaEffect
     }
 }

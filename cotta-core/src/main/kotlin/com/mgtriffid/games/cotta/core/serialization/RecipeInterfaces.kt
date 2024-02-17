@@ -1,7 +1,9 @@
 package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
 
 interface DeltaRecipe {
@@ -49,4 +51,7 @@ interface TraceRecipe {
 }
 
 interface TraceElementRecipe
-interface CreatedEntitiesWithTracesRecipe
+interface CreatedEntitiesWithTracesRecipe {
+    val mappedPredictedIds: Map<AuthoritativeEntityId, PredictedEntityId>
+    val traces: List<Pair<TraceRecipe, EntityId>>
+}

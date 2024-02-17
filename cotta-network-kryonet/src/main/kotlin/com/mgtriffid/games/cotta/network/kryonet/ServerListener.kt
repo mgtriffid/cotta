@@ -29,6 +29,7 @@ class ServerListener(
     }
 
     override fun received(connection: Connection, obj: Any?) {
+        logger.debug { "Received an incoming $obj from ${connection.id}" }
         when (obj) {
             is EnterTheGameDto -> {
                 enterGameIntents.add(Pair(ConnectionId(connection.id), deserialize(obj)))

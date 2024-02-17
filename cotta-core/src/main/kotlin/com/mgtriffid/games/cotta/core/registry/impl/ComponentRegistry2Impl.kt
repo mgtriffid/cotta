@@ -53,7 +53,11 @@ class ComponentRegistry2Impl @Inject constructor(
         return componentClassByKey[key.key.toInt()]
     }
 
-    override fun registerComponent(key: ShortComponentKey, kClass: KClass<out Component<*>>, kClassImpl: KClass<out Component<*>>) {
+    override fun registerComponent(
+        key: ShortComponentKey,
+        kClass: KClass<out Component<*>>,
+        kClassImpl: KClass<out Component<*>>
+    ) {
         componentKeyByClass[kClass] = key
         componentKeyByClass[kClassImpl] = key
         registerForKryo(kClassImpl)
@@ -61,7 +65,11 @@ class ComponentRegistry2Impl @Inject constructor(
         componentClassByKey.add(kClass)
     }
 
-    override fun registerInputComponent(key: ShortComponentKey, kClass: KClass<out InputComponent<*>>, kClassImpl: KClass<out InputComponent<*>>) {
+    override fun registerInputComponent(
+        key: ShortComponentKey,
+        kClass: KClass<out InputComponent<*>>,
+        kClassImpl: KClass<out InputComponent<*>>
+    ) {
         inputComponentKeyByClass[kClass] = key
         inputComponentKeyByClass[kClassImpl] = key
         registerForKryo(kClassImpl)
@@ -69,8 +77,12 @@ class ComponentRegistry2Impl @Inject constructor(
         inputComponentClassByKey.add(kClass)
     }
 
-    override fun registerEffect(key: ShortEffectKey, kClass: KClass<out CottaEffect>) {
-        registerForKryo(kClass)
+    override fun registerEffect(
+        key: ShortEffectKey,
+        kClass: KClass<out CottaEffect>,
+        kClassImpl: KClass<out CottaEffect>
+    ) {
+        registerForKryo(kClassImpl)
         registerEffectForRemapping(key, kClass)
         (idsRemapper as IdsRemapperImpl).registerEffect(kClass, createEffectSpec(kClass))
     }

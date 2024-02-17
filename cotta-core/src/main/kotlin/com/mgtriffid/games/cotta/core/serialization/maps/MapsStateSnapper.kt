@@ -4,7 +4,9 @@ import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.EffectData
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.registry.*
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
@@ -22,7 +24,7 @@ private val logger = KotlinLogging.logger {}
 
 const val SYSTEM_PLAYER_ID = -1
 
-class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
+class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe, MapsCreatedEntitiesWithTracesRecipe> {
     private val snappers = HashMap<ComponentKey, ComponentSnapper<*>>()
     private val deltaSnappers = HashMap<ComponentKey, ComponentDeltaSnapper<*>>()
 
@@ -299,6 +301,18 @@ class MapsStateSnapper : StateSnapper<MapsStateRecipe, MapsDeltaRecipe> {
 
     override fun unpackStateRecipe(entities: Entities, recipe: MapsStateRecipe) {
         recipe.entities.forEach { entityRecipe -> unpackEntityRecipe(entities, entityRecipe) }
+    }
+
+    override fun snapCreatedEntitiesWithTraces(
+        createdEntities: List<Pair<CottaTrace, EntityId>>,
+        associate: Map<AuthoritativeEntityId, PredictedEntityId>
+    ): MapsCreatedEntitiesWithTracesRecipe {
+        return MapsCreatedEntitiesWithTracesRecipe(
+            createdEntities.map { (trace, id) ->
+                Pair(snapTrace(trace), id)
+            },
+            associate
+        )
     }
 
     private fun unpackEntityRecipe(entities: Entities, recipe: MapsEntityRecipe) {

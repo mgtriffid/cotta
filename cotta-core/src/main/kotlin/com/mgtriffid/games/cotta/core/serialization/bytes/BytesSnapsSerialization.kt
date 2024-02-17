@@ -57,10 +57,11 @@ import com.mgtriffid.games.cotta.core.serialization.toDto
 import com.mgtriffid.games.cotta.core.serialization.toEntityId
 import com.mgtriffid.games.cotta.core.serialization.toOwnedBy
 
-class BytesSnapsSerialization : SnapsSerialization<BytesStateRecipe, BytesDeltaRecipe> {
+class BytesSnapsSerialization : SnapsSerialization<BytesStateRecipe, BytesDeltaRecipe, BytesCreatedEntitiesWithTracesRecipe> {
     private val kryo = Kryo()
 
     init {
+        kryo.register(ByteArray::class.java)
         kryo.register(Entity.OwnedBy.Player::class.java)
         kryo.register(PlayerId::class.java)
         kryo.register(Entity.OwnedBy.System::class.java)
@@ -145,8 +146,7 @@ class BytesSnapsSerialization : SnapsSerialization<BytesStateRecipe, BytesDeltaR
         return output.toBytes()
     }
 
-    override fun serializeEntityCreationTracesV2(createdEntities: CreatedEntitiesWithTracesRecipe): ByteArray {
-        createdEntities as BytesCreatedEntitiesWithTracesRecipe
+    override fun serializeEntityCreationTracesV2(createdEntities: BytesCreatedEntitiesWithTracesRecipe): ByteArray {
         val dto =
             BytesCreatedEntitiesWithTracesRecipeDto()
         val tracesDtos =  ArrayList<BytesCreateEntityTraceDto>()

@@ -1,12 +1,13 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.network.ConnectionId
 
-class ClientsGhosts {
+class ClientsGhosts<IR: InputRecipe> {
 
     val playerByConnection = HashMap<ConnectionId, PlayerId>()
-    val data = HashMap<PlayerId, ClientGhost>()
+    val data = HashMap<PlayerId, ClientGhost<IR>>()
 
     // TODO handle removing ghost
     fun addGhost(playerId: PlayerId, connectionId: ConnectionId) {

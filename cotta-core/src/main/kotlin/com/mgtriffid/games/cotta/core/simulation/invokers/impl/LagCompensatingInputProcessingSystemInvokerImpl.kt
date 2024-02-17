@@ -27,7 +27,7 @@ class LagCompensatingInputProcessingSystemInvokerImpl @Inject constructor(
     }
 
     private fun process(entity: Entity, system: InputProcessingSystem) {
-        logger.debug { "${system::class.simpleName} processing entity ${entity.id}" }
+        logger.trace { "${system::class.simpleName} processing entity ${entity.id}" }
         sawTickHolder.tick = entityOwnerSawTickProvider.getSawTickByEntity(entity)
         context.setTrace(CottaTrace.from(TraceElement.InputTraceElement(entity.id)))
         system.process(entity, context)

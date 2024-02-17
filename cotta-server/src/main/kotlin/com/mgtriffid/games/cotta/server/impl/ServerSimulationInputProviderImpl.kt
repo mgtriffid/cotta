@@ -29,21 +29,21 @@ private val logger = KotlinLogging.logger {}
 
 const val REQUIRED_CLIENT_INPUTS_BUFFER = 3
 
-class ServerSimulationInputProviderImpl @Inject constructor(
+class ServerSimulationInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe, CEWTR: CreatedEntitiesWithTracesRecipe> @Inject constructor(
     private val nonPlayerInputProvider: NonPlayerInputProvider,
     @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder,
     private val predictedToAuthoritativeIdMappings: PredictedToAuthoritativeIdMappings,
     private val tickProvider: TickProvider,
     private val networkTransport: CottaServerNetworkTransport,
-    private val inputSerialization: InputSerialization<MapsInputRecipe>,
-    private val inputSnapper: InputSnapper<MapsInputRecipe>,
-    private val stateSnapper: StateSnapper<MapsStateRecipe, MapsDeltaRecipe>,
-    private val snapsSerialization: SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe>,
+    private val inputSerialization: InputSerialization<IR>,
+    private val inputSnapper: InputSnapper<IR>,
+    private val stateSnapper: StateSnapper<SR, DR, CEWTR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR>,
     private val idsRemapper: IdsRemapper,
-    private val clientsGhosts: ClientsGhosts,
+    private val clientsGhosts: ClientsGhosts<IR>,
 ) : ServerSimulationInputProvider {
-    private val buffers = HashMap<PlayerId, ServerIncomingDataBuffer>()
+    private val buffers = HashMap<PlayerId, ServerIncomingDataBuffer<SR, DR, IR>>()
 
     override fun getDelta(): ServerDelta {
         val (clientsInput, predictedClientEntities) = getInput()
@@ -128,11 +128,11 @@ class ServerSimulationInputProviderImpl @Inject constructor(
     }
 
     private fun getInput(): Pair<ClientsInput, ClientsPredictedEntities> {
-        val inputRecipes = ArrayList<MapsInputRecipe>()
+        val inputRecipes = ArrayList<IR>()
         val createdEntities = ArrayList<Pair<CottaTrace, PredictedEntityId>>()
         val playersSawTicks = HashMap<PlayerId, Long>()
 
-        val use: (PlayerId, ClientGhost, Long) -> Unit = { playerId, ghost, tick ->
+        val use: (PlayerId, ClientGhost<IR>, Long) -> Unit = { playerId, ghost, tick ->
             val buffer = getBuffer(playerId)
             playersSawTicks[playerId] = tick
             inputRecipes.add(buffer.inputs[tick]!!)
@@ -140,7 +140,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
             ghost.setLastUsedTick(tick)
             ghost.setLastUsedIncomingInput(buffer.inputs[tick]!!)
         }
-        val usePrevious: (PlayerId, ClientGhost, Long) -> Unit =  { playerId, ghost, tick ->
+        val usePrevious: (PlayerId, ClientGhost<IR>, Long) -> Unit =  { playerId, ghost, tick ->
             playersSawTicks[playerId] = tick
             inputRecipes.add(ghost.getLastUsedIncomingInput())
             ghost.setLastUsedTick(tick)
@@ -177,7 +177,7 @@ class ServerSimulationInputProviderImpl @Inject constructor(
         return Pair(ClientsInput(playersSawTicks, inputs), ClientsPredictedEntities(createdEntities))
     }
 
-    private fun getBuffer(playerId: PlayerId): ServerIncomingDataBuffer {
+    private fun getBuffer(playerId: PlayerId): ServerIncomingDataBuffer<SR, DR, IR> {
         return buffers.computeIfAbsent(playerId) { ServerIncomingDataBuffer() }
     }
 }

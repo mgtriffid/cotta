@@ -10,23 +10,26 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.registry.*
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.core.serialization.maps.*
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
 import kotlin.reflect.KClass
 
-class MapsSerializationModule(val idsRemapper: IdsRemapperImpl) : Module {
+class MapsSerializationModule(
+    private val idsRemapper: IdsRemapperImpl,
+    private val componentsRegistry: ComponentsRegistry
+) : Module {
     override fun configure(binder: Binder) {
         with(binder) {
             val stateSnapper = MapsStateSnapper()
             val snapsSerialization = MapsSnapsSerialization()
             val inputSnapper = MapsInputSnapper()
             val inputSerialization = MapsInputSerialization()
-            val componentsRegistry = ComponentsRegistryImpl()
             bind(MapsStateSnapper::class.java).toInstance(stateSnapper)
-            bind(object : TypeLiteral<StateSnapper<MapsStateRecipe, MapsDeltaRecipe>>() {}).toInstance(stateSnapper)
+            bind(object : TypeLiteral<StateSnapper<MapsStateRecipe, MapsDeltaRecipe, MapsCreatedEntitiesWithTracesRecipe>>() {}).toInstance(stateSnapper)
             bind(MapsSnapsSerialization::class.java).`in`(Scopes.SINGLETON)
-            bind(object : TypeLiteral<SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe>>() {}).toInstance(snapsSerialization)
+            bind(object : TypeLiteral<SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe, MapsCreatedEntitiesWithTracesRecipe>>() {}).toInstance(snapsSerialization)
             bind(MapsInputSnapper::class.java).toInstance(inputSnapper)
             bind(object : TypeLiteral<InputSnapper<MapsInputRecipe>>() {}).toInstance(inputSnapper)
             bind(MapsInputSerialization::class.java).toInstance(inputSerialization)

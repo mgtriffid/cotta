@@ -27,5 +27,9 @@ interface ComponentRegistry2 {
         kClassImpl: KClass<out InputComponent<*>>
     )
 
-    fun registerEffect(key: ShortEffectKey, kClass: KClass<out CottaEffect>)
+    fun registerEffect(
+        key: ShortEffectKey,
+        kClass: KClass<out CottaEffect>,
+        kClassImpl: KClass<out CottaEffect>
+    )
 }

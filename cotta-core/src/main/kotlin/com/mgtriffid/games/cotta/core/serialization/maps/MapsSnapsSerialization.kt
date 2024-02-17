@@ -29,7 +29,7 @@ import com.mgtriffid.games.cotta.core.serialization.toOwnedBy
 
 private val logger = mu.KotlinLogging.logger {}
 
-class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe> {
+class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaRecipe, MapsCreatedEntitiesWithTracesRecipe> {
     // this is not thread safe
     private val kryo = Kryo()
 
@@ -120,8 +120,7 @@ class MapsSnapsSerialization : SnapsSerialization<MapsStateRecipe, MapsDeltaReci
         return output.toBytes()
     }
 
-    override fun serializeEntityCreationTracesV2(createdEntities: CreatedEntitiesWithTracesRecipe): ByteArray {
-        createdEntities as MapsCreatedEntitiesWithTracesRecipe
+    override fun serializeEntityCreationTracesV2(createdEntities: MapsCreatedEntitiesWithTracesRecipe): ByteArray {
         val dto =
             MapsCreatedEntitiesWithTracesRecipeDto()
         val tracesDtos =  ArrayList<MapsCreateEntityTraceDto>()

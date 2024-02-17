@@ -1,13 +1,17 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
+import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
+import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.ConnectionId
@@ -21,12 +25,12 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class CottaGameInstanceImpl @Inject constructor(
+class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     private val game: CottaGame,
     private val componentsRegistry: ComponentsRegistry,
-    private val componentsRegistry2: ComponentRegistry2,
+    private val componentRegistry2: ComponentRegistry2,
     private val network: CottaServerNetworkTransport,
-    private val clientsGhosts: ClientsGhosts,
+    private val clientsGhosts: ClientsGhosts<IR>,
     private val tickProvider: TickProvider,
     @Named("simulation") private val state: CottaState,
     private val serverToClientDataDispatcher: ServerToClientDataDispatcher,
@@ -69,8 +73,18 @@ class CottaGameInstanceImpl @Inject constructor(
 
     private fun registerComponents2() {
         getComponentClasses2().forEachIndexed { index, kClass ->
-            componentsRegistry2.registerComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
+            componentRegistry2.registerComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
                 Class.forName(it).kotlin as KClass<out Component<*>>
+            })
+        }
+        getInputComponentClasses2().forEachIndexed { index, kClass ->
+            componentRegistry2.registerInputComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
+                Class.forName(it).kotlin as KClass<out InputComponent<*>>
+            })
+        }
+        getEffectClasses2().forEachIndexed { index, kClass ->
+            componentRegistry2.registerEffect(ShortEffectKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
+                Class.forName(it).kotlin as KClass<out CottaEffect>
             })
         }
         serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
@@ -83,6 +97,26 @@ class CottaGameInstanceImpl @Inject constructor(
             @Suppress("UNCHECKED_CAST")
             val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
             components.map { it as KClass<out Component<*>> }
+        }
+    }
+
+    private fun getInputComponentClasses2(): List<KClass<out InputComponent<*>>> {
+        val gameClass = game::class
+        return Class.forName(gameClass.qualifiedName + "InputComponents").let {
+            val method = it.getMethod("getComponents")
+            @Suppress("UNCHECKED_CAST")
+            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
+            components.map { it as KClass<out InputComponent<*>> }
+        }
+    }
+
+    private fun getEffectClasses2(): List<KClass<out CottaEffect>> {
+        val gameClass = game::class
+        return Class.forName(gameClass.qualifiedName + "Effects").let {
+            val method = it.getMethod("getEffects")
+            @Suppress("UNCHECKED_CAST")
+            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
+            components.map { it as KClass<out CottaEffect> }
         }
     }
 
@@ -124,7 +158,7 @@ class CottaGameInstanceImpl @Inject constructor(
     }
 
     private fun registerPlayer(connectionId: ConnectionId, intent: EnterGameIntent) {
-        logger.trace { "Received an intent to enter the game from connection '${connectionId.id}'" }
+        logger.debug { "Received an intent to enter the game from connection '${connectionId.id}'" }
         val playerId = serverSimulation.enterGame(intent)
         clientsGhosts.addGhost(playerId, connectionId)
     }

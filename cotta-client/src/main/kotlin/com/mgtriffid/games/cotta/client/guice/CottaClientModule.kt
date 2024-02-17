@@ -24,8 +24,17 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
+import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
 import com.mgtriffid.games.cotta.core.guice.MapsSerializationModule
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
+import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
+import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistry2Impl
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.IdsRemapperImpl
+import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
@@ -56,11 +65,10 @@ class CottaClientModule(
     override fun configure() {
         bind(CottaGame::class.java).toInstance(game)
         bind(CottaClientInput::class.java).toInstance(input)
-        bind(CottaClientNetworkTransport::class.java).to(KryonetCottaClientNetworkTransport::class.java).`in`(Scopes.SINGLETON)
-        bind(NetworkClient::class.java)
-            .to(NetworkClientImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(CottaClientNetworkTransport::class.java).to(KryonetCottaClientNetworkTransport::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(CottaClient::class.java)
-            .to(object: TypeLiteral<CottaClientImpl>(){})
+            .to(object : TypeLiteral<CottaClientImpl>() {})
         bind(Int::class.java).annotatedWith(Names.named("historyLength")).toInstance(8)
         bind(Int::class.java).annotatedWith(Names.named("stateHistoryLength")).toInstance(128)
 
@@ -70,10 +78,9 @@ class CottaClientModule(
         bind(TickProvider::class.java).toInstance(simulationTickProvider)
         bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
 
-        bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(object : TypeLiteral<ClientIncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe>>() {})
-            .toInstance(ClientIncomingDataBuffer())
 
         bind(InvokersFactory::class.java)
             .annotatedWith(Names.named("simulation"))
@@ -85,20 +92,27 @@ class CottaClientModule(
             .to(PredictionInvokersFactory::class.java)
             .`in`(Scopes.SINGLETON)
 
-        bind(PredictedInputProcessingSystemInvoker::class.java).to(PredictedInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(PredictedInputProcessingSystemInvoker::class.java).to(PredictedInputProcessingSystemInvokerImpl::class.java)
+            .`in`(Scopes.SINGLETON)
 
         bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
         bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
         bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(EffectBus::class.java).annotatedWith(Names.named("prediction")).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(EffectBus::class.java).annotatedWith(Names.named("prediction")).to(EffectBusImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("historical")).to(
-            HistoricalLagCompensatingEffectBus::class.java).`in`(Scopes.SINGLETON)
+            HistoricalLagCompensatingEffectBus::class.java
+        ).`in`(Scopes.SINGLETON)
         bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("lagCompensated")).to(
-            LagCompensatingEffectBusImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(LagCompensatingInputProcessingSystemInvoker::class.java).to(LagCompensatingInputProcessingSystemInvokerImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java).`in`(Scopes.SINGLETON)
+            LagCompensatingEffectBusImpl::class.java
+        ).`in`(Scopes.SINGLETON)
+        bind(LagCompensatingInputProcessingSystemInvoker::class.java).to(LagCompensatingInputProcessingSystemInvokerImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(Entities::class.java).annotatedWith(Names.named("latest")).to(LatestEntities::class.java)
-        bind(TracingInputProcessingContext::class.java).to(InputProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(TracingInputProcessingContext::class.java).to(InputProcessingContextImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
         bind(TracingEffectProcessingContext::class.java)
             .annotatedWith(Names.named("lagCompensated"))
@@ -110,13 +124,16 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
         bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(Traces::class.java).annotatedWith(Names.named("prediction")).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Traces::class.java).annotatedWith(Names.named("prediction")).to(TracesImpl::class.java)
+            .`in`(Scopes.SINGLETON)
 
-        bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing")).to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
+        bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing"))
+            .to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
         bind(ServerCreatedEntitiesRegistry::class.java).`in`(Scopes.SINGLETON)
 
         bind(PredictionSimulation::class.java).to(PredictionSimulationImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(CottaState::class.java).annotatedWith(Names.named("prediction")).to(CottaStateImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(CottaState::class.java).annotatedWith(Names.named("prediction")).to(CottaStateImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(TracingInputProcessingContext::class.java)
             .annotatedWith(Names.named("prediction"))
             .to(PredictionInputProcessingContext::class.java)
@@ -146,15 +163,47 @@ class CottaClientModule(
             .annotatedWith(Names.named("prediction"))
             .to(PredictionCreateEntityStrategy::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(PredictedCreatedEntitiesRegistry::class.java).to(PredictedCreatedEntitiesRegistryImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(PredictedEntityIdGenerator::class.java).to(PredictedEntityIdGeneratorImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(PredictedCreatedEntitiesRegistry::class.java).to(PredictedCreatedEntitiesRegistryImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(PredictedEntityIdGenerator::class.java).to(PredictedEntityIdGeneratorImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)
         bind(LocalPlayer::class.java).toInstance(LocalPlayer())
 
         bind(DrawableStateProvider::class.java).to(DrawableStateProviderImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Interpolators::class.java).`in`(Scopes.SINGLETON)
 
-        bind(AuthoritativeToPredictedEntityIdMappings::class.java).to(AuthoritativeToPredictedEntityIdMappingsImpl::class.java).`in`(Scopes.SINGLETON)
-        install(MapsSerializationModule(IdsRemapperImpl()))
+        bind(AuthoritativeToPredictedEntityIdMappings::class.java).to(AuthoritativeToPredictedEntityIdMappingsImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+
+        val idsRemapper = IdsRemapperImpl()
+        val serialization = "bytes"
+        val componentsRegistry = ComponentsRegistryImpl()
+        when (serialization) {
+            "maps" -> {
+                install(MapsSerializationModule(idsRemapper, componentsRegistry))
+                bind(object : TypeLiteral<
+                    ClientIncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe, MapsCreatedEntitiesWithTracesRecipe>>() {})
+                    .toInstance(ClientIncomingDataBuffer())
+                bind(NetworkClient::class.java)
+                    .to(object :
+                        TypeLiteral<NetworkClientImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe, MapsCreatedEntitiesWithTracesRecipe>>() {})
+                    .`in`(Scopes.SINGLETON)
+
+            }
+
+            "bytes" -> {
+                install(BytesSerializationModule(idsRemapper, componentsRegistry))
+                bind(object : TypeLiteral<
+                    ClientIncomingDataBuffer<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+                    .toInstance(ClientIncomingDataBuffer())
+                bind(NetworkClient::class.java)
+                    .to(object :
+                        TypeLiteral<NetworkClientImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+                    .`in`(Scopes.SINGLETON)
+
+            }
+        }
+        bind(ComponentRegistry2::class.java).to(ComponentRegistry2Impl::class.java).`in`(Scopes.SINGLETON)
     }
 }

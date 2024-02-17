@@ -12,15 +12,21 @@ import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataDispatcher
 import mu.KotlinLogging
+import kotlin.math.log
 
 private val logger = KotlinLogging.logger {}
 
-class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> @Inject constructor(
+class ServerToClientDataDispatcherImpl<
+    SR: StateRecipe,
+    DR: DeltaRecipe,
+    IR: InputRecipe,
+    CEWTR: CreatedEntitiesWithTracesRecipe
+    > @Inject constructor(
     private val tick: TickProvider,
-    private val clientsGhosts: ClientsGhosts,
+    private val clientsGhosts: ClientsGhosts<IR>,
     private val network: CottaServerNetworkTransport,
-    private val stateSnapper: StateSnapper<SR, DR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR>,
+    private val stateSnapper: StateSnapper<SR, DR, CEWTR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR>,
     private val inputSnapper: InputSnapper<IR>,
     private val inputSerialization: InputSerialization<IR>,
     private val data: DataForClients,
@@ -31,6 +37,7 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
         logger.debug { "Dispatching data to clients, currentTick=$currentTick" }
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val whatToSend = ghost.whatToSend(currentTick)
+            logger.debug { "Sending data to $playerId : ${whatToSend.necessaryData}" }
             whatToSend.necessaryData.forEach { (tick, kind) ->
                 logger.debug { "Sending tick $tick, kind $kind to $playerId" }
                 network.sendAll(ghost.connectionId, packData(tick, kind, data, playerId))
@@ -61,11 +68,8 @@ class ServerToClientDataDispatcherImpl<SR: StateRecipe, DR: DeltaRecipe, IR: Inp
 
                 val createdEntitiesWithTracesDto = ServerToClientDto()
                 createdEntitiesWithTracesDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CREATED_ENTITIES_V2
-                createdEntitiesWithTracesDto.payload = snapsSerialization.serializeEntityCreationTracesV2(MapsCreatedEntitiesWithTracesRecipe(
-                    data.createdEntities(tick).map { (trace, id) ->
-                        Pair(stateSnapper.snapTrace(trace) as MapsTraceRecipe, id)
-                    },
-                    data.confirmedEntities(tick).filter { (predictedId, _) ->
+                createdEntitiesWithTracesDto.payload = snapsSerialization.serializeEntityCreationTracesV2(
+                    stateSnapper.snapCreatedEntitiesWithTraces(data.createdEntities(tick), data.confirmedEntities(tick).filter { (predictedId, _) ->
                         predictedId.playerId == playerId
                     }.associate { (predictedId, authoritativeId) ->
                         authoritativeId to predictedId

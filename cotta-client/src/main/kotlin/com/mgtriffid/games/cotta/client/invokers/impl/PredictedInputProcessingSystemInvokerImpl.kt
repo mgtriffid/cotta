@@ -31,7 +31,7 @@ class PredictedInputProcessingSystemInvokerImpl @Inject constructor(
     private fun Entity.shouldBePredicted() = ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
 
     private fun process(entity: Entity, system: InputProcessingSystem) {
-        logger.debug { "${system::class.simpleName} processing entity ${entity.id}" }
+        logger.trace { "${system::class.simpleName} processing entity ${entity.id}" }
         context.setTrace(CottaTrace.from(TraceElement.InputTraceElement(entity.id)))
         system.process(entity, context)
         context.setTrace(null)

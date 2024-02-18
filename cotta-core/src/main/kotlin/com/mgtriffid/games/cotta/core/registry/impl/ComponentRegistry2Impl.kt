@@ -5,7 +5,7 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistrationListener
-import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.EffectRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.InputComponentRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 class ComponentRegistry2Impl @Inject constructor(
     @Named("snapper") private val kryo: Kryo,
     private val idsRemapper: IdsRemapper
-) : ComponentRegistry2 {
+) : ComponentRegistry {
     private val inputComponentKeyByClass = HashMap<KClass<out InputComponent<*>>, ShortComponentKey>()
     private var inputComponentClassByKey = ArrayList<KClass<out InputComponent<*>>>()
     private val componentKeyByClass = HashMap<KClass<out Component<*>>, ShortComponentKey>()

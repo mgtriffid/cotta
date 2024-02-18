@@ -11,7 +11,7 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
-import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
@@ -39,7 +39,7 @@ class CottaClientImpl @Inject constructor(
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     override val localPlayer: LocalPlayer,
-    private val componentRegistry2: ComponentRegistry2,
+    private val componentRegistry: ComponentRegistry,
     private val interpolators: Interpolators,
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider
@@ -47,16 +47,16 @@ class CottaClientImpl @Inject constructor(
     private var clientState: ClientState = ClientState.Initial
 
     override fun initialize() {
-        registerComponents2()
+        registerComponents()
 
         registerSystems()
         game.initializeStaticState(state.entities(getCurrentTick()))
         state.setBlank(state.entities(getCurrentTick()))
     }
 
-    private fun registerComponents2() {
-        getComponentClasses2().forEachIndexed { index, kClass ->
-            componentRegistry2.registerComponent(
+    private fun registerComponents() {
+        getComponentClasses().forEachIndexed { index, kClass ->
+            componentRegistry.registerComponent(
                 ShortComponentKey(index.toShort()),
                 kClass,
                 (kClass.qualifiedName + "Impl").let {
@@ -65,8 +65,8 @@ class CottaClientImpl @Inject constructor(
             )
             interpolators.register(kClass)
         }
-        getInputComponentClasses2().forEachIndexed { index, kClass ->
-            componentRegistry2.registerInputComponent(
+        getInputComponentClasses().forEachIndexed { index, kClass ->
+            componentRegistry.registerInputComponent(
                 ShortComponentKey(index.toShort()),
                 kClass,
                 (kClass.qualifiedName + "Impl").let {
@@ -74,8 +74,8 @@ class CottaClientImpl @Inject constructor(
                 }
             )
         }
-        getEffectClasses2().forEachIndexed { index, kClass ->
-            componentRegistry2.registerEffect(
+        getEffectClasses().forEachIndexed { index, kClass ->
+            componentRegistry.registerEffect(
                 ShortEffectKey(index.toShort()),
                 kClass,
                 (kClass.qualifiedName + "Impl").let {
@@ -86,7 +86,7 @@ class CottaClientImpl @Inject constructor(
         }
     }
 
-    private fun getComponentClasses2(): List<KClass<out Component<*>>> {
+    private fun getComponentClasses(): List<KClass<out Component<*>>> {
         val gameClass = game::class
         return Class.forName(gameClass.qualifiedName + "Components").let {
             val method = it.getMethod("getComponents")
@@ -97,7 +97,7 @@ class CottaClientImpl @Inject constructor(
         }
     }
 
-    private fun getInputComponentClasses2(): List<KClass<out InputComponent<*>>> {
+    private fun getInputComponentClasses(): List<KClass<out InputComponent<*>>> {
         val gameClass = game::class
         return Class.forName(gameClass.qualifiedName + "InputComponents").let {
             // GROOM uniformity
@@ -109,7 +109,7 @@ class CottaClientImpl @Inject constructor(
         }
     }
 
-    private fun getEffectClasses2(): List<KClass<out CottaEffect>> {
+    private fun getEffectClasses(): List<KClass<out CottaEffect>> {
         val gameClass = game::class
         return Class.forName(gameClass.qualifiedName + "Effects").let {
             val method = it.getMethod("getEffects")

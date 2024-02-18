@@ -11,7 +11,7 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
-import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
@@ -34,7 +34,7 @@ import kotlin.reflect.KClass
 
 class BytesStateSnapper @Inject constructor(
     @Named("snapper") private val kryo: Kryo,
-    private val generatedComponentRegistry: ComponentRegistry2
+    private val generatedComponentRegistry: ComponentRegistry
 ) : StateSnapper<BytesStateRecipe, BytesDeltaRecipe, BytesCreatedEntitiesWithTracesRecipe> {
     override fun snapState(entities: Entities): BytesStateRecipe {
         return BytesStateRecipe(

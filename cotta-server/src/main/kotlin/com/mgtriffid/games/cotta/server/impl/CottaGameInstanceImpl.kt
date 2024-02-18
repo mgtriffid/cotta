@@ -7,7 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
-import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
@@ -26,7 +26,7 @@ private val logger = KotlinLogging.logger {}
 
 class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     private val game: CottaGame,
-    private val componentRegistry2: ComponentRegistry2,
+    private val componentRegistry: ComponentRegistry,
     private val network: CottaServerNetworkTransport,
     private val clientsGhosts: ClientsGhosts<IR>,
     private val tickProvider: TickProvider,
@@ -41,7 +41,7 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     var running = true
 
     override fun run() {
-        registerComponents2()
+        registerComponents()
         initializeState()
         registerSystems()
         logger.debug { "Tick length is ${game.config.tickLength}" }
@@ -54,26 +54,26 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
         loop.start()
     }
 
-    private fun registerComponents2() {
-        getComponentClasses2().forEachIndexed { index, kClass ->
-            componentRegistry2.registerComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
+    private fun registerComponents() {
+        getComponentClasses().forEachIndexed { index, kClass ->
+            componentRegistry.registerComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
                 Class.forName(it).kotlin as KClass<out Component<*>>
             })
         }
-        getInputComponentClasses2().forEachIndexed { index, kClass ->
-            componentRegistry2.registerInputComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
+        getInputComponentClasses().forEachIndexed { index, kClass ->
+            componentRegistry.registerInputComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
                 Class.forName(it).kotlin as KClass<out InputComponent<*>>
             })
         }
-        getEffectClasses2().forEachIndexed { index, kClass ->
-            componentRegistry2.registerEffect(ShortEffectKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
+        getEffectClasses().forEachIndexed { index, kClass ->
+            componentRegistry.registerEffect(ShortEffectKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
                 Class.forName(it).kotlin as KClass<out CottaEffect>
             })
         }
         serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
     }
 
-    private fun getComponentClasses2(): List<KClass<out Component<*>>> {
+    private fun getComponentClasses(): List<KClass<out Component<*>>> {
         val gameClass = game::class
         return Class.forName(gameClass.qualifiedName + "Components").let {
             val method = it.getMethod("getComponents")
@@ -83,7 +83,7 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
         }
     }
 
-    private fun getInputComponentClasses2(): List<KClass<out InputComponent<*>>> {
+    private fun getInputComponentClasses(): List<KClass<out InputComponent<*>>> {
         val gameClass = game::class
         return Class.forName(gameClass.qualifiedName + "InputComponents").let {
             val method = it.getMethod("getComponents")
@@ -93,7 +93,7 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
         }
     }
 
-    private fun getEffectClasses2(): List<KClass<out CottaEffect>> {
+    private fun getEffectClasses(): List<KClass<out CottaEffect>> {
         val gameClass = game::class
         return Class.forName(gameClass.qualifiedName + "Effects").let {
             val method = it.getMethod("getEffects")

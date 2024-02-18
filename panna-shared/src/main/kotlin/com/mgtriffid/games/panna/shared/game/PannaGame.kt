@@ -13,19 +13,6 @@ import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.physics.createColliderComponent
-import com.mgtriffid.games.panna.shared.game.components.physics.createVelocityComponent
-import com.mgtriffid.games.panna.shared.game.effects.CollisionEffect
-import com.mgtriffid.games.panna.shared.game.effects.MovementEffect
-import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
-import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
-import com.mgtriffid.games.panna.shared.game.effects.shooting.BulletHitsDudeEffect
-import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunHitsDudeEffect
-import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
-import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsDudeVisualEffect
-import com.mgtriffid.games.panna.shared.game.effects.visual.BulletHitsGroundVisualEffect
-import com.mgtriffid.games.panna.shared.game.effects.visual.RailgunVisualEffect
-import com.mgtriffid.games.panna.shared.game.effects.walking.JumpEffect
-import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 import com.mgtriffid.games.panna.shared.game.systems.*
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsumerSystem
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleSystem
@@ -64,20 +51,7 @@ class PannaGame : CottaGame {
     )
 
     override fun initializeServerState(entities: Entities) {
-        // Adding a graverobber, owner should be system
-//        addGraverobber(entities)
-    }
 
-    private fun addGraverobber(entities: Entities) {
-        val graverobber = entities.create()
-        graverobber.addComponent(GraverobberNpcComponent.create())
-        graverobber.addInputComponent(CharacterInputComponent::class)
-        graverobber.addComponent(createWalkingComponent(80f))
-        graverobber.addComponent(createVelocityComponent(0f, 0f))
-        graverobber.addComponent(createPositionComponent(30f, 40f))
-        graverobber.addComponent(createDrawableComponent(
-            TODO("Should not be created as is, should be redone as general NPC")
-        ))
     }
 
     override fun initializeStaticState(entities: Entities) {
@@ -103,27 +77,6 @@ class PannaGame : CottaGame {
         block.addComponent(createSolidTerrainComponent())
         block.addComponent(createColliderComponent(16, 16))
     }
-
-    override val inputComponentClasses = setOf(
-        CharacterInputComponent::class,
-        ShootInputComponent::class,
-        JoinBattleMetaEntityInputComponent::class,
-    )
-
-    override val effectClasses = setOf(
-        WalkingEffect::class,
-        JumpEffect::class,
-        JoinBattleEffect::class,
-        MovementEffect::class,
-        ShootEffect::class,
-        CollisionEffect::class,
-        BulletHitsGroundVisualEffect::class,
-        BulletHitsDudeEffect::class,
-        BulletHitsDudeVisualEffect::class,
-        RailgunVisualEffect::class,
-        RailgunHitsDudeEffect::class,
-        RailgunShotEffect::class,
-    )
 
     override val metaEntitiesInputComponents = setOf(
         JoinBattleMetaEntityInputComponent::class

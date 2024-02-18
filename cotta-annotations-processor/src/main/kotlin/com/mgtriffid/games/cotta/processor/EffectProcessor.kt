@@ -71,7 +71,7 @@ class EffectProcessor(
         fileSpecBuilder.addFunction(
             FunSpec.builder("$FACTORY_METHOD_PREFIX$effectName").addModifiers(KModifier.PUBLIC)
                 .returns(effect.asStarProjectedType().toTypeName())
-                .addStatement("return $name") // TODO this is sus, not used anywhere
+                .addStatement("return $name")
                 .build()
         )
             .addType(

@@ -1,7 +1,5 @@
 package com.mgtriffid.games.cotta.server.guice
 
-import com.esotericsoftware.kryo.Kryo
-import com.google.common.primitives.Bytes
 import com.google.inject.*
 import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaGame
@@ -16,7 +14,6 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
-import com.mgtriffid.games.cotta.core.guice.MapsSerializationModule
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistry2Impl
@@ -25,10 +22,6 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.maps.IdsRemapperImpl
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
@@ -106,50 +99,25 @@ class CottaServerModule(
             bind(CreatedEntities::class.java).to(CreatedEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
             val idsRemapper = IdsRemapperImpl()
-            val serialization = "bytes"
             val componentsRegistry = ComponentsRegistryImpl()
-            when (serialization) {
-                "maps" -> {
-                    install(MapsSerializationModule(idsRemapper, componentsRegistry))
-                    bind(ServerToClientDataDispatcher::class.java)
-                        .to(object :
-                            TypeLiteral<ServerToClientDataDispatcherImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe, MapsCreatedEntitiesWithTracesRecipe>>() {})
-                    bind(CottaGameInstance::class.java).to(object :
-                        TypeLiteral<CottaGameInstanceImpl<MapsInputRecipe>>() {})
+            install(BytesSerializationModule(idsRemapper, componentsRegistry))
+            bind(ServerToClientDataDispatcher::class.java)
+                .to(object :
+                    TypeLiteral<ServerToClientDataDispatcherImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+                .`in`(Scopes.SINGLETON)
+            bind(CottaGameInstance::class.java).to(object :
+                TypeLiteral<CottaGameInstanceImpl<BytesInputRecipe>>() {})
 
-                    bind(ServerSimulationInputProvider::class.java)
-                        .to(object : TypeLiteral<ServerSimulationInputProviderImpl<
-                            MapsStateRecipe,
-                            MapsDeltaRecipe,
-                            MapsInputRecipe,
-                            MapsCreatedEntitiesWithTracesRecipe
-                            >>() {})
-                        .`in`(Scopes.SINGLETON)
+            bind(ServerSimulationInputProvider::class.java)
+                .to(object : TypeLiteral<ServerSimulationInputProviderImpl<
+                    BytesStateRecipe,
+                    BytesDeltaRecipe,
+                    BytesInputRecipe,
+                    BytesCreatedEntitiesWithTracesRecipe
+                    >>() {})
+                .`in`(Scopes.SINGLETON)
 
-                    bind(object : TypeLiteral<ClientsGhosts<MapsInputRecipe>>(){}).`in`(Scopes.SINGLETON)
-                }
-
-                "bytes" -> {
-                    install(BytesSerializationModule(idsRemapper, componentsRegistry))
-                    bind(ServerToClientDataDispatcher::class.java)
-                        .to(object :
-                            TypeLiteral<ServerToClientDataDispatcherImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
-                        .`in`(Scopes.SINGLETON)
-                    bind(CottaGameInstance::class.java).to(object :
-                        TypeLiteral<CottaGameInstanceImpl<BytesInputRecipe>>() {})
-
-                    bind(ServerSimulationInputProvider::class.java)
-                        .to(object : TypeLiteral<ServerSimulationInputProviderImpl<
-                            BytesStateRecipe,
-                            BytesDeltaRecipe,
-                            BytesInputRecipe,
-                            BytesCreatedEntitiesWithTracesRecipe
-                            >>() {})
-                        .`in`(Scopes.SINGLETON)
-
-                    bind(object : TypeLiteral<ClientsGhosts<BytesInputRecipe>>(){}).`in`(Scopes.SINGLETON)
-                }
-            }
+            bind(object : TypeLiteral<ClientsGhosts<BytesInputRecipe>>() {}).`in`(Scopes.SINGLETON)
             bind(ComponentRegistry2::class.java).to(ComponentRegistry2Impl::class.java).`in`(Scopes.SINGLETON)
             bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
 

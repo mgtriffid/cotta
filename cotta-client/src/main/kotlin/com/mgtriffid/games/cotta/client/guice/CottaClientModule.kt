@@ -177,33 +177,16 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
 
         val idsRemapper = IdsRemapperImpl()
-        val serialization = "bytes"
         val componentsRegistry = ComponentsRegistryImpl()
-        when (serialization) {
-            "maps" -> {
-                install(MapsSerializationModule(idsRemapper, componentsRegistry))
-                bind(object : TypeLiteral<
-                    ClientIncomingDataBuffer<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe, MapsCreatedEntitiesWithTracesRecipe>>() {})
-                    .toInstance(ClientIncomingDataBuffer())
-                bind(NetworkClient::class.java)
-                    .to(object :
-                        TypeLiteral<NetworkClientImpl<MapsStateRecipe, MapsDeltaRecipe, MapsInputRecipe, MapsCreatedEntitiesWithTracesRecipe>>() {})
-                    .`in`(Scopes.SINGLETON)
+        install(BytesSerializationModule(idsRemapper, componentsRegistry))
+        bind(object : TypeLiteral<
+            ClientIncomingDataBuffer<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+            .toInstance(ClientIncomingDataBuffer())
+        bind(NetworkClient::class.java)
+            .to(object :
+                TypeLiteral<NetworkClientImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+            .`in`(Scopes.SINGLETON)
 
-            }
-
-            "bytes" -> {
-                install(BytesSerializationModule(idsRemapper, componentsRegistry))
-                bind(object : TypeLiteral<
-                    ClientIncomingDataBuffer<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
-                    .toInstance(ClientIncomingDataBuffer())
-                bind(NetworkClient::class.java)
-                    .to(object :
-                        TypeLiteral<NetworkClientImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
-                    .`in`(Scopes.SINGLETON)
-
-            }
-        }
         bind(ComponentRegistry2::class.java).to(ComponentRegistry2Impl::class.java).`in`(Scopes.SINGLETON)
     }
 }

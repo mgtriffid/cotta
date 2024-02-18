@@ -23,11 +23,9 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.BytesStateSnapper
 import com.mgtriffid.games.cotta.core.serialization.bytes.DataClassSerializer
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEffectRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.IdsRemapperImpl
-import java.lang.reflect.Type
+import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
 
 class BytesSerializationModule(
     private val idsRemapper: IdsRemapperImpl,

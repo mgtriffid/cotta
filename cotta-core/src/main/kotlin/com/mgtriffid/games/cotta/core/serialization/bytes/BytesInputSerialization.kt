@@ -5,7 +5,10 @@ import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
-import com.google.common.primitives.Bytes
+import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
+import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesEntityInputRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesInputComponentRecipeDto
@@ -14,10 +17,6 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityInpu
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputComponentRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
-import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapsEntityInputRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapsInputComponentRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.maps.dto.MapsInputRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.maps.toDto
 import com.mgtriffid.games.cotta.core.serialization.toEntityId
 
 class BytesInputSerialization : InputSerialization<BytesInputRecipe> {
@@ -77,5 +76,23 @@ private fun BytesEntityInputRecipeDto.toRecipe(): BytesEntityInputRecipe {
 
 private fun BytesInputComponentRecipeDto.toRecipe(): BytesInputComponentRecipe {
     return BytesInputComponentRecipe(data)
+}
+
+fun EntityId.toDto(): EntityIdDto {
+    return when (this) {
+        is AuthoritativeEntityId -> EntityIdDto().also {
+            it.id = id
+            it.kind = EntityIdDto.Kind.AUTHORITATIVE
+        }
+        is PredictedEntityId -> EntityIdDto().also {
+            it.id = id
+            it.kind = EntityIdDto.Kind.PREDICTED
+            it.playerId = playerId.id
+        }
+        is StaticEntityId -> EntityIdDto().also {
+            it.id = id
+            it.kind = EntityIdDto.Kind.STATIC
+        }
+    }
 }
 // </editor-fold>

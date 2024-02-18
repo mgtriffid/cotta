@@ -4,7 +4,6 @@ import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import mu.KotlinLogging
 import java.util.*

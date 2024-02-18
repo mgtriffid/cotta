@@ -15,7 +15,7 @@ import com.mgtriffid.games.cotta.core.registry.createEffectSpec
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapper
 import com.mgtriffid.games.cotta.core.serialization.bytes.DataClassSerializer
 import com.mgtriffid.games.cotta.core.serialization.bytes.ObjectSerializer
-import com.mgtriffid.games.cotta.core.serialization.maps.IdsRemapperImpl
+import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import kotlin.reflect.KClass

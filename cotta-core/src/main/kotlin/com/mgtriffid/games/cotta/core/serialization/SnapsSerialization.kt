@@ -2,9 +2,6 @@ package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsTraceRecipe
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 
 interface SnapsSerialization<SR : StateRecipe, DR : DeltaRecipe, CEWTR: CreatedEntitiesWithTracesRecipe> {
     fun serializeDeltaRecipe(recipe: DR): ByteArray

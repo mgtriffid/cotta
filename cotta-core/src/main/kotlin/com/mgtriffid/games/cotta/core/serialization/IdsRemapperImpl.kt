@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.core.serialization.maps
+package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.ComponentData
 import com.mgtriffid.games.cotta.EffectData
@@ -8,17 +8,22 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
-import com.mgtriffid.games.cotta.core.registry.*
-import com.mgtriffid.games.cotta.core.serialization.IdsRemapper
+import com.mgtriffid.games.cotta.core.registry.ComponentKey
+import com.mgtriffid.games.cotta.core.registry.ComponentSpec
+import com.mgtriffid.games.cotta.core.registry.EffectKey
+import com.mgtriffid.games.cotta.core.registry.EffectSpec
+import com.mgtriffid.games.cotta.core.registry.StringComponentKey
+import com.mgtriffid.games.cotta.core.registry.StringEffectKey
 import mu.KotlinLogging
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.*
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.jvm.kotlinFunction
-
-private val logger = KotlinLogging.logger {}
 
 class IdsRemapperImpl : IdsRemapper {
 
@@ -272,3 +277,5 @@ class IdsRemapperImpl : IdsRemapper {
             ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
     }
 }
+
+private val logger = KotlinLogging.logger {}

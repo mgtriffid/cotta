@@ -9,9 +9,6 @@ import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.serialization.*
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace

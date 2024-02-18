@@ -25,7 +25,6 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
-import com.mgtriffid.games.cotta.core.guice.MapsSerializationModule
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
 import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistry2Impl
@@ -33,11 +32,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEnt
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.IdsRemapperImpl
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsCreatedEntitiesWithTracesRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsInputRecipe
-import com.mgtriffid.games.cotta.core.serialization.maps.recipe.MapsStateRecipe
+import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks

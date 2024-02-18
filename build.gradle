@@ -184,20 +184,6 @@ project(":cotta-core") {
     }
 }
 
-project(":cotta-serialization") {
-    apply plugin: "com.google.devtools.ksp"
-
-    dependencies {
-        implementation project(":cotta-core")
-        implementation project(":cotta-annotations")
-        implementation project(":cotta-annotations-processor")
-
-        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-
-        ksp project(":cotta-annotations-processor")
-    }
-}
-
 project(":cotta-client") {
 
     dependencies {

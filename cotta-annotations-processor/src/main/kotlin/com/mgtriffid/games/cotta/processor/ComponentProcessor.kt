@@ -13,7 +13,6 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import com.mgtriffid.games.cotta.core.entities.impl.ComponentInternal
-import com.mgtriffid.games.cotta.processor.serialization.SerializerGenerator
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -40,7 +39,6 @@ class ComponentProcessor(
         components.forEach {
             writeComponentImplementation(it)
         }
-        writeSerializers(components)
         writeComponentsClassRegistry(components, game)
     }
 
@@ -204,9 +202,5 @@ class ComponentProcessor(
                 ).build()
         )
         fileSpecBuilder.build().writeTo(codeGenerator, false)
-    }
-
-    private fun writeSerializers(components: List<KSClassDeclaration>) {
-        SerializerGenerator(resolver, codeGenerator, logger).generate(components)
     }
 }

@@ -8,8 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
-import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
-import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
+import com.mgtriffid.games.cotta.core.registry.registerComponents
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
@@ -41,7 +40,8 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     var running = true
 
     override fun run() {
-        registerComponents()
+        registerComponents(game, componentRegistry)
+        serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
         initializeState()
         registerSystems()
         logger.debug { "Tick length is ${game.config.tickLength}" }
@@ -52,53 +52,6 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
             tick()
         }
         loop.start()
-    }
-
-    private fun registerComponents() {
-        getComponentClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerComponent(ShortComponentKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out Component<*>>)
-        }
-        getInputComponentClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerInputComponent(ShortComponentKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out InputComponent<*>>)
-        }
-        getEffectClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerEffect(ShortEffectKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out CottaEffect>)
-        }
-        serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
-    }
-
-    private fun getImplKClass(kClass: KClass<*>): KClass<*> = (kClass.qualifiedName + "Impl").let {
-        Class.forName(it).kotlin
-    }
-
-    private fun getComponentClasses(): List<KClass<out Component<*>>> {
-        val gameClass = game::class
-        return Class.forName(gameClass.qualifiedName + "Components").let {
-            val method = it.getMethod("getComponents")
-            @Suppress("UNCHECKED_CAST")
-            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
-            components.map { it as KClass<out Component<*>> }
-        }
-    }
-
-    private fun getInputComponentClasses(): List<KClass<out InputComponent<*>>> {
-        val gameClass = game::class
-        return Class.forName(gameClass.qualifiedName + "InputComponents").let {
-            val method = it.getMethod("getComponents")
-            @Suppress("UNCHECKED_CAST")
-            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
-            components.map { it as KClass<out InputComponent<*>> }
-        }
-    }
-
-    private fun getEffectClasses(): List<KClass<out CottaEffect>> {
-        val gameClass = game::class
-        return Class.forName(gameClass.qualifiedName + "Effects").let {
-            val method = it.getMethod("getEffects")
-            @Suppress("UNCHECKED_CAST")
-            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
-            components.map { it as KClass<out CottaEffect> }
-        }
     }
 
     private fun initializeState() {

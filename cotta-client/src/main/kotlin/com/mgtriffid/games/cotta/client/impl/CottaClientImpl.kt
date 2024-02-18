@@ -12,8 +12,7 @@ import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
-import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
-import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
+import com.mgtriffid.games.cotta.core.registry.getComponentClasses
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.utils.now
@@ -55,69 +54,10 @@ class CottaClientImpl @Inject constructor(
     }
 
     private fun registerComponents() {
-        getComponentClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerComponent(
-                ShortComponentKey(index.toShort()),
-                kClass,
-                (kClass.qualifiedName + "Impl").let {
-                    Class.forName(it).kotlin as KClass<out Component<*>>
-                }
-            )
+        getComponentClasses(game).forEach{ kClass ->
             interpolators.register(kClass)
         }
-        getInputComponentClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerInputComponent(
-                ShortComponentKey(index.toShort()),
-                kClass,
-                (kClass.qualifiedName + "Impl").let {
-                    Class.forName(it).kotlin as KClass<out InputComponent<*>>
-                }
-            )
-        }
-        getEffectClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerEffect(
-                ShortEffectKey(index.toShort()),
-                kClass,
-                (kClass.qualifiedName + "Impl").let {
-                    Class.forName(it).kotlin as KClass<out CottaEffect>
-                }
-            )
-
-        }
-    }
-
-    private fun getComponentClasses(): List<KClass<out Component<*>>> {
-        val gameClass = game::class
-        return Class.forName(gameClass.qualifiedName + "Components").let {
-            val method = it.getMethod("getComponents")
-
-            @Suppress("UNCHECKED_CAST")
-            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
-            components.map { it as KClass<out Component<*>> }
-        }
-    }
-
-    private fun getInputComponentClasses(): List<KClass<out InputComponent<*>>> {
-        val gameClass = game::class
-        return Class.forName(gameClass.qualifiedName + "InputComponents").let {
-            // GROOM uniformity
-            val method = it.getMethod("getComponents")
-
-            @Suppress("UNCHECKED_CAST")
-            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
-            components.map { it as KClass<out InputComponent<*>> }
-        }
-    }
-
-    private fun getEffectClasses(): List<KClass<out CottaEffect>> {
-        val gameClass = game::class
-        return Class.forName(gameClass.qualifiedName + "Effects").let {
-            val method = it.getMethod("getEffects")
-
-            @Suppress("UNCHECKED_CAST")
-            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
-            components.map { it as KClass<out CottaEffect> }
-        }
+        com.mgtriffid.games.cotta.core.registry.registerComponents(game, componentRegistry)
     }
 
     override fun tick() {
@@ -288,9 +228,9 @@ class CottaClientImpl @Inject constructor(
     }
 
     sealed class ClientState {
-        object Initial : ClientState()
+        data object Initial : ClientState()
         class AwaitingGameState(val since: Long) : ClientState()
-        object Disconnected : ClientState()
+        data object Disconnected : ClientState()
         class Running(val currentTick: Long) : ClientState() // not sure again
     }
 }

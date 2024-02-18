@@ -12,7 +12,6 @@ import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
@@ -40,7 +39,6 @@ class CottaClientImpl @Inject constructor(
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     override val localPlayer: LocalPlayer,
-    private val componentsRegistry: ComponentsRegistry,
     private val componentRegistry2: ComponentRegistry2,
     private val interpolators: Interpolators,
     @Named("simulation") private val state: CottaState,
@@ -49,7 +47,6 @@ class CottaClientImpl @Inject constructor(
     private var clientState: ClientState = ClientState.Initial
 
     override fun initialize() {
-        registerComponents()
         registerComponents2()
 
         registerSystems()
@@ -66,6 +63,7 @@ class CottaClientImpl @Inject constructor(
                     Class.forName(it).kotlin as KClass<out Component<*>>
                 }
             )
+            interpolators.register(kClass)
         }
         getInputComponentClasses2().forEachIndexed { index, kClass ->
             componentRegistry2.registerInputComponent(
@@ -274,32 +272,6 @@ class CottaClientImpl @Inject constructor(
             logger.debug { "Meta entity not found" }
         }
         return entity
-    }
-
-    // TODO probably this is wrong place
-    private fun registerComponents() {
-        logger.debug { "Registering components to ${componentsRegistry.hashCode()}" }
-        getComponentClasses().forEach {
-            componentsRegistry.registerComponentClass(it)
-            interpolators.register(it)
-        }
-        game.inputComponentClasses.forEach {
-            componentsRegistry.registerInputComponentClass(it)
-        }
-        game.effectClasses.forEach { effectClass ->
-            componentsRegistry.registerEffectClass(effectClass)
-        }
-    }
-
-    private fun getComponentClasses(): Set<KClass<out Component<*>>> {
-        val gameClass = game::class
-        return Class.forName(gameClass.qualifiedName + "Components").let {
-            val method = it.getMethod("getComponents")
-
-            @Suppress("UNCHECKED_CAST")
-            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
-            components.map { it as KClass<out Component<*>> }.toSet()
-        }
     }
 
     private fun registerSystems() {

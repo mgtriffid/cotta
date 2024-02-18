@@ -26,7 +26,6 @@ import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistryImpl
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistry2Impl
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
@@ -172,8 +171,7 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
 
         val idsRemapper = IdsRemapperImpl()
-        val componentsRegistry = ComponentsRegistryImpl()
-        install(BytesSerializationModule(idsRemapper, componentsRegistry))
+        install(BytesSerializationModule(idsRemapper))
         bind(object : TypeLiteral<
             ClientIncomingDataBuffer<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
             .toInstance(ClientIncomingDataBuffer())

@@ -1,11 +1,16 @@
-package com.mgtriffid.games.cotta.core.registry
+package com.mgtriffid.games.cotta.core.registry.impl
 
 import com.mgtriffid.games.cotta.ComponentData
-import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.entities.Component
-import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.registry.ComponentKey
+import com.mgtriffid.games.cotta.core.registry.ComponentSpec
+import com.mgtriffid.games.cotta.core.registry.EffectKey
+import com.mgtriffid.games.cotta.core.registry.EffectSpec
+import com.mgtriffid.games.cotta.core.registry.FieldMutability
+import com.mgtriffid.games.cotta.core.registry.FieldSpec
+import com.mgtriffid.games.cotta.core.registry.FieldType
+import com.mgtriffid.games.cotta.core.registry.StringComponentKey
+import com.mgtriffid.games.cotta.core.registry.StringEffectKey
 import mu.KotlinLogging
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -14,67 +19,6 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.hasAnnotation
 
 private val logger = KotlinLogging.logger {}
-
-/**
- * Knows about all registered component classes. Keeps component descriptors. They are needed for serialization.
- * Serializers use this registry. Something needs to build component from data and descriptor.
- */
-interface ComponentsRegistry {
-    companion object {
-        fun getInstance(): ComponentsRegistry = ComponentsRegistryImpl()
-    }
-
-    fun <C: Component<C>> registerComponentClass(kClass: KClass<C>)
-    fun <C: InputComponent<C>> registerInputComponentClass(kClass: KClass<C>)
-    fun <C: CottaEffect> registerEffectClass(kClass: KClass<C>)
-    fun addRegistrationListener(listener: ComponentRegistrationListener)
-    fun addInputComponentRegistrationListener(listener: InputComponentRegistrationListener)
-    fun addEffectRegistrationListener(listener: EffectRegistrationListener)
-}
-
-class ComponentsRegistryImpl: ComponentsRegistry {
-
-    private val data: MutableMap<ComponentKey, ComponentSpec> = HashMap()
-    private val effectSpecs: MutableMap<EffectKey, EffectSpec> = HashMap()
-
-    private val componentRegistrationListeners = ArrayList<ComponentRegistrationListener>()
-    private val inputComponentsRegistrationListeners = ArrayList<InputComponentRegistrationListener>()
-    private val effectRegistrationListeners = ArrayList<EffectRegistrationListener>()
-
-    override fun <C : Component<C>> registerComponentClass(kClass: KClass<C>) {
-        logger.debug { "Registering class ${kClass.qualifiedName} as component"}
-        val descriptor = createComponentSpec(kClass)
-        data[descriptor.key] = descriptor
-        componentRegistrationListeners.forEach { it.onComponentRegistration(kClass, descriptor) }
-    }
-
-    override fun <C : InputComponent<C>> registerInputComponentClass(kClass: KClass<C>) {
-        logger.debug { "Registering class ${kClass.qualifiedName} as input component"}
-        val descriptor = createComponentSpec(kClass)
-        data[descriptor.key] = descriptor
-        inputComponentsRegistrationListeners.forEach { it.onInputComponentRegistration(kClass, descriptor) }
-
-    }
-
-    override fun <C : CottaEffect> registerEffectClass(kClass: KClass<C>) {
-        logger.debug { "Registering class ${kClass.qualifiedName} as effect"}
-        val descriptor = createEffectSpec(kClass)
-        effectSpecs[descriptor.key] = descriptor
-        effectRegistrationListeners.forEach { it.onEffectRegistration(kClass, descriptor) }
-    }
-
-    override fun addRegistrationListener(listener: ComponentRegistrationListener) {
-        componentRegistrationListeners.add(listener)
-    }
-
-    override fun addInputComponentRegistrationListener(listener: InputComponentRegistrationListener) {
-        inputComponentsRegistrationListeners.add(listener)
-    }
-
-    override fun addEffectRegistrationListener(listener: EffectRegistrationListener) {
-        effectRegistrationListeners.add(listener)
-    }
-}
 
 private data class ComponentSpecImpl(
     override val key: ComponentKey,

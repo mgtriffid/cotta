@@ -10,8 +10,6 @@ import com.mgtriffid.games.cotta.core.registry.EffectRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.InputComponentRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
-import com.mgtriffid.games.cotta.core.registry.createComponentSpec
-import com.mgtriffid.games.cotta.core.registry.createEffectSpec
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapper
 import com.mgtriffid.games.cotta.core.serialization.bytes.DataClassSerializer
 import com.mgtriffid.games.cotta.core.serialization.bytes.ObjectSerializer

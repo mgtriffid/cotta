@@ -8,7 +8,6 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry2
-import com.mgtriffid.games.cotta.core.registry.ComponentsRegistry
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
@@ -27,7 +26,6 @@ private val logger = KotlinLogging.logger {}
 
 class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     private val game: CottaGame,
-    private val componentsRegistry: ComponentsRegistry,
     private val componentRegistry2: ComponentRegistry2,
     private val network: CottaServerNetworkTransport,
     private val clientsGhosts: ClientsGhosts<IR>,
@@ -43,7 +41,6 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     var running = true
 
     override fun run() {
-        registerComponents()
         registerComponents2()
         initializeState()
         registerSystems()
@@ -55,20 +52,6 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
             tick()
         }
         loop.start()
-    }
-
-    // TODO probably this is wrong place
-    private fun registerComponents() {
-        getComponentClasses().forEach {
-            componentsRegistry.registerComponentClass(it)
-        }
-        game.inputComponentClasses.forEach {
-            componentsRegistry.registerInputComponentClass(it)
-        }
-        game.effectClasses.forEach {
-            componentsRegistry.registerEffectClass(it)
-        }
-        serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
     }
 
     private fun registerComponents2() {
@@ -117,17 +100,6 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
             @Suppress("UNCHECKED_CAST")
             val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
             components.map { it as KClass<out CottaEffect> }
-        }
-    }
-
-    // TODO dry
-    private fun getComponentClasses(): Set<KClass<out Component<*>>> {
-        val gameClass = game::class
-        return Class.forName(gameClass.qualifiedName + "Components").let {
-            val method = it.getMethod("getComponents")
-            @Suppress("UNCHECKED_CAST")
-            val components = method.invoke(it.getConstructor().newInstance()) as List<KClass<*>>
-            components.map { it as KClass<out Component<*>> }.toSet()
         }
     }
 

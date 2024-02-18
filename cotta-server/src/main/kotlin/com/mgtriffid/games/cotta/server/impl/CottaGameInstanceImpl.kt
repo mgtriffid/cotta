@@ -56,21 +56,19 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
 
     private fun registerComponents() {
         getComponentClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
-                Class.forName(it).kotlin as KClass<out Component<*>>
-            })
+            componentRegistry.registerComponent(ShortComponentKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out Component<*>>)
         }
         getInputComponentClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerInputComponent(ShortComponentKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
-                Class.forName(it).kotlin as KClass<out InputComponent<*>>
-            })
+            componentRegistry.registerInputComponent(ShortComponentKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out InputComponent<*>>)
         }
         getEffectClasses().forEachIndexed { index, kClass ->
-            componentRegistry.registerEffect(ShortEffectKey(index.toShort()), kClass, (kClass.qualifiedName + "Impl").let {
-                Class.forName(it).kotlin as KClass<out CottaEffect>
-            })
+            componentRegistry.registerEffect(ShortEffectKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out CottaEffect>)
         }
         serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
+    }
+
+    private fun getImplKClass(kClass: KClass<*>): KClass<*> = (kClass.qualifiedName + "Impl").let {
+        Class.forName(it).kotlin
     }
 
     private fun getComponentClasses(): List<KClass<out Component<*>>> {

@@ -4,6 +4,11 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.mgtriffid.games.cotta.core.codegen.Constants.COMPONENTS_CLASS_SUFFIX
+import com.mgtriffid.games.cotta.core.codegen.Constants.COPY_METHOD
+import com.mgtriffid.games.cotta.core.codegen.Constants.FACTORY_METHOD_PREFIX
+import com.mgtriffid.games.cotta.core.codegen.Constants.GET_COMPONENTS_METHOD
+import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
@@ -22,8 +27,6 @@ import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import kotlin.reflect.KClass
-
-const val IMPL_SUFFIX = "Impl"
 
 // TODO this class is full of weird assumptions and should be refactored to return more specific objects defining the
 //  components and their properties, it should not rely on naming conventions.
@@ -77,9 +80,9 @@ class ComponentProcessor(
         component: KSClassDeclaration
     ) {
         fileSpecBuilder.addFunction(
-            FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
+            FunSpec.builder("$FACTORY_METHOD_PREFIX${componentName}").addModifiers(KModifier.PUBLIC)
                 .returns(component.asStarProjectedType().toTypeName())
-                .addStatement("return ${componentName}$IMPL_SUFFIX")
+                .addStatement("return $componentName$IMPL_SUFFIX")
                 .build()
         )
             .addType(
@@ -87,7 +90,7 @@ class ComponentProcessor(
                     .addSuperinterface(component.asStarProjectedType().toTypeName())
                     .addSuperinterface(ComponentInternal::class.asTypeName())
                     .addFunction(
-                        FunSpec.builder("copy").addStatement("return this")
+                        FunSpec.builder(COPY_METHOD).addStatement("return this")
                             .addModifiers(KModifier.OVERRIDE)
                             .returns(component.asStarProjectedType().toTypeName())
                             .build()
@@ -136,7 +139,7 @@ class ComponentProcessor(
     private fun copy(
         properties: List<ProcessableComponentFieldSpec>,
         component: KSClassDeclaration
-    ) = FunSpec.builder("copy").addStatement(
+    ) = FunSpec.builder(COPY_METHOD).addStatement(
         if (properties.none { p -> p.isMutable })
             "return this"
         else
@@ -163,14 +166,14 @@ class ComponentProcessor(
         componentName: String,
         component: KSClassDeclaration,
         properties: List<ProcessableComponentFieldSpec>
-    ) = FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
+    ) = FunSpec.builder("$FACTORY_METHOD_PREFIX$componentName").addModifiers(KModifier.PUBLIC)
         .returns(component.asStarProjectedType().toTypeName())
         .addParameters(
             properties.map { spec ->
                 ParameterSpec.builder(spec.name, spec.type).build()
             }
         )
-        .addStatement("return ${componentName}$IMPL_SUFFIX(${properties.joinToString(", ") { it.name }})")
+        .addStatement("return $componentName$IMPL_SUFFIX(${properties.joinToString(", ") { it.name }})")
         .build()
 
     private fun writeComponentsClassRegistry(
@@ -180,11 +183,11 @@ class ComponentProcessor(
         if (components.isEmpty()) return
         val pkg = game.packageName.asString()
         val gameName = game.simpleName.asString()
-        val fileSpecBuilder = FileSpec.builder(pkg, "${gameName}Components")
+        val fileSpecBuilder = FileSpec.builder(pkg, "$gameName$IMPL_SUFFIX")
         fileSpecBuilder.addType(
-            TypeSpec.classBuilder("${gameName}Components")
+            TypeSpec.classBuilder("$gameName$COMPONENTS_CLASS_SUFFIX")
                 .addFunction(
-                    FunSpec.builder("getComponents")
+                    FunSpec.builder(GET_COMPONENTS_METHOD)
                         .returns(
                             List::class.asTypeName().parameterizedBy(
                                 ClassName(

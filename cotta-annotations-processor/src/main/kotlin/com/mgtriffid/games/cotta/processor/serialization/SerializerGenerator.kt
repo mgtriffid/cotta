@@ -10,7 +10,6 @@ import com.mgtriffid.games.cotta.processor.ProcessableComponentFieldSpec
 import com.mgtriffid.games.cotta.processor.getProcessableComponentFieldSpecs
 import com.mgtriffid.games.cotta.utils.divideRoundUp
 import com.squareup.kotlinpoet.BYTE
-import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.DOUBLE
 import com.squareup.kotlinpoet.FLOAT
 import com.squareup.kotlinpoet.FileSpec
@@ -23,10 +22,10 @@ import com.squareup.kotlinpoet.UNIT
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
-import javax.swing.text.html.parser.Entity
 
 private const val DELTA_MASK_VARIABLE = "deltaMask"
 
+// TODO remove
 class SerializerGenerator(
     private val resolver: Resolver,
     private val codeGenerator: CodeGenerator,

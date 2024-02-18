@@ -4,6 +4,12 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.mgtriffid.games.cotta.core.codegen.Constants.COPY_METHOD
+import com.mgtriffid.games.cotta.core.codegen.Constants.EFFECTS_CLASS_SUFFIX
+import com.mgtriffid.games.cotta.core.codegen.Constants.FACTORY_METHOD_PREFIX
+import com.mgtriffid.games.cotta.core.codegen.Constants.GET_EFFECTS_METHOD
+import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
+import com.mgtriffid.games.cotta.core.codegen.Constants.SINGLETON_COMPONENT_SUFFIX
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
@@ -37,7 +43,7 @@ class EffectProcessor(
         val effectName = effect.simpleName.asString()
 
         val properties: List<ProcessableEffectFieldSpec> = getProcessableEffectFieldSpecs(effect)
-        val fileSpecBuilder = FileSpec.builder(pkg, "${effectName}$IMPL_SUFFIX")
+        val fileSpecBuilder = FileSpec.builder(pkg, "$effectName$IMPL_SUFFIX")
         if (properties.isNotEmpty()) {
             buildDataClassImplementation(fileSpecBuilder, effectName, effect, properties)
         } else {
@@ -64,16 +70,16 @@ class EffectProcessor(
         effect: KSClassDeclaration
     ) {
         fileSpecBuilder.addFunction(
-            FunSpec.builder("create${effectName}").addModifiers(KModifier.PUBLIC)
+            FunSpec.builder("$FACTORY_METHOD_PREFIX$effectName").addModifiers(KModifier.PUBLIC)
                 .returns(effect.asStarProjectedType().toTypeName())
-                .addStatement("return ${effectName}Instance")
+                .addStatement("return $effectName$SINGLETON_COMPONENT_SUFFIX")
                 .build()
         )
             .addType(
-                TypeSpec.objectBuilder("${effectName}Instance")
+                TypeSpec.objectBuilder("$effectName$SINGLETON_COMPONENT_SUFFIX")
                     .addSuperinterface(effect.asStarProjectedType().toTypeName())
                     .addFunction(
-                        FunSpec.builder("copy").addStatement("return this")
+                        FunSpec.builder(COPY_METHOD).addStatement("return this")
                             .addModifiers(KModifier.OVERRIDE)
                             .returns(effect.asStarProjectedType().toTypeName())
                             .build()
@@ -86,7 +92,7 @@ class EffectProcessor(
         effectName: String,
         effect: KSClassDeclaration,
         properties: List<ProcessableEffectFieldSpec>
-    ) = TypeSpec.classBuilder("${effectName}${IMPL_SUFFIX}")
+    ) = TypeSpec.classBuilder("$effectName$IMPL_SUFFIX")
         .addSuperinterface(effect.asStarProjectedType().toTypeName())
         .addModifiers(KModifier.DATA, KModifier.INTERNAL)
         .primaryConstructor(
@@ -116,14 +122,14 @@ class EffectProcessor(
         effectName: String,
         effect: KSClassDeclaration,
         properties: List<ProcessableEffectFieldSpec>
-    ) = FunSpec.builder("create${effectName}").addModifiers(KModifier.PUBLIC)
+    ) = FunSpec.builder("$FACTORY_METHOD_PREFIX$effectName").addModifiers(KModifier.PUBLIC)
         .returns(effect.asStarProjectedType().toTypeName())
         .addParameters(
             properties.map { spec ->
                 ParameterSpec.builder(spec.name, spec.type).build()
             }
         )
-        .addStatement("return ${effectName}$IMPL_SUFFIX(${properties.joinToString(", ") { it.name }})")
+        .addStatement("return $effectName$IMPL_SUFFIX(${properties.joinToString(", ") { it.name }})")
         .build()
 
 
@@ -138,11 +144,11 @@ class EffectProcessor(
         if (effects.isEmpty()) return
         val pkg = game.packageName.asString()
         val gameName = game.simpleName.asString()
-        val fileSpecBuilder = FileSpec.builder(pkg, "${gameName}Effects")
+        val fileSpecBuilder = FileSpec.builder(pkg, "$gameName$EFFECTS_CLASS_SUFFIX")
         fileSpecBuilder.addType(
-            TypeSpec.classBuilder("${gameName}Effects")
+            TypeSpec.classBuilder("$gameName$EFFECTS_CLASS_SUFFIX")
                 .addFunction(
-                    FunSpec.builder("getEffects")
+                    FunSpec.builder(GET_EFFECTS_METHOD)
                         .returns(
                             List::class.asTypeName().parameterizedBy(
                                 ClassName(

@@ -4,6 +4,10 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.mgtriffid.games.cotta.core.codegen.Constants.FACTORY_METHOD_PREFIX
+import com.mgtriffid.games.cotta.core.codegen.Constants.GET_INPUT_COMPONENTS_METHOD
+import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
+import com.mgtriffid.games.cotta.core.codegen.Constants.INPUT_COMPONENTS_CLASS_SUFFIX
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
@@ -49,7 +53,7 @@ class InputComponentProcessor(
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
         val properties: List<ProcessableInputComponentFieldSpec> = getProcessableInputComponentFieldSpecs(component)
-        val fileSpecBuilder = FileSpec.builder(pkg, "${componentName}Impl")
+        val fileSpecBuilder = FileSpec.builder(pkg, "$componentName$IMPL_SUFFIX")
         buildDataClassImplementation(fileSpecBuilder, componentName, component, properties)
         fileSpecBuilder.build().writeTo(codeGenerator, false)
     }
@@ -69,7 +73,7 @@ class InputComponentProcessor(
         componentName: String,
         component: KSClassDeclaration,
         properties: List<ProcessableInputComponentFieldSpec>
-    ) = FunSpec.builder("create${componentName}").addModifiers(KModifier.PUBLIC)
+    ) = FunSpec.builder("$FACTORY_METHOD_PREFIX$componentName").addModifiers(KModifier.PUBLIC)
         .returns(component.asStarProjectedType().toTypeName())
         .addParameters(
             properties.map { spec ->
@@ -117,11 +121,11 @@ class InputComponentProcessor(
         if (components.isEmpty()) return
         val pkg = game.packageName.asString()
         val gameName = game.simpleName.asString()
-        val fileSpecBuilder = FileSpec.builder(pkg, "${gameName}InputComponents")
+        val fileSpecBuilder = FileSpec.builder(pkg, "$gameName$INPUT_COMPONENTS_CLASS_SUFFIX")
         fileSpecBuilder.addType(
-            TypeSpec.classBuilder("${gameName}InputComponents")
+            TypeSpec.classBuilder("$gameName$INPUT_COMPONENTS_CLASS_SUFFIX")
                 .addFunction(
-                    FunSpec.builder("getComponents")
+                    FunSpec.builder(GET_INPUT_COMPONENTS_METHOD)
                         .returns(
                             List::class.asTypeName().parameterizedBy(
                                 ClassName(

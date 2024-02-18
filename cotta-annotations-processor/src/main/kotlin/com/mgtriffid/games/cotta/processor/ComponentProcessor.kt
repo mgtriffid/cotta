@@ -77,14 +77,15 @@ class ComponentProcessor(
         componentName: String,
         component: KSClassDeclaration
     ) {
+        val name = "${componentName}$IMPL_SUFFIX"
         fileSpecBuilder.addFunction(
             FunSpec.builder("$FACTORY_METHOD_PREFIX${componentName}").addModifiers(KModifier.PUBLIC)
                 .returns(component.asStarProjectedType().toTypeName())
-                .addStatement("return $componentName$IMPL_SUFFIX")
+                .addStatement("return $name")
                 .build()
         )
             .addType(
-                TypeSpec.objectBuilder("${componentName}$IMPL_SUFFIX")
+                TypeSpec.objectBuilder(name)
                     .addSuperinterface(component.asStarProjectedType().toTypeName())
                     .addSuperinterface(ComponentInternal::class.asTypeName())
                     .addFunction(

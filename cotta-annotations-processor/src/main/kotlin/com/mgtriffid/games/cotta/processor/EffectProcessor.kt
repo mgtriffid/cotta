@@ -4,12 +4,10 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.mgtriffid.games.cotta.core.codegen.Constants.COPY_METHOD
 import com.mgtriffid.games.cotta.core.codegen.Constants.EFFECTS_CLASS_SUFFIX
 import com.mgtriffid.games.cotta.core.codegen.Constants.FACTORY_METHOD_PREFIX
 import com.mgtriffid.games.cotta.core.codegen.Constants.GET_EFFECTS_METHOD
 import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
-import com.mgtriffid.games.cotta.core.codegen.Constants.SINGLETON_COMPONENT_SUFFIX
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
@@ -69,21 +67,16 @@ class EffectProcessor(
         effectName: String,
         effect: KSClassDeclaration
     ) {
+        val name = "$effectName$IMPL_SUFFIX"
         fileSpecBuilder.addFunction(
             FunSpec.builder("$FACTORY_METHOD_PREFIX$effectName").addModifiers(KModifier.PUBLIC)
                 .returns(effect.asStarProjectedType().toTypeName())
-                .addStatement("return $effectName$SINGLETON_COMPONENT_SUFFIX")
+                .addStatement("return $name") // TODO this is sus, not used anywhere
                 .build()
         )
             .addType(
-                TypeSpec.objectBuilder("$effectName$SINGLETON_COMPONENT_SUFFIX")
+                TypeSpec.objectBuilder(name)
                     .addSuperinterface(effect.asStarProjectedType().toTypeName())
-                    .addFunction(
-                        FunSpec.builder(COPY_METHOD).addStatement("return this")
-                            .addModifiers(KModifier.OVERRIDE)
-                            .returns(effect.asStarProjectedType().toTypeName())
-                            .build()
-                    )
                     .build()
             )
     }
@@ -144,9 +137,10 @@ class EffectProcessor(
         if (effects.isEmpty()) return
         val pkg = game.packageName.asString()
         val gameName = game.simpleName.asString()
-        val fileSpecBuilder = FileSpec.builder(pkg, "$gameName$EFFECTS_CLASS_SUFFIX")
+        val registryClassName = "$gameName$EFFECTS_CLASS_SUFFIX"
+        val fileSpecBuilder = FileSpec.builder(pkg, registryClassName)
         fileSpecBuilder.addType(
-            TypeSpec.classBuilder("$gameName$EFFECTS_CLASS_SUFFIX")
+            TypeSpec.classBuilder(registryClassName)
                 .addFunction(
                     FunSpec.builder(GET_EFFECTS_METHOD)
                         .returns(

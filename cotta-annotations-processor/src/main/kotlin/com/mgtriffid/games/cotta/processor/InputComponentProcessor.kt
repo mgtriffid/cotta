@@ -121,9 +121,10 @@ class InputComponentProcessor(
         if (components.isEmpty()) return
         val pkg = game.packageName.asString()
         val gameName = game.simpleName.asString()
-        val fileSpecBuilder = FileSpec.builder(pkg, "$gameName$INPUT_COMPONENTS_CLASS_SUFFIX")
+        val registryClassName = "$gameName$INPUT_COMPONENTS_CLASS_SUFFIX"
+        val fileSpecBuilder = FileSpec.builder(pkg, registryClassName)
         fileSpecBuilder.addType(
-            TypeSpec.classBuilder("$gameName$INPUT_COMPONENTS_CLASS_SUFFIX")
+            TypeSpec.classBuilder(registryClassName)
                 .addFunction(
                     FunSpec.builder(GET_INPUT_COMPONENTS_METHOD)
                         .returns(

@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.exceptions.EcsRuntimeException
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
+import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import kotlin.reflect.KClass
 
 class EntityImpl(
@@ -21,32 +22,27 @@ class EntityImpl(
 
     override fun <T : Component<T>> hasComponent(clazz: KClass<T>): Boolean {
         val key = componentRegistry.getKey(clazz)
-        return if (componentRegistry.isHistorical(key)) {
-            historicalComponents
-        } else {
-            components
-        }.containsKey(key.key.toInt())
+        return components(key).containsKey(key.key.toInt())
     }
 
     override fun <T : Component<T>> getComponent(clazz: KClass<T>): T {
         @Suppress("UNCHECKED_CAST")
         val key = componentRegistry.getKey(clazz)
-        return if (componentRegistry.isHistorical(key)) {
-            historicalComponents
-        } else {
-            components
-        }.get(key.key.toInt()) as? T
+        return components(key).get(key.key.toInt()) as? T
             ?: throw EcsRuntimeException("No such component")
     }
 
     override fun addComponent(component: Component<*>) {
         val key = componentRegistry.getKey(component::class)
+        components(key).put(key.key.toInt(), component)
+    }
+
+    private fun components(key: ShortComponentKey) =
         if (componentRegistry.isHistorical(key)) {
             historicalComponents
         } else {
             components
-        }.put(key.key.toInt(), component)
-    }
+        }
 
     override fun <T : InputComponent<T>> addInputComponent(clazz: KClass<T>) {
         inputComponents[clazz] = null
@@ -70,8 +66,8 @@ class EntityImpl(
     }
 
     override fun <T : Component<T>> removeComponent(clazz: KClass<T>) {
-
-        components.remove(componentRegistry.getKey(clazz).key.toInt())
+        val key = componentRegistry.getKey(clazz)
+        components(key).remove(componentRegistry.getKey(clazz).key.toInt())
     }
 
     /**

@@ -1,7 +1,10 @@
-package com.mgtriffid.games.cotta.core.entities
+package com.mgtriffid.games.cotta.core.test.entities
 
+import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
-import com.mgtriffid.games.cotta.core.entities.workload.components.PositionTestComponent
+import com.mgtriffid.games.cotta.core.test.workload.components.PositionTestComponent
+import com.mgtriffid.games.cotta.core.test.workload.components.createPositionTestComponent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,7 +20,7 @@ class EntitiesTest {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
         val entity = entities.create()
-        entity.addComponent(PositionTestComponent.create(0, 0))
+        entity.addComponent(createPositionTestComponent(0, 0))
 
         assertTrue(entity.hasComponent(PositionTestComponent::class))
     }
@@ -27,7 +30,7 @@ class EntitiesTest {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
         val entity = entities.create()
-        entity.addComponent(PositionTestComponent.create(1, 1))
+        entity.addComponent(createPositionTestComponent(1, 1))
 
         assertEquals(1, entity.getComponent(PositionTestComponent::class).x)
     }
@@ -37,7 +40,7 @@ class EntitiesTest {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
         val entity = entities.create()
-        entity.addComponent(PositionTestComponent.create(0, 0))
+        entity.addComponent(createPositionTestComponent(0, 0))
         entity.removeComponent(PositionTestComponent::class)
 
         assertFalse(entity.hasComponent(PositionTestComponent::class))
@@ -48,7 +51,7 @@ class EntitiesTest {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
         val entity = entities.create()
-        entity.addComponent(PositionTestComponent.create(1, 1))
+        entity.addComponent(createPositionTestComponent(1, 1))
         val entityId = entity.id
 
         assertEquals(
@@ -62,7 +65,7 @@ class EntitiesTest {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
         val entity = entities.create()
-        entity.addComponent(PositionTestComponent.create(1, 1))
+        entity.addComponent(createPositionTestComponent(1, 1))
         val entityId = entity.id
 
         cottaState.advance()
@@ -78,7 +81,7 @@ class EntitiesTest {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
         val entity = entities.create()
-        entity.addComponent(PositionTestComponent.create(1, 1))
+        entity.addComponent(createPositionTestComponent(1, 1))
         val entityId = entity.id
         val tick = tickProvider.tick
 
@@ -95,7 +98,7 @@ class EntitiesTest {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
         val entity = entities.create()
-        entity.addComponent(PositionTestComponent.create(1, 1))
+        entity.addComponent(createPositionTestComponent(1, 1))
         val entityId = entity.id
         val tick = tickProvider.tick
 
@@ -114,7 +117,7 @@ class EntitiesTest {
         val cottaState = CottaState.getInstance()
         val entities = cottaState.entities()
         val entity = entities.create()
-        entity.addComponent(PositionTestComponent.create(1, 1))
+        entity.addComponent(createPositionTestComponent(1, 1))
         val entityId = entity.id
 
         repeat(100) {

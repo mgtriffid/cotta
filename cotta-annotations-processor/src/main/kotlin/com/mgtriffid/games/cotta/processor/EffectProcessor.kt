@@ -31,12 +31,12 @@ class EffectProcessor(
     fun process(game: KSClassDeclaration) {
         val effects = getEffectInterfaces(game)
         effects.forEach { effect ->
-            writeEffectImplementation(effect)
+            writeImplementation(effect)
         }
-        writeEffectsClassRegistry(effects, game)
+        writeRegistry(effects, game)
     }
 
-    private fun writeEffectImplementation(effect: KSClassDeclaration) {
+    private fun writeImplementation(effect: KSClassDeclaration) {
         val pkg = effect.packageName.asString()
         val effectName = effect.simpleName.asString()
 
@@ -47,7 +47,6 @@ class EffectProcessor(
         } else {
             buildSingletonImplementation(fileSpecBuilder, effectName, effect)
         }
-        logger.warn("Processing effect $effectName in package $pkg")
         fileSpecBuilder.build().writeTo(codeGenerator, false)
     }
 
@@ -133,7 +132,7 @@ class EffectProcessor(
             .filter { it.packageName.asString().startsWith(game.packageName.asString()) }
             .toList()
 
-    private fun writeEffectsClassRegistry(effects: List<KSClassDeclaration>, game: KSClassDeclaration) {
+    private fun writeRegistry(effects: List<KSClassDeclaration>, game: KSClassDeclaration) {
         if (effects.isEmpty()) return
         val pkg = game.packageName.asString()
         val gameName = game.simpleName.asString()

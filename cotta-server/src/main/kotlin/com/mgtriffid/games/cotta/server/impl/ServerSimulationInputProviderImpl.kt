@@ -59,7 +59,7 @@ class ServerSimulationInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: In
         }
 
         simulationInputHolder.set(input)
-        listOf(1, 2).fold(0) { acc, i -> acc * 10 + i }
+
         return ServerDelta(
             input = input,
             createdEntities = predictedClientEntities

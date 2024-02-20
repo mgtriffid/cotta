@@ -7,7 +7,6 @@ import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRe
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.annotations.Predicted
-import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
@@ -93,13 +92,13 @@ class CottaClientImpl @Inject constructor(
                     network.fetch()
                     when (val delta = network.tryGetDelta(getCurrentTick())) {
                         is Delta.Present -> {
-                            logger.debug { "Delta present, we will integrate" }
+                            logger.debug { "Delta present" }
                             integrate(delta)
                             clientState = ClientState.Running(it.currentTick + 1)
                         }
 
                         Delta.Absent -> {
-                            logger.debug { "Delta not present" }
+                            logger.debug { "Delta absent" }
                             // for now do nothing, later we'll guess and keep track of how
                             // long ago did we have a state that is trusted
                         }

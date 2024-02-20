@@ -18,7 +18,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 import kotlin.reflect.KClass
 
-class ComponentRegistry2Impl @Inject constructor(
+class ComponentRegistryImpl @Inject constructor(
     @Named("snapper") private val kryo: Kryo,
     private val idsRemapper: IdsRemapper
 ) : ComponentRegistry {

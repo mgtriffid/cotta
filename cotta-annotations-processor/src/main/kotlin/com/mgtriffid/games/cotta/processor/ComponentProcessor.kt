@@ -37,9 +37,9 @@ class ComponentProcessor(
     fun process(game: KSClassDeclaration) {
         val components = getComponentInterfaces(game)
         components.forEach {
-            writeComponentImplementation(it)
+            writeImplementation(it)
         }
-        writeComponentsClassRegistry(components, game)
+        writeRegistry(components, game)
     }
 
     private fun getComponentInterfaces(game: KSClassDeclaration): List<KSClassDeclaration> {
@@ -59,7 +59,7 @@ class ComponentProcessor(
             .filter { it.packageName.asString().startsWith(game.packageName.asString()) }.toList()
     }
 
-    private fun writeComponentImplementation(component: KSClassDeclaration) {
+    private fun writeImplementation(component: KSClassDeclaration) {
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
         val properties: List<ProcessableComponentFieldSpec> = getProcessableComponentFieldSpecs(component)
@@ -175,7 +175,7 @@ class ComponentProcessor(
         .addStatement("return $componentName$IMPL_SUFFIX(${properties.joinToString(", ") { it.name }})")
         .build()
 
-    private fun writeComponentsClassRegistry(
+    private fun writeRegistry(
         components: List<KSClassDeclaration>,
         game: KSClassDeclaration
     ) {

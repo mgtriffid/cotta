@@ -31,9 +31,9 @@ class InputComponentProcessor(
     fun process(game: KSClassDeclaration) {
         val components = getInputComponentInterfaces(game)
         components.forEach { component ->
-            writeComponentImplementation(component)
+            writeImplementation(component)
         }
-        writeComponentsClassRegistry(components, game)
+        writeRegistry(components, game)
     }
 
     private fun getInputComponentInterfaces(game: KSClassDeclaration): List<KSClassDeclaration> {
@@ -49,7 +49,7 @@ class InputComponentProcessor(
             .toList()
     }
 
-    private fun writeComponentImplementation(component: KSClassDeclaration) {
+    private fun writeImplementation(component: KSClassDeclaration) {
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
         val properties: List<ProcessableInputComponentFieldSpec> = getProcessableInputComponentFieldSpecs(component)
@@ -114,7 +114,7 @@ class InputComponentProcessor(
         )
         .build()
 
-    private fun writeComponentsClassRegistry(
+    private fun writeRegistry(
         components: List<KSClassDeclaration>,
         game: KSClassDeclaration
     ) {

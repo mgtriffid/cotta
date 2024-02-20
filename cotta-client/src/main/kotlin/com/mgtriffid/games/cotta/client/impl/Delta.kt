@@ -14,5 +14,5 @@ sealed interface Delta {
         val authoritativeToPredictedEntities: Map<AuthoritativeEntityId, PredictedEntityId>,
         val tracesOfCreatedEntities : List<Pair<CottaTrace, EntityId>>,
     ) : Delta
-    object Absent : Delta
+    data object Absent : Delta
 }

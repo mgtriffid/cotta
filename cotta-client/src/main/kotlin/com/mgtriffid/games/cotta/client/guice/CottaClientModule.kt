@@ -26,7 +26,7 @@ import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
-import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistry2Impl
+import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
@@ -180,6 +180,6 @@ class CottaClientModule(
                 TypeLiteral<NetworkClientImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
             .`in`(Scopes.SINGLETON)
 
-        bind(ComponentRegistry::class.java).to(ComponentRegistry2Impl::class.java).`in`(Scopes.SINGLETON)
+        bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java).`in`(Scopes.SINGLETON)
     }
 }

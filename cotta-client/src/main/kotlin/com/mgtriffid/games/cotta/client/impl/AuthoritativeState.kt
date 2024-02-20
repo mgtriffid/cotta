@@ -5,5 +5,5 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 
 sealed interface AuthoritativeState {
     class Ready(val apply: (CottaState, TickProvider) -> Unit) : AuthoritativeState
-    object NotReady : AuthoritativeState
+    data object NotReady : AuthoritativeState
 }

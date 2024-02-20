@@ -14,24 +14,24 @@ import kotlin.reflect.KClass
 private val logger = KotlinLogging.logger {}
 
 class PredictionInvokersFactory @Inject constructor(
-    private val predictedInputProcessingSystemInvoker: PredictedInputProcessingSystemInvoker,
-    private val effectsConsumerSystemInvoker: PredictionEffectsConsumerSystemInvoker,
-    private val entityProcessingSystemInvoker: PredictionEntityProcessingSystemInvoker,
+    private val inputProcessingInvoker: PredictedInputProcessingSystemInvoker,
+    private val effectsConsumerInvoker: PredictionEffectsConsumerSystemInvoker,
+    private val entityProcessingInvoker: PredictionEntityProcessingSystemInvoker,
 ) : InvokersFactory {
     override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, CottaSystem> {
         val ctor = systemClass.getConstructor()
         val system: CottaSystem = ctor.call()
         return when (system) {
             is InputProcessingSystem -> {
-                Pair(predictedInputProcessingSystemInvoker, system)
+                Pair(inputProcessingInvoker, system)
             }
 
             is EffectsConsumerSystem -> {
-                Pair(effectsConsumerSystemInvoker, system)
+                Pair(effectsConsumerInvoker, system)
             }
 
             is EntityProcessingSystem -> {
-                Pair(entityProcessingSystemInvoker, system)
+                Pair(entityProcessingInvoker, system)
             }
 
             else -> { throw IllegalStateException("Unexpected implementation of CottaSystem which is actually sealed") }

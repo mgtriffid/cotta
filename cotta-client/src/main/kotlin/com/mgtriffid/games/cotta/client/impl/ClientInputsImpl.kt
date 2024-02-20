@@ -34,7 +34,7 @@ class ClientInputsImpl @Inject constructor(
 
     private sealed interface Envelope {
         class Present(val tick: Long, val input: ClientInput) : Envelope
-        object Absent : Envelope
+        data object Absent : Envelope
     }
 
     override fun all(): SortedMap<Long, ClientInput> {

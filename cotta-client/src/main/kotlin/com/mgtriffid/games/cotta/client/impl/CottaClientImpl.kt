@@ -23,8 +23,8 @@ class CottaClientImpl @Inject constructor(
     private val game: CottaGame,
     private val network: NetworkClient,
     private val localInput: CottaClientInput,
-    private val clientInputs: ClientInputs,
-    private val clientSimulation: ClientSimulation,
+    private val localInputs: ClientInputs,
+    private val simulation: ClientSimulation,
     private val predictionSimulation: PredictionSimulation,
     private val tickProvider: TickProvider,
     private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
@@ -106,8 +106,8 @@ class CottaClientImpl @Inject constructor(
         fillEntityIdMappings(delta)
         remapPredictedCreatedEntityTraces()
         // tick is advanced inside;
-        clientSimulation.tick(delta.input)
-        delta.applyDiff(state.entities(getCurrentTick())) // unnecessary for deterministic simulation
+        simulation.tick(delta.input)
+//        delta.applyDiff(state.entities(getCurrentTick())) // unnecessary for deterministic simulation
         val lastMyInputProcessedByServerSimulation = delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L
         drawableStateProvider.lastMyInputProcessedByServerSimulation = lastMyInputProcessedByServerSimulation
         predict(lastMyInputProcessedByServerSimulation)
@@ -128,7 +128,7 @@ class CottaClientImpl @Inject constructor(
 
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick
-        val inputs = clientInputs.get(tickProvider.tick - 1)
+        val inputs = localInputs.get(tickProvider.tick - 1)
         val createdEntities = predictedCreatedEntitiesRegistry.find(tickProvider.tick)
         network.send(inputs, getCurrentTick() - 1)
         network.send(createdEntities, getCurrentTick())
@@ -138,7 +138,7 @@ class CottaClientImpl @Inject constructor(
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
         drawableStateProvider.lastMyInputProcessedByServerSimulation = lastMyInputProcessedByServerSimulation
-        val unprocessedTicks = clientInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
+        val unprocessedTicks = localInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
             .also { logger.debug { it.joinToString() } } // TODO explicit sorting
         logger.debug { "Setting initial predictions state with tick ${getCurrentTick()}" }
         predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)
@@ -153,7 +153,7 @@ class CottaClientImpl @Inject constructor(
             return
         }
         val inputs = gatherLocalInput()
-        clientInputs.store(inputs)
+        localInputs.store(inputs)
     }
 
     private fun gatherLocalInput(): ClientInput {
@@ -186,11 +186,6 @@ class CottaClientImpl @Inject constructor(
         logger.debug { "Looking for meta entity, metaEntityId = ${localPlayer.metaEntityId}" }
         val entity = state.entities(atTick = getCurrentTick()).all().find {
             it.id == localPlayer.metaEntityId
-        }
-        if (entity != null) {
-            logger.debug { "Meta entity found" }
-        } else {
-            logger.debug { "Meta entity not found" }
         }
         return entity
     }

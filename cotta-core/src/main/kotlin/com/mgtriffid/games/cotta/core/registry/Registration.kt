@@ -12,10 +12,17 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.full.declaredMemberProperties
 
 fun registerComponents(game: CottaGame, componentRegistry: ComponentRegistry) {
     getComponentClasses(game).forEachIndexed { index, kClass ->
-        componentRegistry.registerComponent(ShortComponentKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out Component<*>>)
+        componentRegistry.registerComponent(
+            ShortComponentKey(index.toShort()),
+            kClass,
+            getImplKClass(kClass) as KClass<out Component<*>>,
+            kClass.declaredMemberProperties.any { it is KMutableProperty1 }
+        )
     }
     getInputComponentClasses(game).forEachIndexed { index, kClass ->
         componentRegistry.registerInputComponent(ShortComponentKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out InputComponent<*>>)

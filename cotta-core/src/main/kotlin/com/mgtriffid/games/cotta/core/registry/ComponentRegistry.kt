@@ -17,7 +17,8 @@ interface ComponentRegistry {
     fun registerComponent(
         key: ShortComponentKey,
         kClass: KClass<out Component<*>>,
-        kClassImpl: KClass<out Component<*>>
+        kClassImpl: KClass<out Component<*>>,
+        historical: Boolean
     )
 
     fun registerInputComponent(
@@ -31,4 +32,6 @@ interface ComponentRegistry {
         kClass: KClass<out CottaEffect>,
         kClassImpl: KClass<out CottaEffect>
     )
+
+    fun isHistorical(key: ShortComponentKey): Boolean
 }

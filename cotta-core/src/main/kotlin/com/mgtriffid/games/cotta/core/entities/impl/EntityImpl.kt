@@ -15,21 +15,37 @@ class EntityImpl(
     override val id: EntityId,
     override val ownedBy: Entity.OwnedBy,
 ) : Entity {
-    private val components = IntMap<Component<*>>()
+    private var components = IntMap<Component<*>>()
+    private var historicalComponents = IntMap<Component<*>>()
     private val inputComponents = HashMap<KClass<out InputComponent<*>>, InputComponent<*>?>()
 
     override fun <T : Component<T>> hasComponent(clazz: KClass<T>): Boolean {
-        return components.containsKey(componentRegistry.getKey(clazz).key.toInt())
+        val key = componentRegistry.getKey(clazz)
+        return if (componentRegistry.isHistorical(key)) {
+            historicalComponents
+        } else {
+            components
+        }.containsKey(key.key.toInt())
     }
 
     override fun <T : Component<T>> getComponent(clazz: KClass<T>): T {
         @Suppress("UNCHECKED_CAST")
-        return components.get(componentRegistry.getKey(clazz).key.toInt()) as? T
+        val key = componentRegistry.getKey(clazz)
+        return if (componentRegistry.isHistorical(key)) {
+            historicalComponents
+        } else {
+            components
+        }.get(key.key.toInt()) as? T
             ?: throw EcsRuntimeException("No such component")
     }
 
     override fun addComponent(component: Component<*>) {
-        components.put(componentRegistry.getKey(component::class).key.toInt(), component)
+        val key = componentRegistry.getKey(component::class)
+        if (componentRegistry.isHistorical(key)) {
+            historicalComponents
+        } else {
+            components
+        }.put(key.key.toInt(), component)
     }
 
     override fun <T : InputComponent<T>> addInputComponent(clazz: KClass<T>) {
@@ -54,6 +70,7 @@ class EntityImpl(
     }
 
     override fun <T : Component<T>> removeComponent(clazz: KClass<T>) {
+
         components.remove(componentRegistry.getKey(clazz).key.toInt())
     }
 
@@ -63,20 +80,16 @@ class EntityImpl(
      */
     fun deepCopy(): Entity {
         val ret = EntityImpl(componentRegistry, id, ownedBy)
-        components.forEach { entry ->
-            if (entry.value is MutableComponent<*>) {
-                val key = entry.key
-                val value = (entry.value as MutableComponent<*>).copy()
-                ret.components.put(key, value)
-            } else {
-                ret.components.put(entry.key, entry.value)
-            }
+        ret.components = components
+        historicalComponents.forEach { entry ->
+            val value = (entry.value as MutableComponent<*>).copy()
+            ret.historicalComponents.put(entry.key, value)
         }
         inputComponents.keys.forEach { ret.inputComponents[it] = null }
         return ret
     }
 
     override fun components(): Collection<Component<*>> {
-        return components.values().toList()
+        return components.values().toList() + historicalComponents.values().toList()
     }
 }

@@ -25,7 +25,7 @@ class ComponentRegistryImpl @Inject constructor(
     private val inputComponentKeyByClass = HashMap<KClass<out InputComponent<*>>, ShortComponentKey>()
     private var inputComponentClassByKey = ArrayList<KClass<out InputComponent<*>>>()
     private val componentKeyByClass = HashMap<KClass<out Component<*>>, ShortComponentKey>()
-    private var componentClassByKey = ArrayList<KClass<out Component<*>>>()
+    private var componentSpecByKey = ArrayList<ComponentSpec2>()
 
     private val componentRegistrationListeners = ArrayList<ComponentRegistrationListener>()
     private val inputComponentsRegistrationListeners = ArrayList<InputComponentRegistrationListener>()
@@ -48,19 +48,20 @@ class ComponentRegistryImpl @Inject constructor(
     }
 
     override fun getComponentClassByKey(key: ShortComponentKey): KClass<out Component<*>> {
-        return componentClassByKey[key.key.toInt()]
+        return componentSpecByKey[key.key.toInt()].kClass
     }
 
     override fun registerComponent(
         key: ShortComponentKey,
         kClass: KClass<out Component<*>>,
-        kClassImpl: KClass<out Component<*>>
+        kClassImpl: KClass<out Component<*>>,
+        historical: Boolean
     ) {
         componentKeyByClass[kClass] = key
         componentKeyByClass[kClassImpl] = key
         registerForKryo(kClassImpl)
         registerComponentForRemapping(key, kClass)
-        componentClassByKey.add(kClass)
+        componentSpecByKey.add(ComponentSpec2(kClass, historical))
     }
 
     override fun registerInputComponent(
@@ -83,6 +84,10 @@ class ComponentRegistryImpl @Inject constructor(
         registerForKryo(kClassImpl)
         registerEffectForRemapping(key, kClass)
         (idsRemapper as IdsRemapperImpl).registerEffect(kClass, createEffectSpec(kClass))
+    }
+
+    override fun isHistorical(key: ShortComponentKey): Boolean {
+        return componentSpecByKey[key.key.toInt()].historical
     }
 
     private fun registerForKryo(kClass: KClass<*>) {
@@ -118,3 +123,8 @@ class ComponentRegistryImpl @Inject constructor(
         effectRegistrationListeners.add(listener)
     }
 }
+
+private data class ComponentSpec2(
+    val kClass: KClass<out Component<*>>,
+    val historical: Boolean
+)

@@ -5,6 +5,8 @@ import com.google.inject.Key
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
+import com.mgtriffid.games.cotta.core.registry.registerComponents
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
@@ -46,6 +48,7 @@ class ServerSimulationTest {
         })
         state = injector.getInstance(Key.get(CottaState::class.java, Names.named("simulation")))
         serverSimulation = injector.getInstance(ServerSimulation::class.java)
+        registerComponents(GameStub(), injector.getInstance(ComponentRegistry::class.java))
         dataForClients = injector.getInstance(DataForClients::class.java)
         playersSawTicks = injector.getInstance(PlayersSawTicks::class.java)
     }

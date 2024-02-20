@@ -4,12 +4,14 @@ import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.exceptions.EcsRuntimeException
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import jakarta.inject.Named
 import kotlin.math.max
 
 private val logger = mu.KotlinLogging.logger {}
 
 class CottaStateImpl @Inject constructor(
+    private val componentRegistry: ComponentRegistry,
     @Named("stateHistoryLength") private val stateHistoryLength: Int
 ) : CottaState {
 
@@ -20,7 +22,7 @@ class CottaStateImpl @Inject constructor(
     private var latestTickSet = 0L
 
     init {
-        entitiesArray[0] = Entities.getInstance()
+        entitiesArray[0] = EntitiesImpl(componentRegistry)
     }
 
     override fun entities(atTick: Long): Entities {

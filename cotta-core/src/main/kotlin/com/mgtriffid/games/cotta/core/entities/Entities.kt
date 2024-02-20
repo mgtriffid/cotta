@@ -5,10 +5,6 @@ import com.mgtriffid.games.cotta.core.entities.impl.EntitiesImpl
 import com.mgtriffid.games.cotta.core.exceptions.EntityNotExistsException
 
 interface Entities {
-    companion object {
-        fun getInstance(): Entities = EntitiesImpl()
-    }
-
     fun create(ownedBy: Entity.OwnedBy = Entity.OwnedBy.System): Entity
     fun get(id: EntityId): Entity?
     fun getOrNotFound(id: EntityId): Entity = get(id) ?: throw EntityNotExistsException("Could not find entity $id")

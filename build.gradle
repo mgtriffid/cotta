@@ -179,6 +179,7 @@ project(":cotta-core") {
         implementation project(":cotta-annotations")
         implementation "com.esotericsoftware:kryo:5.0.0"
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+        implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
 
         implementation "com.google.inject:guice:7.0.0" // TODO not really needed
     }
@@ -193,6 +194,7 @@ project(":cotta-core-test") {
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation project(":cotta-annotations")
         ksp project(":cotta-annotations-processor")
+        implementation "com.esotericsoftware:kryo:5.0.0"
     }
 }
 

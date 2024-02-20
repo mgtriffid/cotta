@@ -1,10 +1,14 @@
 package com.mgtriffid.games.cotta.core.entities
 
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 
 interface CottaState {
     companion object {
-        fun getInstance(): CottaState = CottaStateImpl(64)
+        fun getInstance(componentRegistry: ComponentRegistry): CottaState = CottaStateImpl(
+            componentRegistry,
+            64
+        )
     }
     fun entities(atTick: Long): Entities
 

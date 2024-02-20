@@ -56,7 +56,7 @@ class IdsRemapperImpl : IdsRemapper {
 
     private fun <C : Component<C>> registerComponentRemapper(kClass: KClass<C>, spec: ComponentSpec) {
         val factoryMethod: KCallable<C> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }!!.kotlinFunction as KCallable<C>
-        val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<ComponentData>() }
+        val fields = kClass.declaredMemberProperties
 
         val fieldsByName = fields.associateBy { it.name }
 
@@ -95,7 +95,7 @@ class IdsRemapperImpl : IdsRemapper {
     fun <C: InputComponent<C>> registerInputComponentRemapper(kClass: KClass<C>, spec: ComponentSpec) {
         val factoryMethod: KCallable<C> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }?.kotlinFunction as? KCallable<C>
             ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")
-        val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<ComponentData>() }
+        val fields = kClass.declaredMemberProperties
 
         val fieldsByName = fields.associateBy { it.name }
 
@@ -133,7 +133,7 @@ class IdsRemapperImpl : IdsRemapper {
 
     private fun <T : CottaEffect> registerEffectMapper(kClass: KClass<T>, spec: EffectSpec) {
         val factoryMethod: KCallable<T> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }!!.kotlinFunction as KCallable<T>
-        val fields = kClass.declaredMemberProperties.filter { it.hasAnnotation<EffectData>() }
+        val fields = kClass.declaredMemberProperties
 
         val fieldsByName = fields.associateBy { it.name }
 

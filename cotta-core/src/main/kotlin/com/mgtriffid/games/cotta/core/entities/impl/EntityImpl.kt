@@ -26,8 +26,8 @@ class EntityImpl(
     }
 
     override fun <T : Component<T>> getComponent(clazz: KClass<T>): T {
-        @Suppress("UNCHECKED_CAST")
         val key = componentRegistry.getKey(clazz)
+        @Suppress("UNCHECKED_CAST")
         return components(key).get(key.key.toInt()) as? T
             ?: throw EcsRuntimeException("No such component")
     }

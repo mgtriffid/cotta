@@ -38,7 +38,6 @@ class GameScreen(
         logger.debug { "Tick length is ${game.config.tickLength}" }
         tickLength = game.config.tickLength
         cottaClient = CottaClientFactory().create(game, input)
-        cottaClient.initialize()
         nextTickAt = now()
     }
 

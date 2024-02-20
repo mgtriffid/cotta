@@ -2,23 +2,17 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.*
-import com.mgtriffid.games.cotta.client.interpolation.Interpolators
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
-import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
-import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
-import com.mgtriffid.games.cotta.core.registry.getComponentClasses
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
-import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.utils.now
 import jakarta.inject.Named
 import mu.KotlinLogging
 import kotlin.reflect.KClass
-import kotlin.reflect.full.hasAnnotation
 
 const val STATE_WAITING_THRESHOLD = 5000L
 
@@ -37,26 +31,14 @@ class CottaClientImpl @Inject constructor(
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     override val localPlayer: LocalPlayer,
-    private val componentRegistry: ComponentRegistry,
-    private val interpolators: Interpolators,
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial
 
     override fun initialize() {
-        registerComponents()
-
-        registerSystems()
         game.initializeStaticState(state.entities(getCurrentTick()))
         state.setBlank(state.entities(getCurrentTick()))
-    }
-
-    private fun registerComponents() {
-        getComponentClasses(game).forEach{ kClass ->
-            interpolators.register(kClass)
-        }
-        com.mgtriffid.games.cotta.core.registry.registerComponents(game, componentRegistry)
     }
 
     override fun tick() {
@@ -211,19 +193,6 @@ class CottaClientImpl @Inject constructor(
             logger.debug { "Meta entity not found" }
         }
         return entity
-    }
-
-    private fun registerSystems() {
-        game.serverSystems.forEach { system ->
-            clientSimulation.registerSystem(system as KClass<CottaSystem>)
-            if (isPredicted(system)) {
-                predictionSimulation.registerSystem(system)
-            }
-        }
-    }
-
-    private fun isPredicted(system: KClass<CottaSystem>): Boolean {
-        return system.hasAnnotation<Predicted>()
     }
 
     sealed class ClientState {

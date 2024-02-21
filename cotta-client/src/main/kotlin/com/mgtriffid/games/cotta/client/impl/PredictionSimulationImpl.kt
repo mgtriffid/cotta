@@ -33,8 +33,9 @@ class PredictionSimulationImpl @Inject constructor(
 
     override fun predict(initialEntities: Entities, ticks: List<Long>, authoritativeTick: Long) {
         predictionCottaClock.lagBehind = authoritativeTick - ticks.first()
-        startPredictionFrom(initialEntities, ticks.first())
-        run(ticks)
+        val lag = authoritativeTick - ticks.first()
+        startPredictionFrom(initialEntities, authoritativeTick)
+        run(ticks, lag)
     }
 
     private fun startPredictionFrom(entities: Entities, tick: Long) {
@@ -45,7 +46,7 @@ class PredictionSimulationImpl @Inject constructor(
         }
     }
 
-    private fun run(ticks: List<Long>) {
+    private fun run(ticks: List<Long>, lag: Long) {
         logger.debug { "Running prediction simulation for ticks $ticks" }
         for (tick in ticks) {
             logger.debug { "Running prediction simulation for tick $tick" }
@@ -53,6 +54,7 @@ class PredictionSimulationImpl @Inject constructor(
             logger.debug { "Advancing state: to tick ${tickProvider.tick}" }
             state.advance(tickProvider.tick)
             tickProvider.tick++
+
             putInputIntoEntities(tick, localPlayer.playerId)
             simulate()
         }

@@ -106,7 +106,7 @@ class PannaGame : CottaGame {
     }
 
     override val config: CottaConfig = object : CottaConfig {
-        override val tickLength: Long = 20L
+        override val tickLength: Long = 100L
     }
 
     private fun readTerrainFromTiled(): List<List<Int>> {

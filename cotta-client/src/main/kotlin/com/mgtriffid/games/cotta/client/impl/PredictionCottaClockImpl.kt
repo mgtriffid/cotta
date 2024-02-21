@@ -11,7 +11,7 @@ class PredictionCottaClockImpl(
     var lagBehind: Long = 0
 
     override fun time(): Long {
-        return (predictionTickProvider.tick + lagBehind) * tickLength
+        return (predictionTickProvider.tick/* + lagBehind*/) * tickLength
     }
 
     override fun delta(): Float {

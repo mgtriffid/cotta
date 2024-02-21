@@ -12,4 +12,5 @@ interface PredictedCreatedEntitiesRegistry {
     fun find(trace: CottaTrace, tick: Long): EntityId?
     fun find(tick: Long): List<Pair<CottaTrace, EntityId>>
     fun useAuthoritativeEntitiesWherePossible(mappings: Map<AuthoritativeEntityId, PredictedEntityId>)
+    fun latest(): List<Pair<CottaTrace, EntityId>>
 }

@@ -129,17 +129,18 @@ class CottaClientImpl @Inject constructor(
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick
         val inputs = localInputs.get(tickProvider.tick - 1)
-        val createdEntities = predictedCreatedEntitiesRegistry.find(tickProvider.tick)
+        val createdEntities = predictedCreatedEntitiesRegistry.latest()
         network.send(inputs, getCurrentTick() - 1)
         network.send(createdEntities, getCurrentTick())
     }
 
-    private fun predict(lastMyInputProcessedByServerSimulation: Long) {
+    private fun predict(serverSawOurTick: Long) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
-        drawableStateProvider.lastMyInputProcessedByServerSimulation = lastMyInputProcessedByServerSimulation
-        val unprocessedTicks = localInputs.all().keys.filter { it > lastMyInputProcessedByServerSimulation }
-            .also { logger.debug { it.joinToString() } } // TODO explicit sorting
+        val unprocessedTicks2 = (serverSawOurTick + 1 until currentTick).also { logger.info { it } }
+        drawableStateProvider.lastMyInputProcessedByServerSimulation = serverSawOurTick
+        val unprocessedTicks = localInputs.all().keys.filter { it > serverSawOurTick }
+            .also { logger.info { it.joinToString() } } // TODO explicit sorting
         logger.debug { "Setting initial predictions state with tick ${getCurrentTick()}" }
         predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)
     }

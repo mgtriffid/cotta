@@ -1,16 +1,20 @@
 package com.mgtriffid.games.cotta.client.invokers.impl
 
+import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapper
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import jakarta.inject.Inject
+import jakarta.inject.Named
+import jdk.jfr.Name
 
 const val MAX_TICKS_TO_KEEP = 128
 
 class PredictedCreatedEntitiesRegistryImpl @Inject constructor(
-    private val idsRemapper: IdsRemapper
+    private val idsRemapper: IdsRemapper,
+    @Named("prediction") private val tickProvider: TickProvider
 ) : PredictedCreatedEntitiesRegistry {
     private val data = ArrayList<Pair<Key, EntityId>>()
     override fun record(trace: CottaTrace, tick: Long, entityId: EntityId) {
@@ -24,6 +28,10 @@ class PredictedCreatedEntitiesRegistryImpl @Inject constructor(
 
     override fun find(tick: Long): List<Pair<CottaTrace, EntityId>> {
         return data.filter { it.first.tick == tick }.map { Pair(it.first.trace, it.second) }
+    }
+
+    override fun latest(): List<Pair<CottaTrace, EntityId>> {
+        return find(tickProvider.tick)
     }
 
     override fun useAuthoritativeEntitiesWherePossible(mappings: Map<AuthoritativeEntityId, PredictedEntityId>) {

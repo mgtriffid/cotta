@@ -69,17 +69,16 @@ class GraphicsV2 {
     }
 
     fun draw(
-        state: DrawableState,
-        playerId: PlayerId,
+        state: DrawableState.Ready,
         delta: Float,
         mayJoin: Boolean
     ) {
-        processEntities(state, playerId)
+        processEntities(state)
         processEffects(state)
         stage.act(delta)
         ScreenUtils.clear(1f, 0f, 0f, 1f)
         val dudeEntity = state.entities.find {
-            it.hasComponent(SteamManPlayerComponent::class) && it.ownedBy == Entity.OwnedBy.Player(playerId)
+            it.hasComponent(SteamManPlayerComponent::class) && it.ownedBy == Entity.OwnedBy.Player(state.playerId)
         }
         val dudePosition = dudeEntity?.getComponent(PositionComponent::class)
         val x = dudePosition?.xPos ?: 0f
@@ -93,7 +92,7 @@ class GraphicsV2 {
     }
 
     // GROOM 4 levels of indent is too many
-    private fun processEntities(state: DrawableState, playerId: PlayerId) {
+    private fun processEntities(state: DrawableState.Ready) {
         state.entities.forEach { entity ->
             val id = entity.id
             var actor = entityActors[id]
@@ -108,16 +107,16 @@ class GraphicsV2 {
                 }
             }
             if (actor == null) {
-                actor = createActor(entity, playerId)
+                actor = createActor(entity, state.playerId)
                 entityActors[id] = actor
                 stage.addActor(actor.actor)
             }
-            updateActor(actor, entity, playerId)
+            updateActor(actor, entity, state.playerId)
         }
         cleanUpActors(state.entities)
     }
 
-    private fun processEffects(state: DrawableState) {
+    private fun processEffects(state: DrawableState.Ready) {
         (state.effects.predicted.map { it.effect } + state.effects.real.map { it.effect }).forEach { effect ->
             when (effect) {
                 is BulletHitsGroundVisualEffect -> {

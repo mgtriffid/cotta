@@ -6,8 +6,6 @@ import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRe
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.input.ClientInput
-import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.utils.now
 import jakarta.inject.Named
@@ -22,7 +20,6 @@ private val logger = KotlinLogging.logger {}
 class CottaClientImpl @Inject constructor(
     private val game: CottaGame,
     private val network: NetworkClient,
-    private val localInput: CottaClientInput,
     private val localInputs: ClientInputs,
     private val simulation: ClientSimulation,
     private val predictionSimulation: PredictionSimulation,
@@ -153,11 +150,6 @@ class CottaClientImpl @Inject constructor(
             logger.debug { "No meta entity, returning" }
             return
         }
-        val inputs = gatherLocalInput()
-        localInputs.store(inputs)
-    }
-
-    private fun gatherLocalInput(): ClientInput {
         val playerId = localPlayer.playerId
         val localEntities = getEntitiesOwnedByPlayer(playerId)
         logger.debug { "Found ${localEntities.size} entities owned by player $playerId" }
@@ -165,16 +157,7 @@ class CottaClientImpl @Inject constructor(
             it.hasInputComponents()
         }
         logger.debug { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
-        val inputs = localEntitiesWithInputComponents.distinctBy { it.id }.associate { entity ->
-            logger.debug { "Retrieving input for entity '${entity.id}'" }
-            entity.id to getInputs(entity)
-        }
-        return ClientInputImpl(inputs)
-    }
-
-    private fun getInputs(entity: Entity) = entity.inputComponents().map { clazz ->
-        logger.debug { "Retrieving input of class '${clazz.simpleName}' for entity '${entity.id}'" }
-        localInput.input(entity, clazz)
+        localInputs.collect(localEntitiesWithInputComponents.distinctBy { it.id })
     }
 
     // GROOM rename

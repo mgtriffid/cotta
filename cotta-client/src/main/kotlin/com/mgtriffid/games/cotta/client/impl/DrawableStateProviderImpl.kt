@@ -11,6 +11,7 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
@@ -29,14 +30,15 @@ class DrawableStateProviderImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val predictionSimulation: PredictionSimulation,
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
-    private val effectBus: EffectBus
+    private val effectBus: EffectBus,
+    private val localPlayer: LocalPlayer
 ) : DrawableStateProvider {
     override var lastMyInputProcessedByServerSimulation: Long = -1
     private var lastTickEffectsWereReturned: Long = -1
     private val previouslyPredicted = TreeMap<Long, Collection<DrawableEffect>>()
 
     override fun get(alpha: Float, components: Array<out KClass<out Component<*>>>): DrawableState {
-        if (simulationTickProvider.tick == 0L) return DrawableState.EMPTY
+        if (simulationTickProvider.tick == 0L) return DrawableState.NotReady
         val onlyNeeded: Collection<Entity>.() -> Collection<Entity> = {
             filter { entity ->
                 components.all { entity.hasComponent(it) }
@@ -78,11 +80,12 @@ class DrawableStateProviderImpl @Inject constructor(
             DrawableEffects.EMPTY
         }
 
-        return object : DrawableState {
+        return object : DrawableState.Ready {
             override val entities: List<Entity> = entities
             override val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId> =
                 authoritativeToPredictedEntityIdMappings.all()
             override val effects: DrawableEffects = effects
+            override val playerId: PlayerId = localPlayer.playerId
         }
     }
 

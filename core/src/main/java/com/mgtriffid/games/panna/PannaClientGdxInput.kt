@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.gdx.CottaClientGdxInput
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_PISTOL
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_RAILGUN
 import com.mgtriffid.games.panna.shared.game.components.input.*
@@ -20,7 +21,7 @@ private val logger = KotlinLogging.logger {}
 class PannaClientGdxInput(
     // TODO either remove or use for determining lookAt and other things
     private val viewport: Viewport
-) : CottaClientInput {
+) : CottaClientGdxInput {
     var mayJoin = false
     private val storage = Storage()
 
@@ -75,7 +76,7 @@ class PannaClientGdxInput(
         throw IllegalArgumentException() // TODO write a reasonable "unregistered component exception"
     }
 
-    fun accumulate() {
+    override fun accumulate() {
         with(storage) {
             leftPressed = leftPressed || Gdx.input.isKeyPressed(Input.Keys.A)
             rightPressed = rightPressed || Gdx.input.isKeyPressed(Input.Keys.D)
@@ -101,7 +102,7 @@ class PannaClientGdxInput(
         return atan2Deg360(relY, relX)
     }
 
-    fun clear() {
+    override fun clear() {
         with(storage) {
             leftPressed = false
             rightPressed = false

@@ -69,6 +69,7 @@ project(":core") {
         implementation project(":panna-graphics")
         implementation project(":cotta-client")
         implementation project(":cotta-core")
+        implementation project(":cotta-gdx")
         implementation project(":cotta-network-kryonet")
         implementation project(":cotta-network-api")
         implementation "com.google.code.gson:gson:2.8.6"
@@ -232,6 +233,10 @@ project(":cotta-network-kryonet") {
 }
 
 project(":cotta-gdx") {
+    dependencies {
+        implementation project(":cotta-client")
+        implementation project(":cotta-core")
+    }
 }
 
 project(":cotta-utils") {

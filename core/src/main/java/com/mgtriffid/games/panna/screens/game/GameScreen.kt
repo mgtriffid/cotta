@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.gdx.CottaGdxAdapter
 import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
@@ -23,11 +24,13 @@ private val logger = KotlinLogging.logger {}
 class GameScreen(
     private val gdxGame: PannaGdxGame
 ) : ScreenAdapter() {
-    private lateinit var cottaClient: CottaClient
+    private val drawableComponents = listOf(
+        DrawableComponent::class,
+        PositionComponent::class
+    )
 
-    private var nextTickAt: Long = -1
-    private var tickLength: Long = -1
     private val graphics: GraphicsV2 = GraphicsV2()
+    private lateinit var gdxAdapter: CottaGdxAdapter
 
     private lateinit var input: PannaClientGdxInput
 
@@ -35,10 +38,8 @@ class GameScreen(
         graphics.initialize()
         input = PannaClientGdxInput(graphics.viewport)
         val game = PannaGame()
-        logger.debug { "Tick length is ${game.config.tickLength}" }
-        tickLength = game.config.tickLength
-        cottaClient = CottaClientFactory().create(game, input)
-        nextTickAt = now()
+        gdxAdapter = CottaGdxAdapter(game, input)
+        gdxAdapter.initialize()
     }
 
     /**
@@ -46,22 +47,7 @@ class GameScreen(
      */
     override fun render(delta: Float) {
         logger.trace { "${GameScreen::class.simpleName}#render called" }
-
-        input.accumulate()
-
-        var tickHappened = false
-        val now = now()
-        if (nextTickAt <= now) {
-            cottaClient.tick()
-            nextTickAt += tickLength
-            tickHappened = true
-        }
-
-        if (tickHappened) {
-            input.clear()
-        }
-
-        draw(1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat(), delta)
+        draw(gdxAdapter(), delta)
     }
 
     override fun dispose() {
@@ -69,24 +55,25 @@ class GameScreen(
     }
 
     private fun draw(alpha: Float, delta: Float) {
-        if (!cottaClient.localPlayer.isReady()) {
-            return
+        when (val state = getDrawableState(alpha)) {
+            DrawableState.NotReady -> return
+            is DrawableState.Ready -> {
+                if (noDude(state)) {
+                    input.mayJoin = true
+                }
+                graphics.draw(state, delta, input.mayJoin)
+            }
         }
-        val state = getDrawableState(alpha)
-        if (noDude(state)) {
-            input.mayJoin = true
-        }
-        graphics.draw(state, cottaClient.localPlayer.playerId, delta, input.mayJoin)
     }
 
-    private fun noDude(state: DrawableState) : Boolean {
+    private fun noDude(state: DrawableState.Ready) : Boolean {
         return state.entities.none {
             it.hasInputComponent(CharacterInputComponent::class) &&
-                it.ownedBy == Entity.OwnedBy.Player(cottaClient.localPlayer.playerId)
+                it.ownedBy == Entity.OwnedBy.Player(state.playerId)
         }
     }
 
     private fun getDrawableState(alpha: Float): DrawableState {
-        return cottaClient.getDrawableState(alpha, DrawableComponent::class, PositionComponent::class)
+        return gdxAdapter.getDrawableState(alpha, drawableComponents)
     }
 }

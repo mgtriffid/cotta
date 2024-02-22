@@ -2,8 +2,14 @@ package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
 
-interface SnapsSerialization<SR : StateRecipe, DR : DeltaRecipe, CEWTR: CreatedEntitiesWithTracesRecipe> {
+interface SnapsSerialization<
+    SR : StateRecipe,
+    DR : DeltaRecipe,
+    CEWTR: CreatedEntitiesWithTracesRecipe,
+    MEDR: MetaEntitiesDeltaRecipe
+    > {
     fun serializeDeltaRecipe(recipe: DR): ByteArray
     fun deserializeDeltaRecipe(bytes: ByteArray): DR
     fun serializeStateRecipe(recipe: SR): ByteArray
@@ -18,4 +24,6 @@ interface SnapsSerialization<SR : StateRecipe, DR : DeltaRecipe, CEWTR: CreatedE
     fun deserializeEntityCreationTracesV2(bytes: ByteArray): CreatedEntitiesWithTracesRecipe
     fun serializePlayersSawTicks(playersSawTicks: Map<PlayerId, Long>): ByteArray
     fun deserializePlayersSawTicks(bytes: ByteArray): Map<PlayerId, Long>
+    fun serializeMetaEntitiesDeltaRecipe(recipe: MEDR): ByteArray
+    fun deserializeMetaEntitiesDeltaRecipe(bytes: ByteArray): MEDR
 }

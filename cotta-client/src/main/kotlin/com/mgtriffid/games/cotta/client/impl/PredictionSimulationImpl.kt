@@ -25,6 +25,7 @@ class PredictionSimulationImpl @Inject constructor(
     private val clientInputs: ClientInputs,
     @Named("prediction") override val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
+    @Named("localInput") private val localInputTickProvider: TickProvider,
     private val predictionCottaClock: PredictionCottaClockImpl,
     private val localPlayer: LocalPlayer,
     private val idMappings: AuthoritativeToPredictedEntityIdMappings
@@ -49,6 +50,7 @@ class PredictionSimulationImpl @Inject constructor(
     private fun run(ticks: List<Long>, lag: Long) {
         logger.debug { "Running prediction simulation for ticks $ticks" }
         for (tick in ticks) {
+            localInputTickProvider.tick = tick
             logger.debug { "Running prediction simulation for tick $tick" }
             effectBus.clear()
             logger.debug { "Advancing state: to tick ${tickProvider.tick}" }

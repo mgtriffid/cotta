@@ -23,7 +23,7 @@ fun configureLogging() {
         "com.mgtriffid.games.cotta.core.registry.ComponentsRegistry" to default,
         "com.mgtriffid.games.cotta.server.impl.ServerToClientDataDispatcherImpl" to default,
         "com.mgtriffid.games.cotta.client.invokers.impl.PredictionCreateEntityStrategy" to default,
-        "com.mgtriffid.games.cotta.client.impl.PredictionSimulationImpl" to Level.DEBUG,
+        "com.mgtriffid.games.cotta.client.impl.PredictionSimulationImpl" to default,
         "com.mgtriffid.games.cotta.server.impl.PredictedToAuthoritativeIdMappingsImpl" to default,
         "com.mgtriffid.games.cotta.client.impl.ClientSimulationInputProviderImpl" to default,
         "com.mgtriffid.games.cotta.core.simulation.SimulationInput" to default,

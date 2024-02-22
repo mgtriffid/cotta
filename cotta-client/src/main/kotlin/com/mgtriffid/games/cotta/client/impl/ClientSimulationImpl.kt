@@ -51,10 +51,10 @@ class ClientSimulationImpl @Inject constructor(
 
     private fun putInputIntoEntities(input: SimulationInput) {
         getEntitiesWithInputComponents().forEach { e ->
-            logger.trace { "Entity ${e.id} has some input components:" }
+            logger.info { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
                 val component = input.inputForEntityAndComponent(e.id, c)
-                logger.trace { "  $component" }
+                logger.info { "  $component" }
                 e.setInputComponent(c, component)
             }
         }

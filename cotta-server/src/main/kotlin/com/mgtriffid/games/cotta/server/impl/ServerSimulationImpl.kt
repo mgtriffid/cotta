@@ -97,6 +97,7 @@ class ServerSimulationImpl @Inject constructor(
             metaEntities[playerId] = metaEntity.id
             it.first.params // TODO use parameters to add certain components, figure it out
         }
+        metaEntities.recordNew(enterGameIntents.map { metaEntities[it.second] to it.second }, tickProvider.tick)
         enterGameIntents.clear()
     }
 

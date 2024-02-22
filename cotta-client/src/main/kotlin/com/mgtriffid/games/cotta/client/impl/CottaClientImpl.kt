@@ -105,6 +105,10 @@ class CottaClientImpl @Inject constructor(
         // tick is advanced inside;
         simulation.tick(delta.input)
 //        delta.applyDiff(state.entities(getCurrentTick())) // unnecessary for deterministic simulation
+        delta.metaEntitiesDiff.forEach { (entityId, playerId) ->
+            val newMetaEntity = state.entities(getCurrentTick()).create(entityId, Entity.OwnedBy.Player(playerId))
+            game.metaEntitiesInputComponents.forEach { newMetaEntity.addInputComponent(it) }
+        }
         val lastMyInputProcessedByServerSimulation = delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L
         drawableStateProvider.lastMyInputProcessedByServerSimulation = lastMyInputProcessedByServerSimulation
         predict(lastMyInputProcessedByServerSimulation)

@@ -1,7 +1,6 @@
 package com.mgtriffid.games.cotta.client
 
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.ClientInput
 
 interface ClientInputs {

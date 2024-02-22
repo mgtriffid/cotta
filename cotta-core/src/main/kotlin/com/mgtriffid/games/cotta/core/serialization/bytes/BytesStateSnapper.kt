@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
@@ -23,6 +24,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEffectRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputComponentRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceElementRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceRecipe
@@ -35,7 +37,13 @@ import kotlin.reflect.KClass
 class BytesStateSnapper @Inject constructor(
     @Named("snapper") private val kryo: Kryo,
     private val generatedComponentRegistry: ComponentRegistry
-) : StateSnapper<BytesStateRecipe, BytesDeltaRecipe, BytesCreatedEntitiesWithTracesRecipe> {
+) : StateSnapper<
+    BytesStateRecipe,
+    BytesDeltaRecipe,
+    BytesCreatedEntitiesWithTracesRecipe,
+    BytesMetaEntitiesDeltaRecipe
+    > {
+
     override fun snapState(entities: Entities): BytesStateRecipe {
         return BytesStateRecipe(
             entities.dynamic().map { entity -> packEntity(entity) }
@@ -105,6 +113,18 @@ class BytesStateSnapper @Inject constructor(
         unpackAddedEntities(entities, recipe.addedEntities)
         unpackChangedEntities(entities, recipe.changedEntities)
         recipe.removedEntitiesIds.forEach(entities::remove)
+    }
+
+    override fun snapMetaEntitiesDelta(
+        addedEntities: List<Pair<EntityId, PlayerId>>
+    ): BytesMetaEntitiesDeltaRecipe {
+        return BytesMetaEntitiesDeltaRecipe(
+            addedEntities = addedEntities
+        )
+    }
+
+    override fun unpackMetaEntitiesDeltaRecipe(recipe: BytesMetaEntitiesDeltaRecipe): List<Pair<EntityId, PlayerId>> {
+        return recipe.addedEntities
     }
 
     private fun unpackChangedEntities(entities: Entities, changedEntities: List<BytesChangedEntityRecipe>) {

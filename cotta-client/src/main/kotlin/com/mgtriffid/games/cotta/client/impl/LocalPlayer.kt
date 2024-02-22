@@ -24,12 +24,12 @@ class LocalPlayer {
     private fun <C: Any> get(kProperty0: KProperty1<Present, C>) = data.let {
         when (it) {
             is Present -> kProperty0.get(it)
-            is Absent -> throw IllegalStateException("Local player is not ready")
+            Absent -> throw IllegalStateException("Local player is not ready")
         }
     }
 
     private sealed interface Data {
-        object Absent : Data
+        data object Absent : Data
         data class Present(val metaEntityId: EntityId, val playerId: PlayerId) : Data
     }
 }

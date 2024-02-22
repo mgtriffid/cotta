@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
@@ -14,6 +15,11 @@ interface DeltaRecipe {
 
 interface StateRecipe {
     val entities : List<EntityRecipe>
+}
+
+interface MetaEntitiesDeltaRecipe {
+    val addedEntities : List<Pair<EntityId, PlayerId>>
+//    val removedEntitiesIds: Set<EntityId>
 }
 
 interface EntityRecipe {

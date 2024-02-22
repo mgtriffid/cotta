@@ -26,7 +26,13 @@ private val logger = KotlinLogging.logger {}
 
 const val REQUIRED_CLIENT_INPUTS_BUFFER = 3
 
-class ServerSimulationInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe, CEWTR: CreatedEntitiesWithTracesRecipe> @Inject constructor(
+class ServerSimulationInputProviderImpl<
+    SR: StateRecipe,
+    DR: DeltaRecipe,
+    IR: InputRecipe,
+    CEWTR: CreatedEntitiesWithTracesRecipe,
+    MEDR: MetaEntitiesDeltaRecipe
+    > @Inject constructor(
     private val nonPlayerInputProvider: NonPlayerInputProvider,
     @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder,
@@ -35,8 +41,8 @@ class ServerSimulationInputProviderImpl<SR: StateRecipe, DR: DeltaRecipe, IR: In
     private val networkTransport: CottaServerNetworkTransport,
     private val inputSerialization: InputSerialization<IR>,
     private val inputSnapper: InputSnapper<IR>,
-    private val stateSnapper: StateSnapper<SR, DR, CEWTR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR>,
+    private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
     private val idsRemapper: IdsRemapper,
     private val clientsGhosts: ClientsGhosts<IR>,
 ) : ServerSimulationInputProvider {

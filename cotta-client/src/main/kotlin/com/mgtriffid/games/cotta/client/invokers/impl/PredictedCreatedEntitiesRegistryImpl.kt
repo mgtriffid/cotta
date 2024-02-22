@@ -14,9 +14,10 @@ const val MAX_TICKS_TO_KEEP = 128
 
 class PredictedCreatedEntitiesRegistryImpl @Inject constructor(
     private val idsRemapper: IdsRemapper,
-    @Named("prediction") private val tickProvider: TickProvider
+    @Named("localInput") private val localInputTickProvider: TickProvider
 ) : PredictedCreatedEntitiesRegistry {
     private val data = ArrayList<Pair<Key, EntityId>>()
+
     override fun record(trace: CottaTrace, tick: Long, entityId: EntityId) {
         data.add(Pair(Key(tick, trace), entityId))
         cleanUpOld(tick)
@@ -31,7 +32,7 @@ class PredictedCreatedEntitiesRegistryImpl @Inject constructor(
     }
 
     override fun latest(): List<Pair<CottaTrace, EntityId>> {
-        return find(tickProvider.tick)
+        return find(localInputTickProvider.tick)
     }
 
     override fun useAuthoritativeEntitiesWherePossible(mappings: Map<AuthoritativeEntityId, PredictedEntityId>) {

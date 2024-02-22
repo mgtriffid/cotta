@@ -16,6 +16,7 @@ import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
+import com.mgtriffid.games.cotta.core.serialization.MetaEntitiesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
@@ -34,14 +35,15 @@ class NetworkClientImpl<
     SR: StateRecipe,
     DR: DeltaRecipe,
     IR: InputRecipe,
-    CEWTR: CreatedEntitiesWithTracesRecipe
+    CEWTR: CreatedEntitiesWithTracesRecipe,
+    MEDR: MetaEntitiesDeltaRecipe
     > @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
-    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, IR, CEWTR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR>,
+    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, IR, CEWTR, MEDR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
     private val inputSerialization: InputSerialization<IR>,
     private val inputSnapper: InputSnapper<IR>,
-    private val stateSnapper: StateSnapper<SR, DR, CEWTR>,
+    private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
     private val localPlayer: LocalPlayer
 ) : NetworkClient {
     private val lagCompLimit: Int = 8 // TODO move to config and bind properly
@@ -58,6 +60,11 @@ class NetworkClientImpl<
                 KindOfData.DELTA -> incomingDataBuffer.storeDelta(
                     it.tick,
                     snapsSerialization.deserializeDeltaRecipe(it.payload)
+                )
+
+                KindOfData.META_ENTITIES_DELTA -> incomingDataBuffer.storeMetaEntitiesDelta(
+                    it.tick,
+                    snapsSerialization.deserializeMetaEntitiesDeltaRecipe(it.payload)
                 )
 
                 KindOfData.STATE -> incomingDataBuffer.storeState(
@@ -110,10 +117,12 @@ class NetworkClientImpl<
 
     override fun tryGetDelta(tick: Long): Delta = if (deltaAvailable(tick)) {
         val input = incomingDataBuffer.inputs[tick]!!
+        logger.info { "Exists input for entities ${input.keys}" }
         Delta.Present(
             applyDiff = { entities ->
                 applyDelta(entities, tick)
             },
+            metaEntitiesDiff = stateSnapper.unpackMetaEntitiesDeltaRecipe((incomingDataBuffer.metaEntitiesDeltas[tick]!!)),
             input = object : SimulationInput {
                 override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                     return input
@@ -177,5 +186,6 @@ class NetworkClientImpl<
             && incomingDataBuffer.inputs.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
             && incomingDataBuffer.playersSawTicks.containsKey(tick).also { logger.debug { "sawTicks present for tick $tick: $it" } }
             && incomingDataBuffer.createdEntities.containsKey(tick).also { logger.debug { "createEntities present for tick $tick: $it" } }
+            && incomingDataBuffer.metaEntitiesDeltas.containsKey(tick).also { logger.debug { "metaEntitiesDelta present for tick $tick: $it" } }
     }
 }

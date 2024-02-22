@@ -21,6 +21,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
@@ -99,7 +100,13 @@ class CottaServerModule(
             install(BytesSerializationModule(idsRemapper))
             bind(ServerToClientDataDispatcher::class.java)
                 .to(object :
-                    TypeLiteral<ServerToClientDataDispatcherImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+                    TypeLiteral<ServerToClientDataDispatcherImpl<
+                        BytesStateRecipe,
+                        BytesDeltaRecipe,
+                        BytesInputRecipe,
+                        BytesCreatedEntitiesWithTracesRecipe,
+                        BytesMetaEntitiesDeltaRecipe
+                        >>() {})
                 .`in`(Scopes.SINGLETON)
             bind(CottaGameInstance::class.java).to(object :
                 TypeLiteral<CottaGameInstanceImpl<BytesInputRecipe>>() {})
@@ -109,7 +116,8 @@ class CottaServerModule(
                     BytesStateRecipe,
                     BytesDeltaRecipe,
                     BytesInputRecipe,
-                    BytesCreatedEntitiesWithTracesRecipe
+                    BytesCreatedEntitiesWithTracesRecipe,
+                    BytesMetaEntitiesDeltaRecipe
                     >>() {})
                 .`in`(Scopes.SINGLETON)
 

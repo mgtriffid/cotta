@@ -17,13 +17,14 @@ class ServerToClientDataDispatcherImpl<
     SR: StateRecipe,
     DR: DeltaRecipe,
     IR: InputRecipe,
-    CEWTR: CreatedEntitiesWithTracesRecipe
+    CEWTR: CreatedEntitiesWithTracesRecipe,
+    MEDR: MetaEntitiesDeltaRecipe
     > @Inject constructor(
     private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts<IR>,
     private val network: CottaServerNetworkTransport,
-    private val stateSnapper: StateSnapper<SR, DR, CEWTR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR>,
+    private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
     private val inputSnapper: InputSnapper<IR>,
     private val inputSerialization: InputSerialization<IR>,
     private val data: DataForClients,
@@ -56,6 +57,14 @@ class ServerToClientDataDispatcherImpl<
                         curr = data.entities(tick)
                     )
                 )
+
+                val metaEntitiesDeltaDto = ServerToClientDto()
+                metaEntitiesDeltaDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.META_ENTITIES_DELTA
+                metaEntitiesDeltaDto.tick = tick - 1
+                metaEntitiesDeltaDto.payload = snapsSerialization.serializeMetaEntitiesDeltaRecipe(
+                    stateSnapper.snapMetaEntitiesDelta(data.metaEntities().addedAtTick(tick))
+                )
+
                 val inputDto = ServerToClientDto()
                 inputDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT
                 inputDto.payload = inputSerialization.serializeInputRecipe(
@@ -80,7 +89,7 @@ class ServerToClientDataDispatcherImpl<
                     data.playersSawTicks().all().also { logger.debug { it.toString() } }
                 )
                 playersSawTicksDto.tick = tick - 1
-                return listOf(deltaDto, inputDto, createdEntitiesWithTracesDto, playersSawTicksDto)
+                return listOf(deltaDto, inputDto, createdEntitiesWithTracesDto, playersSawTicksDto, metaEntitiesDeltaDto)
             }
             KindOfData.STATE -> {
                 val dto = ServerToClientDto()

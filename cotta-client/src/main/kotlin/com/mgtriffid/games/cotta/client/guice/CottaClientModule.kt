@@ -32,6 +32,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
@@ -136,6 +137,9 @@ class CottaClientModule(
         bind(TickProvider::class.java)
             .annotatedWith(Names.named("prediction"))
             .toInstance(predictionTickProvider)
+        bind(TickProvider::class.java)
+            .annotatedWith(Names.named("localInput"))
+            .toInstance(AtomicLongTickProvider())
         val predictionClock = PredictionCottaClockImpl(predictionTickProvider, game.config.tickLength)
         bind(CottaClock::class.java)
             .annotatedWith(Names.named("prediction"))
@@ -173,11 +177,23 @@ class CottaClientModule(
         val idsRemapper = IdsRemapperImpl()
         install(BytesSerializationModule(idsRemapper))
         bind(object : TypeLiteral<
-            ClientIncomingDataBuffer<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+            ClientIncomingDataBuffer<
+                BytesStateRecipe,
+                BytesDeltaRecipe,
+                BytesInputRecipe,
+                BytesCreatedEntitiesWithTracesRecipe,
+                BytesMetaEntitiesDeltaRecipe
+                >>() {})
             .toInstance(ClientIncomingDataBuffer())
         bind(NetworkClient::class.java)
             .to(object :
-                TypeLiteral<NetworkClientImpl<BytesStateRecipe, BytesDeltaRecipe, BytesInputRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+                TypeLiteral<NetworkClientImpl<
+                    BytesStateRecipe,
+                    BytesDeltaRecipe,
+                    BytesInputRecipe,
+                    BytesCreatedEntitiesWithTracesRecipe,
+                    BytesMetaEntitiesDeltaRecipe
+                    >>() {})
             .`in`(Scopes.SINGLETON)
 
         bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java).`in`(Scopes.SINGLETON)

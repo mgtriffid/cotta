@@ -25,6 +25,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesCreatedEntiti
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesDeltaRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesEffectRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesEntityRecipeDto
+import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesMetaEntitiesDeltaRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesStateRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesChangedEntityRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentDeltaRecipe
@@ -33,6 +34,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEnt
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEffectRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceElementRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceRecipe
@@ -45,7 +47,12 @@ import com.mgtriffid.games.cotta.core.serialization.toDto
 import com.mgtriffid.games.cotta.core.serialization.toEntityId
 import com.mgtriffid.games.cotta.core.serialization.toOwnedBy
 
-class BytesSnapsSerialization : SnapsSerialization<BytesStateRecipe, BytesDeltaRecipe, BytesCreatedEntitiesWithTracesRecipe> {
+class BytesSnapsSerialization : SnapsSerialization<
+    BytesStateRecipe,
+    BytesDeltaRecipe,
+    BytesCreatedEntitiesWithTracesRecipe,
+    BytesMetaEntitiesDeltaRecipe
+    > {
     private val kryo = Kryo()
 
     init {
@@ -74,6 +81,7 @@ class BytesSnapsSerialization : SnapsSerialization<BytesStateRecipe, BytesDeltaR
         kryo.register(BytesCottaTraceElementDto::class.java)
         kryo.register(TraceElementDtoKind::class.java)
         kryo.register(BytesEffectRecipeDto::class.java)
+        kryo.register(BytesMetaEntitiesDeltaRecipeDto::class.java)
     }
 
     override fun serializeDeltaRecipe(recipe: BytesDeltaRecipe): ByteArray {
@@ -90,6 +98,16 @@ class BytesSnapsSerialization : SnapsSerialization<BytesStateRecipe, BytesDeltaR
         val output = Output(64, 1024 * 1024)
         kryo.writeObject(output, recipe.toDto())
         return output.toBytes()
+    }
+
+    override fun serializeMetaEntitiesDeltaRecipe(recipe: BytesMetaEntitiesDeltaRecipe): ByteArray {
+        val output = Output(64, 1024 * 1024)
+        kryo.writeObject(output, recipe.toDto())
+        return output.toBytes()
+    }
+
+    override fun deserializeMetaEntitiesDeltaRecipe(bytes: ByteArray): BytesMetaEntitiesDeltaRecipe {
+        return kryo.readObject(Input(bytes), BytesMetaEntitiesDeltaRecipeDto::class.java).toRecipe()
     }
 
     override fun deserializeStateRecipe(bytes: ByteArray): BytesStateRecipe {
@@ -253,6 +271,25 @@ fun BytesDeltaRecipe.toDto(): BytesDeltaRecipeDto {
     ret.changedEntities = ArrayList(changedEntities.map { it.toDto() })
     ret.removedEntitiesIds = ArrayList(removedEntitiesIds.map { it.toDto() })
     return ret
+}
+
+private fun BytesMetaEntitiesDeltaRecipe.toDto(): BytesMetaEntitiesDeltaRecipeDto {
+    val ret = BytesMetaEntitiesDeltaRecipeDto()
+    ret.added = addedEntities.map { (entityId, playerId) ->
+        val dto = MetaEntityPlayerIdDto()
+        dto.entityId = entityId.toDto()
+        dto.playerId = playerId.id
+        dto
+    }
+//    ret.removed = removedEntitiesIds.map { it.toDto() }
+    return ret
+}
+
+private fun BytesMetaEntitiesDeltaRecipeDto.toRecipe(): BytesMetaEntitiesDeltaRecipe {
+    return BytesMetaEntitiesDeltaRecipe(
+        added.map { it.entityId.toEntityId() to PlayerId(it.playerId) },
+//        removed.map { it.toEntityId() }.toSet()
+    )
 }
 
 private fun BytesEntityRecipe.toDto(): BytesEntityRecipeDto {

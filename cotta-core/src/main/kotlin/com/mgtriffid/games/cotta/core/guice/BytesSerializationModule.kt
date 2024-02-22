@@ -25,6 +25,8 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
+import com.mgtriffid.games.cotta.core.serialization.MetaEntitiesDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
 
 class BytesSerializationModule(
     private val idsRemapper: IdsRemapperImpl
@@ -38,9 +40,19 @@ class BytesSerializationModule(
             bind(Kryo::class.java).annotatedWith(named("snapper")).toInstance(kryo)
             bind(BytesStateSnapper::class.java).`in`(Scopes.SINGLETON)
             bind(IdsRemapper::class.java).toInstance(idsRemapper)
-            bind(object : TypeLiteral<SnapsSerialization<BytesStateRecipe, BytesDeltaRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {})
+            bind(object : TypeLiteral<SnapsSerialization<
+                BytesStateRecipe,
+                BytesDeltaRecipe,
+                BytesCreatedEntitiesWithTracesRecipe,
+                BytesMetaEntitiesDeltaRecipe
+                >>() {})
                 .toInstance(snapsSerialization)
-            bind(object : TypeLiteral<StateSnapper<BytesStateRecipe, BytesDeltaRecipe, BytesCreatedEntitiesWithTracesRecipe>>() {}).to(BytesStateSnapper::class.java).`in`(Scopes.SINGLETON)
+            bind(object : TypeLiteral<StateSnapper<
+                BytesStateRecipe,
+                BytesDeltaRecipe,
+                BytesCreatedEntitiesWithTracesRecipe,
+                BytesMetaEntitiesDeltaRecipe
+                >>() {}).to(BytesStateSnapper::class.java).`in`(Scopes.SINGLETON)
             bind(object:TypeLiteral<InputSnapper<BytesInputRecipe>>(){}).to(BytesInputSnapper::class.java)
             bind(object : TypeLiteral<InputSerialization<BytesInputRecipe>>(){}).to(BytesInputSerialization::class.java).`in`(Scopes.SINGLETON)
         }

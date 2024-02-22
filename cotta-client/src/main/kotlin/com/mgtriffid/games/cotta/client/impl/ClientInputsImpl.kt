@@ -1,22 +1,24 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.ClientInputs
+import com.mgtriffid.games.cotta.client.CottaClientInput
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.input.ClientInput
+import com.mgtriffid.games.cotta.core.input.impl.ClientInputImpl
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import mu.KotlinLogging
 import java.util.*
+
+private val logger = KotlinLogging.logger {}
 
 class ClientInputsImpl @Inject constructor(
     private val tickProvider: TickProvider,
-    @Named("clientInputBufferLength") private val bufferLength: Int
+    @Named("clientInputBufferLength") private val bufferLength: Int,
+    private val localInput: CottaClientInput
 ) : ClientInputs {
     private val data = Array<Envelope>(bufferLength) { Envelope.Absent }
-
-    // called before advancing tick
-    override fun store(input: ClientInput) {
-        store(tickProvider.tick, input)
-    }
 
     override fun get(tick: Long): ClientInput {
         val pos = (tick % bufferLength).toInt()
@@ -39,5 +41,23 @@ class ClientInputsImpl @Inject constructor(
 
     override fun all(): SortedMap<Long, ClientInput> {
         return data.filterIsInstance<Envelope.Present>().associate { it.tick to it.input }.toSortedMap()
+    }
+
+    override fun collect(
+        entities: List<Entity>
+    ) {
+        store(
+            tickProvider.tick,
+            ClientInputImpl(
+                entities.associate { entity ->
+                    entity.id to getInputs(entity)
+                }
+            )
+        )
+    }
+
+    private fun getInputs(entity: Entity) = entity.inputComponents().map { clazz ->
+        logger.debug { "Retrieving input of class '${clazz.simpleName}' for entity '${entity.id}'" }
+        localInput.input(entity, clazz)
     }
 }

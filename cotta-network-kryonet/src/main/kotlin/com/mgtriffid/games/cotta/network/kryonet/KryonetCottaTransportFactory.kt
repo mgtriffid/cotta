@@ -19,8 +19,8 @@ class KryonetCottaTransportFactory {
             }
             is WithIssues -> {
                 KryonetCottaClientNetworkTransport(
-                    LaggingSender(emulatedNetworkConditions.sending.latency, SimpleSender()),
-                    LaggingSaver(emulatedNetworkConditions.receiving.latency, SimpleSaver())
+                    LaggingSender(emulatedNetworkConditions.sending, SimpleSender()),
+                    LaggingSaver(emulatedNetworkConditions.receiving, SimpleSaver())
                 )
             }
         }

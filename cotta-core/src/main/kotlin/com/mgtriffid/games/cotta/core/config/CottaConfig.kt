@@ -39,7 +39,7 @@ interface DebugConfig {
 
             interface Issues {
                 val latency: Latency
-                val packetLoss: Long
+                val packetLoss: Double
             }
         }
     }

@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditio
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.client.KryonetCottaClientNetworkTransport
+import com.mgtriffid.games.cotta.network.kryonet.client.LaggingSaver
 import com.mgtriffid.games.cotta.network.kryonet.client.LaggingSender
 import com.mgtriffid.games.cotta.network.kryonet.client.SimpleSaver
 import com.mgtriffid.games.cotta.network.kryonet.client.SimpleSender
@@ -19,7 +20,7 @@ class KryonetCottaTransportFactory {
             is WithIssues -> {
                 KryonetCottaClientNetworkTransport(
                     LaggingSender(emulatedNetworkConditions.sending.latency, SimpleSender()),
-                    SimpleSaver()
+                    LaggingSaver(emulatedNetworkConditions.receiving.latency, SimpleSaver())
                 )
             }
         }

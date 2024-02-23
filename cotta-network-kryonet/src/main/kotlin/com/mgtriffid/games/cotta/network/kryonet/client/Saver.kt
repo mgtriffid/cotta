@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.network.kryonet.client
 
+import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Latency
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import java.util.Queue
 import java.util.concurrent.Executors
@@ -16,7 +17,7 @@ internal class SimpleSaver : Saver {
 }
 
 internal class LaggingSaver(
-    private val lag: Long,
+    private val latency: Latency,
     private val impl: Saver
 ) : Saver {
     private val executors = Executors.newScheduledThreadPool(1)
@@ -24,7 +25,7 @@ internal class LaggingSaver(
     override fun save(obj: ServerToClientDto, packetsQueue: Queue<ServerToClientDto>) {
         executors.schedule(
             { impl.save(obj, packetsQueue) },
-            lag,
+            latency.random(),
             TimeUnit.MILLISECONDS
         )
         impl.save(obj, packetsQueue)

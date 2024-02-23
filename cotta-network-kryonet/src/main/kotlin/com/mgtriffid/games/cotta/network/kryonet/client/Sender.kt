@@ -28,8 +28,4 @@ internal class LaggingSender(
             java.util.concurrent.TimeUnit.MILLISECONDS
         )
     }
-
-    private fun Latency.random(): Long {
-        return (min..max).random()
-    }
 }

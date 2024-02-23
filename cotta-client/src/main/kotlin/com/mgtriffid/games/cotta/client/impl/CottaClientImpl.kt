@@ -104,15 +104,21 @@ class CottaClientImpl @Inject constructor(
         remapPredictedCreatedEntityTraces()
         // tick is advanced inside;
         simulation.tick(delta.input)
-//        delta.applyDiff(state.entities(getCurrentTick())) // unnecessary for deterministic simulation
+        processMetaEntitiesDiff(delta)
+        val lastConfirmedTick = getLastConfirmedTick(delta)
+        drawableStateProvider.lastMyInputProcessedByServerSimulation = lastConfirmedTick
+        predict(lastConfirmedTick)
+        sendDataToServer()
+    }
+
+    private fun getLastConfirmedTick(delta: Delta.Present) =
+        delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L
+
+    private fun processMetaEntitiesDiff(delta: Delta.Present) {
         delta.metaEntitiesDiff.forEach { (entityId, playerId) ->
             val newMetaEntity = state.entities(getCurrentTick()).create(entityId, Entity.OwnedBy.Player(playerId))
             game.metaEntitiesInputComponents.forEach { newMetaEntity.addInputComponent(it) }
         }
-        val lastMyInputProcessedByServerSimulation = delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L
-        drawableStateProvider.lastMyInputProcessedByServerSimulation = lastMyInputProcessedByServerSimulation
-        predict(lastMyInputProcessedByServerSimulation)
-        sendDataToServer()
     }
 
     private fun fillEntityIdMappings(delta: Delta.Present) {
@@ -138,7 +144,6 @@ class CottaClientImpl @Inject constructor(
     private fun predict(serverSawOurTick: Long) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
-        val unprocessedTicks2 = (serverSawOurTick + 1 until currentTick).also { logger.info { it } }
         drawableStateProvider.lastMyInputProcessedByServerSimulation = serverSawOurTick
         val unprocessedTicks = localInputs.all().keys.filter { it > serverSawOurTick }
             .also { logger.info { it.joinToString() } } // TODO explicit sorting

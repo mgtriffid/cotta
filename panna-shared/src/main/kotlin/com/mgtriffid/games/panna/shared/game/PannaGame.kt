@@ -2,7 +2,7 @@ package com.mgtriffid.games.panna.shared.game
 
 import com.google.gson.Gson
 import com.mgtriffid.games.cotta.Game
-import com.mgtriffid.games.cotta.core.CottaConfig
+import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities

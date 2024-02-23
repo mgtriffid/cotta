@@ -1,6 +1,8 @@
 package com.mgtriffid.games.cotta.network.kryonet.client
 
 import com.esotericsoftware.kryonet.Client
+import com.mgtriffid.games.cotta.core.config.DebugConfig
+import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Latency
 import java.util.concurrent.Executors
 
 internal interface Sender {
@@ -14,7 +16,7 @@ internal class SimpleSender : Sender {
 }
 
 internal class LaggingSender(
-    private val lag: Long,
+    private val latency: Latency,
     private val impl: Sender
 ) : Sender {
 
@@ -22,8 +24,12 @@ internal class LaggingSender(
     override fun send(client: Client, obj: Any) {
         executors.schedule(
             { impl.send(client, obj) },
-            lag,
+            latency.random(),
             java.util.concurrent.TimeUnit.MILLISECONDS
         )
+    }
+
+    private fun Latency.random(): Long {
+        return (min..max).random()
     }
 }

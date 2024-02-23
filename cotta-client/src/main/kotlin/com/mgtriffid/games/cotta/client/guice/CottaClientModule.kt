@@ -199,6 +199,7 @@ class CottaClientModule(
     }
 
     private fun bindNetwork() {
-        bind(CottaClientNetworkTransport::class.java).toInstance(KryonetCottaTransportFactory().createClient())
+        bind(CottaClientNetworkTransport::class.java)
+            .toInstance(KryonetCottaTransportFactory().createClient(game.config.debugConfig.emulatedNetworkConditions))
     }
 }

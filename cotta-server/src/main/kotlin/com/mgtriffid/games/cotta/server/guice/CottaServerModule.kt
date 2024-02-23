@@ -133,7 +133,7 @@ class CottaServerModule(
     }
 
     @Provides
-    @Singleton // TODO game instance scoped
+    @Singleton
     fun provideCottaServerNetwork(): CottaServerNetworkTransport {
         val network = KryonetCottaServerNetworkTransport()
         network.initialize()

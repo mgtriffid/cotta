@@ -102,7 +102,7 @@ class NetworkClientImpl<
         val inputDto = ClientToServerInputDto()
         inputDto.tick = tick
         inputDto.payload = inputSerialization.serializeInputRecipe(inputRecipe)
-        networkTransport.sendInput(inputDto)
+        networkTransport.send(inputDto)
     }
 
     override fun send(createdEntities: List<Pair<CottaTrace, EntityId>>, tick: Long) {
@@ -112,7 +112,7 @@ class NetworkClientImpl<
         val createdEntitiesDto = ClientToServerCreatedPredictedEntitiesDto()
         createdEntitiesDto.tick = tick
         createdEntitiesDto.payload = snapsSerialization.serializeEntityCreationTraces(createdEntitiesRecipe)
-        networkTransport.sendCreatedEntities(createdEntitiesDto)
+        networkTransport.send(createdEntitiesDto)
     }
 
     override fun tryGetDelta(tick: Long): Delta = if (deltaAvailable(tick)) {

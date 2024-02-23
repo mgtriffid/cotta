@@ -51,7 +51,7 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingIn
 import com.mgtriffid.games.cotta.core.tracing.Traces
 import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
-import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaClientNetworkTransport
+import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaTransportFactory
 
 class CottaClientModule(
     private val game: CottaGame,
@@ -60,8 +60,7 @@ class CottaClientModule(
     override fun configure() {
         bind(CottaGame::class.java).toInstance(game)
         bind(CottaClientInput::class.java).toInstance(input)
-        bind(CottaClientNetworkTransport::class.java).to(KryonetCottaClientNetworkTransport::class.java)
-            .`in`(Scopes.SINGLETON)
+        bindNetwork()
         bind(CottaClient::class.java)
             .to(object : TypeLiteral<CottaClientImpl>() {})
         bind(Int::class.java).annotatedWith(Names.named("historyLength")).toInstance(8)
@@ -197,5 +196,9 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
 
         bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java).`in`(Scopes.SINGLETON)
+    }
+
+    private fun bindNetwork() {
+        bind(CottaClientNetworkTransport::class.java).toInstance(KryonetCottaTransportFactory().createClient())
     }
 }

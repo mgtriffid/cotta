@@ -1,20 +1,23 @@
-package com.mgtriffid.games.cotta.network.kryonet
+package com.mgtriffid.games.cotta.network.kryonet.client
 
 import com.esotericsoftware.kryonet.Client
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
+import com.mgtriffid.games.cotta.network.kryonet.registerClasses
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.utils.drain
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentLinkedQueue
+import javax.swing.UIDefaults.ActiveValue
 
 private val logger = KotlinLogging.logger {}
 
-class KryonetCottaClientNetworkTransport: CottaClientNetworkTransport {
+internal class KryonetCottaClientNetworkTransport(
+    private val sender: Sender,
+    private val saver: Saver
+) : CottaClientNetworkTransport {
     private lateinit var client: Client
     private val packetsQueue = ConcurrentLinkedQueue<ServerToClientDto>()
 
@@ -29,19 +32,15 @@ class KryonetCottaClientNetworkTransport: CottaClientNetworkTransport {
     }
 
     override fun sendEnterGameIntent() {
-        client.sendUDP(EnterTheGameDto())
+        send(EnterTheGameDto())
     }
 
     override fun drainIncomingData(): Collection<ServerToClientDto> {
         return packetsQueue.drain()
     }
 
-    override fun sendInput(input: ClientToServerInputDto) {
-        client.sendUDP(input)
-    }
-
-    override fun sendCreatedEntities(createdEntitiesDto: ClientToServerCreatedPredictedEntitiesDto) {
-        client.sendUDP(createdEntitiesDto)
+    override fun send(obj: Any) {
+        sender.send(client, obj)
     }
 
     private fun configureListener() {
@@ -50,12 +49,16 @@ class KryonetCottaClientNetworkTransport: CottaClientNetworkTransport {
                 logger.debug { "Received $obj" }
                 when (obj) {
                     is ServerToClientDto -> {
-                        packetsQueue.add(obj)
+                        saver.save(obj, packetsQueue)
                         logger.debug { "Tick ${obj.tick}, kind ${obj.kindOfData}" }
                     }
                 }
             }
         }
         client.addListener(listener)
+    }
+
+    private fun save(obj: ServerToClientDto) {
+        packetsQueue.add(obj)
     }
 }

@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.client.impl
 import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.ClientInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
+import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
@@ -26,14 +27,12 @@ class PredictionSimulationImpl @Inject constructor(
     @Named("prediction") override val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
     @Named("localInput") private val localInputTickProvider: TickProvider,
-    private val predictionCottaClock: PredictionCottaClockImpl,
     private val localPlayer: LocalPlayer,
     private val idMappings: AuthoritativeToPredictedEntityIdMappings
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
     override fun predict(initialEntities: Entities, ticks: List<Long>, authoritativeTick: Long) {
-        predictionCottaClock.lagBehind = authoritativeTick - ticks.first()
         val lag = authoritativeTick - ticks.first()
         startPredictionFrom(initialEntities, authoritativeTick)
         run(ticks, lag)

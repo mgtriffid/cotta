@@ -26,7 +26,7 @@ class CottaClientFactory {
 
         registerSystems(
             game,
-            injector.getInstance(ClientSimulation::class.java),
+            injector.getInstance(AuthoritativeSimulation::class.java),
             injector.getInstance(PredictionSimulation::class.java)
         )
 
@@ -41,7 +41,7 @@ class CottaClientFactory {
         registerComponents(game, componentRegistry)
     }
 
-    private fun registerSystems(game: CottaGame, clientSimulation: ClientSimulation, predictionSimulation: PredictionSimulation) {
+    private fun registerSystems(game: CottaGame, clientSimulation: AuthoritativeSimulation, predictionSimulation: PredictionSimulation) {
         game.serverSystems.forEach { system ->
             clientSimulation.registerSystem(system as KClass<CottaSystem>)
             if (isPredicted(system)) {

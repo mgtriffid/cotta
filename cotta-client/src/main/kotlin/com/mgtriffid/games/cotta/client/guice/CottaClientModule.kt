@@ -66,7 +66,9 @@ class CottaClientModule(
         bind(Int::class.java).annotatedWith(Names.named("historyLength")).toInstance(8)
         bind(Int::class.java).annotatedWith(Names.named("stateHistoryLength")).toInstance(128)
 
-        bind(ClientSimulation::class.java).to(ClientSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Simulations::class.java).to(SimulationsImpl::class.java).`in`(Scopes.SINGLETON)
+
+        bind(AuthoritativeSimulation::class.java).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 
         val simulationTickProvider = AtomicLongTickProvider()
         bind(TickProvider::class.java).toInstance(simulationTickProvider)

@@ -6,7 +6,6 @@ import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRe
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.utils.now
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -21,12 +20,10 @@ class CottaClientImpl @Inject constructor(
     private val game: CottaGame,
     private val network: NetworkClient,
     private val localInputs: ClientInputs,
-    private val simulation: ClientSimulation,
+    private val simulations: Simulations,
     private val predictionSimulation: PredictionSimulation,
     private val tickProvider: TickProvider,
     private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
-    private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
-    private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider
@@ -99,39 +96,14 @@ class CottaClientImpl @Inject constructor(
         logger.debug { "Integrating" }
         processLocalInput()
 
-        serverCreatedEntitiesRegistry.data = delta.tracesOfCreatedEntities.toMutableList()
-        fillEntityIdMappings(delta)
-        remapPredictedCreatedEntityTraces()
-        // tick is advanced inside;
-        simulation.tick(delta.input)
-        processMetaEntitiesDiff(delta)
-        val lastConfirmedTick = getLastConfirmedTick(delta)
-        drawableStateProvider.lastMyInputProcessedByServerSimulation = lastConfirmedTick
-        predict(lastConfirmedTick)
+        simulations.integrate(delta)
+
         sendDataToServer()
+        drawableStateProvider.lastMyInputProcessedByServerSimulation = getLastConfirmedTick(delta)
     }
 
     private fun getLastConfirmedTick(delta: Delta.Present) =
         delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L
-
-    private fun processMetaEntitiesDiff(delta: Delta.Present) {
-        delta.metaEntitiesDiff.forEach { (entityId, playerId) ->
-            val newMetaEntity = state.entities(getCurrentTick()).create(entityId, Entity.OwnedBy.Player(playerId))
-            game.metaEntitiesInputComponents.forEach { newMetaEntity.addInputComponent(it) }
-        }
-    }
-
-    private fun fillEntityIdMappings(delta: Delta.Present) {
-        delta.authoritativeToPredictedEntities.forEach { (authoritativeId, predictedId) ->
-            logger.debug { "Recording mapping $authoritativeId to $predictedId" }
-            authoritativeToPredictedEntityIdMappings[authoritativeId] = predictedId
-        }
-    }
-
-    private fun remapPredictedCreatedEntityTraces() {
-        // TODO analyze performance and optimize
-        predictedCreatedEntitiesRegistry.useAuthoritativeEntitiesWherePossible(authoritativeToPredictedEntityIdMappings.all())
-    }
 
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick
@@ -139,16 +111,6 @@ class CottaClientImpl @Inject constructor(
         val createdEntities = predictedCreatedEntitiesRegistry.latest()
         network.send(inputs, getCurrentTick() - 1)
         network.send(createdEntities, getCurrentTick())
-    }
-
-    private fun predict(serverSawOurTick: Long) {
-        logger.debug { "Predicting" }
-        val currentTick = getCurrentTick()
-        drawableStateProvider.lastMyInputProcessedByServerSimulation = serverSawOurTick
-        val unprocessedTicks = localInputs.all().keys.filter { it > serverSawOurTick }
-            .also { logger.info { it.joinToString() } } // TODO explicit sorting
-        logger.debug { "Setting initial predictions state with tick ${getCurrentTick()}" }
-        predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)
     }
 
     // called before advancing tick

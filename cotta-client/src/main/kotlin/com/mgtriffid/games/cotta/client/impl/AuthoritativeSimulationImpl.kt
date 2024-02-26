@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
-import com.mgtriffid.games.cotta.client.ClientSimulation
+import com.mgtriffid.games.cotta.client.AuthoritativeSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -16,13 +16,13 @@ import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
-class ClientSimulationImpl @Inject constructor(
+class AuthoritativeSimulationImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val tick: TickProvider,
     @Named("simulation") private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks
-) : ClientSimulation {
+) : AuthoritativeSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>() // TODO pathetic casts
 
     override fun tick(input: SimulationInput) {

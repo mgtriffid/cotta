@@ -29,7 +29,7 @@ class SimulationsImpl @Inject constructor(
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val predictionSimulation: PredictionSimulation,
     ): Simulations {
-    override fun integrate(delta: Delta.Present) {
+    override fun simulate(delta: Delta.Present) {
         serverCreatedEntitiesRegistry.data = delta.tracesOfCreatedEntities.toMutableList()
         fillEntityIdMappings(delta)
         remapPredictedCreatedEntityTraces()

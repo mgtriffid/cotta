@@ -96,7 +96,7 @@ class CottaClientImpl @Inject constructor(
         logger.debug { "Integrating" }
         processLocalInput()
 
-        simulations.integrate(delta)
+        simulations.simulate(delta)
 
         sendDataToServer()
         drawableStateProvider.lastMyInputProcessedByServerSimulation = getLastConfirmedTick(delta)

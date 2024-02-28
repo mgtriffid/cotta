@@ -70,6 +70,8 @@ class CottaClientModule(
 
         bind(AuthoritativeSimulation::class.java).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 
+        bind(GuessedSimulation::class.java).to(GuessedSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+
         val simulationTickProvider = AtomicLongTickProvider()
         bind(TickProvider::class.java).toInstance(simulationTickProvider)
         bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))

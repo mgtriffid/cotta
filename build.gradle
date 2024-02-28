@@ -209,6 +209,8 @@ project(":cotta-client") {
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
         implementation "com.google.inject:guice:7.0.0"
+
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     }
 }
 

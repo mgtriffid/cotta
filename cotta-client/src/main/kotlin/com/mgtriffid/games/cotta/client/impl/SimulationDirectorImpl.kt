@@ -7,17 +7,16 @@ import java.util.*
 
 class SimulationDirectorImpl(
     private val deltasPresent: DeltasPresent,
-    private val tickProvider: TickProvider // TODO just a parameter to `instruct`
 ) : SimulationDirector {
 
     var currentState: CurrentState = CurrentState.Authoritative
 
-    override fun instruct(): List<Instruction> {
+    override fun instruct(tick: Long): List<Instruction> {
         val ret = LinkedList<Instruction>()
         val s = currentState
         var needToRecalculate = false
         if (s is CurrentState.Guessed) {
-            for (t in s.authoritativeTick until tickProvider.tick) {
+            for (t in s.authoritativeTick until tick) {
                 if (deltasPresent.hasDelta(t)) {
                     ret.add(Instruction.IntegrateAuthoritative(t))
                     currentState = CurrentState.Guessed(t + 1)
@@ -26,24 +25,24 @@ class SimulationDirectorImpl(
                     break
                 }
             }
-            currentState = if (caughtUp()) {
+            currentState = if (caughtUp(tick)) {
                 CurrentState.Authoritative
             } else {
                 currentState
             }
         }
         if (currentState is CurrentState.Authoritative) {
-            if (deltasPresent.hasDelta(tickProvider.tick)) {
-                ret.add(Instruction.IntegrateAuthoritative(tickProvider.tick))
+            if (deltasPresent.hasDelta(tick)) {
+                ret.add(Instruction.IntegrateAuthoritative(tick))
             } else {
                 ret.add(Instruction.CopyAuthoritativeToGuessed)
-                ret.add(Instruction.IntegrateGuessed(tickProvider.tick - 1))
-                currentState = CurrentState.Guessed(tickProvider.tick)
+                ret.add(Instruction.IntegrateGuessed(tick - 1))
+                currentState = CurrentState.Guessed(tick)
             }
         } else {
             if (needToRecalculate) {
                 ret.add(Instruction.CopyAuthoritativeToGuessed)
-                repeat((tickProvider.tick - getAuthoritativeTick() + 1).toInt()) {
+                repeat((tick - getAuthoritativeTick() + 1).toInt()) {
                     ret.add(Instruction.IntegrateGuessed(getAuthoritativeTick() - 1))
                 }
             }
@@ -52,7 +51,7 @@ class SimulationDirectorImpl(
         return ret
     }
 
-    private fun caughtUp() = getAuthoritativeTick() == tickProvider.tick
+    private fun caughtUp(tick: Long) = getAuthoritativeTick() == tick
 
     private fun getAuthoritativeTick() = (currentState as CurrentState.Guessed).authoritativeTick
 }

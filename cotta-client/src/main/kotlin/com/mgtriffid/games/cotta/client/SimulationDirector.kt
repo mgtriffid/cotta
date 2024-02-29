@@ -4,7 +4,7 @@ package com.mgtriffid.games.cotta.client
  *  state[N+1] = logic(state[N], input[N])
  */
 interface SimulationDirector {
-    fun instruct(): List<Instruction>
+    fun instruct(tick: Long): List<Instruction>
 }
 
 sealed interface Instruction {

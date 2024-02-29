@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.client
 
 import com.mgtriffid.games.cotta.client.impl.CurrentState
 import com.mgtriffid.games.cotta.client.impl.SimulationDirectorImpl
-import com.mgtriffid.games.cotta.core.entities.TickProvider
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,23 +26,16 @@ class IncomingData {
 
 class GameStub {
     val incoming = IncomingData()
-    private val instructionsProvider = SimulationDirectorImpl(
-        incoming::hasDelta,
-        object : TickProvider {
-            override var tick
-                get() = _tick.toLong()
-                set(value) = throw UnsupportedOperationException()
-        })
+    private val instructionsProvider = SimulationDirectorImpl(incoming::hasDelta)
     private var authoritativeState: State = State(0)
     private var guessedState: State? = null
 
-    private var _tick = 0
+    private var tick = 0L
 
     fun tick() {
-        val instructions = instructionsProvider.instruct()
+        val instructions = instructionsProvider.instruct(tick)
         perform(instructions)
-        _tick++
-        println("tick: $_tick, n: ${stateView().n}")
+        tick++
     }
 
     private fun perform(instructions: List<Instruction>) {

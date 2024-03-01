@@ -181,7 +181,7 @@ class NetworkClientImpl<
         return deltasForLagCompArrived
     }
 
-    private fun deltaAvailable(tick: Long): Boolean {
+    override fun deltaAvailable(tick: Long): Boolean {
         return incomingDataBuffer.deltas.containsKey(tick).also { logger.debug { "Delta present for tick $tick: $it" } }
             && incomingDataBuffer.inputs.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
             && incomingDataBuffer.playersSawTicks.containsKey(tick).also { logger.debug { "sawTicks present for tick $tick: $it" } }

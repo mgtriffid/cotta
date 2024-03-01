@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.ClientInputs
 import com.mgtriffid.games.cotta.client.GuessedSimulation
 import com.mgtriffid.games.cotta.client.PredictionSimulation
+import com.mgtriffid.games.cotta.client.SimulationDirector
 import com.mgtriffid.games.cotta.client.Simulations
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.core.CottaGame
@@ -23,6 +24,7 @@ class SimulationsImpl @Inject constructor(
     private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     private val simulation: AuthoritativeSimulation,
     private val guessedSimulation: GuessedSimulation,
+    private val simulationDirector: SimulationDirector,
     private val localInputs: ClientInputs,
     @Named("simulation") private val state: CottaState,
     private val tickProvider: TickProvider,
@@ -32,6 +34,7 @@ class SimulationsImpl @Inject constructor(
     private val predictionSimulation: PredictionSimulation,
     ): Simulations {
     override fun simulate(delta: Delta.Present) {
+        val instructions = simulationDirector.instruct(tickProvider.tick).also { logger.info { "Instructions: $it" } }
         serverCreatedEntitiesRegistry.data = delta.tracesOfCreatedEntities.toMutableList()
         fillEntityIdMappings(delta)
         remapPredictedCreatedEntityTraces()

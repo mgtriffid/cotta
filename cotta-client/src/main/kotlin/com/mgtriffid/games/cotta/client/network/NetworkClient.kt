@@ -13,4 +13,5 @@ interface NetworkClient {
     fun send(createdEntities: List<Pair<CottaTrace, EntityId>>, tick: Long)
     fun tryGetDelta(tick: Long): Delta
     fun tryGetAuthoritativeState(): AuthoritativeState
+    fun deltaAvailable(tick: Long): Boolean
 }

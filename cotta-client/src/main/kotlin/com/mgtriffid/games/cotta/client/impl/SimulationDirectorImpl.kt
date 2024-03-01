@@ -2,10 +2,10 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.Instruction
 import com.mgtriffid.games.cotta.client.SimulationDirector
-import com.mgtriffid.games.cotta.core.entities.TickProvider
+import jakarta.inject.Inject
 import java.util.*
 
-class SimulationDirectorImpl(
+class SimulationDirectorImpl @Inject constructor(
     private val deltasPresent: DeltasPresent,
 ) : SimulationDirector {
 
@@ -61,5 +61,5 @@ sealed interface CurrentState {
     data class Guessed(val authoritativeTick: Long) : CurrentState
 }
 fun interface DeltasPresent {
-    fun hasDelta(t: Long): Boolean
+    fun hasDelta(tick: Long): Boolean
 }

@@ -75,6 +75,8 @@ class CottaClientModule(
         val simulationTickProvider = AtomicLongTickProvider()
         bind(TickProvider::class.java).toInstance(simulationTickProvider)
         bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
+        bind(SimulationDirector::class.java).to(SimulationDirectorImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(DeltasPresent::class.java).to(DeltasPresentImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java)
             .`in`(Scopes.SINGLETON)

@@ -20,6 +20,7 @@ class CottaClientImpl @Inject constructor(
     private val game: CottaGame,
     private val network: NetworkClient,
     private val localInputs: ClientInputs,
+    private val playerInputs: LocalPlayerInputs,
     private val simulations: Simulations,
     private val predictionSimulation: PredictionSimulation,
     private val tickProvider: TickProvider,
@@ -111,6 +112,7 @@ class CottaClientImpl @Inject constructor(
         val createdEntities = predictedCreatedEntitiesRegistry.latest()
         network.send(inputs, getCurrentTick() - 1)
         network.send(createdEntities, getCurrentTick())
+        network.send(playerInputs.get(getCurrentTick() - 1), getCurrentTick() - 1)
     }
 
     // called before advancing tick
@@ -129,6 +131,7 @@ class CottaClientImpl @Inject constructor(
         }
         logger.debug { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
         localInputs.collect(localEntitiesWithInputComponents.distinctBy { it.id })
+        playerInputs.collect()
     }
 
     // GROOM rename

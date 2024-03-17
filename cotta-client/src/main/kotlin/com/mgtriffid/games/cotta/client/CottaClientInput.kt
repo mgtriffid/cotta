@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.client
 
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import kotlin.reflect.KClass
 
 interface CottaClientInput {
@@ -9,4 +10,6 @@ interface CottaClientInput {
         entity: Entity,
         clazz: KClass<T>
     ): T
+
+    fun input(): PlayerInput
 }

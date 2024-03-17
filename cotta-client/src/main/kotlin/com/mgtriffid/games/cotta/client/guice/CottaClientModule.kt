@@ -160,7 +160,10 @@ class CottaClientModule(
             .annotatedWith(Names.named("prediction"))
             .to(PredictionTracingEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
+
         bind(ClientInputs::class.java).to(ClientInputsImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(LocalPlayerInputs::class.java).to(LocalPlayerInputsImpl::class.java).`in`(Scopes.SINGLETON)
+
         bind(CreateEntityStrategy::class.java)
             .annotatedWith(Names.named("prediction"))
             .to(PredictionCreateEntityStrategy::class.java)
@@ -179,7 +182,7 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
 
         val idsRemapper = IdsRemapperImpl()
-        install(BytesSerializationModule(idsRemapper))
+        install(BytesSerializationModule(idsRemapper, game.playerInputKClass))
         bind(object : TypeLiteral<
             ClientIncomingDataBuffer<
                 BytesStateRecipe,

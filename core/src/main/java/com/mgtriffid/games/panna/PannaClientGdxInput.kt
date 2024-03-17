@@ -4,10 +4,11 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils.atan2Deg360
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.gdx.CottaClientGdxInput
+import com.mgtriffid.games.panna.shared.PannaPlayerInput
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_PISTOL
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_RAILGUN
 import com.mgtriffid.games.panna.shared.game.components.input.*
@@ -74,6 +75,18 @@ class PannaClientGdxInput(
             }
         }
         throw IllegalArgumentException() // TODO write a reasonable "unregistered component exception"
+    }
+
+    override fun input(): PlayerInput {
+        return PannaPlayerInput(
+            storage.leftPressed,
+            storage.rightPressed,
+            storage.shootPressed,
+            storage.jumpPressed,
+            storage.lookAt,
+            storage.joinPressed,
+            storage.switchWeapon
+        )
     }
 
     override fun accumulate() {

@@ -97,7 +97,7 @@ class CottaServerModule(
             bind(CreatedEntities::class.java).to(CreatedEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
             val idsRemapper = IdsRemapperImpl()
-            install(BytesSerializationModule(idsRemapper))
+            install(BytesSerializationModule(idsRemapper, game.playerInputKClass))
             bind(ServerToClientDataDispatcher::class.java)
                 .to(object :
                     TypeLiteral<ServerToClientDataDispatcherImpl<

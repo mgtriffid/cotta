@@ -10,6 +10,7 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapper
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.InputSnapper
@@ -27,9 +28,11 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecip
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
 import com.mgtriffid.games.cotta.core.serialization.MetaEntitiesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
+import kotlin.reflect.KClass
 
 class BytesSerializationModule(
-    private val idsRemapper: IdsRemapperImpl
+    private val idsRemapper: IdsRemapperImpl,
+    private val playerInputKClass: KClass<out PlayerInput>
 ) : Module {
     override fun configure(binder: Binder) {
         with(binder) {
@@ -53,8 +56,8 @@ class BytesSerializationModule(
                 BytesCreatedEntitiesWithTracesRecipe,
                 BytesMetaEntitiesDeltaRecipe
                 >>() {}).to(BytesStateSnapper::class.java).`in`(Scopes.SINGLETON)
-            bind(object:TypeLiteral<InputSnapper<BytesInputRecipe>>(){}).to(BytesInputSnapper::class.java)
-            bind(object : TypeLiteral<InputSerialization<BytesInputRecipe>>(){}).to(BytesInputSerialization::class.java).`in`(Scopes.SINGLETON)
+            bind(object : TypeLiteral<InputSnapper<BytesInputRecipe>>(){}).to(BytesInputSnapper::class.java)
+            bind(object : TypeLiteral<InputSerialization<BytesInputRecipe>>(){}).toInstance(BytesInputSerialization(playerInputKClass))
         }
     }
 

@@ -11,6 +11,7 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.ClientInput
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
@@ -25,6 +26,7 @@ import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto2
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import jakarta.inject.Inject
 import mu.KotlinLogging
@@ -115,6 +117,13 @@ class NetworkClientImpl<
         networkTransport.send(createdEntitiesDto)
     }
 
+    override fun send(input: PlayerInput, currentTick: Long) {
+        val inputDto = ClientToServerInputDto2()
+        inputDto.tick = currentTick
+        inputDto.payload = inputSerialization.serializeInput(input)
+        networkTransport.send(inputDto)
+    }
+
     override fun tryGetDelta(tick: Long): Delta = if (deltaAvailable(tick)) {
         val input = incomingDataBuffer.inputs[tick]!!
         logger.info { "Exists input for entities ${input.keys}" }
@@ -126,6 +135,9 @@ class NetworkClientImpl<
             input = object : SimulationInput {
                 override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                     return input
+                }
+                override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
+                    return emptyMap()
                 }
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {

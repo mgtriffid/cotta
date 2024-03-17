@@ -10,6 +10,7 @@ import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesEntityInputRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesInputComponentRecipeDto
@@ -22,8 +23,9 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntiti
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.dto.MetaEntityPlayerIdDto
 import com.mgtriffid.games.cotta.core.serialization.toEntityId
+import kotlin.reflect.KClass
 
-class BytesInputSerialization : InputSerialization<BytesInputRecipe> {
+class BytesInputSerialization(val inputKClass: KClass<out PlayerInput>) : InputSerialization<BytesInputRecipe> {
     // TODO this is a potential source of confusion for someone who digs into the code.
     //      Like, why are there so many instances of Kryo, and why are they all being registered with different classes?
     private val kryo = Kryo()
@@ -37,6 +39,7 @@ class BytesInputSerialization : InputSerialization<BytesInputRecipe> {
         kryo.register(BytesInputRecipeDto::class.java)
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(ArrayList::class.java, CollectionSerializer<ArrayList<Any?>>())
+        kryo.register(inputKClass.java, DataClassSerializer(inputKClass))
     }
 
     override fun serializeInputRecipe(recipe: BytesInputRecipe): ByteArray {
@@ -45,8 +48,18 @@ class BytesInputSerialization : InputSerialization<BytesInputRecipe> {
         return output.toBytes()
     }
 
+    override fun serializeInput(input: PlayerInput): ByteArray {
+        val output = Output(4096, 1024 * 1024)
+        kryo.writeObject(output, input)
+        return output.toBytes()
+    }
+
     override fun deserializeInputRecipe(bytes: ByteArray): BytesInputRecipe {
         return kryo.readObject(Input(bytes), BytesInputRecipeDto::class.java).toRecipe()
+    }
+
+    override fun deserializeInput(bytes: ByteArray): PlayerInput {
+        return kryo.readObject(Input(bytes), inputKClass.java)
     }
 }
 

@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto2
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.utils.drain
 import mu.KotlinLogging
@@ -17,6 +18,7 @@ class KryonetCottaServerNetworkTransport : CottaServerNetworkTransport {
     private lateinit var server: Server
     private val enterGameIntents = ConcurrentLinkedQueue<Pair<ConnectionId, EnterGameIntent>>()
     private val clientToServerInputs = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>()
+    private val clientToServerInputs2 = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto2>>()
     private val clientToServerCreatedPredictedEntities = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>>()
 
     override fun initialize() {
@@ -32,6 +34,7 @@ class KryonetCottaServerNetworkTransport : CottaServerNetworkTransport {
         val listener = ServerListener(
             enterGameIntents = enterGameIntents,
             clientToServerInputs = clientToServerInputs,
+            clientToServerInputs2 = clientToServerInputs2,
             clientToServerCreatedPredictedEntities = clientToServerCreatedPredictedEntities
         )
         server.addListener(listener)
@@ -43,6 +46,10 @@ class KryonetCottaServerNetworkTransport : CottaServerNetworkTransport {
 
     override fun drainInputs(): Collection<Pair<ConnectionId, ClientToServerInputDto>> {
         return clientToServerInputs.drain()
+    }
+
+    override fun drainInputs2(): Collection<Pair<ConnectionId, ClientToServerInputDto2>> {
+        return clientToServerInputs2.drain()
     }
 
     override fun drainCreatedEntities(): Collection<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>> {

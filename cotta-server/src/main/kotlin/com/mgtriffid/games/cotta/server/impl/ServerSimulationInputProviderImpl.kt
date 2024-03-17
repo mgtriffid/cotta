@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
@@ -60,6 +61,8 @@ class ServerSimulationInputProviderImpl<
         val input = object : SimulationInput {
             // TODO protect against malicious client sending input for entity not belonging to them
             override fun inputsForEntities() = inputs
+
+            override fun inputForPlayers() = clientsInput.inputForPlayers
 
             override fun playersSawTicks() = clientsInput.playersSawTicks
         }
@@ -114,6 +117,17 @@ class ServerSimulationInputProviderImpl<
             getBuffer(playerId).storeInput(dto.tick, recipe)
         }
 
+        val inputDtos2 = networkTransport.drainInputs2()
+        inputDtos2.forEach { (connectionId, dto) ->
+            val playerId = clientsGhosts.playerByConnection[connectionId]
+            if (playerId == null) {
+                logger.warn { "Got input from unknown connection $connectionId" }
+                return@forEach
+            }
+            val input = inputSerialization.deserializeInput(dto.payload)
+            getBuffer(playerId).storeInput2(dto.tick, input)
+        }
+
         val rawCreatedEntitiesDtos = networkTransport.drainCreatedEntities()
         rawCreatedEntitiesDtos.forEach { (connectionId, dto) ->
             val playerId = clientsGhosts.playerByConnection[connectionId]
@@ -134,18 +148,22 @@ class ServerSimulationInputProviderImpl<
         val inputRecipes = ArrayList<IR>()
         val createdEntities = ArrayList<Pair<CottaTrace, PredictedEntityId>>()
         val playersSawTicks = HashMap<PlayerId, Long>()
+        val playerInputs = HashMap<PlayerId, PlayerInput>()
 
         val use: (PlayerId, ClientGhost<IR>, Long) -> Unit = { playerId, ghost, tick ->
             val buffer = getBuffer(playerId)
             playersSawTicks[playerId] = tick
             inputRecipes.add(buffer.inputs[tick]!!)
+            playerInputs[playerId] = buffer.inputs2[tick]!!
             createdEntities.addAll(buffer.createdEntities[tick + 1]!!)
             ghost.setLastUsedTick(tick)
             ghost.setLastUsedIncomingInput(buffer.inputs[tick]!!)
+            ghost.setLastUsedIncomingInput2(buffer.inputs2[tick]!!)
         }
         val usePrevious: (PlayerId, ClientGhost<IR>, Long) -> Unit =  { playerId, ghost, tick ->
             playersSawTicks[playerId] = tick
             inputRecipes.add(ghost.getLastUsedIncomingInput())
+            playerInputs[playerId] = ghost.getLastUsedIncomingInput2()
             ghost.setLastUsedTick(tick)
         }
         clientsGhosts.data.forEach { (playerId, ghost) ->
@@ -165,7 +183,11 @@ class ServerSimulationInputProviderImpl<
                     val lastUsedInput = ghost.lastUsedInput()
                     val tick = lastUsedInput + 1
                     logger.debug { "Client input tick is $tick for $playerId" }
-                    if (buffer.inputs.containsKey(tick) && buffer.createdEntities.containsKey(tick + 1)) {
+                    if (
+                        buffer.inputs.containsKey(tick) &&
+                        buffer.inputs2.containsKey(tick) &&
+                        buffer.createdEntities.containsKey(tick + 1)
+                        ) {
                         use(playerId, ghost, tick)
                     } else {
                         usePrevious(playerId, ghost, tick)
@@ -177,7 +199,14 @@ class ServerSimulationInputProviderImpl<
         val inputs = inputRecipes.map { recipe ->
             inputSnapper.unpackInputRecipe(recipe).entries
         }.flatten().associate { it.key to it.value }
-        return Pair(ClientsInput(playersSawTicks, inputs), ClientsPredictedEntities(createdEntities))
+        return Pair(
+            ClientsInput(
+                playersSawTicks = playersSawTicks,
+                input = inputs,
+                inputForPlayers = playerInputs
+            ),
+            ClientsPredictedEntities(createdEntities)
+        )
     }
 
     private fun getBuffer(playerId: PlayerId): ServerIncomingDataBuffer<SR, DR, IR> {

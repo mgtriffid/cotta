@@ -9,6 +9,7 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
+import com.mgtriffid.games.panna.shared.PannaPlayerInput
 import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
 import com.mgtriffid.games.panna.shared.game.components.input.*
@@ -108,6 +109,8 @@ class PannaGame : CottaGame {
     override val config: CottaConfig = object : CottaConfig {
         override val tickLength: Long = 100L
     }
+
+    override val playerInputKClass = PannaPlayerInput::class
 
     private fun readTerrainFromTiled(): List<List<Int>> {
         val res = javaClass.getResource("/maps/panna-level.tmj")

@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import kotlin.reflect.KClass
 
 @Game
@@ -23,4 +24,7 @@ class GameStub : CottaGame {
     override val config: CottaConfig = object : CottaConfig {
         override val tickLength: Long = 20
     }
+    override val playerInputKClass = PlayerInputStub::class
 }
+
+data class PlayerInputStub(val input: String) : PlayerInput

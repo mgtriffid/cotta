@@ -42,7 +42,7 @@ class SimulationsImpl @Inject constructor(
         simulation.tick(delta.input)
         processMetaEntitiesDiff(delta)
         val lastConfirmedTick = getLastConfirmedTick(delta)
-        predict(lastConfirmedTick)
+//        predict(lastConfirmedTick)
     }
 
     private fun fillEntityIdMappings(delta: Delta.Present) {

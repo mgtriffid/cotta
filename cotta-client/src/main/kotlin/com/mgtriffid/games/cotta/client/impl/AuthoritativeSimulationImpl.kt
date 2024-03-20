@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.client.AuthoritativeSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
@@ -21,7 +22,8 @@ class AuthoritativeSimulationImpl @Inject constructor(
     private val tick: TickProvider,
     @Named("simulation") private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
-    private val playersSawTicks: PlayersSawTicks
+    private val playersSawTicks: PlayersSawTicks,
+    private val inputProcessing: InputProcessing,
 ) : AuthoritativeSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>() // TODO pathetic casts
 
@@ -30,8 +32,13 @@ class AuthoritativeSimulationImpl @Inject constructor(
         state.advance(tick.tick)
         tick.tick++
         putInputIntoEntities(input)
+        processInput(input)
         fillPlayersSawTicks(input)
         simulate()
+    }
+
+    private fun processInput(input: SimulationInput) {
+        inputProcessing.process(input, state.entities(tick.tick), effectBus)
     }
 
     private fun fillPlayersSawTicks(input: SimulationInput) {
@@ -45,16 +52,15 @@ class AuthoritativeSimulationImpl @Inject constructor(
     }
 
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
-        logger.info { "Registering system '${systemClass.simpleName}'" }
         systemInvokers.add(invokersFactory.createInvoker(systemClass))
     }
 
     private fun putInputIntoEntities(input: SimulationInput) {
         getEntitiesWithInputComponents().forEach { e ->
-            logger.info { "Entity ${e.id} has some input components:" }
+            logger.debug { "Entity ${e.id} has some input components:" }
             e.inputComponents().forEach { c ->
                 val component = input.inputForEntityAndComponent(e.id, c)
-                logger.info { "  $component" }
+                logger.debug { "  $component" }
                 e.setInputComponent(c, component)
             }
         }

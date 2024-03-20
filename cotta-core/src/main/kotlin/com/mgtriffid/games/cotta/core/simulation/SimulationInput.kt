@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.ClientInput
+import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import mu.KotlinLogging
 import kotlin.reflect.KCallable
@@ -23,6 +24,8 @@ interface SimulationInput {
     fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>>
 
     fun inputForPlayers(): Map<PlayerId, PlayerInput>
+
+    fun nonPlayerInput(): NonPlayerInput
 
     fun playersSawTicks(): Map<PlayerId, Long>
 

@@ -2,6 +2,7 @@ package com.mgtriffid.games.panna.shared.game.systems.join
 
 import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.panna.shared.CHARACTER_STRATEGY
@@ -17,7 +18,7 @@ import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
 class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
     override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
         if (e is JoinBattleEffect) {
-            val dude = ctx.createEntity(ctx.entities().getOrNotFound(e.metaEntityId).ownedBy)
+            val dude = ctx.createEntity(Entity.OwnedBy.Player(e.playerId))
             dude.addComponent(createPositionComponent(32f, 24f))
             dude.addInputComponent(CharacterInputComponent::class)
             dude.addInputComponent(ShootInputComponent::class)
@@ -30,7 +31,22 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem {
             dude.addComponent(createSteamManPlayerComponent())
             dude.addComponent(createColliderComponent(16, 16))
             dude.addComponent(createDrawableComponent(CHARACTER_STRATEGY))
-            dude.addComponent(createWeaponEquippedComponent(WEAPON_PISTOL, 0, 0))
+            dude.addComponent(
+                createWeaponEquippedComponent(
+                    WEAPON_PISTOL,
+                    0,
+                    0
+                )
+            )
+            dude.addComponent(createShootComponent(false))
+            dude.addComponent(
+                createCharacterInputComponent2(
+                    WALKING_DIRECTION_NONE,
+                    false,
+                    0f,
+                    0
+                )
+            )
         }
     }
 }

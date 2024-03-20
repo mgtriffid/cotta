@@ -3,9 +3,11 @@ package com.mgtriffid.games.cotta.server
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 
@@ -21,4 +23,5 @@ interface DataForClients {
     fun confirmedEntities(tick: Long): List<Pair<PredictedEntityId, AuthoritativeEntityId>>
     fun metaEntities(): MetaEntities
     fun playersSawTicks(): PlayersSawTicks
+    fun playerInputs(): Map<PlayerId, PlayerInput>
 }

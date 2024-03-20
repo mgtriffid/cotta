@@ -5,6 +5,7 @@ import com.google.inject.Key
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.registerComponents
@@ -43,6 +44,8 @@ class ServerSimulationTest {
                 return emptyMap()
             }
 
+            override fun nonPlayerInput() = object: NonPlayerInput {}
+
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
             }
@@ -71,6 +74,7 @@ class ServerSimulationTest {
                 return emptyMap()
             }
 
+            override fun nonPlayerInput() = object: NonPlayerInput {}
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
             }
@@ -102,6 +106,7 @@ class ServerSimulationTest {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
+                override fun nonPlayerInput() = object: NonPlayerInput {}
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
@@ -140,6 +145,7 @@ class ServerSimulationTest {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
+                override fun nonPlayerInput() = object: NonPlayerInput {}
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
@@ -158,6 +164,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input1)
                 )
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
@@ -177,6 +184,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input2)
                 )
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
@@ -217,6 +225,7 @@ class ServerSimulationTest {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
+                override fun nonPlayerInput() = object: NonPlayerInput {}
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
@@ -230,6 +239,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input)
                 )
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
@@ -251,6 +261,7 @@ class ServerSimulationTest {
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
         })
@@ -288,6 +299,7 @@ class ServerSimulationTest {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
+                override fun nonPlayerInput() = object: NonPlayerInput {}
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
@@ -301,6 +313,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input)
                 )
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
@@ -322,6 +335,7 @@ class ServerSimulationTest {
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
         })
@@ -345,6 +359,7 @@ class ServerSimulationTest {
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks(): Map<PlayerId, Long> {
                 return emptyMap()
@@ -369,6 +384,7 @@ class ServerSimulationTest {
             override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
                 return emptyMap()
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
@@ -402,6 +418,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input1)
                 )
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
@@ -415,6 +432,7 @@ class ServerSimulationTest {
                     damageDealerId to setOf(input1)
                 )
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
@@ -444,6 +462,7 @@ class ServerSimulationTest {
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
             }
+            override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
         })

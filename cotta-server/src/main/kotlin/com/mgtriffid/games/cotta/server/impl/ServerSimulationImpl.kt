@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
@@ -28,7 +29,8 @@ class ServerSimulationImpl @Inject constructor(
     private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks,
-    private val tickProvider: TickProvider
+    private val tickProvider: TickProvider,
+    private val inputProcessing: InputProcessing
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
@@ -51,9 +53,18 @@ class ServerSimulationImpl @Inject constructor(
         logger.debug { "Advancing tick from ${tickProvider.tick} to ${tickProvider.tick + 1}" }
         tickProvider.tick++
         putInputIntoEntities(input)
+        processInput(input)
         fillPlayersSawTicks(input)
         simulate()
         processEnterGameIntents()
+    }
+
+    private fun processInput(input: SimulationInput) {
+        inputProcessing.process(
+            input,
+            state.entities(tickProvider.tick),
+            effectBus
+        )
     }
 
     private fun simulate() {

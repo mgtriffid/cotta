@@ -3,7 +3,7 @@ package com.mgtriffid.games.cotta.server.guice
 import com.google.inject.*
 import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaGame
-import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
+import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.clock.impl.CottaClockImpl
 import com.mgtriffid.games.cotta.core.effects.EffectBus
@@ -14,6 +14,7 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
+import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
@@ -61,6 +62,7 @@ class CottaServerModule(
                 .`in`(Scopes.SINGLETON)
 
             bind(ServerSimulation::class.java).to(ServerSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(InputProcessing::class.java).toInstance(game.inputProcessing)
 
             bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
             bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)

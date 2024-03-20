@@ -11,6 +11,7 @@ import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.ClientInput
+import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
@@ -84,6 +85,11 @@ class NetworkClientImpl<
                     inputSnapper.unpackInputRecipe(inputSerialization.deserializeInputRecipe(it.payload))
                 )
 
+                KindOfData.INPUT2 -> incomingDataBuffer.storeInput2(
+                    it.tick,
+                    inputSerialization.deserializePlayersInputs(it.payload)
+                )
+
                 KindOfData.PLAYERS_SAW_TICKS -> incomingDataBuffer.storePlayersSawTicks(
                     it.tick,
                     snapsSerialization.deserializePlayersSawTicks(it.payload)
@@ -133,11 +139,16 @@ class NetworkClientImpl<
             },
             metaEntitiesDiff = stateSnapper.unpackMetaEntitiesDeltaRecipe((incomingDataBuffer.metaEntitiesDeltas[tick]!!)),
             input = object : SimulationInput {
+                override fun nonPlayerInput(): NonPlayerInput {
+                    return object : NonPlayerInput {}
+                }
+
                 override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
                     return input
                 }
+
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                    return emptyMap()
+                    return incomingDataBuffer.inputs2[tick]!!
                 }
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {

@@ -3,6 +3,8 @@ package com.mgtriffid.games.cotta.core
 import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.input.InputProcessing
+import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import kotlin.reflect.KClass
 
@@ -23,4 +25,6 @@ interface CottaGame {
     val config: CottaConfig
 
     val playerInputKClass: KClass<out PlayerInput>
+
+    val inputProcessing: InputProcessing
 }

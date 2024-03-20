@@ -25,6 +25,7 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
+import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
@@ -130,6 +131,7 @@ class CottaClientModule(
         bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing"))
             .to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
         bind(ServerCreatedEntitiesRegistry::class.java).`in`(Scopes.SINGLETON)
+        bind(InputProcessing::class.java).toInstance(game.inputProcessing)
 
         bind(PredictionSimulation::class.java).to(PredictionSimulationImpl::class.java).`in`(Scopes.SINGLETON)
         bind(CottaState::class.java).annotatedWith(Names.named("prediction")).to(CottaStateImpl::class.java)

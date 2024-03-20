@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.client.impl
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
@@ -25,6 +26,7 @@ class ClientIncomingDataBuffer<
     val deltas = TreeMap<Long, DR>()
     val metaEntitiesDeltas = TreeMap<Long, MEDR>()
     val inputs = TreeMap<Long, Map<EntityId, Collection<InputComponent<*>>>>() // GROOM class with naming
+    val inputs2 = TreeMap<Long, Map<PlayerId, PlayerInput>>() // GROOM class with naming
     val createdEntities = TreeMap<Long, CEWTR>() // GROOM class with naming
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
 
@@ -51,6 +53,12 @@ class ClientIncomingDataBuffer<
         logger.debug { "Storing input for $tick, data buffer ${this.hashCode()}" }
         inputs[tick] = input
         cleanUpOldInputs(tick)
+    }
+
+    fun storeInput2(tick: Long, input: Map<PlayerId, PlayerInput>) {
+        logger.info { "Storing input2 for $tick, data buffer ${this.hashCode()}" }
+        inputs2[tick] = input
+        cleanUpOldInputs2(tick)
     }
 
     fun storeCreatedEntities(tick: Long, createdEntities: CEWTR) {
@@ -81,6 +89,10 @@ class ClientIncomingDataBuffer<
 
     private fun cleanUpOldInputs(tick: Long) {
         cleanUp(inputs, tick)
+    }
+
+    private fun cleanUpOldInputs2(tick: Long) {
+        cleanUp(inputs2, tick)
     }
 
     // GROOM same on server

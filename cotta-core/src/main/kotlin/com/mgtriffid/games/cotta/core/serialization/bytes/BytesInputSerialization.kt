@@ -54,6 +54,16 @@ class BytesInputSerialization(val inputKClass: KClass<out PlayerInput>) : InputS
         return output.toBytes()
     }
 
+    override fun serializePlayersInputs(inputs: Map<PlayerId, PlayerInput>): ByteArray {
+        val output = Output(4096, 1024 * 1024)
+        kryo.writeObject(output, HashMap(inputs.mapKeys { it.key.id }))
+        return output.toBytes()
+    }
+
+    override fun deserializePlayersInputs(bytes: ByteArray): Map<PlayerId, PlayerInput> {
+        return (kryo.readObject(Input(bytes), HashMap::class.java) as Map<Int, PlayerInput>).mapKeys { PlayerId(it.key) }
+    }
+
     override fun deserializeInputRecipe(bytes: ByteArray): BytesInputRecipe {
         return kryo.readObject(Input(bytes), BytesInputRecipeDto::class.java).toRecipe()
     }

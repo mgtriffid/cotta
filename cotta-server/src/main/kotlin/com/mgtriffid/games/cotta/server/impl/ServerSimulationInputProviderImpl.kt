@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
+import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
+import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
@@ -56,11 +57,11 @@ class ServerSimulationInputProviderImpl<
 
         val remappedInput = replacePredictedEntityIdsWithAuthoritative(clientsInput)
 
-        val inputs = remappedInput + nonPlayerInput
-
         val input = object : SimulationInput {
             // TODO protect against malicious client sending input for entity not belonging to them
-            override fun inputsForEntities() = inputs
+            override fun inputsForEntities() = remappedInput
+
+            override fun nonPlayerInput(): NonPlayerInput = nonPlayerInput
 
             override fun inputForPlayers() = clientsInput.inputForPlayers
 

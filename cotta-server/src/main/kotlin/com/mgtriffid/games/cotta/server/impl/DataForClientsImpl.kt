@@ -4,9 +4,11 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
@@ -33,6 +35,10 @@ data class DataForClientsImpl @Inject constructor(
 
     override fun inputs(): Map<EntityId, Collection<InputComponent<*>>> {
         return simulationInputHolder.get().inputsForEntities()
+    }
+
+    override fun playerInputs(): Map<PlayerId, PlayerInput> {
+        return simulationInputHolder.get().inputForPlayers()
     }
 
     override fun entities(tick: Long): Entities {

@@ -4,11 +4,10 @@ import com.google.gson.Gson
 import com.mgtriffid.games.cotta.Game
 import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
-import com.mgtriffid.games.cotta.core.NonPlayerInputProvider
+import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.InputComponent
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
+import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.panna.shared.PannaPlayerInput
 import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
@@ -16,12 +15,11 @@ import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.physics.createColliderComponent
 import com.mgtriffid.games.panna.shared.game.systems.*
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsumerSystem
-import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletCollisionSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletHitsDudeEffectConsumer
 import com.mgtriffid.games.panna.shared.game.systems.shooting.RailgunHitsDudeEffectConsumer
 import com.mgtriffid.games.panna.shared.game.systems.shooting.RailgunShotEffectConsumerSystem
-import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponInputProcessingSystem
+import com.mgtriffid.games.panna.shared.game.systems.shooting.ShootingProcessingSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.*
 import com.mgtriffid.games.panna.shared.tiled.TiledMap
@@ -31,10 +29,8 @@ import java.util.concurrent.atomic.AtomicInteger
 class PannaGame : CottaGame {
     override val serverSystems = listOf(
         WalkingInputProcessingSystem::class,
-        LookingAtInputProcessingSystem::class,
-        SwitchWeaponInputProcessingSystem::class,
         SwitchWeaponSystem::class,
-        ShootingInputProcessingSystem::class,
+        ShootingProcessingSystem::class,
         WalkingEffectConsumerSystem::class,
         JumpEffectConsumerSystem::class,
         MovementSystem::class,
@@ -42,7 +38,6 @@ class PannaGame : CottaGame {
         MovementEffectConsumerSystem::class,
         CoyoteSystem::class,
         GravitySystem::class,
-        JoinBattleSystem::class,
         JoinBattleEffectConsumerSystem::class,
         BulletCollisionSystem::class,
         BulletHitsDudeEffectConsumer::class,
@@ -84,26 +79,7 @@ class PannaGame : CottaGame {
     )
 
     override val nonPlayerInputProvider = object : NonPlayerInputProvider {
-        var goingLeft = false
-        override fun input(entities: Entities): Map<EntityId, Collection<InputComponent<*>>> {
-            return entities.all().filter { it.hasComponent(GraverobberNpcComponent::class) }.associate {
-                val xPos = it.getComponent(PositionComponent::class).xPos
-                if (xPos > 800 && !goingLeft) {
-                    goingLeft = true
-                }
-                if (xPos < 200 && goingLeft) {
-                    goingLeft = false
-                }
-                it.id to listOf(
-                    createCharacterInputComponent(
-                        direction = if (goingLeft) WALKING_DIRECTION_LEFT else WALKING_DIRECTION_RIGHT,
-                        jump = false,
-                        lookAt = if (goingLeft) 180f else 0f,
-                        switchWeapon = 0
-                    )
-                )
-            }
-        }
+        override fun input(entities: Entities) = object : NonPlayerInput {}
     }
 
     override val config: CottaConfig = object : CottaConfig {
@@ -117,4 +93,6 @@ class PannaGame : CottaGame {
         val map = Gson().fromJson(res.readText(), TiledMap::class.java)
         return map.layers[0].data.toList().chunked(map.width).reversed()
     }
+
+    override val inputProcessing = PannaGameInputProcessing()
 }

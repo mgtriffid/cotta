@@ -79,8 +79,11 @@ class PannaClientGdxInput(
 
     override fun input(): PlayerInput {
         return PannaPlayerInput(
-            storage.leftPressed,
-            storage.rightPressed,
+            when (if (storage.leftPressed) -1 else 0 + if (storage.rightPressed) 1 else 0) {
+                -1 -> WALKING_DIRECTION_LEFT
+                1 -> WALKING_DIRECTION_RIGHT
+                else -> WALKING_DIRECTION_NONE
+            },
             storage.shootPressed,
             storage.jumpPressed,
             storage.lookAt,

@@ -40,7 +40,7 @@ class SimulationsImpl @Inject constructor(
         remapPredictedCreatedEntityTraces()
         // tick is advanced inside;
         simulation.tick(delta.input)
-        processMetaEntitiesDiff(delta)
+//        processMetaEntitiesDiff(delta) // TODO maybe playersDiff goes here if even needed
         val lastConfirmedTick = getLastConfirmedTick(delta)
 //        predict(lastConfirmedTick)
     }
@@ -64,13 +64,6 @@ class SimulationsImpl @Inject constructor(
     private fun remapPredictedCreatedEntityTraces() {
         // TODO analyze performance and optimize
         predictedCreatedEntitiesRegistry.useAuthoritativeEntitiesWherePossible(authoritativeToPredictedEntityIdMappings.all())
-    }
-
-    private fun processMetaEntitiesDiff(delta: Delta.Present) {
-        delta.metaEntitiesDiff.forEach { (entityId, playerId) ->
-            val newMetaEntity = state.entities(getCurrentTick()).create(entityId, Entity.OwnedBy.Player(playerId))
-            game.metaEntitiesInputComponents.forEach { newMetaEntity.addInputComponent(it) }
-        }
     }
 
     private fun getLastConfirmedTick(delta: Delta.Present) =

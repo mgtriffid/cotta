@@ -118,11 +118,6 @@ class CottaClientImpl @Inject constructor(
     // called before advancing tick
     private fun processLocalInput() {
         logger.debug { "Processing input" }
-        val metaEntity = metaEntity()
-        if (metaEntity == null) {
-            logger.debug { "No meta entity, returning" }
-            return
-        }
         val playerId = localPlayer.playerId
         val localEntities = getEntitiesOwnedByPlayer(playerId)
         logger.debug { "Found ${localEntities.size} entities owned by player $playerId" }
@@ -139,14 +134,6 @@ class CottaClientImpl @Inject constructor(
         state.entities(atTick = getCurrentTick()).dynamic().filter {
             it.ownedBy == Entity.OwnedBy.Player(playerId)
         } + predictionSimulation.getLocalPredictedEntities()
-
-    private fun metaEntity(): Entity? {
-        logger.debug { "Looking for meta entity, metaEntityId = ${localPlayer.metaEntityId}" }
-        val entity = state.entities(atTick = getCurrentTick()).all().find {
-            it.id == localPlayer.metaEntityId
-        }
-        return entity
-    }
 
     sealed class ClientState {
         data object Initial : ClientState()

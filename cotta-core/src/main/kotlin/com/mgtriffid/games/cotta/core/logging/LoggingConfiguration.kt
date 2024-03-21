@@ -9,7 +9,7 @@ fun configureLogging() {
     // KryoNet:
     Log.set(Log.LEVEL_INFO)
 
-    val default = Level.INFO
+    val default = Level.DEBUG
     mapOf(
         "org.eclipse" to default,
         "com.mgtriffid.games.cotta.server.impl" to default,

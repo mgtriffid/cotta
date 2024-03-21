@@ -75,7 +75,7 @@ class ClientGhost<IR: InputRecipe>(
             }
             if (!metaEntitySent) {
                 logger.debug { "Need to send meta entity id to $connectionId" }
-                necessaryData.add(WhatToSend.WhatToSendItem(tick, KindOfData.CLIENT_META_ENTITY_ID))
+                necessaryData.add(WhatToSend.WhatToSendItem(tick, KindOfData.PLAYER_ID))
                 metaEntitySent = true
             }
             return object : WhatToSend {
@@ -89,7 +89,7 @@ class ClientGhost<IR: InputRecipe>(
         private fun lastKnownToClient(): Long {
             return logOfSentData.filter { when (it.kindOfData) {
                 KindOfData.DELTA, KindOfData.STATE -> true
-                KindOfData.CLIENT_META_ENTITY_ID -> false
+                KindOfData.PLAYER_ID -> false
             } }.maxOfOrNull { it.tick } ?: -1
         }
     }
@@ -117,5 +117,5 @@ interface WhatToSend {
 enum class KindOfData {
     STATE,
     DELTA,
-    CLIENT_META_ENTITY_ID
+    PLAYER_ID,
 }

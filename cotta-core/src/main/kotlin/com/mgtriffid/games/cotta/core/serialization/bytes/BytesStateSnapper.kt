@@ -115,16 +115,16 @@ class BytesStateSnapper @Inject constructor(
         recipe.removedEntitiesIds.forEach(entities::remove)
     }
 
-    override fun snapMetaEntitiesDelta(
-        addedEntities: List<Pair<EntityId, PlayerId>>
+    override fun snapPlayersDelta(
+        addedPlayers: List<PlayerId>
     ): BytesMetaEntitiesDeltaRecipe {
         return BytesMetaEntitiesDeltaRecipe(
-            addedEntities = addedEntities
+            addedPlayers = addedPlayers
         )
     }
 
-    override fun unpackMetaEntitiesDeltaRecipe(recipe: BytesMetaEntitiesDeltaRecipe): List<Pair<EntityId, PlayerId>> {
-        return recipe.addedEntities
+    override fun unpackPlayersDeltaRecipe(recipe: BytesMetaEntitiesDeltaRecipe): List<PlayerId> {
+        return recipe.addedPlayers
     }
 
     private fun unpackChangedEntities(entities: Entities, changedEntities: List<BytesChangedEntityRecipe>) {

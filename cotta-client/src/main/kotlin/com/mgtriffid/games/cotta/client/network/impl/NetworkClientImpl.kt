@@ -65,9 +65,9 @@ class NetworkClientImpl<
                     snapsSerialization.deserializeDeltaRecipe(it.payload)
                 )
 
-                KindOfData.META_ENTITIES_DELTA -> incomingDataBuffer.storeMetaEntitiesDelta(
+                KindOfData.PLAYERS_DELTA -> incomingDataBuffer.storeMetaEntitiesDelta(
                     it.tick,
-                    snapsSerialization.deserializeMetaEntitiesDeltaRecipe(it.payload)
+                    snapsSerialization.deserializePlayersDeltaRecipe(it.payload)
                 )
 
                 KindOfData.STATE -> incomingDataBuffer.storeState(
@@ -75,9 +75,8 @@ class NetworkClientImpl<
                     snapsSerialization.deserializeStateRecipe(it.payload)
                 )
 
-                KindOfData.CLIENT_META_ENTITY_ID -> {
-                    val (entityId, playerId) = snapsSerialization.deserializeMetaEntityId(it.payload)
-                    localPlayer.set(entityId, playerId)
+                KindOfData.PLAYER_ID -> {
+                    localPlayer.set(snapsSerialization.deserializePlayerId(it.payload))
                 }
 
                 KindOfData.INPUT -> incomingDataBuffer.storeInput(
@@ -137,7 +136,7 @@ class NetworkClientImpl<
             applyDiff = { entities ->
                 applyDelta(entities, tick)
             },
-            metaEntitiesDiff = stateSnapper.unpackMetaEntitiesDeltaRecipe((incomingDataBuffer.metaEntitiesDeltas[tick]!!)),
+            playersDiff = stateSnapper.unpackPlayersDeltaRecipe((incomingDataBuffer.playersDeltas[tick]!!)),
             input = object : SimulationInput {
                 override fun nonPlayerInput(): NonPlayerInput {
                     return object : NonPlayerInput {}
@@ -209,6 +208,6 @@ class NetworkClientImpl<
             && incomingDataBuffer.inputs.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
             && incomingDataBuffer.playersSawTicks.containsKey(tick).also { logger.debug { "sawTicks present for tick $tick: $it" } }
             && incomingDataBuffer.createdEntities.containsKey(tick).also { logger.debug { "createEntities present for tick $tick: $it" } }
-            && incomingDataBuffer.metaEntitiesDeltas.containsKey(tick).also { logger.debug { "metaEntitiesDelta present for tick $tick: $it" } }
+            && incomingDataBuffer.playersDeltas.containsKey(tick).also { logger.debug { "playersDelta present for tick $tick: $it" } }
     }
 }

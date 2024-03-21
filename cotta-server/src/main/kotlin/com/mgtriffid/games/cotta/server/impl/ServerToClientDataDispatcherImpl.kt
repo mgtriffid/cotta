@@ -58,11 +58,11 @@ class ServerToClientDataDispatcherImpl<
                     )
                 )
 
-                val metaEntitiesDeltaDto = ServerToClientDto()
-                metaEntitiesDeltaDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.META_ENTITIES_DELTA
-                metaEntitiesDeltaDto.tick = tick - 1
-                metaEntitiesDeltaDto.payload = snapsSerialization.serializeMetaEntitiesDeltaRecipe(
-                    stateSnapper.snapMetaEntitiesDelta(data.metaEntities().addedAtTick(tick))
+                val playersDeltaDto = ServerToClientDto()
+                playersDeltaDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.PLAYERS_DELTA
+                playersDeltaDto.tick = tick - 1
+                playersDeltaDto.payload = snapsSerialization.serializePlayersDeltaRecipe(
+                    stateSnapper.snapPlayersDelta(data.players().addedAtTick(tick))
                 )
 
                 val inputDto = ServerToClientDto()
@@ -102,7 +102,7 @@ class ServerToClientDataDispatcherImpl<
                     inputDto2,
                     createdEntitiesWithTracesDto,
                     playersSawTicksDto,
-                    metaEntitiesDeltaDto
+                    playersDeltaDto,
                 )
             }
             KindOfData.STATE -> {
@@ -112,11 +112,10 @@ class ServerToClientDataDispatcherImpl<
                 dto.tick = tick
                 return listOf(dto)
             }
-            KindOfData.CLIENT_META_ENTITY_ID -> {
+            KindOfData.PLAYER_ID -> {
                 val dto = ServerToClientDto()
-                dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.CLIENT_META_ENTITY_ID
-                dto.payload = snapsSerialization.serializeMetaEntityId(
-                    data.metaEntities()[playerId],
+                dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.PLAYER_ID
+                dto.payload = snapsSerialization.serializePlayerId(
                     playerId
                 )
                 dto.tick = tick

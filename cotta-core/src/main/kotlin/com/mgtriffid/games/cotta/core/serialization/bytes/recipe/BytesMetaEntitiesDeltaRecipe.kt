@@ -5,6 +5,5 @@ import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.serialization.MetaEntitiesDeltaRecipe
 
 class BytesMetaEntitiesDeltaRecipe(
-    override val addedEntities: List<Pair<EntityId, PlayerId>>,
-//    override val removedEntitiesIds: Set<EntityId>
+    override val addedPlayers: List<PlayerId>,
 ) : MetaEntitiesDeltaRecipe

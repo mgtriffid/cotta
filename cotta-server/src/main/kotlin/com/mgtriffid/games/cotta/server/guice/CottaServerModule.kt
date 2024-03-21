@@ -66,7 +66,7 @@ class CottaServerModule(
 
             bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
             bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(MetaEntities::class.java).to(MetaEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(Players::class.java).to(MetaEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
             bind(InvokersFactory::class.java).to(SimulationInvokersFactory::class.java).`in`(Scopes.SINGLETON)
             bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))

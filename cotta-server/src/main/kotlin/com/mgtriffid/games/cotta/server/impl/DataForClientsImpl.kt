@@ -15,7 +15,7 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.server.DataForClients
-import com.mgtriffid.games.cotta.server.MetaEntities
+import com.mgtriffid.games.cotta.server.Players
 import com.mgtriffid.games.cotta.server.PredictedToAuthoritativeIdMappings
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -25,7 +25,7 @@ data class DataForClientsImpl @Inject constructor(
     private val simulationInputHolder: SimulationInputHolder,
     @Named("simulation") private val state: CottaState,
     private val createdEntities: CreatedEntities,
-    private val metaEntities: MetaEntities,
+    private val players: Players,
     private val playersSawTicks: PlayersSawTicks,
     private val predictedToAuthoritativeIdMappings: PredictedToAuthoritativeIdMappings,
 ) : DataForClients {
@@ -53,8 +53,8 @@ data class DataForClientsImpl @Inject constructor(
         return predictedToAuthoritativeIdMappings.forTick(tick)
     }
 
-    override fun metaEntities(): MetaEntities {
-        return metaEntities
+    override fun players(): Players {
+        return players
     }
 
     override fun playersSawTicks(): PlayersSawTicks {

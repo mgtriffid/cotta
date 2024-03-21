@@ -17,11 +17,11 @@ interface StateSnapper<
     fun unpackStateRecipe(entities: Entities, recipe: SR)
     fun snapDelta(prev: Entities, curr: Entities): DR
     fun unpackDeltaRecipe(entities: Entities, recipe: DR)
-    fun snapMetaEntitiesDelta(
-        addedEntities: List<Pair<EntityId, PlayerId>>,
+    fun snapPlayersDelta(
+        addedPlayers: List<PlayerId>,
 //        removedEntitiesIds: Set<EntityId>
     ): MEDR
-    fun unpackMetaEntitiesDeltaRecipe(recipe: MEDR): List<Pair<EntityId, PlayerId>>
+    fun unpackPlayersDeltaRecipe(recipe: MEDR): List<PlayerId>
     fun snapTrace(trace: CottaTrace): TraceRecipe
     fun unpackTrace(trace: TraceRecipe): CottaTrace
     fun snapCreatedEntitiesWithTraces(

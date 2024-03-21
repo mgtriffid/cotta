@@ -20,11 +20,11 @@ class ClientIncomingDataBuffer<
     DR : DeltaRecipe,
     IR : InputRecipe,
     CEWTR : CreatedEntitiesWithTracesRecipe,
-    MEDR: MetaEntitiesDeltaRecipe
+    PDR: MetaEntitiesDeltaRecipe
     > {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
-    val metaEntitiesDeltas = TreeMap<Long, MEDR>()
+    val playersDeltas = TreeMap<Long, PDR>()
     val inputs = TreeMap<Long, Map<EntityId, Collection<InputComponent<*>>>>() // GROOM class with naming
     val inputs2 = TreeMap<Long, Map<PlayerId, PlayerInput>>() // GROOM class with naming
     val createdEntities = TreeMap<Long, CEWTR>() // GROOM class with naming
@@ -35,8 +35,8 @@ class ClientIncomingDataBuffer<
         cleanUpOldDeltas(tick)
     }
 
-    fun storeMetaEntitiesDelta(tick: Long, delta: MEDR) {
-        metaEntitiesDeltas[tick] = delta
+    fun storeMetaEntitiesDelta(tick: Long, delta: PDR) {
+        playersDeltas[tick] = delta
         cleanUpOldMetaEntitiesDelta(tick)
     }
 
@@ -80,7 +80,7 @@ class ClientIncomingDataBuffer<
     }
 
     private fun cleanUpOldMetaEntitiesDelta(tick: Long) {
-        cleanUp(metaEntitiesDeltas, tick)
+        cleanUp(playersDeltas, tick)
     }
 
     private fun cleanUpOldStates(tick: Long) {

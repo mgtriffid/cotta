@@ -40,7 +40,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceEleme
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceRecipe
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityOwnedByDto
-import com.mgtriffid.games.cotta.core.serialization.dto.MetaEntityPlayerIdDto
+import com.mgtriffid.games.cotta.core.serialization.dto.PlayerIdDto
 import com.mgtriffid.games.cotta.core.serialization.dto.PlayersSawTicksDto
 import com.mgtriffid.games.cotta.core.serialization.dto.TraceElementDtoKind
 import com.mgtriffid.games.cotta.core.serialization.toDto
@@ -72,7 +72,7 @@ class BytesSnapsSerialization : SnapsSerialization<
         kryo.register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
         kryo.register(EntityIdDto::class.java)
         kryo.register(EntityIdDto.Kind::class.java)
-        kryo.register(MetaEntityPlayerIdDto::class.java)
+        kryo.register(PlayerIdDto::class.java)
         kryo.register(BytesCreateEntityTraceDto::class.java)
         kryo.register(BytesCreateEntityTracesDto::class.java)
         kryo.register(BytesCreatedEntitiesWithTracesRecipeDto::class.java)
@@ -100,13 +100,13 @@ class BytesSnapsSerialization : SnapsSerialization<
         return output.toBytes()
     }
 
-    override fun serializeMetaEntitiesDeltaRecipe(recipe: BytesMetaEntitiesDeltaRecipe): ByteArray {
+    override fun serializePlayersDeltaRecipe(recipe: BytesMetaEntitiesDeltaRecipe): ByteArray {
         val output = Output(64, 1024 * 1024)
         kryo.writeObject(output, recipe.toDto())
         return output.toBytes()
     }
 
-    override fun deserializeMetaEntitiesDeltaRecipe(bytes: ByteArray): BytesMetaEntitiesDeltaRecipe {
+    override fun deserializePlayersDeltaRecipe(bytes: ByteArray): BytesMetaEntitiesDeltaRecipe {
         return kryo.readObject(Input(bytes), BytesMetaEntitiesDeltaRecipeDto::class.java).toRecipe()
     }
 
@@ -124,19 +124,19 @@ class BytesSnapsSerialization : SnapsSerialization<
         return kryo.readObject(Input(bytes), EntityIdDto::class.java).toEntityId()
     }
 
-    override fun serializeMetaEntityId(entityId: EntityId, playerId: PlayerId): ByteArray {
+    override fun serializePlayerId(playerId: PlayerId): ByteArray {
         val output = Output(64, 1024 * 1024)
-        kryo.writeObject(output, MetaEntityPlayerIdDto()
+        kryo.writeObject(output, PlayerIdDto()
             .also {
-                it.entityId = entityId.toDto()
                 it.playerId = playerId.id
             })
         return output.toBytes()
     }
 
-    override fun deserializeMetaEntityId(bytes: ByteArray): Pair<EntityId, PlayerId> {
-        val dto = kryo.readObject(Input(bytes), MetaEntityPlayerIdDto::class.java)
-        return Pair(dto.entityId.toEntityId(), PlayerId(dto.playerId))    }
+    override fun deserializePlayerId(bytes: ByteArray): PlayerId {
+        val dto = kryo.readObject(Input(bytes), PlayerIdDto::class.java)
+        return PlayerId(dto.playerId)
+    }
 
     override fun serializeEntityCreationTraces(traces: List<Pair<TraceRecipe, EntityId>>): ByteArray {
         val output = Output(64, 1024 * 1024)
@@ -275,20 +275,18 @@ fun BytesDeltaRecipe.toDto(): BytesDeltaRecipeDto {
 
 private fun BytesMetaEntitiesDeltaRecipe.toDto(): BytesMetaEntitiesDeltaRecipeDto {
     val ret = BytesMetaEntitiesDeltaRecipeDto()
-    ret.added = addedEntities.map { (entityId, playerId) ->
-        val dto = MetaEntityPlayerIdDto()
-        dto.entityId = entityId.toDto()
+    ret.added = addedPlayers.map { playerId ->
+        val dto =
+            PlayerIdDto()
         dto.playerId = playerId.id
         dto
     }
-//    ret.removed = removedEntitiesIds.map { it.toDto() }
     return ret
 }
 
 private fun BytesMetaEntitiesDeltaRecipeDto.toRecipe(): BytesMetaEntitiesDeltaRecipe {
     return BytesMetaEntitiesDeltaRecipe(
-        added.map { it.entityId.toEntityId() to PlayerId(it.playerId) },
-//        removed.map { it.toEntityId() }.toSet()
+        added.map { PlayerId(it.playerId) },
     )
 }
 

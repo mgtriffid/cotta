@@ -11,7 +11,7 @@ import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 sealed interface Delta {
     class Present(
         val applyDiff: (Entities) -> Unit,
-        val metaEntitiesDiff: List<Pair<EntityId, PlayerId>>,
+        val playersDiff: List<PlayerId>,
         val input: SimulationInput,
         val authoritativeToPredictedEntities: Map<AuthoritativeEntityId, PredictedEntityId>,
         val tracesOfCreatedEntities : List<Pair<CottaTrace, EntityId>>,

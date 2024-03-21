@@ -18,8 +18,7 @@ interface StateRecipe {
 }
 
 interface MetaEntitiesDeltaRecipe {
-    val addedEntities : List<Pair<EntityId, PlayerId>>
-//    val removedEntitiesIds: Set<EntityId>
+    val addedPlayers : List<PlayerId>
 }
 
 interface EntityRecipe {

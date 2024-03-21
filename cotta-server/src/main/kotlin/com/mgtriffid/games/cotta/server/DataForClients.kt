@@ -21,7 +21,7 @@ interface DataForClients {
     fun entities(tick: Long): Entities
     fun createdEntities(tick: Long): List<Pair<CottaTrace, EntityId>>
     fun confirmedEntities(tick: Long): List<Pair<PredictedEntityId, AuthoritativeEntityId>>
-    fun metaEntities(): MetaEntities
+    fun players(): Players
     fun playersSawTicks(): PlayersSawTicks
     fun playerInputs(): Map<PlayerId, PlayerInput>
 }

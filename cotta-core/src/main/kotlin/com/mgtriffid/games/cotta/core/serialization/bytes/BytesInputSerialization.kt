@@ -15,13 +15,10 @@ import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesEntityInputRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesInputComponentRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesInputRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesMetaEntitiesDeltaRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputComponentRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
-import com.mgtriffid.games.cotta.core.serialization.dto.MetaEntityPlayerIdDto
 import com.mgtriffid.games.cotta.core.serialization.toEntityId
 import kotlin.reflect.KClass
 

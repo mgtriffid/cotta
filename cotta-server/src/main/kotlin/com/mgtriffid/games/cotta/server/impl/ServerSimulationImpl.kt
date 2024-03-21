@@ -14,7 +14,6 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
-import com.mgtriffid.games.cotta.server.MetaEntities
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -25,7 +24,6 @@ private val logger = KotlinLogging.logger {}
 
 class ServerSimulationImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
-    private val metaEntities: MetaEntities,
     private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks,
@@ -100,15 +98,7 @@ class ServerSimulationImpl @Inject constructor(
         logger.debug { "Processing enterGameIntents" }
         enterGameIntents.forEach {
             logger.debug { "Processing intent to ETG for ${it.second}" }
-            val metaEntity = state.entities(tickProvider.tick).create(ownedBy = OwnedBy.Player(it.second))
-            metaEntitiesInputComponents.forEach { componentClass ->
-                metaEntity.addInputComponent(componentClass)
-            }
-            val playerId = it.second
-            metaEntities[playerId] = metaEntity.id
-            it.first.params // TODO use parameters to add certain components, figure it out
         }
-        metaEntities.recordNew(enterGameIntents.map { metaEntities[it.second] to it.second }, tickProvider.tick)
         enterGameIntents.clear()
     }
 

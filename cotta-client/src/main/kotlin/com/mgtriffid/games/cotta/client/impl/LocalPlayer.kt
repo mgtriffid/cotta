@@ -9,17 +9,14 @@ import kotlin.reflect.KProperty1
 class LocalPlayer {
     private var data: Data = Absent
 
-    fun set(metaEntityId: EntityId, playerId: PlayerId) {
-        data = Present(metaEntityId, playerId)
+    fun set(playerId: PlayerId) {
+        data = Present(playerId)
     }
 
     fun isReady(): Boolean = data is Present
 
     val playerId: PlayerId
         get() = get(Present::playerId)
-
-    val metaEntityId: EntityId
-        get() = get(Present::metaEntityId)
 
     private fun <C: Any> get(kProperty0: KProperty1<Present, C>) = data.let {
         when (it) {
@@ -30,6 +27,6 @@ class LocalPlayer {
 
     private sealed interface Data {
         data object Absent : Data
-        data class Present(val metaEntityId: EntityId, val playerId: PlayerId) : Data
+        data class Present(val playerId: PlayerId) : Data
     }
 }

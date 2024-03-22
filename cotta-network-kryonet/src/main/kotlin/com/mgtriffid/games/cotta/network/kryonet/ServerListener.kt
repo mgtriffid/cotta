@@ -41,7 +41,7 @@ class ServerListener(
                 clientToServerInputs.add(Pair(ConnectionId(connection.id), obj))
             }
             is ClientToServerInputDto2 -> {
-                logger.trace { "Received ${ClientToServerInputDto2::class.simpleName}" }
+                logger.debug { "Received ${ClientToServerInputDto2::class.simpleName}" }
                 clientToServerInputs2.add(Pair(ConnectionId(connection.id), obj))
             }
             is ClientToServerCreatedPredictedEntitiesDto -> {

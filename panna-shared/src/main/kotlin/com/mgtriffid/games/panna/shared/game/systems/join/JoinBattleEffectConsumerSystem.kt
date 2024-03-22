@@ -17,7 +17,6 @@ import com.mgtriffid.games.panna.shared.game.components.createShootComponent
 import com.mgtriffid.games.panna.shared.game.components.createSteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.createWalkingComponent
 import com.mgtriffid.games.panna.shared.game.components.createWeaponEquippedComponent
-import com.mgtriffid.games.panna.shared.game.components.input.CharacterInputComponent
 import com.mgtriffid.games.panna.shared.game.components.input.ShootInputComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.createColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.createGravityComponent
@@ -30,7 +29,6 @@ class JoinBattleEffectConsumerSystem : EffectsConsumerSystem<JoinBattleEffect> {
     override fun handle(e: JoinBattleEffect, ctx: EffectProcessingContext) {
         val dude = ctx.createEntity(Entity.OwnedBy.Player(e.playerId))
         dude.addComponent(createPositionComponent(32f, 24f))
-        dude.addInputComponent(CharacterInputComponent::class)
         dude.addInputComponent(ShootInputComponent::class)
         dude.addComponent(createJumpingComponent(false, 250f))
         dude.addComponent(createWalkingComponent(100f))

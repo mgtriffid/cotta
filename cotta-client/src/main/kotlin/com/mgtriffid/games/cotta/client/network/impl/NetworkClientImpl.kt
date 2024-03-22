@@ -125,13 +125,12 @@ class NetworkClientImpl<
     override fun send(input: PlayerInput, currentTick: Long) {
         val inputDto = ClientToServerInputDto2()
         inputDto.tick = currentTick
+        logger.debug { "Sending input for $currentTick : $input" }
         inputDto.payload = inputSerialization.serializeInput(input)
         networkTransport.send(inputDto)
     }
 
     override fun tryGetDelta(tick: Long): Delta = if (deltaAvailable(tick)) {
-        val input = incomingDataBuffer.inputs[tick]!!
-        logger.info { "Exists input for entities ${input.keys}" }
         Delta.Present(
             applyDiff = { entities ->
                 applyDelta(entities, tick)
@@ -143,7 +142,7 @@ class NetworkClientImpl<
                 }
 
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                    return incomingDataBuffer.inputs2[tick]!!
+                    return incomingDataBuffer.inputs2[tick]!!.also { logger.debug { "In getting delta: $it" } }
                 }
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {
@@ -201,7 +200,7 @@ class NetworkClientImpl<
 
     override fun deltaAvailable(tick: Long): Boolean {
         return incomingDataBuffer.deltas.containsKey(tick).also { logger.debug { "Delta present for tick $tick: $it" } }
-            && incomingDataBuffer.inputs.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
+            && incomingDataBuffer.inputs2.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
             && incomingDataBuffer.playersSawTicks.containsKey(tick).also { logger.debug { "sawTicks present for tick $tick: $it" } }
             && incomingDataBuffer.createdEntities.containsKey(tick).also { logger.debug { "createEntities present for tick $tick: $it" } }
             && incomingDataBuffer.playersDeltas.containsKey(tick).also { logger.debug { "playersDelta present for tick $tick: $it" } }

@@ -163,7 +163,6 @@ class CottaClientModule(
             .to(PredictionTracingEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
 
-        bind(ClientInputs::class.java).to(ClientInputsImpl::class.java).`in`(Scopes.SINGLETON)
         bind(LocalPlayerInputs::class.java).to(LocalPlayerInputsImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(CreateEntityStrategy::class.java)

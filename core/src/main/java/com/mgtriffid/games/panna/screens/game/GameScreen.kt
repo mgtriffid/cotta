@@ -1,19 +1,16 @@
 package com.mgtriffid.games.panna.screens.game
 
 import com.badlogic.gdx.ScreenAdapter
-import com.mgtriffid.games.cotta.client.CottaClient
-import com.mgtriffid.games.cotta.client.CottaClientFactory
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.gdx.CottaGdxAdapter
-import com.mgtriffid.games.cotta.utils.now
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
 import com.mgtriffid.games.panna.screens.game.graphics.GraphicsV2
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
-import com.mgtriffid.games.panna.shared.game.components.input.CharacterInputComponent
 import com.mgtriffid.games.panna.shared.game.PannaGame
+import com.mgtriffid.games.panna.shared.game.components.CharacterInputComponent2
 import mu.KotlinLogging
 
 const val SCALE = 3
@@ -68,7 +65,7 @@ class GameScreen(
 
     private fun noDude(state: DrawableState.Ready) : Boolean {
         return state.entities.none {
-            it.hasInputComponent(CharacterInputComponent::class) &&
+            it.hasComponent(CharacterInputComponent2::class) &&
                 it.ownedBy == Entity.OwnedBy.Player(state.playerId)
         }
     }

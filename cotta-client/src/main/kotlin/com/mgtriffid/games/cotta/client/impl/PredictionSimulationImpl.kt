@@ -1,9 +1,7 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
-import com.mgtriffid.games.cotta.client.ClientInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
-import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
@@ -23,7 +21,6 @@ private val logger = KotlinLogging.logger {}
 class PredictionSimulationImpl @Inject constructor(
     @Named("prediction") private val invokersFactory: InvokersFactory,
     @Named("prediction") private val state: CottaState,
-    private val clientInputs: ClientInputs,
     @Named("prediction") override val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
     @Named("localInput") private val localInputTickProvider: TickProvider,
@@ -56,49 +53,8 @@ class PredictionSimulationImpl @Inject constructor(
             state.advance(tickProvider.tick)
             tickProvider.tick++
 
-            putInputIntoEntities(tick, localPlayer.playerId)
             simulate()
         }
-    }
-
-    private fun putInputIntoEntities(tick: Long, playerId: PlayerId) {
-        logger.debug { "Putting input into entities for tick $tick" }
-        val input = clientInputs.get(tick)
-        state.entities(tickProvider.tick).all().filter {
-            it.ownedBy == Entity.OwnedBy.Player(playerId) && it.hasInputComponents()
-        }.forEach { e ->
-            logger.trace { "Entity ${e.id} has some input components:" }
-            e.inputComponents().forEach { c ->
-                val component = input.inputForEntityAndComponent(e.id, c)
-                logger.trace { "  $component" }
-                e.setInputComponent(c, component)
-            }
-        }
-    }
-
-    private fun ClientInput.inputForEntityAndComponent(entityId: EntityId, component: KClass<*>): InputComponent<*> {
-        logger.trace { "Getting input for entity $entityId and component ${component.qualifiedName}" }
-        val entityInputs = getEntityInputs(entityId)
-        val input = entityInputs?.find { component.isInstance(it) }
-        if (input != null) {
-            logger.trace { "Input found" }
-            return input
-        } else {
-            logger.trace { "Input not found, falling back" }
-            return fallback(component)
-        }
-    }
-
-    private fun ClientInput.getEntityInputs(entityId: EntityId): List<InputComponent<*>>? {
-        return inputs[entityId] ?: inputs[getMatchingPredictedEntityId(entityId)]
-    }
-
-    private fun getMatchingPredictedEntityId(entityId: EntityId): EntityId? {
-        return idMappings[entityId]
-    }
-
-    private fun fallback(component: KClass<*>): InputComponent<*> {
-        TODO()
     }
 
     private fun simulate() {

@@ -51,6 +51,7 @@ class ServerSimulationImpl @Inject constructor(
     }
 
     private fun processInput(input: SimulationInput) {
+        logger.debug { "Processing input on server on tick ${tickProvider.tick}: ${input.inputForPlayers()}" }
         inputProcessing.process(
             input,
             state.entities(tickProvider.tick),

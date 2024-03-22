@@ -2,15 +2,14 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.AuthoritativeSimulation
 import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
-import com.mgtriffid.games.cotta.client.ClientInputs
 import com.mgtriffid.games.cotta.client.GuessedSimulation
+import com.mgtriffid.games.cotta.client.LocalPlayerInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.SimulationDirector
 import com.mgtriffid.games.cotta.client.Simulations
 import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
 import jakarta.inject.Inject
@@ -25,7 +24,7 @@ class SimulationsImpl @Inject constructor(
     private val simulation: AuthoritativeSimulation,
     private val guessedSimulation: GuessedSimulation,
     private val simulationDirector: SimulationDirector,
-    private val localInputs: ClientInputs,
+    private val playerInputs: LocalPlayerInputs,
     @Named("simulation") private val state: CottaState,
     private val tickProvider: TickProvider,
     private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
@@ -55,7 +54,7 @@ class SimulationsImpl @Inject constructor(
     private fun predict(serverSawOurTick: Long) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
-        val unprocessedTicks = localInputs.all().keys.filter { it > serverSawOurTick }
+        val unprocessedTicks = playerInputs.all().keys.filter { it > serverSawOurTick }
             .also { logger.info { it.joinToString() } } // TODO explicit sorting
         logger.debug { "Setting initial predictions state with tick ${getCurrentTick()}" }
         predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)

@@ -19,7 +19,6 @@ private val logger = KotlinLogging.logger {}
 class CottaClientImpl @Inject constructor(
     private val game: CottaGame,
     private val network: NetworkClient,
-    private val localInputs: ClientInputs,
     private val playerInputs: LocalPlayerInputs,
     private val simulations: Simulations,
     private val predictionSimulation: PredictionSimulation,
@@ -108,9 +107,7 @@ class CottaClientImpl @Inject constructor(
 
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick
-        val inputs = localInputs.get(tickProvider.tick - 1)
         val createdEntities = predictedCreatedEntitiesRegistry.latest()
-        network.send(inputs, getCurrentTick() - 1)
         network.send(createdEntities, getCurrentTick())
         network.send(playerInputs.get(getCurrentTick() - 1), getCurrentTick() - 1)
     }
@@ -125,7 +122,6 @@ class CottaClientImpl @Inject constructor(
             it.hasInputComponents()
         }
         logger.debug { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
-        localInputs.collect(localEntitiesWithInputComponents.distinctBy { it.id })
         playerInputs.collect()
     }
 

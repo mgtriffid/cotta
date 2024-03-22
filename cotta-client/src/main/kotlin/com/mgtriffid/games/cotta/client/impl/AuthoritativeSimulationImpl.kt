@@ -32,6 +32,7 @@ class AuthoritativeSimulationImpl @Inject constructor(
         state.advance(tick.tick)
         tick.tick++
         processInput(input)
+        logger.debug { input.inputForPlayers() }
         fillPlayersSawTicks(input)
         simulate()
     }

@@ -24,6 +24,7 @@ class ServerIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
 
     fun storeInput2(tick: Long, input: PlayerInput) {
         inputs2[tick] = input
+        logger.debug { "Storing input for tick $tick : $input" }
         cleanUpOldInputs2(tick)
     }
 
@@ -52,8 +53,8 @@ class ServerIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
     }
 
     fun hasEnoughInputsToStart(): Boolean {
-        if (inputs.isEmpty()) return false
-        val lastInput = inputs.lastKey()
-        return (0 until REQUIRED_CLIENT_INPUTS_BUFFER).all { inputs.containsKey(lastInput - it) }
+        if (inputs2.isEmpty()) return false
+        val lastInput = inputs2.lastKey()
+        return (0 until REQUIRED_CLIENT_INPUTS_BUFFER).all { inputs2.containsKey(lastInput - it) }
     }
 }

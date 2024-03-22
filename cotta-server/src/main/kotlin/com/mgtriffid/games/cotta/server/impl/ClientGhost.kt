@@ -39,14 +39,6 @@ class ClientGhost<IR: InputRecipe>(
         return clientTickCursor.lastUsedInput
     }
 
-    fun setLastUsedIncomingInput(mapsInputRecipe: IR) {
-        this.lastUserIncomingInput = mapsInputRecipe
-    }
-
-    fun getLastUsedIncomingInput(): IR {
-        return lastUserIncomingInput ?: throw IllegalStateException("No last used input")
-    }
-
     fun setLastUsedIncomingInput2(playerInput: PlayerInput) {
         this.lastUsedIncomingInput2 = playerInput
     }

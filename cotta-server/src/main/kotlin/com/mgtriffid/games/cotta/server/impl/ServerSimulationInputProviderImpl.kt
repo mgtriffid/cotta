@@ -152,16 +152,14 @@ class ServerSimulationInputProviderImpl<
         val use: (PlayerId, ClientGhost<IR>, Long) -> Unit = { playerId, ghost, tick ->
             val buffer = getBuffer(playerId)
             playersSawTicks[playerId] = tick
-            inputRecipes.add(buffer.inputs[tick]!!)
+//            inputRecipes.add(buffer.inputs[tick]!!)
             playerInputs[playerId] = buffer.inputs2[tick]!!
             createdEntities.addAll(buffer.createdEntities[tick + 1]!!)
             ghost.setLastUsedTick(tick)
-            ghost.setLastUsedIncomingInput(buffer.inputs[tick]!!)
             ghost.setLastUsedIncomingInput2(buffer.inputs2[tick]!!)
         }
         val usePrevious: (PlayerId, ClientGhost<IR>, Long) -> Unit =  { playerId, ghost, tick ->
             playersSawTicks[playerId] = tick
-            inputRecipes.add(ghost.getLastUsedIncomingInput())
             playerInputs[playerId] = ghost.getLastUsedIncomingInput2()
             ghost.setLastUsedTick(tick)
         }
@@ -171,7 +169,7 @@ class ServerSimulationInputProviderImpl<
                 AWAITING_INPUTS -> {
                     if (buffer.hasEnoughInputsToStart()) {
                         ghost.setCursorState(RUNNING)
-                        val tick = buffer.inputs.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
+                        val tick = buffer.inputs2.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
                         use(playerId, ghost, tick)
                     } else {
                         // do nothing. Ok, we don't have the input recipe yet, no big deal.
@@ -183,7 +181,6 @@ class ServerSimulationInputProviderImpl<
                     val tick = lastUsedInput + 1
                     logger.debug { "Client input tick is $tick for $playerId" }
                     if (
-                        buffer.inputs.containsKey(tick) &&
                         buffer.inputs2.containsKey(tick) &&
                         buffer.createdEntities.containsKey(tick + 1)
                         ) {

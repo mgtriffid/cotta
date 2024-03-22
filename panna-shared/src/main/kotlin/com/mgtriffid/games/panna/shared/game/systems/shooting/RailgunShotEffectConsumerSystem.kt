@@ -15,9 +15,9 @@ import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.createRailgunHitsDudeEffect
 
 @LagCompensated
-class RailgunShotEffectConsumerSystem : EffectsConsumerSystem {
-    override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
-        if (e !is RailgunShotEffect) return
+class RailgunShotEffectConsumerSystem : EffectsConsumerSystem<RailgunShotEffect> {
+    override val effectType: Class<RailgunShotEffect> = RailgunShotEffect::class.java
+    override fun handle(e: RailgunShotEffect, ctx: EffectProcessingContext) {
 
         ctx.entities().all().filter {
             // "Damageable" would be a bit more clean

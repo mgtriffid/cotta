@@ -4,7 +4,6 @@ import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
@@ -14,11 +13,11 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.guice.CottaServerModule
 import com.mgtriffid.games.cotta.server.workload.GameStub
+import com.mgtriffid.games.cotta.server.workload.PlayerInputStub
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
-import com.mgtriffid.games.cotta.server.workload.components.PlayerInputTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.createHealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.createLinearPositionTestComponent
-import com.mgtriffid.games.cotta.server.workload.components.createPlayerInputTestComponent
+import com.mgtriffid.games.cotta.server.workload.components.createPlayerControlledStubComponent
 import com.mgtriffid.games.cotta.server.workload.components.createVelocityTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.createHealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.systems.*
@@ -40,10 +39,6 @@ class ServerSimulationTest {
         tickProvider = injector.getInstance(TickProvider::class.java)
         simulationInputHolder = injector.getInstance(SimulationInputHolder::class.java)
         simulationInputHolder.set(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
-                return emptyMap()
-            }
-
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -70,9 +65,6 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return emptyMap()
-            }
 
             override fun nonPlayerInput() = object: NonPlayerInput {}
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -99,10 +91,6 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
         repeat(2) {
             serverSimulation.tick(object : SimulationInput {
-                override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                    return emptyMap()
-                }
-
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
@@ -122,25 +110,22 @@ class ServerSimulationTest {
 
     @Test
     fun `should consume input`() {
+        val playerId = PlayerId(0)
         val damageable = state.entities().create()
         val damageableId = damageable.id
         damageable.addComponent(createHealthTestComponent(20))
         damageable.addComponent(createLinearPositionTestComponent(0))
         damageable.addComponent(createVelocityTestComponent(2))
 
-        val damageDealer = state.entities().create()
-        damageDealer.addInputComponent(PlayerInputTestComponent::class)
-        val damageDealerId = damageDealer.id
-        serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
+        val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
+        damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
+        serverSimulation.registerSystem(PlayerProcessingTestSystem::class)
         serverSimulation.registerSystem(ShotFiredTestEffectConsumerSystem::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
         serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
 
         repeat(2) {
             serverSimulation.tick(object : SimulationInput {
-                override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                    return emptyMap()
-                }
 
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
@@ -153,41 +138,31 @@ class ServerSimulationTest {
             })
         }
 
-        val input1 = createPlayerInputTestComponent(
+        val input1 = PlayerInputStub(
             aim = 4,
             shoot = true
         )
 
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input1)
-                )
-            }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to input1)
             }
 
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
         })
 
-        val input2 = createPlayerInputTestComponent(
+        val input2 = PlayerInputStub(
             aim = 4,
             shoot = true
         )
 
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input2)
-                )
-            }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to input2)
             }
 
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
@@ -209,19 +184,14 @@ class ServerSimulationTest {
         damageable.addComponent(createVelocityTestComponent(2))
 
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
-        val damageDealerId = damageDealer.id
-        damageDealer.addInputComponent(PlayerInputTestComponent::class)
-        val input = createPlayerInputTestComponent(aim = 4, shoot = true)
-        serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
+        damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
+        val input = PlayerInputStub(aim = 4, shoot = true)
+        serverSimulation.registerSystem(PlayerProcessingTestSystem::class)
         serverSimulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
         serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
         repeat(6) {
             serverSimulation.tick(object : SimulationInput {
-                override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                    return emptyMap()
-                }
-
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
@@ -234,32 +204,22 @@ class ServerSimulationTest {
         }
 
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input)
-                )
-            }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to input)
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
         })
-        val input2 = createPlayerInputTestComponent(
+        val input2 = PlayerInputStub(
             aim = 4,
             shoot = false
         )
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input2)
-                )
-            }
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to input2)
             }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
@@ -282,20 +242,15 @@ class ServerSimulationTest {
         damageable.addComponent(createVelocityTestComponent(2))
 
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
-        val damageDealerId = damageDealer.id
-        damageDealer.addInputComponent(PlayerInputTestComponent::class)
-        val input = createPlayerInputTestComponent(aim = 4, shoot = true)
-        serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
+        damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
+        val input = PlayerInputStub(aim = 4, shoot = true)
+        serverSimulation.registerSystem(PlayerProcessingTestSystem::class)
         serverSimulation.registerSystem(StepOneShotFiredTestEffectConsumerSystem::class)
         serverSimulation.registerSystem(LagCompensatedActualShotFiredTestEffectConsumer::class)
         serverSimulation.registerSystem(MovementTestSystem::class)
         serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
         repeat(6) {
             serverSimulation.tick(object : SimulationInput {
-                override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                    return emptyMap()
-                }
-
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
@@ -308,32 +263,22 @@ class ServerSimulationTest {
         }
 
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input)
-                )
-            }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to input)
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
         })
-        val input2 = createPlayerInputTestComponent(
+        val input2 = PlayerInputStub(
             aim = 4,
             shoot = false
         )
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input2)
-                )
-            }
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to input2)
             }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
@@ -352,10 +297,6 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(BlankTestSystem::class)
 
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return emptyMap()
-            }
-
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
             }
@@ -381,9 +322,6 @@ class ServerSimulationTest {
         serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return emptyMap()
-            }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -404,63 +342,40 @@ class ServerSimulationTest {
     @Test
     fun `should prepare inputs to be sent to clients`() {
         val playerId = PlayerId(0)
-        val damageDealer = state.entities().create()
-        damageDealer.addInputComponent(PlayerInputTestComponent::class)
-        val damageDealerId = damageDealer.id
-        serverSimulation.registerSystem(PlayerInputProcessingTestSystem::class)
-        val input1 = createPlayerInputTestComponent(
-            aim = 4,
-            shoot = true
+        val damageDealer = state.entities().create(
+            ownedBy = Entity.OwnedBy.Player(playerId)
         )
+        damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
+        serverSimulation.registerSystem(PlayerProcessingTestSystem::class)
         simulationInputHolder.set(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input1)
-                )
-            }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to PlayerInputStub(4, true))
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
         })
         serverSimulation.tick(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input1)
-                )
-            }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to PlayerInputStub(4, true))
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
         })
         assertEquals(
             4,
-            (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataForClients.playerInputs()[playerId] as PlayerInputStub).aim,
         )
         assertEquals(
             true,
-            (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).shoot
-        )
-        val input2 = createPlayerInputTestComponent(
-            aim = 4,
-            shoot = false
+            (dataForClients.playerInputs()[playerId] as PlayerInputStub).shoot
         )
         simulationInputHolder.set(object : SimulationInput {
-            override fun inputsForEntities(): Map<EntityId, Set<InputComponent<*>>> {
-                return mapOf(
-                    damageDealerId to setOf(input2)
-                )
-            }
-
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
+                return mapOf(playerId to PlayerInputStub(4, false))
             }
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
@@ -468,11 +383,11 @@ class ServerSimulationTest {
         })
         assertEquals(
             4,
-            (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).aim
+            (dataForClients.playerInputs()[playerId] as PlayerInputStub).aim
         )
         assertEquals(
             false,
-            (dataForClients.inputs()[damageDealerId]?.first() as PlayerInputTestComponent).shoot
+            (dataForClients.playerInputs()[playerId] as PlayerInputStub).shoot
         )
     }
 

@@ -25,7 +25,6 @@ class ServerToClientDataDispatcherImpl<
     private val network: CottaServerNetworkTransport,
     private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
     private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
-    private val inputSnapper: InputSnapper<IR>,
     private val inputSerialization: InputSerialization<IR>,
     private val data: DataForClients,
 ) : ServerToClientDataDispatcher {
@@ -65,13 +64,6 @@ class ServerToClientDataDispatcherImpl<
                     stateSnapper.snapPlayersDelta(data.players().addedAtTick(tick))
                 )
 
-                val inputDto = ServerToClientDto()
-                inputDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT
-                inputDto.payload = inputSerialization.serializeInputRecipe(
-                    inputSnapper.snapInput(data.inputs())
-                )
-                inputDto.tick = tick - 1
-
                 val inputDto2 = ServerToClientDto()
                 inputDto2.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT2
                 inputDto2.payload = inputSerialization.serializePlayersInputs(
@@ -98,7 +90,6 @@ class ServerToClientDataDispatcherImpl<
                 playersSawTicksDto.tick = tick - 1
                 return listOf(
                     deltaDto,
-                    inputDto,
                     inputDto2,
                     createdEntitiesWithTracesDto,
                     playersSawTicksDto,

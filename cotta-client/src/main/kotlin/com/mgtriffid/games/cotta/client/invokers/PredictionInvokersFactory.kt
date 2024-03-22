@@ -26,7 +26,7 @@ class PredictionInvokersFactory @Inject constructor(
                 Pair(inputProcessingInvoker, system)
             }
 
-            is EffectsConsumerSystem -> {
+            is EffectsConsumerSystem<*> -> {
                 Pair(effectsConsumerInvoker, system)
             }
 

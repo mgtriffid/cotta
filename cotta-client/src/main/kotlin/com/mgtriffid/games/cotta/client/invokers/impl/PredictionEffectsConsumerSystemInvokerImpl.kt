@@ -19,17 +19,19 @@ class PredictionEffectsConsumerSystemInvokerImpl @Inject constructor(
     @Named("prediction") private val context: TracingEffectProcessingContext,
     @Named("prediction") private val traces: Traces,
 ) : PredictionEffectsConsumerSystemInvoker {
-    override fun invoke(system: EffectsConsumerSystem) {
+    override fun invoke(system: EffectsConsumerSystem<*>) {
         effectBus.effects().forEach { process(it, system) }
     }
 
-    private fun process(effect: CottaEffect, system: EffectsConsumerSystem) {
+    private fun <T: CottaEffect> process(effect: CottaEffect, system: EffectsConsumerSystem<T>) {
         logger.debug { "${system::class.simpleName} processing effect $effect" }
         context.setTrace(
             traces.get(effect)?.plus(TraceElement.EffectTraceElement(effect))
                 ?: CottaTrace.from(TraceElement.EffectTraceElement(effect))
         )
-        system.handle(effect, context)
+        if (system.effectType.isAssignableFrom(effect::class.java)) {
+            system.handle(system.effectType.cast(effect), context)
+        }
         context.setTrace(null)
     }
 }

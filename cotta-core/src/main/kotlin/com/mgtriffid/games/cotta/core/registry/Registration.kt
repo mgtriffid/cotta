@@ -11,9 +11,12 @@ import com.mgtriffid.games.cotta.core.codegen.Constants.INPUT_COMPONENTS_CLASS_S
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.InputComponent
+import mu.KotlinLogging
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.declaredMemberProperties
+
+private val logger = KotlinLogging.logger {}
 
 fun registerComponents(game: CottaGame, componentRegistry: ComponentRegistry) {
     getComponentClasses(game).forEachIndexed { index, kClass ->
@@ -43,11 +46,11 @@ fun getComponentClasses(game: CottaGame): List<KClass<out Component<*>>> {
 
 fun getInputComponentClasses(game: CottaGame): List<KClass<out InputComponent<*>>> {
     val gameClass = game::class
-    return getCottaGeneratedClass(gameClass, INPUT_COMPONENTS_CLASS_SUFFIX).let {
+    return findCottaGeneratedClass(gameClass, INPUT_COMPONENTS_CLASS_SUFFIX)?.let {
         @Suppress("UNCHECKED_CAST")
         val components = invokeOnNewInstance(it, GET_INPUT_COMPONENTS_METHOD) as List<KClass<*>>
         components.map { it as KClass<out InputComponent<*>> }
-    }
+    } ?: emptyList()
 }
 
 fun getEffectClasses(game: CottaGame): List<KClass<out CottaEffect>> {
@@ -64,6 +67,14 @@ private fun invokeOnNewInstance(clazz: Class<*>, method: String): Any? =
 
 private fun getCottaGeneratedClass(gameClass: KClass<out CottaGame>, suffix: String): Class<*> =
     Class.forName(gameClass.qualifiedName + suffix)
+
+private fun findCottaGeneratedClass(gameClass: KClass<out CottaGame>, suffix: String): Class<*>? =
+    try {
+        getCottaGeneratedClass(gameClass, suffix)
+    } catch (e: ClassNotFoundException) {
+        logger.warn {"Could not find generated class for ${gameClass.qualifiedName} with suffix $suffix" }
+        null
+    }
 
 private fun getImplKClass(kClass: KClass<*>): KClass<*> = (kClass.qualifiedName + IMPL_SUFFIX).let {
     Class.forName(it).kotlin

@@ -31,7 +31,6 @@ class AuthoritativeSimulationImpl @Inject constructor(
         effectBus.clear()
         state.advance(tick.tick)
         tick.tick++
-        putInputIntoEntities(input)
         processInput(input)
         fillPlayersSawTicks(input)
         simulate()
@@ -53,20 +52,5 @@ class AuthoritativeSimulationImpl @Inject constructor(
 
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
         systemInvokers.add(invokersFactory.createInvoker(systemClass))
-    }
-
-    private fun putInputIntoEntities(input: SimulationInput) {
-        getEntitiesWithInputComponents().forEach { e ->
-            logger.debug { "Entity ${e.id} has some input components:" }
-            e.inputComponents().forEach { c ->
-                val component = input.inputForEntityAndComponent(e.id, c)
-                logger.debug { "  $component" }
-                e.setInputComponent(c, component)
-            }
-        }
-    }
-
-    private fun getEntitiesWithInputComponents() = state.entities(tick.tick).all().filter {
-        it.hasInputComponents()
     }
 }

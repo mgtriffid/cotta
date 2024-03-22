@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.server.impl
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.Entity.OwnedBy
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -34,15 +33,10 @@ class ServerSimulationImpl @Inject constructor(
 
     private val enterGameIntents = ArrayList<Pair<EnterGameIntent, PlayerId>>()
     private val playerIdGenerator = PlayerIdGenerator()
-    private lateinit var metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>>
 
     override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
         logger.info { "Registering system '${systemClass.simpleName}'" }
         systemInvokers.add(invokersFactory.createInvoker(systemClass))
-    }
-
-    override fun setMetaEntitiesInputComponents(components: Set<KClass<out InputComponent<*>>>) {
-        this.metaEntitiesInputComponents = components;
     }
 
     override fun tick(input: SimulationInput) {
@@ -50,7 +44,6 @@ class ServerSimulationImpl @Inject constructor(
         state.advance(tickProvider.tick)
         logger.debug { "Advancing tick from ${tickProvider.tick} to ${tickProvider.tick + 1}" }
         tickProvider.tick++
-        putInputIntoEntities(input)
         processInput(input)
         fillPlayersSawTicks(input)
         simulate()
@@ -73,19 +66,6 @@ class ServerSimulationImpl @Inject constructor(
 
     private fun fillPlayersSawTicks(input: SimulationInput) {
         playersSawTicks.set(input.playersSawTicks())
-    }
-
-    private fun putInputIntoEntities(input: SimulationInput) {
-        state.entities(tickProvider.tick).all().filter {
-            it.hasInputComponents()
-        }.forEach { e ->
-            logger.trace { "Entity ${e.id} has some input components:" }
-            e.inputComponents().forEach { c ->
-                val component = input.inputForEntityAndComponent(e.id, c)
-                logger.trace { "  $component" }
-                e.setInputComponent(c, component)
-            }
-        }
     }
 
     override fun enterGame(intent: EnterGameIntent): PlayerId {

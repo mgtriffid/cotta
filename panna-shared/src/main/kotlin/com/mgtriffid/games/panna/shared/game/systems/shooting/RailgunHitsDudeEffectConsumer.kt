@@ -7,9 +7,9 @@ import com.mgtriffid.games.panna.shared.game.components.HealthComponent
 import com.mgtriffid.games.panna.shared.game.effects.shooting.BulletHitsDudeEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunHitsDudeEffect
 
-class RailgunHitsDudeEffectConsumer : EffectsConsumerSystem {
-    override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
-        if (e !is RailgunHitsDudeEffect) return
+class RailgunHitsDudeEffectConsumer : EffectsConsumerSystem<RailgunHitsDudeEffect> {
+    override val effectType: Class<RailgunHitsDudeEffect> = RailgunHitsDudeEffect::class.java
+    override fun handle(e: RailgunHitsDudeEffect, ctx: EffectProcessingContext) {
         ctx.entities().get(e.shotId)?.let { entity ->
             val healthComponent = entity.getComponent(HealthComponent::class)
             healthComponent.health -= 40

@@ -59,8 +59,6 @@ class ServerSimulationInputProviderImpl<
 
         val input = object : SimulationInput {
             // TODO protect against malicious client sending input for entity not belonging to them
-            override fun inputsForEntities() = remappedInput
-
             override fun nonPlayerInput(): NonPlayerInput = nonPlayerInput
 
             override fun inputForPlayers() = clientsInput.inputForPlayers

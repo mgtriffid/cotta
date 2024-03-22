@@ -142,10 +142,6 @@ class NetworkClientImpl<
                     return object : NonPlayerInput {}
                 }
 
-                override fun inputsForEntities(): Map<EntityId, Collection<InputComponent<*>>> {
-                    return input
-                }
-
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return incomingDataBuffer.inputs2[tick]!!
                 }

@@ -41,7 +41,6 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
 
     override fun run() {
         registerComponents(game, componentRegistry)
-        serverSimulation.setMetaEntitiesInputComponents(game.metaEntitiesInputComponents)
         initializeState()
         registerSystems()
         logger.debug { "Tick length is ${game.config.tickLength}" }

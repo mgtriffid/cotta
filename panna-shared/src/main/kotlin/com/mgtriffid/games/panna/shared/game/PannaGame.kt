@@ -74,10 +74,6 @@ class PannaGame : CottaGame {
         block.addComponent(createColliderComponent(16, 16))
     }
 
-    override val metaEntitiesInputComponents = setOf(
-        JoinBattleMetaEntityInputComponent::class
-    )
-
     override val nonPlayerInputProvider = object : NonPlayerInputProvider {
         override fun input(entities: Entities) = object : NonPlayerInput {}
     }

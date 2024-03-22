@@ -33,10 +33,6 @@ data class DataForClientsImpl @Inject constructor(
         return effectsHistory.forTick(tick)
     }
 
-    override fun inputs(): Map<EntityId, Collection<InputComponent<*>>> {
-        return simulationInputHolder.get().inputsForEntities()
-    }
-
     override fun playerInputs(): Map<PlayerId, PlayerInput> {
         return simulationInputHolder.get().inputForPlayers()
     }

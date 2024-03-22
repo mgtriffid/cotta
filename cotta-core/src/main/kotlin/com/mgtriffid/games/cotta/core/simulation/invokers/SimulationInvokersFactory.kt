@@ -33,7 +33,7 @@ class SimulationInvokersFactory @Inject constructor(
                 Pair(entityProcessingSystemInvoker, system)
             }
 
-            is EffectsConsumerSystem -> if (
+            is EffectsConsumerSystem<*> -> if (
                 systemClass.hasAnnotation<LagCompensated>()
             ) {
                 Pair(lagCompensatingEffectsConsumerInvoker, system)

@@ -17,7 +17,6 @@ import com.mgtriffid.games.cotta.core.tracing.CottaTrace
  */
 interface DataForClients {
     fun effects(tick: Long): Collection<CottaEffect>
-    fun inputs(): Map<EntityId, Collection<InputComponent<*>>>
     fun entities(tick: Long): Entities
     fun createdEntities(tick: Long): List<Pair<CottaTrace, EntityId>>
     fun confirmedEntities(tick: Long): List<Pair<PredictedEntityId, AuthoritativeEntityId>>

@@ -21,8 +21,6 @@ object GameStub : CottaGame {
     override fun initializeStaticState(entities: Entities) {
     }
 
-    override val metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>> =
-        emptySet()
     override val config: CottaConfig = TODO()
     override val playerInputKClass = TODO()
 

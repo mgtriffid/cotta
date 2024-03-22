@@ -11,18 +11,18 @@ import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 
-@Predicted class WalkingEffectConsumerSystem : EffectsConsumerSystem {
-    override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
-        if (e is WalkingEffect) {
-            val entity = ctx.entities().get(e.entityId) ?: return
-            entity.getComponent(VelocityComponent::class).apply {
-                velX = when (e.direction) {
-                    WALKING_DIRECTION_NONE -> 0
-                    WALKING_DIRECTION_LEFT -> -1
-                    WALKING_DIRECTION_RIGHT -> 1
-                    else -> throw IllegalArgumentException("Unknown direction ${e.direction}")
-                } * entity.getComponent(WalkingComponent::class).speed
-            }
+@Predicted class WalkingEffectConsumerSystem : EffectsConsumerSystem<WalkingEffect> {
+    override val effectType: Class<WalkingEffect> = WalkingEffect::class.java
+
+    override fun handle(e: WalkingEffect, ctx: EffectProcessingContext) {
+        val entity = ctx.entities().get(e.entityId) ?: return
+        entity.getComponent(VelocityComponent::class).apply {
+            velX = when (e.direction) {
+                WALKING_DIRECTION_NONE -> 0
+                WALKING_DIRECTION_LEFT -> -1
+                WALKING_DIRECTION_RIGHT -> 1
+                else -> throw IllegalArgumentException("Unknown direction ${e.direction}")
+            } * entity.getComponent(WalkingComponent::class).speed
         }
     }
 }

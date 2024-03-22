@@ -6,12 +6,11 @@ import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.server.workload.components.HealthTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.HealthRegenerationTestEffect
 
-class HealthRegenerationTestEffectsConsumerSystem : EffectsConsumerSystem {
-    override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
-        if (e is HealthRegenerationTestEffect) {
-            ctx.entities().get(e.entityId)?.let {
-                it.getComponent(HealthTestComponent::class).health += e.health
-            }
+class HealthRegenerationTestEffectsConsumerSystem : EffectsConsumerSystem<HealthRegenerationTestEffect> {
+    override val effectType: Class<HealthRegenerationTestEffect> = HealthRegenerationTestEffect::class.java
+    override fun handle(e: HealthRegenerationTestEffect, ctx: EffectProcessingContext) {
+        ctx.entities().get(e.entityId)?.let {
+            it.getComponent(HealthTestComponent::class).health += e.health
         }
     }
 }

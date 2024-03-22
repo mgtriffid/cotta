@@ -14,8 +14,6 @@ interface ServerSimulation {
      */
     fun <T : CottaSystem> registerSystem(systemClass: KClass<T>)
 
-    fun setMetaEntitiesInputComponents(components: Set<KClass<out InputComponent<*>>>)
-
     fun tick(input: SimulationInput)
     fun enterGame(intent: EnterGameIntent): PlayerId
 }

@@ -6,11 +6,13 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
+import com.mgtriffid.games.cotta.server.workload.components.PlayerControlledStubComponent
 import kotlin.reflect.KClass
 
 @Game
@@ -19,22 +21,36 @@ class GameStub : CottaGame {
     override val nonPlayerInputProvider = object : NonPlayerInputProvider {
         override fun input(entities: Entities) = object : NonPlayerInput {}
     }
-    override val inputProcessing = object : InputProcessing {
-        override fun process(
-            input: SimulationInput,
-            entities: Entities,
-            effectBus: EffectBus
-        ) {}
-    }
-
+    override val inputProcessing = InputProcessingStub()
     override fun initializeServerState(entities: Entities) {}
     override fun initializeStaticState(entities: Entities) {}
 
-    override val metaEntitiesInputComponents: Set<KClass<out InputComponent<*>>> = emptySet()
     override val config: CottaConfig = object : CottaConfig {
         override val tickLength: Long = 20
     }
     override val playerInputKClass = PlayerInputStub::class
 }
 
-data class PlayerInputStub(val input: String) : PlayerInput
+data class PlayerInputStub(
+    val aim: Int,
+    val shoot: Boolean,
+) : PlayerInput
+
+class InputProcessingStub : InputProcessing {
+    override fun process(
+        input: SimulationInput,
+        entities: Entities,
+        effectBus: EffectBus
+    ) {
+        input.inputForPlayers().forEach { (playerId, playerInput) ->
+            playerInput as PlayerInputStub
+            val player = entities.all()
+                .filter { it.hasComponent(PlayerControlledStubComponent::class) }
+                .first { it.ownedBy == Entity.OwnedBy.Player(playerId)}
+            player.getComponent(PlayerControlledStubComponent::class).apply {
+                aim = playerInput.aim
+                shoot = playerInput.shoot
+            }
+        }
+    }
+}

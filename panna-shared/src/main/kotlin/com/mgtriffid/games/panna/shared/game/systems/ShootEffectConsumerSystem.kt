@@ -36,11 +36,9 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 @Predicted
-class ShootEffectConsumerSystem : EffectsConsumerSystem {
-    override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
-        if (e !is ShootEffect) {
-            return
-        }
+class ShootEffectConsumerSystem : EffectsConsumerSystem<ShootEffect> {
+    override val effectType: Class<ShootEffect> = ShootEffect::class.java
+    override fun handle(e: ShootEffect, ctx: EffectProcessingContext) {
         val shooter = ctx.entities().get(e.shooterId) ?: return
         val weaponEquippedComponent = shooter.getComponent(WeaponEquippedComponent::class)
         logger.debug { "ctx.clock().time = ${ctx.clock().time()}" }

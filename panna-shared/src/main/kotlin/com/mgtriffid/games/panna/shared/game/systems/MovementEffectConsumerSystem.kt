@@ -21,37 +21,36 @@ import kotlin.math.min
 private val logger = mu.KotlinLogging.logger {}
 
 @Predicted
-class MovementEffectConsumerSystem : EffectsConsumerSystem {
-    override fun handle(e: CottaEffect, ctx: EffectProcessingContext) {
-        if (e is MovementEffect) {
-            logger.trace { "Received MovementEffect: $e" }
-            val entity = ctx.entities().get(e.entityId) ?: return
-            val velocityComponent = entity.getComponent(VelocityComponent::class)
-            if (entity.hasComponent(PositionComponent::class)) {
-                val position = entity.getComponent(PositionComponent::class)
-                val originalX = position.xPos
-                val originalY = position.yPos
-                var newXPos = position.xPos + e.velocityX
-                var newYPos = position.yPos + e.velocityY
+class MovementEffectConsumerSystem : EffectsConsumerSystem<MovementEffect> {
+    override val effectType: Class<MovementEffect> = MovementEffect::class.java
+    override fun handle(e: MovementEffect, ctx: EffectProcessingContext) {
+        logger.trace { "Received MovementEffect: $e" }
+        val entity = ctx.entities().get(e.entityId) ?: return
+        val velocityComponent = entity.getComponent(VelocityComponent::class)
+        if (entity.hasComponent(PositionComponent::class)) {
+            val position = entity.getComponent(PositionComponent::class)
+            val originalX = position.xPos
+            val originalY = position.yPos
+            var newXPos = position.xPos + e.velocityX
+            var newYPos = position.yPos + e.velocityY
 
-                // TODO indexed query
-                if (entity.hasComponent(ColliderComponent::class)) {
-                    if (entity.hasComponent(WalkingComponent::class)) {
-                        val pair = resolveTerrainCollisions(entity, position, newXPos, newYPos, ctx, e, velocityComponent)
+            // TODO indexed query
+            if (entity.hasComponent(ColliderComponent::class)) {
+                if (entity.hasComponent(WalkingComponent::class)) {
+                    val pair = resolveTerrainCollisions(entity, position, newXPos, newYPos, ctx, e, velocityComponent)
 
-                        newXPos = pair.first
-                        newYPos = pair.second
-                    }
-
-                    detectCollisions(entity, originalX, originalY, newXPos, newYPos, ctx)
+                    newXPos = pair.first
+                    newYPos = pair.second
                 }
 
-                position.xPos = newXPos
-                position.yPos = newYPos
+                detectCollisions(entity, originalX, originalY, newXPos, newYPos, ctx)
+            }
 
-                if (position.xPos < -50 || position.xPos > 1000 || position.yPos < -100 || position.yPos > 2000) {
-                    ctx.entities().remove(e.entityId)
-                }
+            position.xPos = newXPos
+            position.yPos = newYPos
+
+            if (position.xPos < -50 || position.xPos > 1000 || position.yPos < -100 || position.yPos > 2000) {
+                ctx.entities().remove(e.entityId)
             }
         }
     }

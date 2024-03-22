@@ -7,7 +7,6 @@ import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.impl.*
 import com.mgtriffid.games.cotta.client.interpolation.Interpolators
-import com.mgtriffid.games.cotta.client.invokers.PredictedInputProcessingSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionEffectsConsumerSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionEntityProcessingSystemInvoker
 import com.mgtriffid.games.cotta.client.invokers.PredictionInvokersFactory
@@ -48,7 +47,6 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessi
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingEffectProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingInputProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
-import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.core.tracing.Traces
 import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
@@ -93,9 +91,6 @@ class CottaClientModule(
             .to(PredictionInvokersFactory::class.java)
             .`in`(Scopes.SINGLETON)
 
-        bind(PredictedInputProcessingSystemInvoker::class.java).to(PredictedInputProcessingSystemInvokerImpl::class.java)
-            .`in`(Scopes.SINGLETON)
-
         bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
         bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
         bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
@@ -107,8 +102,6 @@ class CottaClientModule(
         bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("lagCompensated")).to(
             LagCompensatingEffectBusImpl::class.java
         ).`in`(Scopes.SINGLETON)
-        bind(LagCompensatingInputProcessingSystemInvoker::class.java).to(LagCompensatingInputProcessingSystemInvokerImpl::class.java)
-            .`in`(Scopes.SINGLETON)
         bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(Entities::class.java).annotatedWith(Names.named("latest")).to(LatestEntities::class.java)
@@ -188,7 +181,6 @@ class CottaClientModule(
             ClientIncomingDataBuffer<
                 BytesStateRecipe,
                 BytesDeltaRecipe,
-                BytesInputRecipe,
                 BytesCreatedEntitiesWithTracesRecipe,
                 BytesMetaEntitiesDeltaRecipe
                 >>() {})

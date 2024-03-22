@@ -17,19 +17,21 @@ import com.mgtriffid.games.panna.shared.game.components.createShootComponent
 import com.mgtriffid.games.panna.shared.game.components.createSteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.createWalkingComponent
 import com.mgtriffid.games.panna.shared.game.components.createWeaponEquippedComponent
-import com.mgtriffid.games.panna.shared.game.components.input.ShootInputComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.createColliderComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.createGravityComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.createVelocityComponent
 import com.mgtriffid.games.panna.shared.game.effects.join.JoinBattleEffect
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 @Predicted
 class JoinBattleEffectConsumerSystem : EffectsConsumerSystem<JoinBattleEffect> {
     override val effectType: Class<JoinBattleEffect> = JoinBattleEffect::class.java
     override fun handle(e: JoinBattleEffect, ctx: EffectProcessingContext) {
+        logger.debug { "Received JoinBattleEffect $e" }
         val dude = ctx.createEntity(Entity.OwnedBy.Player(e.playerId))
         dude.addComponent(createPositionComponent(32f, 24f))
-        dude.addInputComponent(ShootInputComponent::class)
         dude.addComponent(createJumpingComponent(false, 250f))
         dude.addComponent(createWalkingComponent(100f))
         dude.addComponent(createGravityComponent())

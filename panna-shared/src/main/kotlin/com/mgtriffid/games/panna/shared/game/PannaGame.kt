@@ -11,7 +11,6 @@ import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.panna.shared.PannaPlayerInput
 import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
-import com.mgtriffid.games.panna.shared.game.components.input.*
 import com.mgtriffid.games.panna.shared.game.components.physics.createColliderComponent
 import com.mgtriffid.games.panna.shared.game.systems.*
 import com.mgtriffid.games.panna.shared.game.systems.join.JoinBattleEffectConsumerSystem

@@ -9,5 +9,4 @@ class BytesEntityRecipe(
     override val entityId: EntityId,
     override val ownedBy: Entity.OwnedBy,
     override val components: List<BytesComponentRecipe>,
-    override val inputComponents: List<ShortComponentKey>
 ): EntityRecipe

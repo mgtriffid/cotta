@@ -6,7 +6,6 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.getConstructor
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
-import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import jakarta.inject.Inject
 import mu.KotlinLogging
 import kotlin.reflect.KClass
@@ -14,7 +13,6 @@ import kotlin.reflect.KClass
 private val logger = KotlinLogging.logger {}
 
 class PredictionInvokersFactory @Inject constructor(
-    private val inputProcessingInvoker: PredictedInputProcessingSystemInvoker,
     private val effectsConsumerInvoker: PredictionEffectsConsumerSystemInvoker,
     private val entityProcessingInvoker: PredictionEntityProcessingSystemInvoker,
 ) : InvokersFactory {
@@ -22,9 +20,6 @@ class PredictionInvokersFactory @Inject constructor(
         val ctor = systemClass.getConstructor()
         val system: CottaSystem = ctor.call()
         return when (system) {
-            is InputProcessingSystem -> {
-                Pair(inputProcessingInvoker, system)
-            }
 
             is EffectsConsumerSystem<*> -> {
                 Pair(effectsConsumerInvoker, system)

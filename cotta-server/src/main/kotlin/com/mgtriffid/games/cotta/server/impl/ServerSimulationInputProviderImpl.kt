@@ -2,12 +2,9 @@ package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
-import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.*
@@ -15,7 +12,6 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
-import com.mgtriffid.games.cotta.server.PredictedToAuthoritativeIdMappings
 import com.mgtriffid.games.cotta.server.ServerDelta
 import com.mgtriffid.games.cotta.server.ServerSimulationInputProvider
 import com.mgtriffid.games.cotta.server.impl.ClientGhost.ClientTickCursor.State.AWAITING_INPUTS
@@ -29,33 +25,30 @@ private val logger = KotlinLogging.logger {}
 const val REQUIRED_CLIENT_INPUTS_BUFFER = 3
 
 class ServerSimulationInputProviderImpl<
-    SR: StateRecipe,
-    DR: DeltaRecipe,
-    IR: InputRecipe,
-    CEWTR: CreatedEntitiesWithTracesRecipe,
-    MEDR: MetaEntitiesDeltaRecipe
+    SR : StateRecipe,
+    DR : DeltaRecipe,
+    IR : InputRecipe,
+    CEWTR : CreatedEntitiesWithTracesRecipe,
+    MEDR : MetaEntitiesDeltaRecipe
     > @Inject constructor(
     private val nonPlayerInputProvider: NonPlayerInputProvider,
     @Named("simulation") private val state: CottaState,
     private val simulationInputHolder: SimulationInputHolder,
-    private val predictedToAuthoritativeIdMappings: PredictedToAuthoritativeIdMappings,
     private val tickProvider: TickProvider,
     private val networkTransport: CottaServerNetworkTransport,
     private val inputSerialization: InputSerialization<IR>,
-    private val inputSnapper: InputSnapper<IR>,
     private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
     private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
-    private val idsRemapper: IdsRemapper,
     private val clientsGhosts: ClientsGhosts<IR>,
 ) : ServerSimulationInputProvider {
-    private val buffers = HashMap<PlayerId, ServerIncomingDataBuffer<SR, DR, IR>>()
+    private val buffers =
+        HashMap<PlayerId, ServerIncomingDataBuffer<SR, DR, IR>>()
 
     override fun getDelta(): ServerDelta {
-        val (clientsInput, predictedClientEntities) = getInput()
+        val clientsInput = getInput()
 
-        val nonPlayerInput = nonPlayerInputProvider.input(state.entities(tickProvider.tick))
-
-        val remappedInput = replacePredictedEntityIdsWithAuthoritative(clientsInput)
+        val nonPlayerInput =
+            nonPlayerInputProvider.input(state.entities(tickProvider.tick))
 
         val input = object : SimulationInput {
             // TODO protect against malicious client sending input for entity not belonging to them
@@ -69,40 +62,9 @@ class ServerSimulationInputProviderImpl<
         simulationInputHolder.set(input)
 
         return ServerDelta(
-            input = input,
-            createdEntities = predictedClientEntities
+            input = input
         )
     }
-
-    private fun replacePredictedEntityIdsWithAuthoritative(clientsInput: ClientsInput) =
-        clientsInput.input.mapKeys { (entityId, _) ->
-            when (entityId) {
-                is PredictedEntityId -> {
-                    val authoritativeId = predictedToAuthoritativeIdMappings[entityId]
-                    if (authoritativeId != null) {
-                        logger.trace { "Remapping input for entity $entityId to $authoritativeId" }
-                        authoritativeId
-                    } else {
-                        // TODO probably warning or not needed in the resulting map at all
-                        logger.warn { "Not remapping input for entity $entityId" }
-                        entityId
-                    }
-                }
-
-                is AuthoritativeEntityId -> {
-                    logger.trace { "Not remapping input for entity $entityId" }
-                    entityId
-                }
-
-                is StaticEntityId -> throw IllegalStateException("Static entity $entityId cannot be controlled")
-            }
-        }.mapValues { (_, input: Collection<InputComponent<*>>) ->
-            input.map { replacePredictedIdsWithAuthoritative(it) }
-        }
-
-    private fun replacePredictedIdsWithAuthoritative(
-        inputComponent: InputComponent<*>
-    ) = idsRemapper.remap(inputComponent, predictedToAuthoritativeIdMappings::get)
 
     override fun fetch() {
         val inputDtos = networkTransport.drainInputs()
@@ -134,45 +96,48 @@ class ServerSimulationInputProviderImpl<
                 logger.warn { "Got input from unknown connection $connectionId" }
                 return@forEach
             }
-            val createdEntitiesRecipe = snapsSerialization.deserializeEntityCreationTraces(dto.payload)
+            val createdEntitiesRecipe =
+                snapsSerialization.deserializeEntityCreationTraces(dto.payload)
             val createdEntities: List<Pair<CottaTrace, PredictedEntityId>> =
                 createdEntitiesRecipe.map { (trace, entityId) ->
-                    Pair(stateSnapper.unpackTrace(trace), entityId as PredictedEntityId)
+                    Pair(
+                        stateSnapper.unpackTrace(trace),
+                        entityId as PredictedEntityId
+                    )
                 }
             getBuffer(playerId).storeCreatedEntities(dto.tick, createdEntities)
         }
     }
 
-    private fun getInput(): Pair<ClientsInput, ClientsPredictedEntities> {
-        val inputRecipes = ArrayList<IR>()
-        val createdEntities = ArrayList<Pair<CottaTrace, PredictedEntityId>>()
+    private fun getInput(): ClientsInput {
         val playersSawTicks = HashMap<PlayerId, Long>()
         val playerInputs = HashMap<PlayerId, PlayerInput>()
 
-        val use: (PlayerId, ClientGhost<IR>, Long) -> Unit = { playerId, ghost, tick ->
-            val buffer = getBuffer(playerId)
-            playersSawTicks[playerId] = tick
-//            inputRecipes.add(buffer.inputs[tick]!!)
-            playerInputs[playerId] = buffer.inputs2[tick]!!
-            createdEntities.addAll(buffer.createdEntities[tick + 1]!!)
-            ghost.setLastUsedTick(tick)
-            ghost.setLastUsedIncomingInput2(buffer.inputs2[tick]!!)
-        }
-        val usePrevious: (PlayerId, ClientGhost<IR>, Long) -> Unit =  { playerId, ghost, tick ->
-            playersSawTicks[playerId] = tick
-            playerInputs[playerId] = ghost.getLastUsedIncomingInput2()
-            ghost.setLastUsedTick(tick)
-        }
+        val use: (PlayerId, ClientGhost, Long) -> Unit =
+            { playerId, ghost, tick ->
+                val buffer = getBuffer(playerId)
+                playersSawTicks[playerId] = tick
+                playerInputs[playerId] = buffer.inputs2[tick]!!
+                ghost.setLastUsedTick(tick)
+                ghost.setLastUsedIncomingInput(buffer.inputs2[tick]!!)
+            }
+        val usePrevious: (PlayerId, ClientGhost, Long) -> Unit =
+            { playerId, ghost, tick ->
+                playersSawTicks[playerId] = tick
+                playerInputs[playerId] = ghost.getLastUsedIncomingInput()
+                ghost.setLastUsedTick(tick)
+            }
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val buffer = getBuffer(playerId)
             when (ghost.tickCursorState()) {
                 AWAITING_INPUTS -> {
                     if (buffer.hasEnoughInputsToStart()) {
                         ghost.setCursorState(RUNNING)
-                        val tick = buffer.inputs2.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
+                        val tick =
+                            buffer.inputs2.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
                         use(playerId, ghost, tick)
                     } else {
-                        // do nothing. Ok, we don't have the input recipe yet, no big deal.
+                        // do nothing. Ok, we don't have the input, no big deal.
                     }
                 }
 
@@ -181,9 +146,8 @@ class ServerSimulationInputProviderImpl<
                     val tick = lastUsedInput + 1
                     logger.debug { "Client input tick is $tick for $playerId" }
                     if (
-                        buffer.inputs2.containsKey(tick) &&
-                        buffer.createdEntities.containsKey(tick + 1)
-                        ) {
+                        buffer.inputs2.containsKey(tick)
+                    ) {
                         use(playerId, ghost, tick)
                     } else {
                         usePrevious(playerId, ghost, tick)
@@ -192,16 +156,9 @@ class ServerSimulationInputProviderImpl<
             }
         }
 
-        val inputs = inputRecipes.map { recipe ->
-            inputSnapper.unpackInputRecipe(recipe).entries
-        }.flatten().associate { it.key to it.value }
-        return Pair(
-            ClientsInput(
-                playersSawTicks = playersSawTicks,
-                input = inputs,
-                inputForPlayers = playerInputs
-            ),
-            ClientsPredictedEntities(createdEntities)
+        return ClientsInput(
+            playersSawTicks = playersSawTicks,
+            inputForPlayers = playerInputs
         )
     }
 

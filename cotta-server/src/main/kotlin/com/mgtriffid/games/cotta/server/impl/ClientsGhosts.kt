@@ -7,7 +7,7 @@ import com.mgtriffid.games.cotta.network.ConnectionId
 class ClientsGhosts<IR: InputRecipe> {
 
     val playerByConnection = HashMap<ConnectionId, PlayerId>()
-    val data = HashMap<PlayerId, ClientGhost<IR>>()
+    val data = HashMap<PlayerId, ClientGhost>()
 
     // TODO handle removing ghost
     fun addGhost(playerId: PlayerId, connectionId: ConnectionId) {

@@ -1,8 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
@@ -18,14 +16,12 @@ private val logger = KotlinLogging.logger {}
 class ClientIncomingDataBuffer<
     SR : StateRecipe,
     DR : DeltaRecipe,
-    IR : InputRecipe,
     CEWTR : CreatedEntitiesWithTracesRecipe,
     PDR: MetaEntitiesDeltaRecipe
     > {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
     val playersDeltas = TreeMap<Long, PDR>()
-    val inputs = TreeMap<Long, Map<EntityId, Collection<InputComponent<*>>>>() // GROOM class with naming
     val inputs2 = TreeMap<Long, Map<PlayerId, PlayerInput>>() // GROOM class with naming
     val createdEntities = TreeMap<Long, CEWTR>() // GROOM class with naming
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
@@ -47,12 +43,6 @@ class ClientIncomingDataBuffer<
     fun storeState(tick: Long, state: SR) {
         states[tick] = state
         cleanUpOldStates(tick)
-    }
-
-    fun storeInput(tick: Long, input: Map<EntityId, Collection<InputComponent<*>>>) {
-        logger.debug { "Storing input for $tick, data buffer ${this.hashCode()}" }
-        inputs[tick] = input
-        cleanUpOldInputs(tick)
     }
 
     fun storeInput2(tick: Long, input: Map<PlayerId, PlayerInput>) {
@@ -85,10 +75,6 @@ class ClientIncomingDataBuffer<
 
     private fun cleanUpOldStates(tick: Long) {
         cleanUp(states, tick)
-    }
-
-    private fun cleanUpOldInputs(tick: Long) {
-        cleanUp(inputs, tick)
     }
 
     private fun cleanUpOldInputs2(tick: Long) {

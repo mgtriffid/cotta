@@ -7,17 +7,14 @@ import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
-import com.mgtriffid.games.cotta.core.serialization.InputSnapper
 import com.mgtriffid.games.cotta.core.serialization.MetaEntitiesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
@@ -26,7 +23,6 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto2
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import jakarta.inject.Inject
@@ -42,10 +38,9 @@ class NetworkClientImpl<
     MEDR: MetaEntitiesDeltaRecipe
     > @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
-    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, IR, CEWTR, MEDR>,
+    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, CEWTR, MEDR>,
     private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
     private val inputSerialization: InputSerialization<IR>,
-    private val inputSnapper: InputSnapper<IR>,
     private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
     private val localPlayer: LocalPlayer
 ) : NetworkClient {
@@ -79,11 +74,6 @@ class NetworkClientImpl<
                     localPlayer.set(snapsSerialization.deserializePlayerId(it.payload))
                 }
 
-                KindOfData.INPUT -> incomingDataBuffer.storeInput(
-                    it.tick,
-                    inputSnapper.unpackInputRecipe(inputSerialization.deserializeInputRecipe(it.payload))
-                )
-
                 KindOfData.INPUT2 -> incomingDataBuffer.storeInput2(
                     it.tick,
                     inputSerialization.deserializePlayersInputs(it.payload)
@@ -102,14 +92,6 @@ class NetworkClientImpl<
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
             }
         }
-    }
-
-    override fun send(inputs: ClientInput, tick: Long) {
-        val inputRecipe = inputSnapper.snapInput(inputs.inputs)
-        val inputDto = ClientToServerInputDto()
-        inputDto.tick = tick
-        inputDto.payload = inputSerialization.serializeInputRecipe(inputRecipe)
-        networkTransport.send(inputDto)
     }
 
     override fun send(createdEntities: List<Pair<CottaTrace, EntityId>>, tick: Long) {

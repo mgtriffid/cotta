@@ -25,7 +25,6 @@ interface EntityRecipe {
     val entityId: EntityId
     val ownedBy: Entity.OwnedBy
     val components: List<ComponentRecipe>
-    val inputComponents: List<ComponentKey>
 }
 
 interface ComponentRecipe

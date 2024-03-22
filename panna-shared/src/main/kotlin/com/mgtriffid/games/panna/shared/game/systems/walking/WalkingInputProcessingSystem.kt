@@ -3,15 +3,10 @@ package com.mgtriffid.games.panna.shared.game.systems.walking
 import com.mgtriffid.games.cotta.core.annotations.Predicted
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.InputProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
-import com.mgtriffid.games.cotta.core.systems.InputProcessingSystem
 import com.mgtriffid.games.panna.shared.game.components.CharacterInputComponent2
 import com.mgtriffid.games.panna.shared.game.components.JumpingComponent
 import com.mgtriffid.games.panna.shared.game.components.WalkingComponent
-import com.mgtriffid.games.panna.shared.game.components.input.CharacterInputComponent
-import com.mgtriffid.games.panna.shared.game.effects.walking.JumpEffect
-import com.mgtriffid.games.panna.shared.game.effects.walking.WalkingEffect
 import com.mgtriffid.games.panna.shared.game.effects.walking.createJumpEffect
 import com.mgtriffid.games.panna.shared.game.effects.walking.createWalkingEffect
 

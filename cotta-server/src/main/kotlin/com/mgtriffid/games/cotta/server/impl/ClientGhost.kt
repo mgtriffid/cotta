@@ -1,7 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.input.PlayerInput
-import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.network.ConnectionId
 import mu.KotlinLogging
 
@@ -11,13 +10,12 @@ private const val HISTORY_LENGTH = 128
 private const val MAX_LAG_COMP_DEPTH_TICKS = 8
 
 // TODO inject history length
-class ClientGhost<IR: InputRecipe>(
+class ClientGhost(
     val connectionId: ConnectionId
 ) {
-    private var lastUsedIncomingInput2: PlayerInput? = null
+    private var lastUsedIncomingInput: PlayerInput? = null
     private val recordsOfSentData = RecordsOfSentData()
     private val clientTickCursor = ClientTickCursor()
-    private var lastUserIncomingInput: IR? = null
 
     fun whatToSend(tick: Long): WhatToSend {
         return recordsOfSentData.whatToSend(tick)
@@ -39,12 +37,12 @@ class ClientGhost<IR: InputRecipe>(
         return clientTickCursor.lastUsedInput
     }
 
-    fun setLastUsedIncomingInput2(playerInput: PlayerInput) {
-        this.lastUsedIncomingInput2 = playerInput
+    fun setLastUsedIncomingInput(playerInput: PlayerInput) {
+        this.lastUsedIncomingInput = playerInput
     }
 
-    fun getLastUsedIncomingInput2(): PlayerInput {
-        return lastUsedIncomingInput2 ?: throw IllegalStateException("No last used input")
+    fun getLastUsedIncomingInput(): PlayerInput {
+        return lastUsedIncomingInput ?: throw IllegalStateException("No last used input")
     }
 
     inner class RecordsOfSentData {

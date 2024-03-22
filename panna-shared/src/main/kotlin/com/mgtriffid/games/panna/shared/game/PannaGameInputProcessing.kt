@@ -14,6 +14,7 @@ import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.WeaponEquippedComponent
 import com.mgtriffid.games.panna.shared.game.effects.join.createJoinBattleEffect
 import mu.KotlinLogging
+import kotlin.math.log
 
 private val logger = KotlinLogging.logger {}
 
@@ -26,6 +27,7 @@ class PannaGameInputProcessing : InputProcessing {
         input.inputForPlayers().forEach { (playerId, playerInput) ->
             playerInput as PannaPlayerInput
             if (playerInput.joinPressed && !dudeExists(playerId, entities)) {
+                logger.debug { "Creating dude now" }
                 createDude(playerId, entities, effectBus)
             }
         }

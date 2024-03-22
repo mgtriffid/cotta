@@ -9,5 +9,4 @@ public class BytesEntityRecipeDto {
     public EntityIdDto entityId;
     public EntityOwnedByDto ownedBy;
     public ArrayList<BytesComponentRecipeDto> components;
-    public ArrayList<Short> inputComponents; // TODO array?
 }

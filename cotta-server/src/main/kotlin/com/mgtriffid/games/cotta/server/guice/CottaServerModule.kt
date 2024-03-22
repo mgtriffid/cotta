@@ -38,7 +38,6 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.EntityPro
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.InputProcessingContextImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompensatingTracingEffectProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.SimpleTracingEffectProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingInputProcessingSystemInvokerImpl
 import com.mgtriffid.games.cotta.core.tracing.Traces
 import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
@@ -78,9 +77,6 @@ class CottaServerModule(
             bind(LagCompensatingEffectBus::class.java).annotatedWith(named("lagCompensated"))
                 .to(LagCompensatingEffectBusImpl::class.java).`in`(Scopes.SINGLETON)
 
-            bind(LagCompensatingInputProcessingSystemInvoker::class.java).to(
-                LagCompensatingInputProcessingSystemInvokerImpl::class.java
-            ).`in`(Scopes.SINGLETON)
             bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java)
                 .`in`(Scopes.SINGLETON)
             bind(Entities::class.java).annotatedWith(named("latest")).to(LatestEntities::class.java)

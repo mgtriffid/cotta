@@ -6,7 +6,6 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import kotlin.reflect.KClass

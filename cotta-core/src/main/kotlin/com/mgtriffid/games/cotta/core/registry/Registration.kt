@@ -10,7 +10,6 @@ import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
 import com.mgtriffid.games.cotta.core.codegen.Constants.INPUT_COMPONENTS_CLASS_SUFFIX
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import mu.KotlinLogging
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
@@ -27,9 +26,6 @@ fun registerComponents(game: CottaGame, componentRegistry: ComponentRegistry) {
             kClass.declaredMemberProperties.any { it is KMutableProperty1 }
         )
     }
-    getInputComponentClasses(game).forEachIndexed { index, kClass ->
-        componentRegistry.registerInputComponent(ShortComponentKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out InputComponent<*>>)
-    }
     getEffectClasses(game).forEachIndexed { index, kClass ->
         componentRegistry.registerEffect(ShortEffectKey(index.toShort()), kClass, getImplKClass(kClass) as KClass<out CottaEffect>)
     }
@@ -42,15 +38,6 @@ fun getComponentClasses(game: CottaGame): List<KClass<out Component<*>>> {
         val components = invokeOnNewInstance(it, GET_COMPONENTS_METHOD) as List<KClass<*>>
         components.map { it as KClass<out Component<*>> }
     }
-}
-
-fun getInputComponentClasses(game: CottaGame): List<KClass<out InputComponent<*>>> {
-    val gameClass = game::class
-    return findCottaGeneratedClass(gameClass, INPUT_COMPONENTS_CLASS_SUFFIX)?.let {
-        @Suppress("UNCHECKED_CAST")
-        val components = invokeOnNewInstance(it, GET_INPUT_COMPONENTS_METHOD) as List<KClass<*>>
-        components.map { it as KClass<out InputComponent<*>> }
-    } ?: emptyList()
 }
 
 fun getEffectClasses(game: CottaGame): List<KClass<out CottaEffect>> {

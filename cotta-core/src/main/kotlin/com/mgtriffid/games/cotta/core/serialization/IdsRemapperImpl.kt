@@ -1,10 +1,7 @@
 package com.mgtriffid.games.cotta.core.serialization
 
-import com.mgtriffid.games.cotta.ComponentData
-import com.mgtriffid.games.cotta.EffectData
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
@@ -21,19 +18,16 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSuperclassOf
 import kotlin.reflect.jvm.kotlinFunction
 
 class IdsRemapperImpl : IdsRemapper {
 
     private var componentsRemappers = mutableMapOf<ComponentKey, ComponentRemapper>()
-    private var inputComponentsRemappers = mutableMapOf<ComponentKey, InputComponentRemapper>()
     private var effectsRemappers = mutableMapOf<EffectKey, EffectRemapper>()
 
     private val keyByClass = HashMap<KClass<*>, StringComponentKey>()
 
-    private val inputComponentsKeyByClass = HashMap<KClass<*>, ComponentKey>()
     private val effectsKeyByClass = HashMap<KClass<*>, StringEffectKey>()
     override fun remap(c: Component<*>, ids: (PredictedEntityId) -> AuthoritativeEntityId?): Component<*> {
         // GROOM we have null-safe and we have IdentityThing. Redundant.
@@ -42,10 +36,6 @@ class IdsRemapperImpl : IdsRemapper {
 
     override fun remap(e: CottaEffect, ids: (PredictedEntityId) -> AuthoritativeEntityId?): CottaEffect {
         return effectsRemappers[getKey(e)]?.remap(e, ids) ?: e
-    }
-
-    override fun remap(ic: InputComponent<*>, ids: (PredictedEntityId) -> AuthoritativeEntityId?): InputComponent<*> {
-        return inputComponentsRemappers[getInputComponentKey(ic::class)]?.remap(ic, ids) ?: ic
     }
 
     fun <T : Component<T>> registerComponent(kClass: KClass<T>, spec: ComponentSpec) {
@@ -78,45 +68,6 @@ class IdsRemapperImpl : IdsRemapper {
             IdentityComponentRemapper
         } else {
             ComponentRemapperImpl(
-                factoryMethod,
-                valueParametersToNames,
-                fieldsByName,
-            )
-        }
-    }
-
-    fun <T : InputComponent<T>> registerInputComponent(kClass: KClass<T>, spec: ComponentSpec) {
-        logger.debug { "Registering input component ${kClass.qualifiedName}, spec has key of ${spec.key}" }
-        inputComponentsKeyByClass[kClass] = spec.key as StringComponentKey // hack, the fact that maps and componentregistry are connected leaks in here but okay
-
-        registerInputComponentRemapper(kClass, spec)
-    }
-
-    fun <C: InputComponent<C>> registerInputComponentRemapper(kClass: KClass<C>, spec: ComponentSpec) {
-        val factoryMethod: KCallable<C> = kClass.java.classLoader.loadClass("${kClass.qualifiedName}ImplKt").declaredMethods.find { it.name == "create${kClass.simpleName}" }?.kotlinFunction as? KCallable<C>
-            ?: throw IllegalArgumentException("${kClass.qualifiedName} has no 'create' method")
-        val fields = kClass.declaredMemberProperties
-
-        val fieldsByName = fields.associateBy { it.name }
-
-        val factoryParameters = factoryMethod.parameters
-        val valueParameters = factoryParameters.filter { it.kind == KParameter.Kind.VALUE }
-        val valueParametersToNames = valueParameters.associateWith { it.name }
-
-        val fieldNames = fieldsByName.keys
-        val valueParametersNames = valueParametersToNames.values
-
-        // GROOM extract this check before adding all those listeners for ComponentRegistry: checks are common.
-        if (fieldNames.toSet() != valueParametersNames.toSet()) {
-            throw IllegalArgumentException(
-                "Factory method for class '${kClass.qualifiedName}' is misconfigured: fields are " + "${fieldNames.joinToString()}, factory parameters are ${valueParametersNames.joinToString()}}"
-            )
-        }
-
-        inputComponentsRemappers[spec.key] = if (fields.none { it.returnType == EntityId::class.createType() }) {
-            IdentityInputComponentRemapper
-        } else {
-            InputComponentRemapperImpl(
                 factoryMethod,
                 valueParametersToNames,
                 fieldsByName,
@@ -194,38 +145,6 @@ class IdsRemapperImpl : IdsRemapper {
         }
     }
 
-    private interface InputComponentRemapper {
-        fun remap(ic: InputComponent<*>, ids: (PredictedEntityId) -> AuthoritativeEntityId?): InputComponent<*>
-    }
-
-    private class InputComponentRemapperImpl<C : InputComponent<C>>(
-        private val factoryMethod: KCallable<C>,
-        private val valueParametersToNames: Map<KParameter, String?>,
-        private val fieldsByName: Map<String, KProperty1<C, *>>,
-    ) : InputComponentRemapper {
-
-        override fun remap(ic: InputComponent<*>, ids: (PredictedEntityId) -> AuthoritativeEntityId?): InputComponent<*> {
-            val otherParams: Map<KParameter, Any?> = valueParametersToNames.mapValues { (param, name) ->
-                val field = fieldsByName[name]
-                val value = field?.getter?.call(ic)
-                if (value is PredictedEntityId) {
-                    val remapped = ids(value) ?: value // TODO we actually can't just use PredictedEntityId anyway. Need some assertions or fallback to something like blank
-                    logger.trace { "Remapping $value to $remapped" }
-                    remapped
-                } else {
-                    value
-                }
-            }
-            return factoryMethod.callBy(otherParams)
-        }
-    }
-
-    private object IdentityInputComponentRemapper : InputComponentRemapper {
-        override fun remap(ic: InputComponent<*>, ids: (PredictedEntityId) -> AuthoritativeEntityId?): InputComponent<*> {
-            return ic
-        }
-    }
-
     interface EffectRemapper {
         fun remap(e: CottaEffect, ids: (PredictedEntityId) -> AuthoritativeEntityId?): CottaEffect
     }
@@ -268,12 +187,6 @@ class IdsRemapperImpl : IdsRemapper {
         val kClass = obj::class
         val registeredClass = effectsKeyByClass.keys.first { it.isSuperclassOf(kClass) }
         return effectsKeyByClass[registeredClass]
-            ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
-    }
-
-    private fun getInputComponentKey(kClass: KClass<out InputComponent<*>>): ComponentKey {
-        val registeredClass = inputComponentsKeyByClass.keys.first { it.isSuperclassOf(kClass) }
-        return inputComponentsKeyByClass[registeredClass]
             ?: throw java.lang.IllegalArgumentException("Unexpected type ${kClass.qualifiedName}")
     }
 }

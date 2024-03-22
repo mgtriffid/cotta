@@ -295,7 +295,6 @@ private fun BytesEntityRecipe.toDto(): BytesEntityRecipeDto {
     ret.entityId = entityId.toDto()
     ret.ownedBy = ownedBy.toDto()
     ret.components = ArrayList(components.map { it.toDto() })
-    ret.inputComponents = ArrayList(inputComponents.map { it.key })
     return ret
 }
 
@@ -335,7 +334,6 @@ fun BytesEntityRecipeDto.toRecipe(): BytesEntityRecipe {
         entityId.toEntityId(),
         ownedBy.toOwnedBy(),
         components.map { it.toRecipe() },
-        inputComponents.map(::ShortComponentKey)
     )
 }
 

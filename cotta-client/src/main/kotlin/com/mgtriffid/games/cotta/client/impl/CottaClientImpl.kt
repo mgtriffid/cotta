@@ -107,8 +107,6 @@ class CottaClientImpl @Inject constructor(
 
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick
-        val createdEntities = predictedCreatedEntitiesRegistry.latest()
-        network.send(createdEntities, getCurrentTick())
         network.send(playerInputs.get(getCurrentTick() - 1), getCurrentTick() - 1)
     }
 
@@ -118,10 +116,6 @@ class CottaClientImpl @Inject constructor(
         val playerId = localPlayer.playerId
         val localEntities = getEntitiesOwnedByPlayer(playerId)
         logger.debug { "Found ${localEntities.size} entities owned by player $playerId" }
-        val localEntitiesWithInputComponents = localEntities.filter {
-            it.hasInputComponents()
-        }
-        logger.debug { "Found ${localEntitiesWithInputComponents.size} entities with input components" }
         playerInputs.collect()
     }
 

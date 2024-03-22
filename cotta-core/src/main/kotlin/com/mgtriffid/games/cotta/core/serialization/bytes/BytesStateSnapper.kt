@@ -7,7 +7,6 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
@@ -152,9 +151,6 @@ class BytesStateSnapper @Inject constructor(
     private fun unpackEntityRecipe(entities: Entities, recipe: BytesEntityRecipe) {
         val entity = entities.create(recipe.entityId, recipe.ownedBy)
         recipe.components.forEach { componentRecipe -> entity.addComponent(unpackComponentRecipe(componentRecipe)) }
-        recipe.inputComponents.forEach { inputComponent -> entity.addInputComponent(
-            generatedComponentRegistry.getInputComponentClassByKey(inputComponent)
-        ) }
     }
 
     private fun unpackComponentRecipe(componentRecipe: BytesComponentRecipe): Component<*> {
@@ -176,7 +172,6 @@ class BytesStateSnapper @Inject constructor(
             entityId = entity.id,
             ownedBy = entity.ownedBy,
             components = entity.components().map(::packComponent),
-            inputComponents = entity.inputComponents().map(::getInputComponentKey)
         )
     }
 
@@ -198,20 +193,6 @@ class BytesStateSnapper @Inject constructor(
                 output.toBytes()
             }
         )
-    }
-
-    private fun packInputComponent(inputComponent: Class<out InputComponent<*>>): BytesInputComponentRecipe {
-        return BytesInputComponentRecipe(
-            data = kryo.run {
-                val output = Output(1024)
-                writeClassAndObject(output, inputComponent)
-                output.toBytes()
-            }
-        )
-    }
-
-    private fun getInputComponentKey(inputComponent: KClass<out InputComponent<*>>): ShortComponentKey {
-        return generatedComponentRegistry.getInputComponentKey(inputComponent)
     }
 
     private fun getKey(component: Component<*>): ShortComponentKey {

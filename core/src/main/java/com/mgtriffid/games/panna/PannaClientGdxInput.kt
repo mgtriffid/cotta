@@ -4,18 +4,15 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.MathUtils.atan2Deg360
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.gdx.CottaClientGdxInput
 import com.mgtriffid.games.panna.shared.PannaPlayerInput
+import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_LEFT
+import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_NONE
+import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_PISTOL
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_RAILGUN
-import com.mgtriffid.games.panna.shared.game.components.input.*
-import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.IDLE
-import com.mgtriffid.games.panna.shared.game.components.input.JoinBattleMetaEntityInputComponent.Companion.JOIN_BATTLE
 import mu.KotlinLogging
-import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 
@@ -25,57 +22,6 @@ class PannaClientGdxInput(
 ) : CottaClientGdxInput {
     var mayJoin = false
     private val storage = Storage()
-
-    /**
-     * Called for each Entity that has ownedBy == current player AND has some InputComponent.
-     */
-    override fun <T : InputComponent<T>> input(
-        entity: Entity,
-        clazz: KClass<T>
-    ): T {
-        when (clazz) {
-            // GROOM
-            JoinBattleMetaEntityInputComponent::class -> {
-                logger.debug { "Looking for JoinBattleMetaEntityInputComponent" }
-                logger.debug { "mayJoin=$mayJoin" }
-                return if (mayJoin) {
-                    logger.debug { "storage.joinPressed=${storage.joinPressed}" }
-                    if (storage.joinPressed) {
-                        mayJoin = false
-                        createJoinBattleMetaEntityInputComponent(JOIN_BATTLE) as T
-                    } else {
-                        createJoinBattleMetaEntityInputComponent(IDLE) as T
-                    }
-                } else {
-                    // TODO allow to assume blank
-                    createJoinBattleMetaEntityInputComponent(IDLE) as T
-                }.also {
-                    logger.trace { "Prepared ${JoinBattleMetaEntityInputComponent::class.simpleName} $it" }
-                }
-            }
-
-            CharacterInputComponent::class -> {
-                return createCharacterInputComponent(
-                    when {
-                        storage.leftPressed -> WALKING_DIRECTION_LEFT
-                        storage.rightPressed -> WALKING_DIRECTION_RIGHT
-                        else -> WALKING_DIRECTION_NONE
-                    }.also { logger.trace { "WalkingInputComponent created; direction == $it" } },
-                    storage.jumpPressed,
-                    storage.lookAt,
-                    storage.switchWeapon
-                ) as T
-            }
-
-            ShootInputComponent::class -> {
-                logger.trace { "Providing ${ShootInputComponent::class.simpleName}" }
-                return createShootInputComponent(
-                    storage.shootPressed
-                ) as T
-            }
-        }
-        throw IllegalArgumentException() // TODO write a reasonable "unregistered component exception"
-    }
 
     override fun input(): PlayerInput {
         return PannaPlayerInput(

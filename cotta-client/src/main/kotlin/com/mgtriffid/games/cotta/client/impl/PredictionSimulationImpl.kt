@@ -4,9 +4,7 @@ import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesImpl
-import com.mgtriffid.games.cotta.core.input.ClientInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
@@ -25,7 +23,6 @@ class PredictionSimulationImpl @Inject constructor(
     @Named("prediction") private val tickProvider: TickProvider,
     @Named("localInput") private val localInputTickProvider: TickProvider,
     private val localPlayer: LocalPlayer,
-    private val idMappings: AuthoritativeToPredictedEntityIdMappings
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 

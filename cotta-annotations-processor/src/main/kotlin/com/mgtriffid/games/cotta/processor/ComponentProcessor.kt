@@ -10,7 +10,6 @@ import com.mgtriffid.games.cotta.core.codegen.Constants.FACTORY_METHOD_PREFIX
 import com.mgtriffid.games.cotta.core.codegen.Constants.GET_COMPONENTS_METHOD
 import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
 import com.mgtriffid.games.cotta.core.entities.Component
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import com.mgtriffid.games.cotta.core.entities.impl.ComponentInternal
 import com.squareup.kotlinpoet.ClassName
@@ -55,7 +54,6 @@ class ComponentProcessor(
                         )
                 }
             }
-            .filter { it.superTypes.none { superType -> superType.resolve().declaration.qualifiedName?.asString() == InputComponent::class.qualifiedName } }
             .filter { it.packageName.asString().startsWith(game.packageName.asString()) }.toList()
     }
 

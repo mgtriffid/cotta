@@ -1,10 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaGame
-import com.mgtriffid.games.cotta.core.effects.CottaEffect
-import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
@@ -31,7 +28,6 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     private val tickProvider: TickProvider,
     @Named("simulation") private val state: CottaState,
     private val serverToClientDataDispatcher: ServerToClientDataDispatcher,
-    private val entitiesCreatedOnClientsRegistry: EntitiesCreatedOnClientsRegistry,
     private val serverSimulation: ServerSimulation,
     private val serverSimulationInputProvider: ServerSimulationInputProvider
 ): CottaGameInstance {
@@ -71,7 +67,6 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     private fun fetchInput(): SimulationInput {
         serverSimulationInputProvider.fetch()
         val delta = serverSimulationInputProvider.getDelta()
-        entitiesCreatedOnClientsRegistry.populate(delta.createdEntities)
         val intents = network.drainEnterGameIntents() // TODO move into delta, for it's used to perform simulation
         intents.forEach { (connectionId, intent) ->
             registerPlayer(connectionId, intent)

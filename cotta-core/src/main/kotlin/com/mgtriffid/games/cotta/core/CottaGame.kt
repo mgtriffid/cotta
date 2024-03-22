@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.core
 
 import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.InputComponent
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.input.PlayerInput

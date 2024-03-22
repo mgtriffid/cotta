@@ -10,12 +10,12 @@ import com.mgtriffid.games.panna.screens.game.graphics.textures.LeftRightRegions
 import com.mgtriffid.games.panna.shared.game.components.HealthComponent
 import com.mgtriffid.games.panna.shared.game.components.JumpingComponent
 import com.mgtriffid.games.panna.shared.game.components.LookingAtComponent
+import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_LEFT
+import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_NONE
+import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_PISTOL
 import com.mgtriffid.games.panna.shared.game.components.WEAPON_RAILGUN
 import com.mgtriffid.games.panna.shared.game.components.WeaponEquippedComponent
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_LEFT
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_NONE
-import com.mgtriffid.games.panna.shared.game.components.input.WALKING_DIRECTION_RIGHT
 import com.mgtriffid.games.panna.shared.game.components.physics.VelocityComponent
 
 class DudeActor(
@@ -117,7 +117,7 @@ class DudeActor(
     private sealed interface WalkingState {
         fun update(walkingDirection: Byte): WalkingState
 
-        object Standing : WalkingState {
+        data object Standing : WalkingState {
             override fun update(walkingDirection: Byte): WalkingState {
                 return when (walkingDirection) {
                     WALKING_DIRECTION_NONE -> this

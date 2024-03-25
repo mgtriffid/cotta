@@ -10,7 +10,6 @@ import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.server.ServerDelta
 import com.mgtriffid.games.cotta.server.ServerSimulationInputProvider
@@ -87,25 +86,6 @@ class ServerSimulationInputProviderImpl<
             }
             val input = inputSerialization.deserializeInput(dto.payload)
             getBuffer(playerId).storeInput2(dto.tick, input)
-        }
-
-        val rawCreatedEntitiesDtos = networkTransport.drainCreatedEntities()
-        rawCreatedEntitiesDtos.forEach { (connectionId, dto) ->
-            val playerId = clientsGhosts.playerByConnection[connectionId]
-            if (playerId == null) {
-                logger.warn { "Got input from unknown connection $connectionId" }
-                return@forEach
-            }
-            val createdEntitiesRecipe =
-                snapsSerialization.deserializeEntityCreationTraces(dto.payload)
-            val createdEntities: List<Pair<CottaTrace, PredictedEntityId>> =
-                createdEntitiesRecipe.map { (trace, entityId) ->
-                    Pair(
-                        stateSnapper.unpackTrace(trace),
-                        entityId as PredictedEntityId
-                    )
-                }
-            getBuffer(playerId).storeCreatedEntities(dto.tick, createdEntities)
         }
     }
 

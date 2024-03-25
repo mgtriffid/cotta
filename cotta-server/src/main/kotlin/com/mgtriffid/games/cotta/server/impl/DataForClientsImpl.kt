@@ -11,8 +11,6 @@ import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreatedEntities
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.Players
 import com.mgtriffid.games.cotta.server.PredictedToAuthoritativeIdMappings
@@ -23,7 +21,6 @@ data class DataForClientsImpl @Inject constructor(
     private val effectsHistory: EffectsHistory,
     private val simulationInputHolder: SimulationInputHolder,
     @Named("simulation") private val state: CottaState,
-    private val createdEntities: CreatedEntities,
     private val players: Players,
     private val playersSawTicks: PlayersSawTicks,
     private val predictedToAuthoritativeIdMappings: PredictedToAuthoritativeIdMappings,
@@ -38,10 +35,6 @@ data class DataForClientsImpl @Inject constructor(
 
     override fun entities(tick: Long): Entities {
         return state.entities(tick)
-    }
-
-    override fun createdEntities(tick: Long): List<Pair<CottaTrace, EntityId>> {
-        return createdEntities.forTick(tick)
     }
 
     override fun confirmedEntities(tick: Long): List<Pair<PredictedEntityId, AuthoritativeEntityId>> {

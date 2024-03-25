@@ -1,15 +1,12 @@
-package com.mgtriffid.games.cotta.server.impl
+package com.mgtriffid.games.cotta.core.simulation.invokers.context.impl
 
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
 import jakarta.inject.Inject
 import jakarta.inject.Named
-import mu.KotlinLogging
 
-private val logger = KotlinLogging.logger {}
-
-class CreateAndRecordCreateEntityStrategy @Inject constructor(
+class SimpleCreateEntityStrategy @Inject constructor(
     @Named("latest") private val entities: Entities
 ) : CreateEntityStrategy {
     // TODO introduce concept of _circumstances_.

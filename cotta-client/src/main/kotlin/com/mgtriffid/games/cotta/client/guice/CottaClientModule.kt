@@ -44,11 +44,8 @@ import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EntityProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingEffectProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingInputProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
-import com.mgtriffid.games.cotta.core.tracing.Traces
-import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaTransportFactory
 
@@ -105,33 +102,21 @@ class CottaClientModule(
         bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(Entities::class.java).annotatedWith(Names.named("latest")).to(LatestEntities::class.java)
-        bind(TracingInputProcessingContext::class.java).to(InputProcessingContextImpl::class.java)
-            .`in`(Scopes.SINGLETON)
         bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(TracingEffectProcessingContext::class.java)
+        bind(EffectProcessingContext::class.java)
             .annotatedWith(Names.named("lagCompensated"))
-            .to(LagCompensatingTracingEffectProcessingContext::class.java)
+            .to(LagCompensatingEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(TracingEffectProcessingContext::class.java)
+        bind(EffectProcessingContext::class.java)
             .annotatedWith(Names.named("simple"))
-            .to(SimpleTracingEffectProcessingContext::class.java)
+            .to(SimpleEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
         bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(Traces::class.java).annotatedWith(Names.named("prediction")).to(TracesImpl::class.java)
-            .`in`(Scopes.SINGLETON)
 
-        bind(CreateEntityStrategy::class.java).annotatedWith(Names.named("effectProcessing"))
-            .to(UseIdFromServerCreateEntityStrategy::class.java).`in`(Scopes.SINGLETON)
-        bind(ServerCreatedEntitiesRegistry::class.java).`in`(Scopes.SINGLETON)
         bind(InputProcessing::class.java).toInstance(game.inputProcessing)
 
         bind(PredictionSimulation::class.java).to(PredictionSimulationImpl::class.java).`in`(Scopes.SINGLETON)
         bind(CottaState::class.java).annotatedWith(Names.named("prediction")).to(CottaStateImpl::class.java)
-            .`in`(Scopes.SINGLETON)
-        bind(TracingInputProcessingContext::class.java)
-            .annotatedWith(Names.named("prediction"))
-            .to(PredictionInputProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
         val predictionTickProvider = AtomicLongTickProvider()
         bind(TickProvider::class.java)
@@ -151,18 +136,19 @@ class CottaClientModule(
         bind(PredictionEntityProcessingSystemInvoker::class.java)
             .to(PredictionEntityProcessingSystemInvokerImpl::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(TracingEffectProcessingContext::class.java)
+        bind(EffectProcessingContext::class.java)
             .annotatedWith(Names.named("prediction"))
             .to(PredictionTracingEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
 
         bind(LocalPlayerInputs::class.java).to(LocalPlayerInputsImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(CreateEntityStrategy::class.java)
+            .annotatedWith(Names.named("effectProcessing"))
+            .to(SimpleCreateEntityStrategy::class.java)
 
         bind(CreateEntityStrategy::class.java)
             .annotatedWith(Names.named("prediction"))
             .to(PredictionCreateEntityStrategy::class.java)
-            .`in`(Scopes.SINGLETON)
-        bind(PredictedCreatedEntitiesRegistry::class.java).to(PredictedCreatedEntitiesRegistryImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(PredictedEntityIdGenerator::class.java).to(PredictedEntityIdGeneratorImpl::class.java)
             .`in`(Scopes.SINGLETON)
@@ -181,7 +167,6 @@ class CottaClientModule(
             ClientIncomingDataBuffer<
                 BytesStateRecipe,
                 BytesDeltaRecipe,
-                BytesCreatedEntitiesWithTracesRecipe,
                 BytesMetaEntitiesDeltaRecipe
                 >>() {})
             .toInstance(ClientIncomingDataBuffer())

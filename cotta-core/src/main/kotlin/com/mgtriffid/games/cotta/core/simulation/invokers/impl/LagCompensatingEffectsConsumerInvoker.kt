@@ -5,11 +5,9 @@ import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBus
 import com.mgtriffid.games.cotta.core.simulation.invokers.SawTickHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.TracingEffectProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.systems.LagCompensatedEffectsConsumerSystem
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
-import com.mgtriffid.games.cotta.core.tracing.Traces
 import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -21,8 +19,7 @@ private val logger = KotlinLogging.logger {}
 class LagCompensatingEffectsConsumerInvoker @Inject constructor(
     @Named("historical") private val effectBus: LagCompensatingEffectBus,
     private val sawTickHolder: SawTickHolder,
-    @Named("lagCompensated") private val context: TracingEffectProcessingContext,
-    private val traces: Traces,
+    @Named("lagCompensated") private val context: EffectProcessingContext,
     private val playersSawTicks: PlayersSawTicks
 ) : SystemInvoker<EffectsConsumerSystem<*>> {
     override fun invoke(system: EffectsConsumerSystem<*>) {
@@ -46,14 +43,8 @@ class LagCompensatingEffectsConsumerInvoker @Inject constructor(
             } else {
                 sawTickHolder.tick = effectBus.getTickForEffect(effect)
             }
-            context.setTrace(
-                traces.get(effect)
-                    ?.plus(TraceElement.EffectTraceElement(effect))
-                    ?: CottaTrace.from(TraceElement.EffectTraceElement(effect))
-            )
             system.handle(e, context)
 
-            context.setTrace(null)
             sawTickHolder.tick = null
         }
     }

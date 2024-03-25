@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.*
-import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.*
@@ -23,7 +22,6 @@ class CottaClientImpl @Inject constructor(
     private val simulations: Simulations,
     private val predictionSimulation: PredictionSimulation,
     private val tickProvider: TickProvider,
-    private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider
@@ -113,17 +111,8 @@ class CottaClientImpl @Inject constructor(
     // called before advancing tick
     private fun processLocalInput() {
         logger.debug { "Processing input" }
-        val playerId = localPlayer.playerId
-        val localEntities = getEntitiesOwnedByPlayer(playerId)
-        logger.debug { "Found ${localEntities.size} entities owned by player $playerId" }
         playerInputs.collect()
     }
-
-    // GROOM rename
-    private fun getEntitiesOwnedByPlayer(playerId: PlayerId) =
-        state.entities(atTick = getCurrentTick()).dynamic().filter {
-            it.ownedBy == Entity.OwnedBy.Player(playerId)
-        } + predictionSimulation.getLocalPredictedEntities()
 
     sealed class ClientState {
         data object Initial : ClientState()

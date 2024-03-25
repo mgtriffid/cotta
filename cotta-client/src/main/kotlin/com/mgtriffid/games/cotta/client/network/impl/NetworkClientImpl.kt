@@ -8,7 +8,6 @@ import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
@@ -20,9 +19,7 @@ import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto2
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import jakarta.inject.Inject
@@ -38,7 +35,7 @@ class NetworkClientImpl<
     MEDR: MetaEntitiesDeltaRecipe
     > @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
-    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, CEWTR, MEDR>,
+    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, MEDR>,
     private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
     private val inputSerialization: InputSerialization<IR>,
     private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
@@ -84,24 +81,9 @@ class NetworkClientImpl<
                     snapsSerialization.deserializePlayersSawTicks(it.payload)
                 )
 
-                KindOfData.CREATED_ENTITIES_V2 -> incomingDataBuffer.storeCreatedEntities(
-                    it.tick,
-                    snapsSerialization.deserializeEntityCreationTracesV2(it.payload) as CEWTR
-                )
-
                 null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
             }
         }
-    }
-
-    override fun send(createdEntities: List<Pair<CottaTrace, EntityId>>, tick: Long) {
-        val createdEntitiesRecipe = createdEntities.map { (trace, id) ->
-            Pair(stateSnapper.snapTrace(trace), id)
-        }
-        val createdEntitiesDto = ClientToServerCreatedPredictedEntitiesDto()
-        createdEntitiesDto.tick = tick
-        createdEntitiesDto.payload = snapsSerialization.serializeEntityCreationTraces(createdEntitiesRecipe)
-        networkTransport.send(createdEntitiesDto)
     }
 
     override fun send(input: PlayerInput, currentTick: Long) {
@@ -131,10 +113,6 @@ class NetworkClientImpl<
                     return incomingDataBuffer.playersSawTicks[tick]!!
                 }
             },
-            authoritativeToPredictedEntities = incomingDataBuffer.createdEntities[tick + 1]!!.mappedPredictedIds,
-            tracesOfCreatedEntities = incomingDataBuffer.createdEntities[tick + 1]!!.traces.map { (traceRecipe, entityId) ->
-                Pair(stateSnapper.unpackTrace(traceRecipe), entityId)
-            }
         )
     } else {
         Delta.Absent
@@ -184,7 +162,6 @@ class NetworkClientImpl<
         return incomingDataBuffer.deltas.containsKey(tick).also { logger.debug { "Delta present for tick $tick: $it" } }
             && incomingDataBuffer.inputs2.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
             && incomingDataBuffer.playersSawTicks.containsKey(tick).also { logger.debug { "sawTicks present for tick $tick: $it" } }
-            && incomingDataBuffer.createdEntities.containsKey(tick).also { logger.debug { "createEntities present for tick $tick: $it" } }
             && incomingDataBuffer.playersDeltas.containsKey(tick).also { logger.debug { "playersDelta present for tick $tick: $it" } }
     }
 }

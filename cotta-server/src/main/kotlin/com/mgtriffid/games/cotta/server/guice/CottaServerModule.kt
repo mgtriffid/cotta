@@ -33,13 +33,9 @@ import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.*
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.CreatedEntitiesImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.EntityProcessingContextImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.InputProcessingContextImpl
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompensatingTracingEffectProcessingContext
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.SimpleTracingEffectProcessingContext
-import com.mgtriffid.games.cotta.core.tracing.Traces
-import com.mgtriffid.games.cotta.core.tracing.impl.TracesImpl
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompensatingEffectProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.SimpleEffectProcessingContext
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetworkTransport
 import com.mgtriffid.games.cotta.server.*
@@ -81,20 +77,15 @@ class CottaServerModule(
                 .`in`(Scopes.SINGLETON)
             bind(Entities::class.java).annotatedWith(named("latest")).to(LatestEntities::class.java)
 
-            bind(TracingInputProcessingContext::class.java).to(InputProcessingContextImpl::class.java)
-                .`in`(Scopes.SINGLETON)
             bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
             bind(EffectProcessingContext::class.java).annotatedWith(named("lagCompensated"))
-                .to(LagCompensatingTracingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
-            bind(TracingEffectProcessingContext::class.java).annotatedWith(named("lagCompensated"))
-                .to(LagCompensatingTracingEffectProcessingContext::class.java)
-            bind(TracingEffectProcessingContext::class.java).annotatedWith(named("simple")).to(
-                SimpleTracingEffectProcessingContext::class.java
+                .to(LagCompensatingEffectProcessingContext::class.java).`in`(Scopes.SINGLETON)
+            bind(EffectProcessingContext::class.java).annotatedWith(named("simple")).to(
+                SimpleEffectProcessingContext::class.java
             ).`in`(Scopes.SINGLETON)
             bind(CreateEntityStrategy::class.java).annotatedWith(named("effectProcessing")).to(
                 CreateAndRecordCreateEntityStrategy::class.java
             ).`in`(Scopes.SINGLETON)
-            bind(CreatedEntities::class.java).to(CreatedEntitiesImpl::class.java).`in`(Scopes.SINGLETON)
             bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
             val idsRemapper = IdsRemapperImpl()
             install(BytesSerializationModule(idsRemapper, game.playerInputKClass))
@@ -123,11 +114,8 @@ class CottaServerModule(
 
             bind(object : TypeLiteral<ClientsGhosts<BytesInputRecipe>>() {}).`in`(Scopes.SINGLETON)
             bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(Traces::class.java).to(TracesImpl::class.java).`in`(Scopes.SINGLETON)
 
             bind(PredictedToAuthoritativeIdMappings::class.java).to(PredictedToAuthoritativeIdMappingsImpl::class.java)
-                .`in`(Scopes.SINGLETON)
-            bind(EntitiesCreatedOnClientsRegistry::class.java).to(EntitiesCreatedOnClientsRegistryImpl::class.java)
                 .`in`(Scopes.SINGLETON)
         }
     }

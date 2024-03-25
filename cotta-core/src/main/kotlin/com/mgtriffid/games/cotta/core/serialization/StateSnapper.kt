@@ -5,7 +5,6 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 
 interface StateSnapper<
     SR: StateRecipe,
@@ -22,10 +21,4 @@ interface StateSnapper<
 //        removedEntitiesIds: Set<EntityId>
     ): MEDR
     fun unpackPlayersDeltaRecipe(recipe: MEDR): List<PlayerId>
-    fun snapTrace(trace: CottaTrace): TraceRecipe
-    fun unpackTrace(trace: TraceRecipe): CottaTrace
-    fun snapCreatedEntitiesWithTraces(
-        createdEntities: List<Pair<CottaTrace, EntityId>>,
-        associate: Map<AuthoritativeEntityId, PredictedEntityId>
-    ): CEWTR
 }

@@ -27,7 +27,6 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntiti
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceElementRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceRecipe
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -85,26 +84,6 @@ class BytesStateSnapper @Inject constructor(
             },
             addedComponents = addedComponents.map { packComponent(it) },
             removedComponents = removedComponents,
-        )
-    }
-
-    override fun snapTrace(trace: CottaTrace): BytesTraceRecipe {
-        return BytesTraceRecipe(trace.elements.map { it.toRecipe() })
-    }
-
-    // GROOM this is sooo type-unsafe because imma get rid of MapsStateSnapper and then groom
-    override fun unpackTrace(trace: TraceRecipe): CottaTrace {
-        trace as BytesTraceRecipe
-        return CottaTrace(trace.elements.map { it.toTraceElement() })
-    }
-
-    override fun snapCreatedEntitiesWithTraces(
-        createdEntities: List<Pair<CottaTrace, EntityId>>,
-        associate: Map<AuthoritativeEntityId, PredictedEntityId>
-    ): BytesCreatedEntitiesWithTracesRecipe {
-        return BytesCreatedEntitiesWithTracesRecipe(
-            traces = createdEntities.map { (trace, entityId) -> Pair(snapTrace(trace), entityId) },
-            mappedPredictedIds = associate
         )
     }
 

@@ -2,9 +2,7 @@ package com.mgtriffid.games.cotta.client.invokers.impl
 
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
-import com.mgtriffid.games.cotta.core.tracing.CottaTrace
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -13,22 +11,10 @@ private val logger = KotlinLogging.logger {}
 
 class PredictionCreateEntityStrategy @Inject constructor(
     @Named("prediction") private val entities: Entities,
-    private val registry: PredictedCreatedEntitiesRegistry,
-    @Named("prediction") private val tickProvider: TickProvider,
-    @Named("localInput") private val localInputTickProvider: TickProvider,
     private val predictedEntityIdGenerator: PredictedEntityIdGenerator
 ): CreateEntityStrategy {
 
-    override fun createEntity(ownedBy: Entity.OwnedBy, trace: CottaTrace): Entity {
-        val entityId = registry.find(trace, localInputTickProvider.tick)
-        return if (entityId != null) {
-            logger.debug { "Found entityId=$entityId for trace $trace, using it" }
-            entities.create(entityId, ownedBy)
-        } else {
-            logger.debug { "No entityId found for trace $trace, generating a new one" }
-            val newEntity = entities.create(predictedEntityIdGenerator.getId(), ownedBy)
-            registry.record(trace, localInputTickProvider.tick, newEntity.id)
-            newEntity
-        }
+    override fun createEntity(ownedBy: Entity.OwnedBy): Entity {
+        return entities.create(predictedEntityIdGenerator.getId(), ownedBy)
     }
 }

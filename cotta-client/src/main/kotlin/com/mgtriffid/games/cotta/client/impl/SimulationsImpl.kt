@@ -7,11 +7,9 @@ import com.mgtriffid.games.cotta.client.LocalPlayerInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.SimulationDirector
 import com.mgtriffid.games.cotta.client.Simulations
-import com.mgtriffid.games.cotta.client.invokers.impl.PredictedCreatedEntitiesRegistry
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.ServerCreatedEntitiesRegistry
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -20,35 +18,23 @@ private val logger = KotlinLogging.logger {}
 
 class SimulationsImpl @Inject constructor(
     private val game: CottaGame,
-    private val serverCreatedEntitiesRegistry: ServerCreatedEntitiesRegistry,
     private val simulation: AuthoritativeSimulation,
     private val guessedSimulation: GuessedSimulation,
     private val simulationDirector: SimulationDirector,
     private val playerInputs: LocalPlayerInputs,
     @Named("simulation") private val state: CottaState,
     private val tickProvider: TickProvider,
-    private val predictedCreatedEntitiesRegistry: PredictedCreatedEntitiesRegistry,
     private val localPlayer: LocalPlayer,
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val predictionSimulation: PredictionSimulation,
     ): Simulations {
     override fun simulate(delta: Delta.Present) {
         val instructions = simulationDirector.instruct(tickProvider.tick).also { logger.info { "Instructions: $it" } }
-        serverCreatedEntitiesRegistry.data = delta.tracesOfCreatedEntities.toMutableList()
-        fillEntityIdMappings(delta)
-        remapPredictedCreatedEntityTraces()
         // tick is advanced inside;
         simulation.tick(delta.input)
 //        processMetaEntitiesDiff(delta) // TODO maybe playersDiff goes here if even needed
         val lastConfirmedTick = getLastConfirmedTick(delta)
-//        predict(lastConfirmedTick)
-    }
-
-    private fun fillEntityIdMappings(delta: Delta.Present) {
-        delta.authoritativeToPredictedEntities.forEach { (authoritativeId, predictedId) ->
-            logger.debug { "Recording mapping $authoritativeId to $predictedId" }
-            authoritativeToPredictedEntityIdMappings[authoritativeId] = predictedId
-        }
+        predict(lastConfirmedTick)
     }
 
     private fun predict(serverSawOurTick: Long) {
@@ -57,12 +43,7 @@ class SimulationsImpl @Inject constructor(
         val unprocessedTicks = playerInputs.all().keys.filter { it > serverSawOurTick }
             .also { logger.info { it.joinToString() } } // TODO explicit sorting
         logger.debug { "Setting initial predictions state with tick ${getCurrentTick()}" }
-        predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)
-    }
-
-    private fun remapPredictedCreatedEntityTraces() {
-        // TODO analyze performance and optimize
-        predictedCreatedEntitiesRegistry.useAuthoritativeEntitiesWherePossible(authoritativeToPredictedEntityIdMappings.all())
+//        predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)
     }
 
     private fun getLastConfirmedTick(delta: Delta.Present) =

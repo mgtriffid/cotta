@@ -6,6 +6,5 @@ public enum KindOfData {
     PLAYER_ID,
     PLAYERS_DELTA,
     INPUT2,
-    CREATED_ENTITIES_V2,
     PLAYERS_SAW_TICKS
 }

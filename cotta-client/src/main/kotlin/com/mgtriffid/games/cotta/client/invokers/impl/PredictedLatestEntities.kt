@@ -24,6 +24,10 @@ class PredictedLatestEntities @Inject constructor(
         return entities().all()
     }
 
+    override fun currentId(): Int {
+        return entities().currentId()
+    }
+
     override fun dynamic(): Collection<Entity> {
         return entities().dynamic()
     }
@@ -38,6 +42,10 @@ class PredictedLatestEntities @Inject constructor(
 
     override fun createStatic(id: EntityId): Entity {
         throw IllegalStateException("Cannot create static entity while running the game")
+    }
+
+    override fun setIdGenerator(idSequence: Int) {
+        entities().setIdGenerator(idSequence)
     }
 
     private fun entities() = state.entities(tickProvider.tick)

@@ -37,6 +37,10 @@ data class DataForClientsImpl @Inject constructor(
         return state.entities(tick)
     }
 
+    override fun idSequence(tick: Long): Int {
+        return state.entities(tick).currentId()
+    }
+
     override fun confirmedEntities(tick: Long): List<Pair<PredictedEntityId, AuthoritativeEntityId>> {
         return predictedToAuthoritativeIdMappings.forTick(tick)
     }

@@ -11,10 +11,12 @@ interface DeltaRecipe {
     val addedEntities : List<EntityRecipe>
     val changedEntities: List<ChangedEntityRecipe>
     val removedEntitiesIds: Set<EntityId>
+    val idSequence: Int
 }
 
 interface StateRecipe {
     val entities : List<EntityRecipe>
+    val idSequence: Int
 }
 
 interface MetaEntitiesDeltaRecipe {

@@ -270,6 +270,7 @@ fun BytesDeltaRecipe.toDto(): BytesDeltaRecipeDto {
     ret.addedEntities = ArrayList(addedEntities.map { it.toDto() })
     ret.changedEntities = ArrayList(changedEntities.map { it.toDto() })
     ret.removedEntitiesIds = ArrayList(removedEntitiesIds.map { it.toDto() })
+    ret.idSequence = idSequence
     return ret
 }
 
@@ -301,6 +302,7 @@ private fun BytesEntityRecipe.toDto(): BytesEntityRecipeDto {
 fun BytesStateRecipe.toDto(): BytesStateRecipeDto {
     val ret = BytesStateRecipeDto()
     ret.entities = ArrayList(entities.map { it.toDto() })
+    ret.idSequence = idSequence
     return ret
 }
 
@@ -325,7 +327,8 @@ fun BytesDeltaRecipeDto.toRecipe(): BytesDeltaRecipe {
     return BytesDeltaRecipe(
         addedEntities.map { it.toRecipe() },
         changedEntities.map { it.toRecipe() },
-        removedEntitiesIds.map { it.toEntityId() }.toSet()
+        removedEntitiesIds.map { it.toEntityId() }.toSet(),
+        idSequence
     )
 }
 
@@ -338,7 +341,8 @@ fun BytesEntityRecipeDto.toRecipe(): BytesEntityRecipe {
 }
 
 fun BytesStateRecipeDto.toRecipe() = BytesStateRecipe(
-    entities = entities.map { it.toRecipe() }
+    entities = entities.map { it.toRecipe() },
+    idSequence = idSequence
 )
 
 fun BytesTraceRecipe.toDto(): BytesCottaTraceDto {

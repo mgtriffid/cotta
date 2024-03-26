@@ -8,4 +8,5 @@ public class BytesDeltaRecipeDto {
     public ArrayList<BytesEntityRecipeDto> addedEntities;
     public ArrayList<BytesChangedEntityRecipeDto> changedEntities;
     public ArrayList<EntityIdDto> removedEntitiesIds;
+    public int idSequence;
 }

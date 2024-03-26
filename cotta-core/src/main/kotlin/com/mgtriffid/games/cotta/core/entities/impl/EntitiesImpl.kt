@@ -20,8 +20,16 @@ class EntitiesImpl(private val componentRegistry: ComponentRegistry) : Entities 
         return EntityImpl(componentRegistry, id, ownedBy).also { dynamic[id] = it }
     }
 
+    override fun currentId(): Int {
+        return idGenerator.get()
+    }
+
     override fun createStatic(id: EntityId): Entity {
         return EntityImpl(componentRegistry, id, Entity.OwnedBy.System).also { static[id] = it }
+    }
+
+    override fun setIdGenerator(idSequence: Int) {
+        idGenerator.set(idSequence)
     }
 
     override fun get(id: EntityId): Entity? {
@@ -42,7 +50,7 @@ class EntitiesImpl(private val componentRegistry: ComponentRegistry) : Entities 
 
     fun deepCopy(): EntitiesImpl {
         val ret = EntitiesImpl(componentRegistry)
-        ret.idGenerator = idGenerator
+        ret.idGenerator = AtomicInteger(idGenerator.get())
         dynamic.forEach { (id: EntityId, entity: Entity) ->
             ret.dynamic[id] = (entity as EntityImpl).deepCopy()
         }

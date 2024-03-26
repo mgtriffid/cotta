@@ -30,7 +30,10 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceRecip
 import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import mu.KotlinLogging
 import kotlin.reflect.KClass
+
+private val logger = KotlinLogging.logger {}
 
 class BytesStateSnapper @Inject constructor(
     @Named("snapper") private val kryo: Kryo,
@@ -42,29 +45,46 @@ class BytesStateSnapper @Inject constructor(
     BytesMetaEntitiesDeltaRecipe
     > {
 
-    override fun snapState(entities: Entities): BytesStateRecipe {
+    // TODO stupid naming
+    override fun snapState(
+        entities: Entities,
+        idSequence: Int
+    ): BytesStateRecipe {
         return BytesStateRecipe(
-            entities.dynamic().map { entity -> packEntity(entity) }
+            entities.dynamic().map { entity -> packEntity(entity) },
+            idSequence = idSequence
         )
     }
 
     override fun snapDelta(prev: Entities, curr: Entities): BytesDeltaRecipe {
-        return snapDelta(prev.dynamic(), curr.dynamic())
+        return snapDelta(prev.dynamic(), curr.dynamic(), curr.currentId())
     }
 
-    private fun snapDelta(prev: Collection<Entity>, curr: Collection<Entity>): BytesDeltaRecipe {
+    private fun snapDelta(
+        prev: Collection<Entity>,
+        curr: Collection<Entity>,
+        idSequence: Int
+    ): BytesDeltaRecipe {
         val removedIds = prev.map { it.id }.toSet() - curr.map { it.id }.toSet()
         val addedEntities = curr.filter { c -> prev.none { p -> p.id == c.id } }
-        val changedEntities = curr.filter { c -> prev.any { p -> p.id == c.id } }
+        val changedEntities =
+            curr.filter { c -> prev.any { p -> p.id == c.id } }
         return BytesDeltaRecipe(
-            addedEntities = addedEntities.map(::packEntity), changedEntities = changedEntities.map {
+            addedEntities = addedEntities.map(::packEntity),
+            changedEntities = changedEntities.map {
                 packEntityDelta(prev = prev.find { p -> it.id == p.id }
-                    ?: throw IllegalStateException("Suddenly prev entity not found but it has to be here"), curr = it)
-            }, removedEntitiesIds = removedIds
+                    ?: throw IllegalStateException("Suddenly prev entity not found but it has to be here"),
+                    curr = it)
+            },
+            removedEntitiesIds = removedIds,
+            idSequence = idSequence
         )
     }
 
-    private fun packEntityDelta(prev: Entity, curr: Entity): BytesChangedEntityRecipe {
+    private fun packEntityDelta(
+        prev: Entity,
+        curr: Entity
+    ): BytesChangedEntityRecipe {
         val prevComponents = prev.components()
         val currComponents = curr.components()
         val removedComponents = prevComponents.map(::getKey).filter { key ->
@@ -73,9 +93,10 @@ class BytesStateSnapper @Inject constructor(
         val addedComponents = currComponents.filter { cc ->
             prevComponents.none { pc -> getKey(cc) == getKey(pc) }
         }
-        val changedComponents: Map<Component<*>, Component<*>> = currComponents.associateWith { cc ->
-            prevComponents.find { pc -> (getKey(pc) == getKey(cc)) && (pc != cc) }
-        }.filterValues { it != null } as Map<Component<*>, Component<*>>
+        val changedComponents: Map<Component<*>, Component<*>> =
+            currComponents.associateWith { cc ->
+                prevComponents.find { pc -> (getKey(pc) == getKey(cc)) && (pc != cc) }
+            }.filterValues { it != null } as Map<Component<*>, Component<*>>
 
         return BytesChangedEntityRecipe(
             entityId = curr.id,
@@ -87,10 +108,15 @@ class BytesStateSnapper @Inject constructor(
         )
     }
 
-    override fun unpackDeltaRecipe(entities: Entities, recipe: BytesDeltaRecipe) {
+    override fun unpackDeltaRecipe(
+        entities: Entities,
+        recipe: BytesDeltaRecipe
+    ) {
         unpackAddedEntities(entities, recipe.addedEntities)
         unpackChangedEntities(entities, recipe.changedEntities)
         recipe.removedEntitiesIds.forEach(entities::remove)
+        entities.setIdGenerator(recipe.idSequence)
+        logger.info { "Id coming from Server with delta is ${recipe.idSequence}" }
     }
 
     override fun snapPlayersDelta(
@@ -105,7 +131,10 @@ class BytesStateSnapper @Inject constructor(
         return recipe.addedPlayers
     }
 
-    private fun unpackChangedEntities(entities: Entities, changedEntities: List<BytesChangedEntityRecipe>) {
+    private fun unpackChangedEntities(
+        entities: Entities,
+        changedEntities: List<BytesChangedEntityRecipe>
+    ) {
         changedEntities.forEach { recipe ->
             val entity = entities.get(recipe.entityId) ?: return@forEach
             recipe.addedComponents.forEach {
@@ -113,23 +142,38 @@ class BytesStateSnapper @Inject constructor(
             }
             recipe.changedComponents.forEach {
                 val component = unpackComponentDeltaRecipe(it)
-                val clazz = generatedComponentRegistry.getDeclaredComponent(component::class)
+                val clazz =
+                    generatedComponentRegistry.getDeclaredComponent(component::class)
                 if (entity.hasComponent(clazz)) {
                     entity.removeComponent(clazz)
                 }
                 entity.addComponent(component)
             }
-            recipe.removedComponents.forEach { entity.removeComponent(getComponentClassByKey(it) as KClass<out Component<*>>) }
+            recipe.removedComponents.forEach {
+                entity.removeComponent(
+                    getComponentClassByKey(it) as KClass<out Component<*>>
+                )
+            }
         }
     }
 
-    private fun unpackAddedEntities(entities: Entities, addedEntities: List<BytesEntityRecipe>) {
+    private fun unpackAddedEntities(
+        entities: Entities,
+        addedEntities: List<BytesEntityRecipe>
+    ) {
         addedEntities.forEach { unpackEntityRecipe(entities, it) }
     }
 
-    private fun unpackEntityRecipe(entities: Entities, recipe: BytesEntityRecipe) {
+    private fun unpackEntityRecipe(
+        entities: Entities,
+        recipe: BytesEntityRecipe
+    ) {
         val entity = entities.create(recipe.entityId, recipe.ownedBy)
-        recipe.components.forEach { componentRecipe -> entity.addComponent(unpackComponentRecipe(componentRecipe)) }
+        recipe.components.forEach { componentRecipe ->
+            entity.addComponent(
+                unpackComponentRecipe(componentRecipe)
+            )
+        }
     }
 
     private fun unpackComponentRecipe(componentRecipe: BytesComponentRecipe): Component<*> {
@@ -142,8 +186,18 @@ class BytesStateSnapper @Inject constructor(
         return kryo.readClassAndObject(input) as Component<*>
     }
 
-    override fun unpackStateRecipe(entities: Entities, recipe: BytesStateRecipe) {
-        recipe.entities.forEach { entityRecipe -> unpackEntityRecipe(entities, entityRecipe) }
+    override fun unpackStateRecipe(
+        entities: Entities,
+        recipe: BytesStateRecipe
+    ) {
+        recipe.entities.forEach { entityRecipe ->
+            unpackEntityRecipe(
+                entities,
+                entityRecipe
+            )
+        }
+        entities.setIdGenerator(recipe.idSequence)
+        logger.info { "Id coming from Server with state is ${recipe.idSequence}" }
     }
 
     private fun packEntity(entity: Entity): BytesEntityRecipe {
@@ -181,6 +235,7 @@ class BytesStateSnapper @Inject constructor(
     private fun getComponentClassByKey(key: ShortComponentKey): KClass<out Component<*>> {
         return generatedComponentRegistry.getComponentClassByKey(key)
     }
+
     private fun packEffect(effect: CottaEffect): BytesEffectRecipe {
         return BytesEffectRecipe(
             data = kryo.run {
@@ -199,8 +254,13 @@ class BytesStateSnapper @Inject constructor(
     private fun TraceElement.toRecipe(): BytesTraceElementRecipe {
         return when (this) {
             is TraceElement.EffectTraceElement -> {
-                BytesTraceElementRecipe.BytesEffectTraceElementRecipe(packEffect(this.effect))
+                BytesTraceElementRecipe.BytesEffectTraceElementRecipe(
+                    packEffect(
+                        this.effect
+                    )
+                )
             }
+
             is TraceElement.EntityProcessingTraceElement -> TODO()
             is TraceElement.InputTraceElement -> {
                 BytesTraceElementRecipe.BytesInputTraceElementRecipe(this.entityId)
@@ -213,6 +273,7 @@ class BytesStateSnapper @Inject constructor(
             is BytesTraceElementRecipe.BytesEffectTraceElementRecipe -> {
                 TraceElement.EffectTraceElement(unpackEffectRecipe(this.effectRecipe))
             }
+
             is BytesTraceElementRecipe.BytesInputTraceElementRecipe -> {
                 TraceElement.InputTraceElement(this.entityId)
             }

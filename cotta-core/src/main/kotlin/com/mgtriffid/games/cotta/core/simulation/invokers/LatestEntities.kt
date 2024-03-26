@@ -20,6 +20,14 @@ class LatestEntities @Inject constructor(
         return entities().get(id)
     }
 
+    override fun currentId(): Int {
+        return entities().currentId()
+    }
+
+    override fun setIdGenerator(idSequence: Int) {
+        entities().setIdGenerator(idSequence)
+    }
+
     override fun all(): Collection<Entity> {
         return entities().all()
     }

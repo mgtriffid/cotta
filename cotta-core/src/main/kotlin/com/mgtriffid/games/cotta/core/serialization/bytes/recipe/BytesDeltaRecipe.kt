@@ -6,5 +6,6 @@ import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 class BytesDeltaRecipe(
     override val addedEntities: List<BytesEntityRecipe>,
     override val changedEntities: List<BytesChangedEntityRecipe>,
-    override val removedEntitiesIds: Set<EntityId>
+    override val removedEntitiesIds: Set<EntityId>,
+    override val idSequence: Int
 ) : DeltaRecipe

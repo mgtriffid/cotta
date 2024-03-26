@@ -51,9 +51,9 @@ class PredictionSimulationImpl @Inject constructor(
         logger.debug { "Running prediction simulation for ticks $ticks" }
         for (tick in ticks) {
             localInputTickProvider.tick = tick
-            logger.info { "Running prediction simulation for tick $tick" }
+            logger.debug { "Running prediction simulation for tick $tick" }
             effectBus.clear()
-            logger.info { "Advancing state: to tick ${tickProvider.tick}" }
+            logger.debug { "Advancing state: to tick ${tickProvider.tick}" }
             state.advance(tickProvider.tick)
             tickProvider.tick++
             inputProcessing.processPlayerInput(localPlayer.playerId, inputs.get(tick), state.entities(tickProvider.tick), effectBus)

@@ -12,7 +12,7 @@ interface StateSnapper<
     CEWTR: CreatedEntitiesWithTracesRecipe,
     MEDR: MetaEntitiesDeltaRecipe
     > {
-    fun snapState(entities: Entities): SR
+    fun snapState(entities: Entities, idSequence: Int): SR
     fun unpackStateRecipe(entities: Entities, recipe: SR)
     fun snapDelta(prev: Entities, curr: Entities): DR
     fun unpackDeltaRecipe(entities: Entities, recipe: DR)

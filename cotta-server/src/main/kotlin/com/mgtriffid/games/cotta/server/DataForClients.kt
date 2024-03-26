@@ -19,4 +19,5 @@ interface DataForClients {
     fun players(): Players
     fun playersSawTicks(): PlayersSawTicks
     fun playerInputs(): Map<PlayerId, PlayerInput>
+    fun idSequence(tick: Long): Int
 }

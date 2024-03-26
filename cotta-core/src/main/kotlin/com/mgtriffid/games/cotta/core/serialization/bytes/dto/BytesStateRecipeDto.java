@@ -4,4 +4,5 @@ import java.util.ArrayList;
 
 public class BytesStateRecipeDto {
     public ArrayList<BytesEntityRecipeDto> entities;
+    public int idSequence;
 }

@@ -87,7 +87,7 @@ class ServerToClientDataDispatcherImpl<
             KindOfData.STATE -> {
                 val dto = ServerToClientDto()
                 dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.STATE
-                dto.payload = snapsSerialization.serializeStateRecipe(stateSnapper.snapState(data.entities(tick)))
+                dto.payload = snapsSerialization.serializeStateRecipe(stateSnapper.snapState(data.entities(tick), data.idSequence(tick)))
                 dto.tick = tick
                 return listOf(dto)
             }

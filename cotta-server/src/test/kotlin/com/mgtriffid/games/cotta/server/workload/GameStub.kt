@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
@@ -42,14 +43,23 @@ class InputProcessingStub : InputProcessing {
         effectBus: EffectBus
     ) {
         input.inputForPlayers().forEach { (playerId, playerInput) ->
-            playerInput as PlayerInputStub
-            val player = entities.all()
-                .filter { it.hasComponent(PlayerControlledStubComponent::class) }
-                .first { it.ownedBy == Entity.OwnedBy.Player(playerId)}
-            player.getComponent(PlayerControlledStubComponent::class).apply {
-                aim = playerInput.aim
-                shoot = playerInput.shoot
-            }
+            processPlayerInput(playerId, playerInput, entities, effectBus)
+        }
+    }
+
+    override fun processPlayerInput(
+        playerId: PlayerId,
+        input: PlayerInput,
+        entities: Entities,
+        effectBus: EffectBus
+    ) {
+        input as PlayerInputStub
+        val player = entities.all()
+            .filter { it.hasComponent(PlayerControlledStubComponent::class) }
+            .first { it.ownedBy == Entity.OwnedBy.Player(playerId) }
+        player.getComponent(PlayerControlledStubComponent::class).apply {
+            aim = input.aim
+            shoot = input.shoot
         }
     }
 }

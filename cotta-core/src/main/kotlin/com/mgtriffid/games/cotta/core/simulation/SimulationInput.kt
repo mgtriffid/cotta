@@ -7,7 +7,7 @@ import com.mgtriffid.games.cotta.core.input.PlayerInput
 interface SimulationInput {
     fun inputForPlayers(): Map<PlayerId, PlayerInput>
 
-    fun nonPlayerInput(): NonPlayerInput
+    fun nonPlayerInput(): NonPlayerInput = NonPlayerInput.Blank
 
     fun playersSawTicks(): Map<PlayerId, Long>
 }

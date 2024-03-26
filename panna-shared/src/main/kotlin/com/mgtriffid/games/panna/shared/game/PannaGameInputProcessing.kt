@@ -5,6 +5,8 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.InputProcessing
+import com.mgtriffid.games.cotta.core.input.NonPlayerInput
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.panna.shared.PannaPlayerInput
 import com.mgtriffid.games.panna.shared.game.components.CharacterInputComponent2
@@ -19,49 +21,40 @@ import kotlin.math.log
 private val logger = KotlinLogging.logger {}
 
 class PannaGameInputProcessing : InputProcessing {
-    override fun process(
-        input: SimulationInput,
+    override fun processPlayerInput(
+        playerId: PlayerId,
+        input: PlayerInput,
         entities: Entities,
         effectBus: EffectBus
     ) {
-        input.inputForPlayers().forEach { (playerId, playerInput) ->
-            playerInput as PannaPlayerInput
-            if (playerInput.joinPressed && !dudeExists(playerId, entities)) {
-                logger.debug { "Creating dude now" }
-                createDude(playerId, entities, effectBus)
-            }
+        input as PannaPlayerInput
+        if (input.joinPressed && !dudeExists(playerId, entities)) {
+            logger.debug { "Creating dude now" }
+            createDude(playerId, entities, effectBus)
         }
-        entities.all()
+        entities.all().filter { entity -> entity.playerId() == playerId }
             .filter { it.hasComponent(SteamManPlayerComponent::class) }
             .forEach { entity ->
                 if (entity.hasComponent(LookingAtComponent::class)) {
-                    val playerInput = input.inputForPlayers()[entity.playerId()] as PannaPlayerInput
-                    entity.getComponent(LookingAtComponent::class).lookAt = playerInput.lookAt
+                    entity.getComponent(LookingAtComponent::class).lookAt = input.lookAt
                 }
                 if (entity.hasComponent(ShootComponent::class)) {
-                    val playerInput = input.inputForPlayers()[entity.playerId()] as PannaPlayerInput
-                    entity.getComponent(ShootComponent::class).isShooting = playerInput.shootPressed
+                    entity.getComponent(ShootComponent::class).isShooting = input.shootPressed
                 }
                 if (entity.hasComponent(CharacterInputComponent2::class)) {
-                    val playerInput = input.inputForPlayers()[entity.playerId()] as PannaPlayerInput
                     entity.getComponent(CharacterInputComponent2::class).apply {
-                        direction = playerInput.walkingDirection
-                        jump = playerInput.jumpPressed
+                        direction = input.walkingDirection
+                        jump = input.jumpPressed
                     }
                 }
                 if (entity.hasComponent(WeaponEquippedComponent::class)) {
-                    val playerInput =
-                        input.inputForPlayers()[entity.playerId()] as PannaPlayerInput
                     val weaponEquipped =
                         entity.getComponent(WeaponEquippedComponent::class)
-                    if (playerInput.switchWeapon != 0.toByte() && playerInput.switchWeapon != weaponEquipped.equipped) {
-                        weaponEquipped.wantToEquip = playerInput.switchWeapon
+                    if (input.switchWeapon != 0.toByte() && input.switchWeapon != weaponEquipped.equipped) {
+                        weaponEquipped.wantToEquip = input.switchWeapon
                     }
                 }
             }
-        input.inputForPlayers().forEach { (playerId, playerInput) ->
-            logger.info { "Processing input for player $playerId: $playerInput"}
-        }
     }
 
     private fun dudeExists(playerId: PlayerId, entities: Entities) =
@@ -74,5 +67,5 @@ class PannaGameInputProcessing : InputProcessing {
         effectBus.publisher().fire(createJoinBattleEffect(playerId))
     }
 
-    private fun Entity.playerId() = (ownedBy as Entity.OwnedBy.Player).playerId
+    private fun Entity.playerId() = (ownedBy as? Entity.OwnedBy.Player)?.playerId
 }

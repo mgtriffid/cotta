@@ -6,7 +6,9 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
+import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.InputProcessing
+import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import kotlin.reflect.KClass
 
@@ -26,6 +28,14 @@ object GameStub : CottaGame {
     override val inputProcessing = object : InputProcessing {
         override fun process(
             input: SimulationInput,
+            entities: Entities,
+            effectBus: EffectBus
+        ) {
+        }
+
+        override fun processPlayerInput(
+            playerId: PlayerId,
+            input: PlayerInput,
             entities: Entities,
             effectBus: EffectBus
         ) {

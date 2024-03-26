@@ -50,22 +50,25 @@ class DrawableStateProviderImpl @Inject constructor(
         val authoritativePrevious = this.state.entities(this.simulationTickProvider.tick - 1).all().onlyNeeded()
         val predicted = interpolate(predictedPrevious, predictedCurrent, alpha, components.toList())
         val authoritative = interpolate(authoritativePrevious, authoritativeCurrent, alpha, components.toList())
+        val predictedIds = predicted.map { it.id }
         val entities =
-            (predicted + authoritative.filter { authoritativeToPredictedEntityIdMappings[it.id] == null }).also {
-                logger.trace { "Entities found: ${it.map { it.id }}" }
+            (predicted + authoritative.filter {
+                it.id !in predictedIds
+            }).also {
+                logger.info { "Entities found: ${it.map { it.id }}" }
             }
 
         // TODO consider possible edge cases when the number of ticks we're ahead of server changes due to changing
         //  network conditions.
         val effects = if (lastTickEffectsWereReturned < simulationTickProvider.tick) {
-            logger.debug { "Simulation tick: ${simulationTickProvider.tick}" }
-            logger.debug { "Prediction tick: ${predictionTickProvider.tick}" }
-            logger.debug { "lastMyInputProcessedByServerSimulation + 1: ${lastMyInputProcessedByServerSimulation + 1}" }
+            logger.info { "Simulation tick: ${simulationTickProvider.tick}" }
+            logger.info { "Prediction tick: ${predictionTickProvider.tick}" }
+            logger.info { "lastMyInputProcessedByServerSimulation + 1: ${lastMyInputProcessedByServerSimulation + 1}" }
             lastTickEffectsWereReturned = simulationTickProvider.tick
             val predicted = predictionSimulation.effectBus.effects().map(::DrawableEffect)
             // TODO This is WAY too hard to understand. Consider making prediction simulation ahead of real, not in-sync.
             val previouslyPredictedEffects = previouslyPredicted[lastMyInputProcessedByServerSimulation + 1]
-            logger.debug { "previouslyPredictedEffects: $previouslyPredictedEffects" }
+            logger.info { "previouslyPredictedEffects: $previouslyPredictedEffects" }
             val real = effectBus.effects().map(::DrawableEffect)
             logger.debug { "Real effects: $real" }
             val effects = object : DrawableEffects {

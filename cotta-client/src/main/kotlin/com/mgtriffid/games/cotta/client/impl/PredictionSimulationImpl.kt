@@ -1,10 +1,15 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
+import com.mgtriffid.games.cotta.client.LocalPlayerInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesImpl
+import com.mgtriffid.games.cotta.core.input.InputProcessing
+import com.mgtriffid.games.cotta.core.input.NonPlayerInput
+import com.mgtriffid.games.cotta.core.input.PlayerInput
+import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
@@ -22,6 +27,8 @@ class PredictionSimulationImpl @Inject constructor(
     @Named("prediction") override val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
     @Named("localInput") private val localInputTickProvider: TickProvider,
+    private val inputs: LocalPlayerInputs,
+    private val inputProcessing: InputProcessing,
     private val localPlayer: LocalPlayer,
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
@@ -44,12 +51,12 @@ class PredictionSimulationImpl @Inject constructor(
         logger.debug { "Running prediction simulation for ticks $ticks" }
         for (tick in ticks) {
             localInputTickProvider.tick = tick
-            logger.debug { "Running prediction simulation for tick $tick" }
+            logger.info { "Running prediction simulation for tick $tick" }
             effectBus.clear()
-            logger.debug { "Advancing state: to tick ${tickProvider.tick}" }
+            logger.info { "Advancing state: to tick ${tickProvider.tick}" }
             state.advance(tickProvider.tick)
             tickProvider.tick++
-
+            inputProcessing.processPlayerInput(localPlayer.playerId, inputs.get(tick), state.entities(tickProvider.tick), effectBus)
             simulate()
         }
     }

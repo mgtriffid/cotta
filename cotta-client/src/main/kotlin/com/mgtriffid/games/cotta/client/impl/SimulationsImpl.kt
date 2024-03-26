@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.AuthoritativeSimulation
 import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
+import com.mgtriffid.games.cotta.client.ClientPlayers
 import com.mgtriffid.games.cotta.client.GuessedSimulation
 import com.mgtriffid.games.cotta.client.LocalPlayerInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
@@ -25,6 +26,7 @@ class SimulationsImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val tickProvider: TickProvider,
     private val localPlayer: LocalPlayer,
+    private val players: ClientPlayers,
     private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val predictionSimulation: PredictionSimulation,
     ): Simulations {
@@ -32,18 +34,22 @@ class SimulationsImpl @Inject constructor(
         val instructions = simulationDirector.instruct(tickProvider.tick).also { logger.info { "Instructions: $it" } }
         // tick is advanced inside;
         simulation.tick(delta.input)
-//        processMetaEntitiesDiff(delta) // TODO maybe playersDiff goes here if even needed
+        processPlayersDiff(delta) // TODO maybe playersDiff goes here if even needed
         val lastConfirmedTick = getLastConfirmedTick(delta)
         predict(lastConfirmedTick)
     }
 
+    private fun processPlayersDiff(delta: Delta.Present) {
+        delta.playersDiff.forEach(players::add)
+    }
+
     private fun predict(serverSawOurTick: Long) {
-        logger.debug { "Predicting" }
+        logger.info { "Predicting" }
         val currentTick = getCurrentTick()
         val unprocessedTicks = playerInputs.all().keys.filter { it > serverSawOurTick }
             .also { logger.info { it.joinToString() } } // TODO explicit sorting
-        logger.debug { "Setting initial predictions state with tick ${getCurrentTick()}" }
-//        predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)
+        logger.info { "Setting initial predictions state with tick ${getCurrentTick()}" }
+        predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)
     }
 
     private fun getLastConfirmedTick(delta: Delta.Present) =

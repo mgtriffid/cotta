@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.client.DrawableStateProvider
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.interpolation.Interpolators
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.CottaState
@@ -21,7 +22,7 @@ import kotlin.reflect.KClass
 private val logger = mu.KotlinLogging.logger {}
 
 class DrawableStateProviderImpl @Inject constructor(
-    private val simulationTickProvider: TickProvider,
+    @Named(SIMULATION) private val simulationTickProvider: TickProvider,
     @Named("prediction") private val predictionTickProvider: TickProvider,
     private val interpolators: Interpolators,
     @Named("simulation") private val state: CottaState,

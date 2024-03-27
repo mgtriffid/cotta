@@ -14,6 +14,7 @@ import com.mgtriffid.games.cotta.client.invokers.impl.*
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.clock.impl.CottaClockImpl
 import com.mgtriffid.games.cotta.core.effects.EffectBus
@@ -69,7 +70,9 @@ class CottaClientModule(
         bind(GuessedSimulation::class.java).to(GuessedSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 
         val simulationTickProvider = AtomicLongTickProvider()
-        bind(TickProvider::class.java).toInstance(simulationTickProvider)
+        bind(TickProvider::class.java)
+            .annotatedWith(Names.named(SIMULATION))
+            .toInstance(simulationTickProvider)
         bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
         bind(SimulationDirector::class.java).to(SimulationDirectorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(DeltasPresent::class.java).to(DeltasPresentImpl::class.java).`in`(Scopes.SINGLETON)

@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger {}
 
 class AuthoritativeSimulationImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
-    private val tick: TickProvider,
+    @Named("simulation") private val tick: TickProvider,
     @Named("simulation") private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks,

@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
@@ -25,7 +26,7 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     private val componentRegistry: ComponentRegistry,
     private val network: CottaServerNetworkTransport,
     private val clientsGhosts: ClientsGhosts<IR>,
-    private val tickProvider: TickProvider,
+    @Named(SIMULATION) private val tickProvider: TickProvider,
     @Named("simulation") private val state: CottaState,
     private val serverToClientDataDispatcher: ServerToClientDataDispatcher,
     private val serverSimulation: ServerSimulation,

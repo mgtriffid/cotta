@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.google.inject.Inject
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.*
@@ -9,6 +10,7 @@ import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataDispatcher
+import jakarta.inject.Named
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -20,7 +22,7 @@ class ServerToClientDataDispatcherImpl<
     CEWTR: CreatedEntitiesWithTracesRecipe,
     MEDR: MetaEntitiesDeltaRecipe
     > @Inject constructor(
-    private val tick: TickProvider,
+    @Named(SIMULATION) private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts<IR>,
     private val network: CottaServerNetworkTransport,
     private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,

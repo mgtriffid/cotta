@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.google.inject.Inject
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.PlayerId
@@ -25,7 +26,7 @@ class ServerSimulationImpl @Inject constructor(
     private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks,
-    private val tickProvider: TickProvider,
+    @Named(SIMULATION) private val tickProvider: TickProvider,
     private val inputProcessing: InputProcessing
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()

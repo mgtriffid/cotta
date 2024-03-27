@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server
 import com.google.inject.Guice
 import com.google.inject.Key
 import com.google.inject.name.Names
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
@@ -36,7 +37,7 @@ class ServerSimulationTest {
     @BeforeEach
     fun setUp() {
         val injector = Guice.createInjector(CottaServerModule(GameStub()))
-        tickProvider = injector.getInstance(TickProvider::class.java)
+        tickProvider = injector.getInstance(Key.get(TickProvider::class.java, Names.named(SIMULATION)))
         simulationInputHolder = injector.getInstance(SimulationInputHolder::class.java)
         simulationInputHolder.set(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}

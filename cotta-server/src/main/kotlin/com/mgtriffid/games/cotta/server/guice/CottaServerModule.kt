@@ -1,8 +1,10 @@
 package com.mgtriffid.games.cotta.server.guice
 
 import com.google.inject.*
+import com.google.inject.name.Names
 import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.clock.impl.CottaClockImpl
@@ -49,7 +51,9 @@ class CottaServerModule(
             bind(CottaGame::class.java).toInstance(game)
 
             val simulationTickProvider = AtomicLongTickProvider()
-            bind(TickProvider::class.java).toInstance(simulationTickProvider)
+            bind(TickProvider::class.java)
+                .annotatedWith(named(SIMULATION))
+                .toInstance(simulationTickProvider)
             bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
             bind(Int::class.java).annotatedWith(named("historyLength")).toInstance(8)
             bind(Int::class.java).annotatedWith(named("stateHistoryLength")).toInstance(128)
@@ -114,9 +118,6 @@ class CottaServerModule(
 
             bind(object : TypeLiteral<ClientsGhosts<BytesInputRecipe>>() {}).`in`(Scopes.SINGLETON)
             bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java).`in`(Scopes.SINGLETON)
-
-            bind(PredictedToAuthoritativeIdMappings::class.java).to(PredictedToAuthoritativeIdMappingsImpl::class.java)
-                .`in`(Scopes.SINGLETON)
         }
     }
 

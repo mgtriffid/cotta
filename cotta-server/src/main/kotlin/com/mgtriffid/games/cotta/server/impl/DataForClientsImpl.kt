@@ -4,16 +4,12 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.Players
-import com.mgtriffid.games.cotta.server.PredictedToAuthoritativeIdMappings
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
@@ -23,7 +19,6 @@ data class DataForClientsImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val players: Players,
     private val playersSawTicks: PlayersSawTicks,
-    private val predictedToAuthoritativeIdMappings: PredictedToAuthoritativeIdMappings,
 ) : DataForClients {
     override fun effects(tick: Long): Collection<CottaEffect> {
         return effectsHistory.forTick(tick)
@@ -39,10 +34,6 @@ data class DataForClientsImpl @Inject constructor(
 
     override fun idSequence(tick: Long): Int {
         return state.entities(tick).currentId()
-    }
-
-    override fun confirmedEntities(tick: Long): List<Pair<PredictedEntityId, AuthoritativeEntityId>> {
-        return predictedToAuthoritativeIdMappings.forTick(tick)
     }
 
     override fun players(): Players {

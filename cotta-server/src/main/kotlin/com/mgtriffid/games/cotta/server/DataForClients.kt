@@ -13,9 +13,8 @@ import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
  * states, ownership, players "who saw which tick" situations, effects, inputs for entities, etc.
  */
 interface DataForClients {
-    fun effects(tick: Long): Collection<CottaEffect>
+    fun effects(tick: Long): Collection<CottaEffect> // TODO remove
     fun entities(tick: Long): Entities
-    fun confirmedEntities(tick: Long): List<Pair<PredictedEntityId, AuthoritativeEntityId>>
     fun players(): Players
     fun playersSawTicks(): PlayersSawTicks
     fun playerInputs(): Map<PlayerId, PlayerInput>

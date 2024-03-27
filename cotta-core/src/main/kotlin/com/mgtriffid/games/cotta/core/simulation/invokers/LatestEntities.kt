@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -10,7 +11,7 @@ import jakarta.inject.Named
 
 class LatestEntities @Inject constructor(
     @Named("simulation") private val state: CottaState,
-    private val tick: TickProvider
+    @Named(SIMULATION) private val tick: TickProvider
 ) : Entities {
     override fun create(ownedBy: Entity.OwnedBy): Entity {
         return entities().create(ownedBy)

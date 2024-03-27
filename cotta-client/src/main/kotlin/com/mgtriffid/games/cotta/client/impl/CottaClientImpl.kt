@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.utils.now
 import jakarta.inject.Named
@@ -20,7 +21,7 @@ class CottaClientImpl @Inject constructor(
     private val network: NetworkClient,
     private val playerInputs: LocalPlayerInputs,
     private val simulations: Simulations,
-    private val tickProvider: TickProvider,
+    @Named(SIMULATION) private val tickProvider: TickProvider,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider

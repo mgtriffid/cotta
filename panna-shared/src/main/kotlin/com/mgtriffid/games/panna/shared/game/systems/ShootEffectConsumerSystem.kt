@@ -30,6 +30,7 @@ import com.mgtriffid.games.panna.shared.game.effects.shooting.ShootEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.RailgunVisualEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.createRailgunShotEffect
+import com.mgtriffid.games.panna.shared.game.effects.shooting.createShootBulletEffect
 import com.mgtriffid.games.panna.shared.game.effects.visual.createRailgunVisualEffect
 import mu.KotlinLogging
 
@@ -49,7 +50,7 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem<ShootEffect> {
         }
         when (weaponEquippedComponent.equipped) {
             WEAPON_PISTOL -> {
-                shootBullet(shooter, ctx)
+                ctx.fire(createShootBulletEffect(e.shooterId))
                 updateCooldown(weaponEquippedComponent, ctx, WeaponCooldowns.PISTOL)
             }
 
@@ -82,23 +83,6 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem<ShootEffect> {
             |time = $time
         """.trimMargin()
         }
-    }
-
-    private fun shootBullet(shooter: Entity, ctx: EffectProcessingContext) {
-        logger.debug { "Shooting bullet" }
-        val position = shooter.getComponent(PositionComponent::class)
-        val direction = shooter.getComponent(LookingAtComponent::class)
-        val bullet = ctx.createEntity(ownedBy = shooter.ownedBy)
-        val velocity = (Vector2(530f, 0f)).rotateDeg(direction.lookAt)
-        logger.debug { "Created bullet ${bullet.id}" }
-        bullet.addComponent(createPositionComponent(position.xPos, position.yPos))
-        bullet.addComponent(createDrawableComponent(BULLET_STRATEGY))
-        bullet.addComponent(createColliderComponent(2, 2))
-        bullet.addComponent(createGravityComponent())
-        bullet.addComponent(createBulletComponent(shooter.id))
-        bullet.addComponent(
-            createVelocityComponent(velocity.x, velocity.y)
-        )
     }
 
     private fun shootRailgun(shooter: Entity, ctx: EffectProcessingContext) {

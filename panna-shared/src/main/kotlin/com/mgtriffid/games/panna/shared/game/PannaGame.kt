@@ -18,6 +18,7 @@ import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletCollisionSys
 import com.mgtriffid.games.panna.shared.game.systems.shooting.BulletHitsDudeEffectConsumer
 import com.mgtriffid.games.panna.shared.game.systems.shooting.RailgunHitsDudeEffectConsumer
 import com.mgtriffid.games.panna.shared.game.systems.shooting.RailgunShotEffectConsumerSystem
+import com.mgtriffid.games.panna.shared.game.systems.shooting.ShootBulletEffectConsumer
 import com.mgtriffid.games.panna.shared.game.systems.shooting.ShootingProcessingSystem
 import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.*
@@ -34,6 +35,7 @@ class PannaGame : CottaGame {
         JumpEffectConsumerSystem::class,
         MovementSystem::class,
         ShootEffectConsumerSystem::class,
+        ShootBulletEffectConsumer::class,
         MovementEffectConsumerSystem::class,
         CoyoteSystem::class,
         GravitySystem::class,

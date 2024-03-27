@@ -20,7 +20,6 @@ class CottaClientImpl @Inject constructor(
     private val network: NetworkClient,
     private val playerInputs: LocalPlayerInputs,
     private val simulations: Simulations,
-    private val predictionSimulation: PredictionSimulation,
     private val tickProvider: TickProvider,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,

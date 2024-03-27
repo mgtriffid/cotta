@@ -158,9 +158,6 @@ class CottaClientModule(
         bind(DrawableStateProvider::class.java).to(DrawableStateProviderImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Interpolators::class.java).`in`(Scopes.SINGLETON)
 
-        bind(AuthoritativeToPredictedEntityIdMappings::class.java).to(AuthoritativeToPredictedEntityIdMappingsImpl::class.java)
-            .`in`(Scopes.SINGLETON)
-
         val idsRemapper = IdsRemapperImpl()
         install(BytesSerializationModule(idsRemapper, game.playerInputKClass))
         bind(object : TypeLiteral<

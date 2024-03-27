@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta.client.impl
 
-import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.DrawableEffect
 import com.mgtriffid.games.cotta.client.DrawableEffects
 import com.mgtriffid.games.cotta.client.DrawableState
@@ -13,8 +12,6 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -29,7 +26,6 @@ class DrawableStateProviderImpl @Inject constructor(
     private val interpolators: Interpolators,
     @Named("simulation") private val state: CottaState,
     private val predictionSimulation: PredictionSimulation,
-    private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val effectBus: EffectBus,
     private val localPlayer: LocalPlayer
 ) : DrawableStateProvider {
@@ -85,8 +81,6 @@ class DrawableStateProviderImpl @Inject constructor(
 
         return object : DrawableState.Ready {
             override val entities: List<Entity> = entities
-            override val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId> =
-                authoritativeToPredictedEntityIdMappings.all()
             override val effects: DrawableEffects = effects
             override val playerId: PlayerId = localPlayer.playerId
         }

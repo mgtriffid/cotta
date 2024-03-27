@@ -11,7 +11,6 @@ sealed interface DrawableState {
     interface Ready : DrawableState {
         val playerId: PlayerId
         val entities: List<Entity>
-        val authoritativeToPredictedEntityIds: Map<AuthoritativeEntityId, PredictedEntityId>
         val effects: DrawableEffects
     }
     data object NotReady : DrawableState

@@ -1,7 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.AuthoritativeSimulation
-import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.ClientPlayers
 import com.mgtriffid.games.cotta.client.GuessedSimulation
 import com.mgtriffid.games.cotta.client.LocalPlayerInputs
@@ -27,7 +26,6 @@ class SimulationsImpl @Inject constructor(
     private val tickProvider: TickProvider,
     private val localPlayer: LocalPlayer,
     private val players: ClientPlayers,
-    private val authoritativeToPredictedEntityIdMappings: AuthoritativeToPredictedEntityIdMappings,
     private val predictionSimulation: PredictionSimulation,
     ): Simulations {
     override fun simulate(delta: Delta.Present) {

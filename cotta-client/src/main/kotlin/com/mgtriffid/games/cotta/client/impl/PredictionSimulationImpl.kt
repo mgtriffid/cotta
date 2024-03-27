@@ -1,15 +1,11 @@
 package com.mgtriffid.games.cotta.client.impl
 
-import com.mgtriffid.games.cotta.client.AuthoritativeToPredictedEntityIdMappings
 import com.mgtriffid.games.cotta.client.LocalPlayerInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesImpl
 import com.mgtriffid.games.cotta.core.input.InputProcessing
-import com.mgtriffid.games.cotta.core.input.NonPlayerInput
-import com.mgtriffid.games.cotta.core.input.PlayerInput
-import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem

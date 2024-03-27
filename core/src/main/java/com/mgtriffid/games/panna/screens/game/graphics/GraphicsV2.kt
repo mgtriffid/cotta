@@ -96,16 +96,6 @@ class GraphicsV2 {
         state.entities.forEach { entity ->
             val id = entity.id
             var actor = entityActors[id]
-            if (actor == null && id is AuthoritativeEntityId) {
-                val predictedId = state.authoritativeToPredictedEntityIds[id]
-                if (predictedId != null) {
-                    actor = entityActors[predictedId]
-                    if (actor != null) {
-                        entityActors.remove(predictedId)
-                        entityActors[id] = actor
-                    }
-                }
-            }
             if (actor == null) {
                 actor = createActor(entity, state.playerId)
                 entityActors[id] = actor

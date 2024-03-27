@@ -20,7 +20,8 @@ class PredictionEntityProcessingSystemInvokerImpl @Inject constructor(
         logger.debug { "Invoked ${system::class.qualifiedName}" }
         entities.all()
             .filter { it.shouldBePredicted() }
-            .forEach { process(it, system) }    }
+            .forEach { process(it, system) }
+    }
 
     private fun Entity.shouldBePredicted() = ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
 

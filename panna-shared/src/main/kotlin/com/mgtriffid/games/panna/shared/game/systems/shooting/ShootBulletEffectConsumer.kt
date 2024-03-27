@@ -1,6 +1,7 @@
 package com.mgtriffid.games.panna.shared.game.systems.shooting
 
 import com.badlogic.gdx.math.Vector2
+import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.panna.shared.BULLET_STRATEGY
@@ -25,7 +26,7 @@ class ShootBulletEffectConsumer : EffectsConsumerSystem<ShootBulletEffect> {
         logger.debug { "Shooting bullet" }
         val position = shooter.getComponent(PositionComponent::class)
         val direction = shooter.getComponent(LookingAtComponent::class)
-        val bullet = ctx.createEntity(ownedBy = shooter.ownedBy)
+        val bullet = ctx.createEntity()
         val velocity = (Vector2(530f, 0f)).rotateDeg(direction.lookAt)
         logger.debug { "Created bullet ${bullet.id}" }
         bullet.addComponent(createPositionComponent(position.xPos, position.yPos))

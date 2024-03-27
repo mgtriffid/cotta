@@ -12,5 +12,7 @@ interface EffectProcessingContext {
 
     fun createEntity(ownedBy: Entity.OwnedBy): Entity
 
+    fun createEntity() = createEntity(Entity.OwnedBy.System)
+
     fun clock(): CottaClock
 }

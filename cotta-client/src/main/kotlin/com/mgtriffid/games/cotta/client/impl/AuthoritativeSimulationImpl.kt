@@ -1,6 +1,8 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.GLOBAL
+import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -19,7 +21,7 @@ private val logger = KotlinLogging.logger {}
 
 class AuthoritativeSimulationImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
-    @Named("simulation") private val tick: TickProvider,
+    @Named(SIMULATION) private val simulationTick: TickProvider,
     @Named("simulation") private val invokersFactory: InvokersFactory,
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks,
@@ -29,8 +31,8 @@ class AuthoritativeSimulationImpl @Inject constructor(
 
     override fun tick(input: SimulationInput) {
         effectBus.clear()
-        state.advance(tick.tick)
-        tick.tick++
+        state.advance(simulationTick.tick)
+        simulationTick.tick++
         processInput(input)
         logger.debug { input.inputForPlayers() }
         fillPlayersSawTicks(input)
@@ -38,7 +40,7 @@ class AuthoritativeSimulationImpl @Inject constructor(
     }
 
     private fun processInput(input: SimulationInput) {
-        inputProcessing.process(input, state.entities(tick.tick), effectBus)
+        inputProcessing.process(input, state.entities(simulationTick.tick), effectBus)
     }
 
     private fun fillPlayersSawTicks(input: SimulationInput) {

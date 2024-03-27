@@ -14,6 +14,7 @@ import com.mgtriffid.games.cotta.client.invokers.impl.*
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.clock.impl.CottaClockImpl
@@ -73,6 +74,9 @@ class CottaClientModule(
         bind(TickProvider::class.java)
             .annotatedWith(Names.named(SIMULATION))
             .toInstance(simulationTickProvider)
+        bind(TickProvider::class.java)
+            .annotatedWith(Names.named(GLOBAL))
+            .toInstance(AtomicLongTickProvider())
         bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
         bind(SimulationDirector::class.java).to(SimulationDirectorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(DeltasPresent::class.java).to(DeltasPresentImpl::class.java).`in`(Scopes.SINGLETON)

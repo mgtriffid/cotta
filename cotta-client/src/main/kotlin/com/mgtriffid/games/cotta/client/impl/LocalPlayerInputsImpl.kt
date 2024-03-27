@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.CottaClientInput
 import com.mgtriffid.games.cotta.client.LocalPlayerInputs
+import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.input.PlayerInput
@@ -10,7 +11,7 @@ import jakarta.inject.Named
 import java.util.*
 
 class LocalPlayerInputsImpl @Inject constructor(
-    @Named(SIMULATION) private val tickProvider: TickProvider,
+    @Named(GLOBAL) private val tickProvider: TickProvider,
     @Named("clientInputBufferLength") private val bufferLength: Int,
     private val localInput: CottaClientInput
 ) : LocalPlayerInputs {

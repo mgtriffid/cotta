@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.client.DrawableStateProvider
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.interpolation.Interpolators
+import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.Component
@@ -23,6 +24,7 @@ private val logger = mu.KotlinLogging.logger {}
 
 class DrawableStateProviderImpl @Inject constructor(
     @Named(SIMULATION) private val simulationTickProvider: TickProvider,
+    @Named(GLOBAL) private val globalTickProvider: TickProvider,
     @Named("prediction") private val predictionTickProvider: TickProvider,
     private val interpolators: Interpolators,
     @Named("simulation") private val state: CottaState,
@@ -34,8 +36,9 @@ class DrawableStateProviderImpl @Inject constructor(
     private var lastTickEffectsWereReturned: Long = -1
     private val previouslyPredicted = TreeMap<Long, Collection<DrawableEffect>>()
 
+    // GROOM what the actual fuck
     override fun get(alpha: Float, components: Array<out KClass<out Component<*>>>): DrawableState {
-        if (simulationTickProvider.tick == 0L) return DrawableState.NotReady
+        if (globalTickProvider.tick == 0L) return DrawableState.NotReady
         val onlyNeeded: Collection<Entity>.() -> Collection<Entity> = {
             filter { entity ->
                 components.all { entity.hasComponent(it) }
@@ -43,6 +46,7 @@ class DrawableStateProviderImpl @Inject constructor(
         }
         val predictedCurrent = this.predictionSimulation.getLocalPredictedEntities().onlyNeeded()
         val predictedPrevious = this.predictionSimulation.getPreviousLocalPredictedEntities().onlyNeeded()
+        // Here guessed vs authoritative becomes interesting. CottaStateView?
         val authoritativeCurrent = this.state.entities(this.simulationTickProvider.tick).all().onlyNeeded()
         val authoritativePrevious = this.state.entities(this.simulationTickProvider.tick - 1).all().onlyNeeded()
         val predicted = interpolate(predictedPrevious, predictedCurrent, alpha, components.toList())
@@ -57,23 +61,22 @@ class DrawableStateProviderImpl @Inject constructor(
 
         // TODO consider possible edge cases when the number of ticks we're ahead of server changes due to changing
         //  network conditions.
-        val effects = if (lastTickEffectsWereReturned < simulationTickProvider.tick) {
-            logger.debug { "Simulation tick: ${simulationTickProvider.tick}" }
+        val effects = if (lastTickEffectsWereReturned < globalTickProvider.tick) {
+            logger.debug { "Simulation tick: ${globalTickProvider.tick}" }
             logger.debug { "Prediction tick: ${predictionTickProvider.tick}" }
             logger.debug { "lastMyInputProcessedByServerSimulation + 1: ${lastMyInputProcessedByServerSimulation + 1}" }
-            lastTickEffectsWereReturned = simulationTickProvider.tick
-            val predicted = predictionSimulation.effectBus.effects().map(::DrawableEffect)
-            // TODO This is WAY too hard to understand. Consider making prediction simulation ahead of real, not in-sync.
+            lastTickEffectsWereReturned = globalTickProvider.tick
+            val predictedEffects = predictionSimulation.effectBus.effects().map(::DrawableEffect)
             val previouslyPredictedEffects = previouslyPredicted[lastMyInputProcessedByServerSimulation + 1]
             logger.info { "previouslyPredictedEffects: $previouslyPredictedEffects" }
             val real = effectBus.effects().map(::DrawableEffect)
             logger.debug { "Real effects: $real" }
             val effects = object : DrawableEffects {
                 override val real: Collection<DrawableEffect> = real - (previouslyPredictedEffects ?: emptyList())
-                override val predicted: Collection<DrawableEffect> = predicted
+                override val predicted: Collection<DrawableEffect> = predictedEffects
                 override val mispredicted: Collection<DrawableEffect> = emptyList()
             }
-            previouslyPredicted[simulationTickProvider.tick] = predicted
+            previouslyPredicted[globalTickProvider.tick] = predictedEffects
             cleanUpOldPredictedEffects()
             effects
         } else {

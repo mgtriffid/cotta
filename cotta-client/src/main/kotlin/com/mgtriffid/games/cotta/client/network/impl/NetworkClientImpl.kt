@@ -120,16 +120,18 @@ class NetworkClientImpl<
             return AuthoritativeState.NotReady
         }
         return if (stateAvailable()) {
-            AuthoritativeState.Ready { state, tickProvider ->
+            AuthoritativeState.Ready { state, simulationTickProvider, globalTickProvider ->
                 logger.debug { "Setting state from authoritative" }
                 val fullStateTick = incomingDataBuffer.states.lastKey()
                 val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
                 state.setBlank(fullStateTick)
-                tickProvider.tick = fullStateTick
+                simulationTickProvider.tick = fullStateTick
+                globalTickProvider.tick = fullStateTick
                 stateSnapper.unpackStateRecipe(state.entities(atTick = fullStateTick), stateRecipe)
                 ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
                     state.advance(tick - 1)
-                    tickProvider.tick++
+                    simulationTickProvider.tick++
+                    globalTickProvider.tick++
                     applyDelta(state, tick)
                 }
             }

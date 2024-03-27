@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.SimulationDirector
 import com.mgtriffid.games.cotta.client.Simulations
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -24,7 +25,7 @@ class SimulationsImpl @Inject constructor(
     private val simulationDirector: SimulationDirector,
     private val playerInputs: LocalPlayerInputs,
     @Named("simulation") private val state: CottaState,
-    @Named(SIMULATION) private val tickProvider: TickProvider,
+    @Named(GLOBAL) private val tickProvider: TickProvider,
     private val localPlayer: LocalPlayer,
     private val players: ClientPlayers,
     private val predictionSimulation: PredictionSimulation,
@@ -39,6 +40,7 @@ class SimulationsImpl @Inject constructor(
         // Looks like what we have currently is exactly Global tick: it is responsible
         // for sending inputs properly, for fetching necessary data, etc.
         // tick is advanced inside;
+        tickProvider.tick++
         simulation.tick(delta.input)
         processPlayersDiff(delta)
         val lastConfirmedTick = getLastConfirmedTick(delta)

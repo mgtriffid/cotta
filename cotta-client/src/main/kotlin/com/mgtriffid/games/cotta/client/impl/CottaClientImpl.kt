@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.utils.now
@@ -21,7 +22,8 @@ class CottaClientImpl @Inject constructor(
     private val network: NetworkClient,
     private val playerInputs: LocalPlayerInputs,
     private val simulations: Simulations,
-    @Named(SIMULATION) private val tickProvider: TickProvider,
+    @Named(GLOBAL) private val tickProvider: TickProvider,
+    @Named(SIMULATION) private val simulationTickProvider: TickProvider,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider
@@ -46,7 +48,7 @@ class CottaClientImpl @Inject constructor(
                     network.fetch()
                     when (val authoritativeState = network.tryGetAuthoritativeState()) {
                         is AuthoritativeState.Ready -> {
-                            authoritativeState.apply(state, tickProvider)
+                            authoritativeState.apply(state, simulationTickProvider, tickProvider)
                             clientState = ClientState.Running(getCurrentTick())
                         }
 

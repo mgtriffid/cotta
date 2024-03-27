@@ -22,9 +22,6 @@ class PredictionEntityProcessingSystemInvokerImpl @Inject constructor(
             .filter { it.shouldBePredicted() }
             .forEach { process(it, system) }    }
 
-    /**
-     * TODO dry with [PredictionEffectsConsumerSystemInvokerImpl]
-     */
     private fun Entity.shouldBePredicted() = ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
 
     private fun process(entity: Entity, system: EntityProcessingSystem) {

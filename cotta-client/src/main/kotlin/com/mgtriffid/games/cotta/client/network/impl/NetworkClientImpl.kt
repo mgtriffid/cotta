@@ -96,9 +96,6 @@ class NetworkClientImpl<
 
     override fun tryGetDelta(tick: Long): Delta = if (deltaAvailable(tick)) {
         Delta.Present(
-            applyDiff = { entities ->
-                applyDelta(entities, tick)
-            },
             playersDiff = stateSnapper.unpackPlayersDeltaRecipe((incomingDataBuffer.playersDeltas[tick]!!)),
             input = object : SimulationInput {
                 override fun nonPlayerInput(): NonPlayerInput {

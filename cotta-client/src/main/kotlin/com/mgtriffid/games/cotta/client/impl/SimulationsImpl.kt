@@ -30,9 +30,16 @@ class SimulationsImpl @Inject constructor(
     ): Simulations {
     override fun simulate(delta: Delta.Present) {
         val instructions = simulationDirector.instruct(tickProvider.tick).also { logger.info { "Instructions: $it" } }
+        // Now we need to consider the situation when we have guessed simulation.
+        // Suddenly it breaks tickProvider. Right now we have only one, and it
+        // is shared between simulation and, let's say, Global Orchestration.
+        // Ideally simulation tick is one thing, guessed simulation tick - another.
+        // And so is Predicted simulation tick. And finally the global one.
+        // Looks like what we have currently is exactly Global tick: it is responsible
+        // for sending inputs properly, for fetching necessary data, etc.
         // tick is advanced inside;
         simulation.tick(delta.input)
-        processPlayersDiff(delta) // TODO maybe playersDiff goes here if even needed
+        processPlayersDiff(delta)
         val lastConfirmedTick = getLastConfirmedTick(delta)
         predict(lastConfirmedTick)
     }

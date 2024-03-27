@@ -1,7 +1,7 @@
 package com.mgtriffid.games.cotta.client
 
 /**
- *  state[N+1] = logic(state[N], input[N])
+ *    state[N+1] = logic(state[N], input[N])
  */
 interface SimulationDirector {
     fun instruct(tick: Long): List<Instruction>

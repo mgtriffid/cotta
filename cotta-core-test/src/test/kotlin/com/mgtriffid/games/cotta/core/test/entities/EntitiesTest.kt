@@ -22,7 +22,6 @@ class EntitiesTest {
         tickProvider = AtomicLongTickProvider()
         componentRegistry = ComponentRegistryImpl(
             com.esotericsoftware.kryo.Kryo(),
-            com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl()
         )
         registerComponents(GameStub, componentRegistry)
     }

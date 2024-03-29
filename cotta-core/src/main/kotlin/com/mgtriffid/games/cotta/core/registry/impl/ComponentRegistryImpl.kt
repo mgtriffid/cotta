@@ -8,17 +8,14 @@ import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.EffectRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.registry.ShortEffectKey
-import com.mgtriffid.games.cotta.core.serialization.IdsRemapper
 import com.mgtriffid.games.cotta.core.serialization.bytes.DataClassSerializer
 import com.mgtriffid.games.cotta.core.serialization.bytes.ObjectSerializer
-import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import kotlin.reflect.KClass
 
 class ComponentRegistryImpl @Inject constructor(
     @Named("snapper") private val kryo: Kryo,
-    private val idsRemapper: IdsRemapper
 ) : ComponentRegistry {
     private val componentKeyByClass = HashMap<KClass<out Component<*>>, ShortComponentKey>()
     private var componentSpecByKey = ArrayList<ComponentSpec2>()
@@ -47,7 +44,6 @@ class ComponentRegistryImpl @Inject constructor(
         componentKeyByClass[kClass] = key
         componentKeyByClass[kClassImpl] = key
         registerForKryo(kClassImpl)
-        registerComponentForRemapping(key, kClass)
         componentSpecByKey.add(ComponentSpec2(kClass, historical))
     }
 
@@ -57,8 +53,6 @@ class ComponentRegistryImpl @Inject constructor(
         kClassImpl: KClass<out CottaEffect>
     ) {
         registerForKryo(kClassImpl)
-        registerEffectForRemapping(key, kClass)
-        (idsRemapper as IdsRemapperImpl).registerEffect(kClass, createEffectSpec(kClass))
     }
 
     override fun isHistorical(key: ShortComponentKey): Boolean {
@@ -72,14 +66,6 @@ class ComponentRegistryImpl @Inject constructor(
             else -> throw IllegalArgumentException("No serializer for $kClass")
         }
         kryo.register(kClass.java, serializer)
-    }
-
-    private fun registerComponentForRemapping(key: ShortComponentKey, kClass: KClass<out Component<*>>) {
-        (idsRemapper as IdsRemapperImpl).registerComponent(kClass, createComponentSpec(kClass))
-    }
-
-    private fun registerEffectForRemapping(key: ShortEffectKey, kClass: KClass<out CottaEffect>) {
-        (idsRemapper as IdsRemapperImpl).registerEffect(kClass, createEffectSpec(kClass))
     }
 
     override fun addRegistrationListener(listener: ComponentRegistrationListener) {

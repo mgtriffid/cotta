@@ -11,7 +11,6 @@ import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
-import com.mgtriffid.games.cotta.core.serialization.IdsRemapper
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
@@ -22,12 +21,10 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.DataClassSerializer
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
-import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
 import kotlin.reflect.KClass
 
 class BytesSerializationModule(
-    private val idsRemapper: IdsRemapperImpl,
     private val playerInputKClass: KClass<out PlayerInput>
 ) : Module {
     override fun configure(binder: Binder) {
@@ -38,7 +35,6 @@ class BytesSerializationModule(
             val snapsSerialization = BytesSnapsSerialization()
             bind(Kryo::class.java).annotatedWith(named("snapper")).toInstance(kryo)
             bind(BytesStateSnapper::class.java).`in`(Scopes.SINGLETON)
-            bind(IdsRemapper::class.java).toInstance(idsRemapper)
             bind(object : TypeLiteral<SnapsSerialization<
                 BytesStateRecipe,
                 BytesDeltaRecipe,

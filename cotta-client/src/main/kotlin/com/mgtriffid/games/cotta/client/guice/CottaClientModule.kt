@@ -32,7 +32,6 @@ import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
-import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
@@ -165,8 +164,7 @@ class CottaClientModule(
         bind(DrawableStateProvider::class.java).to(DrawableStateProviderImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Interpolators::class.java).`in`(Scopes.SINGLETON)
 
-        val idsRemapper = IdsRemapperImpl()
-        install(BytesSerializationModule(idsRemapper, game.playerInputKClass))
+        install(BytesSerializationModule(game.playerInputKClass))
         bind(object : TypeLiteral<
             ClientIncomingDataBuffer<
                 BytesStateRecipe,

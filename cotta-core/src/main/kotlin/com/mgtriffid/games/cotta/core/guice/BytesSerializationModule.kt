@@ -24,7 +24,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.IdsRemapperImpl
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
 import kotlin.reflect.KClass
 
 class BytesSerializationModule(
@@ -43,15 +43,13 @@ class BytesSerializationModule(
             bind(object : TypeLiteral<SnapsSerialization<
                 BytesStateRecipe,
                 BytesDeltaRecipe,
-                BytesCreatedEntitiesWithTracesRecipe,
-                BytesMetaEntitiesDeltaRecipe
+                BytesPlayersDeltaRecipe
                 >>() {})
                 .toInstance(snapsSerialization)
             bind(object : TypeLiteral<StateSnapper<
                 BytesStateRecipe,
                 BytesDeltaRecipe,
-                BytesCreatedEntitiesWithTracesRecipe,
-                BytesMetaEntitiesDeltaRecipe
+                BytesPlayersDeltaRecipe
                 >>() {}).to(BytesStateSnapper::class.java).`in`(Scopes.SINGLETON)
             bind(object : TypeLiteral<InputSerialization<BytesInputRecipe>>(){}).toInstance(BytesInputSerialization(playerInputKClass))
         }

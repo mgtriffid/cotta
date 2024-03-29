@@ -8,13 +8,9 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
-import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesChangedEntityRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentRecipe
@@ -22,11 +18,9 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEnt
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEffectRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputComponentRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceElementRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceRecipe
 import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -41,8 +35,7 @@ class BytesStateSnapper @Inject constructor(
 ) : StateSnapper<
     BytesStateRecipe,
     BytesDeltaRecipe,
-    BytesCreatedEntitiesWithTracesRecipe,
-    BytesMetaEntitiesDeltaRecipe
+    BytesPlayersDeltaRecipe
     > {
 
     // TODO stupid naming
@@ -119,13 +112,13 @@ class BytesStateSnapper @Inject constructor(
 
     override fun snapPlayersDelta(
         addedPlayers: List<PlayerId>
-    ): BytesMetaEntitiesDeltaRecipe {
-        return BytesMetaEntitiesDeltaRecipe(
+    ): BytesPlayersDeltaRecipe {
+        return BytesPlayersDeltaRecipe(
             addedPlayers = addedPlayers
         )
     }
 
-    override fun unpackPlayersDeltaRecipe(recipe: BytesMetaEntitiesDeltaRecipe): List<PlayerId> {
+    override fun unpackPlayersDeltaRecipe(recipe: BytesPlayersDeltaRecipe): List<PlayerId> {
         return recipe.addedPlayers
     }
 

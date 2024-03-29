@@ -2,9 +2,8 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
-import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.MetaEntitiesDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.PlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import mu.KotlinLogging
 import java.util.*
@@ -15,7 +14,7 @@ private val logger = KotlinLogging.logger {}
 class ClientIncomingDataBuffer<
     SR : StateRecipe,
     DR : DeltaRecipe,
-    PDR: MetaEntitiesDeltaRecipe
+    PDR: PlayersDeltaRecipe
     > {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()

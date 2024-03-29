@@ -28,7 +28,7 @@ class ServerSimulationInputProviderImpl<
     DR : DeltaRecipe,
     IR : InputRecipe,
     CEWTR : CreatedEntitiesWithTracesRecipe,
-    MEDR : MetaEntitiesDeltaRecipe
+    MEDR : PlayersDeltaRecipe
     > @Inject constructor(
     private val nonPlayerInputProvider: NonPlayerInputProvider,
     @Named("simulation") private val state: CottaState,

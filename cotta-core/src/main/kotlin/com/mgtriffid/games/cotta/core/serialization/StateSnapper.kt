@@ -2,15 +2,11 @@ package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 
 interface StateSnapper<
     SR: StateRecipe,
     DR: DeltaRecipe,
-    CEWTR: CreatedEntitiesWithTracesRecipe,
-    MEDR: MetaEntitiesDeltaRecipe
+    MEDR: PlayersDeltaRecipe
     > {
     fun snapState(entities: Entities): SR
     fun unpackStateRecipe(entities: Entities, recipe: SR)

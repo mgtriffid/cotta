@@ -34,7 +34,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEnt
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEffectRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesMetaEntitiesDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceElementRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceRecipe
@@ -50,8 +50,7 @@ import com.mgtriffid.games.cotta.core.serialization.toOwnedBy
 class BytesSnapsSerialization : SnapsSerialization<
     BytesStateRecipe,
     BytesDeltaRecipe,
-    BytesCreatedEntitiesWithTracesRecipe,
-    BytesMetaEntitiesDeltaRecipe
+    BytesPlayersDeltaRecipe
     > {
     private val kryo = Kryo()
 
@@ -100,13 +99,13 @@ class BytesSnapsSerialization : SnapsSerialization<
         return output.toBytes()
     }
 
-    override fun serializePlayersDeltaRecipe(recipe: BytesMetaEntitiesDeltaRecipe): ByteArray {
+    override fun serializePlayersDeltaRecipe(recipe: BytesPlayersDeltaRecipe): ByteArray {
         val output = Output(64, 1024 * 1024)
         kryo.writeObject(output, recipe.toDto())
         return output.toBytes()
     }
 
-    override fun deserializePlayersDeltaRecipe(bytes: ByteArray): BytesMetaEntitiesDeltaRecipe {
+    override fun deserializePlayersDeltaRecipe(bytes: ByteArray): BytesPlayersDeltaRecipe {
         return kryo.readObject(Input(bytes), BytesMetaEntitiesDeltaRecipeDto::class.java).toRecipe()
     }
 
@@ -152,28 +151,6 @@ class BytesSnapsSerialization : SnapsSerialization<
         return output.toBytes()
     }
 
-    override fun serializeEntityCreationTracesV2(createdEntities: BytesCreatedEntitiesWithTracesRecipe): ByteArray {
-        val dto =
-            BytesCreatedEntitiesWithTracesRecipeDto()
-        val tracesDtos =  ArrayList<BytesCreateEntityTraceDto>()
-        createdEntities.traces.forEach { (trace, entityId) ->
-            tracesDtos.add(
-                BytesCreateEntityTraceDto().also {
-                    it.trace = trace.toDto()
-                    it.entityId = entityId.toDto()
-                })
-        }
-        dto.traces = tracesDtos
-        val predictedEntitiesIds = HashMap<EntityIdDto, EntityIdDto>()
-        createdEntities.mappedPredictedIds.forEach { (authoritativeEntityId, predictedEntityId) ->
-            predictedEntitiesIds[authoritativeEntityId.toDto()] = predictedEntityId.toDto()
-        }
-        dto.predictedEntitiesIds = predictedEntitiesIds
-        val output = Output(64, 1024 * 1024)
-        kryo.writeObject(output, dto)
-        return output.toBytes()
-    }
-
     override fun deserializeEntityCreationTraces(bytes: ByteArray): List<Pair<TraceRecipe, EntityId>> {
         val dto = kryo.readObject(Input(bytes), BytesCreateEntityTracesDto::class.java)
         return dto.traces.map {
@@ -196,33 +173,6 @@ class BytesSnapsSerialization : SnapsSerialization<
                 entityIdDto.toEntityId())
         }
     }
-
-    override fun deserializeEntityCreationTracesV2(bytes: ByteArray): CreatedEntitiesWithTracesRecipe {
-        val dto = kryo.readObject(Input(bytes), BytesCreatedEntitiesWithTracesRecipeDto::class.java)
-        val traces = dto.traces.map {
-            val trace: BytesCottaTraceDto = it.trace
-            val entityIdDto = it.entityId
-            Pair(
-                BytesTraceRecipe(
-                    trace.elements.map { it: BytesCottaTraceElementDto ->
-                        when (it.kind) {
-                            TraceElementDtoKind.INPUT -> BytesTraceElementRecipe.BytesInputTraceElementRecipe(
-                                it.entityId.toEntityId()
-                            )
-                            TraceElementDtoKind.EFFECT -> BytesTraceElementRecipe.BytesEffectTraceElementRecipe(
-                                it.data.toRecipe()
-                            )
-                            TraceElementDtoKind.ENTITY_PROCESSING -> TODO()
-                        }
-                    }
-                ),
-                entityIdDto.toEntityId())
-        }
-        val mappedPredictedIds = HashMap<AuthoritativeEntityId, PredictedEntityId>()
-        dto.predictedEntitiesIds.forEach { (authoritativeEntityIdDto, predictedEntityIdDto) ->
-            mappedPredictedIds[authoritativeEntityIdDto.toEntityId() as AuthoritativeEntityId] = predictedEntityIdDto.toEntityId() as PredictedEntityId
-        }
-        return BytesCreatedEntitiesWithTracesRecipe(traces, mappedPredictedIds)    }
 
     override fun serializePlayersSawTicks(playersSawTicks: Map<PlayerId, Long>): ByteArray {
         val output = Output(64, 1024 * 1024)
@@ -274,7 +224,7 @@ fun BytesDeltaRecipe.toDto(): BytesDeltaRecipeDto {
     return ret
 }
 
-private fun BytesMetaEntitiesDeltaRecipe.toDto(): BytesMetaEntitiesDeltaRecipeDto {
+private fun BytesPlayersDeltaRecipe.toDto(): BytesMetaEntitiesDeltaRecipeDto {
     val ret = BytesMetaEntitiesDeltaRecipeDto()
     ret.added = addedPlayers.map { playerId ->
         val dto =
@@ -285,8 +235,8 @@ private fun BytesMetaEntitiesDeltaRecipe.toDto(): BytesMetaEntitiesDeltaRecipeDt
     return ret
 }
 
-private fun BytesMetaEntitiesDeltaRecipeDto.toRecipe(): BytesMetaEntitiesDeltaRecipe {
-    return BytesMetaEntitiesDeltaRecipe(
+private fun BytesMetaEntitiesDeltaRecipeDto.toRecipe(): BytesPlayersDeltaRecipe {
+    return BytesPlayersDeltaRecipe(
         added.map { PlayerId(it.playerId) },
     )
 }

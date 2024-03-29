@@ -14,7 +14,7 @@ import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRec
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
-import com.mgtriffid.games.cotta.core.serialization.MetaEntitiesDeltaRecipe
+import com.mgtriffid.games.cotta.core.serialization.PlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
@@ -31,14 +31,13 @@ class NetworkClientImpl<
     SR: StateRecipe,
     DR: DeltaRecipe,
     IR: InputRecipe,
-    CEWTR: CreatedEntitiesWithTracesRecipe,
-    MEDR: MetaEntitiesDeltaRecipe
+    MEDR: PlayersDeltaRecipe
     > @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
     private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, MEDR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, MEDR>,
     private val inputSerialization: InputSerialization<IR>,
-    private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
+    private val stateSnapper: StateSnapper<SR, DR, MEDR>,
     private val localPlayer: LocalPlayer
 ) : NetworkClient {
     private val lagCompLimit: Int = 8 // TODO move to config and bind properly

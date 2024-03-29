@@ -80,7 +80,8 @@ class CottaClientModule(
         bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
         bind(SimulationDirector::class.java).to(SimulationDirectorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(DeltasPresent::class.java).to(DeltasPresentImpl::class.java).`in`(Scopes.SINGLETON)
-
+        bind(Deltas::class.java).to(DeltasImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(LastClientTickProcessedByServer::class.java).toInstance(LastClientTickProcessedByServerImpl(0L))
         bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)

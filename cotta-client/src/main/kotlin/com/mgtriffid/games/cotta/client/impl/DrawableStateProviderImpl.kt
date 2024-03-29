@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.client.DrawableEffect
 import com.mgtriffid.games.cotta.client.DrawableEffects
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.client.DrawableStateProvider
+import com.mgtriffid.games.cotta.client.LastClientTickProcessedByServer
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.interpolation.Interpolators
 import com.mgtriffid.games.cotta.core.GLOBAL
@@ -30,9 +31,9 @@ class DrawableStateProviderImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val predictionSimulation: PredictionSimulation,
     private val effectBus: EffectBus,
-    private val localPlayer: LocalPlayer
+    private val localPlayer: LocalPlayer,
+    private val lastClientTickProcessedByServer: LastClientTickProcessedByServer
 ) : DrawableStateProvider {
-    override var lastMyInputProcessedByServerSimulation: Long = -1
     private var lastTickEffectsWereReturned: Long = -1
     private val previouslyPredicted = TreeMap<Long, Collection<DrawableEffect>>()
 
@@ -64,10 +65,10 @@ class DrawableStateProviderImpl @Inject constructor(
         val effects = if (lastTickEffectsWereReturned < globalTickProvider.tick) {
             logger.debug { "Simulation tick: ${globalTickProvider.tick}" }
             logger.debug { "Prediction tick: ${predictionTickProvider.tick}" }
-            logger.debug { "lastMyInputProcessedByServerSimulation + 1: ${lastMyInputProcessedByServerSimulation + 1}" }
+            logger.debug { "lastMyInputProcessedByServerSimulation + 1: ${lastClientTickProcessedByServer.tick + 1}" }
             lastTickEffectsWereReturned = globalTickProvider.tick
             val predictedEffects = predictionSimulation.effectBus.effects().map(::DrawableEffect)
-            val previouslyPredictedEffects = previouslyPredicted[lastMyInputProcessedByServerSimulation + 1]
+            val previouslyPredictedEffects = previouslyPredicted[lastClientTickProcessedByServer.tick + 1]
             logger.info { "previouslyPredictedEffects: $previouslyPredictedEffects" }
             val real = effectBus.effects().map(::DrawableEffect)
             logger.debug { "Real effects: $real" }
@@ -91,7 +92,7 @@ class DrawableStateProviderImpl @Inject constructor(
     }
 
     private fun cleanUpOldPredictedEffects() {
-        val old = previouslyPredicted.keys.filter { it < lastMyInputProcessedByServerSimulation - 128 }
+        val old = previouslyPredicted.keys.filter { it < lastClientTickProcessedByServer.tick - 128 }
         old.forEach { previouslyPredicted.remove(it) }
     }
 

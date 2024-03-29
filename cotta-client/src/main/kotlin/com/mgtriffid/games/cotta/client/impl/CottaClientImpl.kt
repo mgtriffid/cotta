@@ -22,11 +22,12 @@ class CottaClientImpl @Inject constructor(
     private val network: NetworkClient,
     private val playerInputs: LocalPlayerInputs,
     private val simulations: Simulations,
-    @Named(GLOBAL) private val tickProvider: TickProvider,
+    @Named(GLOBAL) private val globalTickProvider: TickProvider,
     @Named(SIMULATION) private val simulationTickProvider: TickProvider,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
-    private val drawableStateProvider: DrawableStateProvider
+    private val drawableStateProvider: DrawableStateProvider,
+    private val lastClientTickProcessedByServer: LastClientTickProcessedByServer
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial
 
@@ -48,7 +49,7 @@ class CottaClientImpl @Inject constructor(
                     network.fetch()
                     when (val authoritativeState = network.tryGetAuthoritativeState()) {
                         is AuthoritativeState.Ready -> {
-                            authoritativeState.apply(state, simulationTickProvider, tickProvider)
+                            authoritativeState.apply(state, simulationTickProvider, globalTickProvider)
                             clientState = ClientState.Running(getCurrentTick())
                         }
 
@@ -66,19 +67,8 @@ class CottaClientImpl @Inject constructor(
 
                 is ClientState.Running -> {
                     network.fetch()
-                    when (val delta = network.tryGetDelta(getCurrentTick())) {
-                        is Delta.Present -> {
-                            logger.debug { "Delta present" }
-                            integrate(delta)
-                            clientState = ClientState.Running(it.currentTick + 1)
-                        }
-
-                        Delta.Absent -> {
-                            logger.debug { "Delta absent" }
-                            // for now do nothing, later we'll guess and keep track of how
-                            // long ago did we have a state that is trusted
-                        }
-                    }
+                    integrate()
+                    clientState = ClientState.Running(it.currentTick + 1)
                 }
             }
         }
@@ -89,21 +79,16 @@ class CottaClientImpl @Inject constructor(
     }
 
     private fun getCurrentTick(): Long {
-        return tickProvider.tick
+        return globalTickProvider.tick
     }
 
-    private fun integrate(delta: Delta.Present) {
+    private fun integrate() {
         logger.debug { "Integrating" }
         processLocalInput()
-
-        simulations.simulate(delta)
+        simulations.simulate()
 
         sendDataToServer()
-        drawableStateProvider.lastMyInputProcessedByServerSimulation = getLastConfirmedTick(delta)
     }
-
-    private fun getLastConfirmedTick(delta: Delta.Present) =
-        delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L
 
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick

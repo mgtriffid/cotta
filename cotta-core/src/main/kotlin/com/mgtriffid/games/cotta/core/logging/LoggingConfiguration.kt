@@ -39,6 +39,8 @@ fun configureLogging() {
         "com.mgtriffid.games.panna.shared.game.systems.ShootEffectConsumerSystem" to default,
         "com.mgtriffid.games.cotta.client.impl.DrawableStateProviderImpl" to default,
         "com.mgtriffid.games.panna.PannaClientGdxInput" to default,
+
+        "com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody" to Level.DEBUG,
     ).forEach { (logger, level) ->
         (LoggerFactory.getLogger(logger) as Logger).level = level
     }

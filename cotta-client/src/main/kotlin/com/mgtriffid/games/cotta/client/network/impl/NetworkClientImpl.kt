@@ -94,8 +94,8 @@ class NetworkClientImpl<
         networkTransport.send(inputDto)
     }
 
-    override fun tryGetDelta(tick: Long): Delta = if (deltaAvailable(tick)) {
-        Delta.Present(
+    override fun tryGetDelta(tick: Long): Delta? = if (deltaAvailable(tick)) {
+        Delta(
             playersDiff = stateSnapper.unpackPlayersDeltaRecipe((incomingDataBuffer.playersDeltas[tick]!!)),
             input = object : SimulationInput {
                 override fun nonPlayerInput(): NonPlayerInput {
@@ -112,7 +112,7 @@ class NetworkClientImpl<
             },
         )
     } else {
-        Delta.Absent
+        null
     }
 
     override fun tryGetAuthoritativeState(): AuthoritativeState {

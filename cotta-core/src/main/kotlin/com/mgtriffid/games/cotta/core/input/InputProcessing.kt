@@ -14,7 +14,7 @@ interface InputProcessing {
         entities: Entities,
         effectBus: EffectBus
     ) {
-        input.inputForPlayers().also { logger.info { "Input: $input" } }.forEach { (playerId, playerInput) ->
+        input.inputForPlayers().forEach { (playerId, playerInput) ->
             processPlayerInput(playerId, playerInput, entities, effectBus)
         }
         processNonPlayerInput(input.nonPlayerInput(), entities, effectBus)

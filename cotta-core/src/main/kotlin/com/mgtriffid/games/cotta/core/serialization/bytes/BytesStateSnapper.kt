@@ -137,7 +137,7 @@ class BytesStateSnapper @Inject constructor(
             }
             recipe.removedComponents.forEach {
                 entity.removeComponent(
-                    getComponentClassByKey(it) as KClass<out Component<*>>
+                    getComponentClassByKey(it)
                 )
             }
         }

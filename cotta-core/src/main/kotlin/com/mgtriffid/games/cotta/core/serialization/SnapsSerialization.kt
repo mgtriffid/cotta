@@ -16,8 +16,6 @@ interface SnapsSerialization<
     fun deserializeEntityId(bytes: ByteArray): EntityId
     fun serializePlayerId(playerId: PlayerId): ByteArray
     fun deserializePlayerId(bytes: ByteArray): PlayerId
-    fun serializeEntityCreationTraces(traces: List<Pair<TraceRecipe, EntityId>>): ByteArray
-    fun deserializeEntityCreationTraces(bytes: ByteArray): List<Pair<TraceRecipe, EntityId>>
     fun serializePlayersSawTicks(playersSawTicks: Map<PlayerId, Long>): ByteArray
     fun deserializePlayersSawTicks(bytes: ByteArray): Map<PlayerId, Long>
     fun serializePlayersDeltaRecipe(recipe: MEDR): ByteArray

@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.core.serialization.bytes
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
-import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
@@ -15,12 +14,9 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesChangedEnt
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEffectRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesTraceElementRecipe
-import com.mgtriffid.games.cotta.core.tracing.elements.TraceElement
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -222,51 +218,5 @@ class BytesStateSnapper @Inject constructor(
 
     private fun getComponentClassByKey(key: ShortComponentKey): KClass<out Component<*>> {
         return generatedComponentRegistry.getComponentClassByKey(key)
-    }
-
-    private fun packEffect(effect: CottaEffect): BytesEffectRecipe {
-        return BytesEffectRecipe(
-            data = kryo.run {
-                val output = Output(1024)
-                writeClassAndObject(output, effect)
-                output.toBytes()
-            }
-        )
-    }
-
-    private fun unpackEffectRecipe(effectRecipe: BytesEffectRecipe): CottaEffect {
-        val input = Input(effectRecipe.data)
-        return kryo.readClassAndObject(input) as CottaEffect
-    }
-
-    private fun TraceElement.toRecipe(): BytesTraceElementRecipe {
-        return when (this) {
-            is TraceElement.EffectTraceElement -> {
-                BytesTraceElementRecipe.BytesEffectTraceElementRecipe(
-                    packEffect(
-                        this.effect
-                    )
-                )
-            }
-
-            is TraceElement.EntityProcessingTraceElement -> TODO()
-            is TraceElement.InputTraceElement -> {
-                BytesTraceElementRecipe.BytesInputTraceElementRecipe(this.entityId)
-            }
-        }
-    }
-
-    private fun BytesTraceElementRecipe.toTraceElement(): TraceElement {
-        return when (this) {
-            is BytesTraceElementRecipe.BytesEffectTraceElementRecipe -> {
-                TraceElement.EffectTraceElement(unpackEffectRecipe(this.effectRecipe))
-            }
-
-            is BytesTraceElementRecipe.BytesInputTraceElementRecipe -> {
-                TraceElement.InputTraceElement(this.entityId)
-            }
-
-            is BytesTraceElementRecipe.BytesEntityProcessingTraceElementRecipe -> TODO()
-        }
     }
 }

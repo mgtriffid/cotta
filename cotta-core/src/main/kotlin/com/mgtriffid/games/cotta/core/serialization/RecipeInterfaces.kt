@@ -51,8 +51,4 @@ interface InputComponentRecipe
 
 interface EffectRecipe
 
-interface TraceRecipe {
-    val elements: List<TraceElementRecipe>
-}
-
 interface TraceElementRecipe

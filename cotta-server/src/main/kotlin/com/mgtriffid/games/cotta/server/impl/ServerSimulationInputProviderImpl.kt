@@ -5,7 +5,6 @@ import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.*
@@ -37,8 +36,6 @@ class ServerSimulationInputProviderImpl<
     @Named(SIMULATION) private val tickProvider: TickProvider,
     private val networkTransport: CottaServerNetworkTransport,
     private val inputSerialization: InputSerialization<IR>,
-    private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
     private val clientsGhosts: ClientsGhosts<IR>,
 ) : ServerSimulationInputProvider {
     private val buffers =

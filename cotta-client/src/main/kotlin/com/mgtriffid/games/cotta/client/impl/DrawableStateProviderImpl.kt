@@ -69,7 +69,7 @@ class DrawableStateProviderImpl @Inject constructor(
             lastTickEffectsWereReturned = globalTickProvider.tick
             val predictedEffects = predictionSimulation.effectBus.effects().map(::DrawableEffect)
             val previouslyPredictedEffects = previouslyPredicted[lastClientTickProcessedByServer.tick + 1]
-            logger.info { "previouslyPredictedEffects: $previouslyPredictedEffects" }
+            logger.debug { "previouslyPredictedEffects: $previouslyPredictedEffects" }
             val real = effectBus.effects().map(::DrawableEffect)
             logger.debug { "Real effects: $real" }
             val effects = object : DrawableEffects {

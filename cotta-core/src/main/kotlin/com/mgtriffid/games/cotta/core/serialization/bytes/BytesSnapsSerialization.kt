@@ -302,7 +302,6 @@ private fun BytesEntityRecipe.toDto(): BytesEntityRecipeDto {
 fun BytesStateRecipe.toDto(): BytesStateRecipeDto {
     val ret = BytesStateRecipeDto()
     ret.entities = ArrayList(entities.map { it.toDto() })
-    ret.idSequence = idSequence
     return ret
 }
 
@@ -342,7 +341,6 @@ fun BytesEntityRecipeDto.toRecipe(): BytesEntityRecipe {
 
 fun BytesStateRecipeDto.toRecipe() = BytesStateRecipe(
     entities = entities.map { it.toRecipe() },
-    idSequence = idSequence
 )
 
 fun BytesTraceRecipe.toDto(): BytesCottaTraceDto {

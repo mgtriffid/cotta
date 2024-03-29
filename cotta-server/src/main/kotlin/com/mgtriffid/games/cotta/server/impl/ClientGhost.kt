@@ -7,18 +7,28 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 private const val HISTORY_LENGTH = 128
-private const val MAX_LAG_COMP_DEPTH_TICKS = 8
+const val MAX_LAG_COMP_DEPTH_TICKS = 8
 
 // TODO inject history length
 class ClientGhost(
     val connectionId: ConnectionId
 ) {
+    private var stateSent = false
     private var lastUsedIncomingInput: PlayerInput? = null
     private val recordsOfSentData = RecordsOfSentData()
     private val clientTickCursor = ClientTickCursor()
 
     fun whatToSend(tick: Long): WhatToSend {
         return recordsOfSentData.whatToSend(tick)
+    }
+
+    fun whatToSend2(): WhatToSend2 {
+        return if (stateSent) {
+            WhatToSend2.SIMULATION_INPUTS
+        } else {
+            stateSent = true
+            WhatToSend2.STATE
+        }
     }
 
     fun tickCursorState(): ClientTickCursor.State {
@@ -73,6 +83,7 @@ class ClientGhost(
             }.also { whatToSend ->
                 logOfSentData.addAll(whatToSend.necessaryData)
                 logOfSentData.removeAll { it.tick < tick - HISTORY_LENGTH }
+                logger.info { "What to send to connection $connectionId: $necessaryData" }
             }
         }
 
@@ -108,4 +119,9 @@ enum class KindOfData {
     STATE,
     DELTA,
     PLAYER_ID,
+}
+
+enum class WhatToSend2 {
+    STATE,
+    SIMULATION_INPUTS
 }

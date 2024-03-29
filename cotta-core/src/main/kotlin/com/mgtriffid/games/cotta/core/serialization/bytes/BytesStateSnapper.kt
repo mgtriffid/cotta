@@ -48,11 +48,9 @@ class BytesStateSnapper @Inject constructor(
     // TODO stupid naming
     override fun snapState(
         entities: Entities,
-        idSequence: Int
     ): BytesStateRecipe {
         return BytesStateRecipe(
             entities.dynamic().map { entity -> packEntity(entity) },
-            idSequence = idSequence
         )
     }
 
@@ -196,8 +194,6 @@ class BytesStateSnapper @Inject constructor(
                 entityRecipe
             )
         }
-        entities.setIdGenerator(recipe.idSequence)
-        logger.info { "Id coming from Server with state is ${recipe.idSequence}" }
     }
 
     private fun packEntity(entity: Entity): BytesEntityRecipe {

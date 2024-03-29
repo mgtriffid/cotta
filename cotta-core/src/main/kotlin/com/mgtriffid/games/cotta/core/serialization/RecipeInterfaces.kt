@@ -16,7 +16,6 @@ interface DeltaRecipe {
 
 interface StateRecipe {
     val entities : List<EntityRecipe>
-    val idSequence: Int
 }
 
 interface MetaEntitiesDeltaRecipe {

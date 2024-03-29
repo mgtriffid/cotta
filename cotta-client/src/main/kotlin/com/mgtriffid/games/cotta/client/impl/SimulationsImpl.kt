@@ -35,7 +35,7 @@ class SimulationsImpl @Inject constructor(
     private val lastClientTickProcessedByServer: LastClientTickProcessedByServer
     ): Simulations {
     override fun simulate() {
-        val instructions = simulationDirector.instruct(tickProvider.tick).also { logger.info { "Instructions: $it" } }
+        val instructions = simulationDirector.instruct(tickProvider.tick).also { logger.debug { "Instructions: $it" } }
         // Now we need to consider the situation when we have guessed simulation.
         // Suddenly it breaks tickProvider. Right now we have only one, and it
         // is shared between simulation and, let's say, Global Orchestration.
@@ -72,11 +72,11 @@ class SimulationsImpl @Inject constructor(
     }
 
     private fun predict(serverSawOurTick: Long) {
-        logger.info { "Predicting" }
+        logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
         val unprocessedTicks = playerInputs.all().keys.filter { it > serverSawOurTick }
-            .also { logger.info { it.joinToString() } } // TODO explicit sorting
-        logger.info { "Setting initial predictions state with tick $currentTick" }
+            .also { logger.debug { it.joinToString() } } // TODO explicit sorting
+        logger.debug { "Setting initial predictions state with tick $currentTick" }
         predictionSimulation.predict(state.entities(currentTick), unprocessedTicks, currentTick)
     }
 

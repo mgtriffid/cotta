@@ -43,7 +43,7 @@ class ClientIncomingDataBuffer<
     }
 
     fun storeInput2(tick: Long, input: Map<PlayerId, PlayerInput>) {
-        logger.info { "Storing input2 for $tick, data buffer ${this.hashCode()}" }
+        logger.debug { "Storing input2 for $tick, data buffer ${this.hashCode()}" }
         inputs2[tick] = input
         cleanUpOldInputs2(tick)
     }

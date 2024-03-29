@@ -7,7 +7,11 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.*
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
+import com.mgtriffid.games.cotta.network.protocol.DeltaDto
+import com.mgtriffid.games.cotta.network.protocol.FullStateDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
+import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto2
+import com.mgtriffid.games.cotta.network.protocol.StateServerToClientDto2
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataDispatcher
 import jakarta.inject.Named
@@ -25,6 +29,7 @@ class ServerToClientDataDispatcherImpl<
     @Named(SIMULATION) private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts<IR>,
     private val network: CottaServerNetworkTransport,
+    // TODO these three better be merged into one somehow, verbose and redundant
     private val stateSnapper: StateSnapper<SR, DR, CEWTR, MEDR>,
     private val snapsSerialization: SnapsSerialization<SR, DR, CEWTR, MEDR>,
     private val inputSerialization: InputSerialization<IR>,
@@ -39,13 +44,56 @@ class ServerToClientDataDispatcherImpl<
             logger.debug { "Sending data to $playerId : ${whatToSend.necessaryData}" }
             whatToSend.necessaryData.forEach { (tick, kind) ->
                 logger.debug { "Sending tick $tick, kind $kind to $playerId" }
-                network.sendAll(ghost.connectionId, packData(tick, kind, data, playerId))
+                network.sendAll(ghost.connectionId, packData(tick, kind, playerId))
                 logger.debug { "Sent tick $tick, kind $kind to $playerId" }
+            }
+        }
+        clientsGhosts.data.forEach { (playerId, ghost) ->
+            val whatToSend2 = ghost.whatToSend2()
+            logger.debug { "Sending data to $playerId : ${whatToSend2}" }
+//            network.send(ghost.connectionId, packData(currentTick, whatToSend2, playerId))
+            logger.debug { "Sent data to $playerId : $whatToSend2" }
+        }
+    }
+
+    private fun packData(tick: Long, whatToSend: WhatToSend2, playerId: PlayerId): ServerToClientDto2 {
+        when (whatToSend) {
+            WhatToSend2.STATE -> {
+                val fullStateTick = tick - MAX_LAG_COMP_DEPTH_TICKS
+                val dto = StateServerToClientDto2()
+                dto.tick = tick
+                dto.fullState = FullStateDto().apply {
+                    payload = snapsSerialization.serializeStateRecipe(
+                        stateSnapper.snapState(data.entities(fullStateTick))
+                    )
+                }
+                dto.playerId = playerId.id
+                dto.deltas = ((tick - MAX_LAG_COMP_DEPTH_TICKS + 1)..tick).map { t ->
+                   DeltaDto().apply {
+                       payload = snapsSerialization.serializeDeltaRecipe(
+                           stateSnapper.snapDelta(
+                               prev = data.entities(tick - 1),
+                               curr = data.entities(tick)
+                           )
+                       )
+                   }
+                }
+                return dto
+            }
+            WhatToSend2.SIMULATION_INPUTS -> {
+                /*val inputDto2 = ServerToClientDto2()
+                inputDto2.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT2
+                inputDto2.payload = inputSerialization.serializePlayersInputs(
+                    data.playerInputs()
+                )
+                inputDto2.tick = tick
+                return inputDto2*/
+                TODO()
             }
         }
     }
 
-    private fun packData(tick: Long, kindOfData: KindOfData, data: DataForClients, playerId: PlayerId): Collection<ServerToClientDto> {
+    private fun packData(tick: Long, kindOfData: KindOfData, playerId: PlayerId): Collection<ServerToClientDto> {
         when (kindOfData) {
             KindOfData.DELTA -> {
                 val deltaDto = ServerToClientDto()
@@ -89,7 +137,7 @@ class ServerToClientDataDispatcherImpl<
             KindOfData.STATE -> {
                 val dto = ServerToClientDto()
                 dto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.STATE
-                dto.payload = snapsSerialization.serializeStateRecipe(stateSnapper.snapState(data.entities(tick), data.idSequence(tick)))
+                dto.payload = snapsSerialization.serializeStateRecipe(stateSnapper.snapState(data.entities(tick)))
                 dto.tick = tick
                 return listOf(dto)
             }

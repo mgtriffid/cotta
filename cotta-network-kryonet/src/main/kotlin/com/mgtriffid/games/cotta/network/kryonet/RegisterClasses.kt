@@ -11,7 +11,6 @@ fun Kryo.registerClasses() {
     register(EnterTheGameDto::class.java)
     register(ClientToServerInputDto::class.java)
     register(ClientToServerInputDto2::class.java)
-    register(ClientToServerCreatedPredictedEntitiesDto::class.java)
     register(ServerToClientDto::class.java)
     register(ByteArray::class.java)
     register(KindOfData::class.java)

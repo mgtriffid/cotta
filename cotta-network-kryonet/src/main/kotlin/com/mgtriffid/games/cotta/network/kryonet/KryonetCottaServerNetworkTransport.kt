@@ -4,7 +4,6 @@ import com.esotericsoftware.kryonet.Server
 import com.mgtriffid.games.cotta.network.ClientConnection
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerCreatedPredictedEntitiesDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto2
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
@@ -19,7 +18,6 @@ class KryonetCottaServerNetworkTransport : CottaServerNetworkTransport {
     private val enterGameIntents = ConcurrentLinkedQueue<Pair<ConnectionId, EnterGameIntent>>()
     private val clientToServerInputs = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>()
     private val clientToServerInputs2 = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto2>>()
-    private val clientToServerCreatedPredictedEntities = ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>>()
 
     override fun initialize() {
         logger.info { "Initializing ${KryonetCottaServerNetworkTransport::class.simpleName}..." }
@@ -35,7 +33,6 @@ class KryonetCottaServerNetworkTransport : CottaServerNetworkTransport {
             enterGameIntents = enterGameIntents,
             clientToServerInputs = clientToServerInputs,
             clientToServerInputs2 = clientToServerInputs2,
-            clientToServerCreatedPredictedEntities = clientToServerCreatedPredictedEntities
         )
         server.addListener(listener)
     }
@@ -50,10 +47,6 @@ class KryonetCottaServerNetworkTransport : CottaServerNetworkTransport {
 
     override fun drainInputs2(): Collection<Pair<ConnectionId, ClientToServerInputDto2>> {
         return clientToServerInputs2.drain()
-    }
-
-    override fun drainCreatedEntities(): Collection<Pair<ConnectionId, ClientToServerCreatedPredictedEntitiesDto>> {
-        return clientToServerCreatedPredictedEntities.drain()
     }
 
     override fun send(connectionId: ConnectionId, any: Any) {

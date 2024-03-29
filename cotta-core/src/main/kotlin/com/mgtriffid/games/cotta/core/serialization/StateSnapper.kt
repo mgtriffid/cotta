@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 interface StateSnapper<
     SR: StateRecipe,
     DR: DeltaRecipe,
-    MEDR: PlayersDeltaRecipe
+    PDR: PlayersDeltaRecipe
     > {
     fun snapState(entities: Entities): SR
     fun unpackStateRecipe(entities: Entities, recipe: SR)
@@ -15,6 +15,6 @@ interface StateSnapper<
     fun snapPlayersDelta(
         addedPlayers: List<PlayerId>,
 //        removedEntitiesIds: Set<EntityId>
-    ): MEDR
-    fun unpackPlayersDeltaRecipe(recipe: MEDR): List<PlayerId>
+    ): PDR
+    fun unpackPlayersDeltaRecipe(recipe: PDR): List<PlayerId>
 }

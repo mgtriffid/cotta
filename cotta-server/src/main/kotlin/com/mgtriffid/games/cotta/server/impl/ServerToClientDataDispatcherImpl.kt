@@ -23,14 +23,14 @@ class ServerToClientDataDispatcherImpl<
     SR: StateRecipe,
     DR: DeltaRecipe,
     IR: InputRecipe,
-    MEDR: PlayersDeltaRecipe
+    PDR: PlayersDeltaRecipe
     > @Inject constructor(
     @Named(SIMULATION) private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts<IR>,
     private val network: CottaServerNetworkTransport,
     // TODO these three better be merged into one somehow, verbose and redundant
-    private val stateSnapper: StateSnapper<SR, DR, MEDR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR, MEDR>,
+    private val stateSnapper: StateSnapper<SR, DR, PDR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, PDR>,
     private val inputSerialization: InputSerialization<IR>,
     private val data: DataForClients,
 ) : ServerToClientDataDispatcher {

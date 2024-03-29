@@ -30,13 +30,13 @@ class NetworkClientImpl<
     SR: StateRecipe,
     DR: DeltaRecipe,
     IR: InputRecipe,
-    MEDR: PlayersDeltaRecipe
+    PDR: PlayersDeltaRecipe
     > @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
-    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, MEDR>,
-    private val snapsSerialization: SnapsSerialization<SR, DR, MEDR>,
+    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, PDR>,
+    private val snapsSerialization: SnapsSerialization<SR, DR, PDR>,
     private val inputSerialization: InputSerialization<IR>,
-    private val stateSnapper: StateSnapper<SR, DR, MEDR>,
+    private val stateSnapper: StateSnapper<SR, DR, PDR>,
     private val localPlayer: LocalPlayer
 ) : NetworkClient {
     private val lagCompLimit: Int = 8 // TODO move to config and bind properly

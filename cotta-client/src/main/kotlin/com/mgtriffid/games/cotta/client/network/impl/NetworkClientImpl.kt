@@ -10,7 +10,6 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
-import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization

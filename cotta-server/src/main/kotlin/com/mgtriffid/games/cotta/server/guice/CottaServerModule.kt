@@ -18,7 +18,6 @@ import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
@@ -108,9 +107,7 @@ class CottaServerModule(
                 .to(object : TypeLiteral<ServerSimulationInputProviderImpl<
                     BytesStateRecipe,
                     BytesDeltaRecipe,
-                    BytesInputRecipe,
-                    BytesCreatedEntitiesWithTracesRecipe,
-                    BytesPlayersDeltaRecipe
+                    BytesInputRecipe
                     >>() {})
                 .`in`(Scopes.SINGLETON)
 

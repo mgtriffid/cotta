@@ -19,7 +19,6 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.BytesInputSerializatio
 import com.mgtriffid.games.cotta.core.serialization.bytes.BytesSnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.bytes.BytesStateSnapper
 import com.mgtriffid.games.cotta.core.serialization.bytes.DataClassSerializer
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe

@@ -7,11 +7,8 @@ import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
-import com.mgtriffid.games.cotta.core.serialization.CreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.TraceRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesChangedEntityRecipeDto
@@ -30,7 +27,6 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesStateRecipeDt
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesChangedEntityRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesComponentRecipe
-import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesCreatedEntitiesWithTracesRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEffectRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesEntityRecipe

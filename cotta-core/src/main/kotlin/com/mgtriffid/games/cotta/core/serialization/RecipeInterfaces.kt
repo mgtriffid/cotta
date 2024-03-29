@@ -56,7 +56,3 @@ interface TraceRecipe {
 }
 
 interface TraceElementRecipe
-interface CreatedEntitiesWithTracesRecipe {
-    val mappedPredictedIds: Map<AuthoritativeEntityId, PredictedEntityId>
-    val traces: List<Pair<TraceRecipe, EntityId>>
-}

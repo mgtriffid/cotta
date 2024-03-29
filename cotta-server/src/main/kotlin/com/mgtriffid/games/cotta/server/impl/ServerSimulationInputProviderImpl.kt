@@ -26,9 +26,7 @@ const val REQUIRED_CLIENT_INPUTS_BUFFER = 3
 class ServerSimulationInputProviderImpl<
     SR : StateRecipe,
     DR : DeltaRecipe,
-    IR : InputRecipe,
-    CEWTR : CreatedEntitiesWithTracesRecipe,
-    MEDR : PlayersDeltaRecipe
+    IR : InputRecipe
     > @Inject constructor(
     private val nonPlayerInputProvider: NonPlayerInputProvider,
     @Named("simulation") private val state: CottaState,

@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
+import com.mgtriffid.games.cotta.core.MAX_LAG_COMP_DEPTH_TICKS
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.network.ConnectionId
 import mu.KotlinLogging
@@ -7,7 +8,6 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 private const val HISTORY_LENGTH = 128
-const val MAX_LAG_COMP_DEPTH_TICKS = 8
 
 // TODO inject history length
 class ClientGhost(

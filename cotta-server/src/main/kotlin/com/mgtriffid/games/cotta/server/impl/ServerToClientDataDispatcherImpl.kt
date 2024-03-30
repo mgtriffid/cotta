@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.google.inject.Inject
+import com.mgtriffid.games.cotta.core.MAX_LAG_COMP_DEPTH_TICKS
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
@@ -84,7 +85,7 @@ class ServerToClientDataDispatcherImpl<
             }
             WhatToSend2.SIMULATION_INPUTS -> {
                 val dto = SimulationInputServerToClientDto2()
-                dto.tick = tick
+                dto.tick = tick - 1
                 dto.playersSawTicks = snapsSerialization.serializePlayersSawTicks(
                     data.playersSawTicks().all()
                 )
@@ -117,7 +118,7 @@ class ServerToClientDataDispatcherImpl<
 
                 val playersDeltaDto = ServerToClientDto()
                 playersDeltaDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.PLAYERS_DELTA
-                playersDeltaDto.tick = tick - 1
+             /**/   playersDeltaDto.tick = tick - 1
                 playersDeltaDto.payload = snapsSerialization.serializePlayersDeltaRecipe(
                     stateSnapper.snapPlayersDelta(data.players().addedAtTick(tick))
                 )
@@ -127,14 +128,14 @@ class ServerToClientDataDispatcherImpl<
                 inputDto2.payload = inputSerialization.serializePlayersInputs(
                     data.playerInputs()
                 )
-                inputDto2.tick = tick - 1
+             /**/   inputDto2.tick = tick - 1
 
                 val playersSawTicksDto = ServerToClientDto()
                 playersSawTicksDto.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.PLAYERS_SAW_TICKS
                 playersSawTicksDto.payload = snapsSerialization.serializePlayersSawTicks(
                     data.playersSawTicks().all().also { logger.debug { it.toString() } }
                 )
-                playersSawTicksDto.tick = tick - 1
+             /**/   playersSawTicksDto.tick = tick - 1
                 return listOf(
                     deltaDto,
                     inputDto2,

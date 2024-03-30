@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.client.impl.Delta
 import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.client.impl.SimulationInputData
 import com.mgtriffid.games.cotta.client.network.NetworkClient
+import com.mgtriffid.games.cotta.core.MAX_LAG_COMP_DEPTH_TICKS
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
@@ -23,8 +24,6 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
-import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
-import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto2
 import com.mgtriffid.games.cotta.network.protocol.SimulationInputServerToClientDto2
 import com.mgtriffid.games.cotta.network.protocol.StateServerToClientDto2
 import jakarta.inject.Inject
@@ -156,24 +155,27 @@ class NetworkClientImpl<
     }
 
     override fun tryGetAuthoritativeState(): AuthoritativeState {
-        if (!localPlayer.isReady()) {
-            return AuthoritativeState.NotReady
-        }
-        return if (stateAvailable()) {
+        return if (stateAvailable() && bufferedEnough()) {
             AuthoritativeState.Ready { state, simulationTickProvider, globalTickProvider ->
                 logger.debug { "Setting state from authoritative" }
-                val fullStateTick = incomingDataBuffer.states.lastKey()
-                val stateRecipe = incomingDataBuffer.states[fullStateTick]!!
+                val tick = incomingDataBuffer.states2.lastKey()
+                val stateData = incomingDataBuffer.states2[tick]!!
+                val fullStateTick = tick - MAX_LAG_COMP_DEPTH_TICKS
                 state.setBlank(fullStateTick)
                 simulationTickProvider.tick = fullStateTick
                 globalTickProvider.tick = fullStateTick
-                stateSnapper.unpackStateRecipe(state.entities(atTick = fullStateTick), stateRecipe)
-                ((fullStateTick + 1)..(fullStateTick + lagCompLimit)).forEach { tick ->
-                    state.advance(tick - 1)
+                stateSnapper.unpackStateRecipe(state.entities(fullStateTick), stateData.state)
+                // TODO review these indices CAREFULLY, it's easy to miss smth
+                ((fullStateTick + 1)..tick).forEach { t ->
+                    state.advance(t - 1)
                     simulationTickProvider.tick++
                     globalTickProvider.tick++
-                    applyDelta(state, tick)
+                    stateSnapper.unpackDeltaRecipe(
+                        state.entities(atTick = t),
+                        stateData.deltas[(t - fullStateTick - 1).toInt()]
+                    )
                 }
+                localPlayer.set(stateData.playerId)
             }
         } else {
             AuthoritativeState.NotReady
@@ -188,14 +190,11 @@ class NetworkClientImpl<
         stateSnapper.unpackDeltaRecipe(entities, incomingDataBuffer.deltas[tick]!!)
     }
 
-    private fun stateAvailable(): Boolean {
-        val stateArrived = incomingDataBuffer.states.isNotEmpty()
-        if (!stateArrived) return false
-        val stateTick = incomingDataBuffer.states.lastKey()
-        val deltasForLagCompArrived =
-            incomingDataBuffer.deltas.keys.containsAll(((stateTick + 1)..(stateTick + lagCompLimit + bufferLength)).toList())
-        return deltasForLagCompArrived
-    }
+    private fun stateAvailable(): Boolean = incomingDataBuffer.states2.isNotEmpty()
+
+    private fun bufferedEnough(): Boolean = incomingDataBuffer.simulationInputs.keys.containsAll(
+        ((incomingDataBuffer.states2.lastKey() + 1)..(incomingDataBuffer.states2.lastKey() + bufferLength)).toList()
+    )
 
     override fun deltaAvailable(tick: Long): Boolean {
         return incomingDataBuffer.deltas.containsKey(tick).also { logger.debug { "Delta present for tick $tick: $it" } }

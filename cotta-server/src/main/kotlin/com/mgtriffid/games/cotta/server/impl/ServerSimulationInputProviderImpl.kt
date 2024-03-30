@@ -62,17 +62,6 @@ class ServerSimulationInputProviderImpl<
     }
 
     override fun fetch() {
-        val inputDtos = networkTransport.drainInputs()
-        inputDtos.forEach { (connectionId, dto) ->
-            val playerId = clientsGhosts.playerByConnection[connectionId]
-            if (playerId == null) {
-                logger.warn { "Got input from unknown connection $connectionId" }
-                return@forEach
-            }
-            val recipe = inputSerialization.deserializeInputRecipe(dto.payload)
-            getBuffer(playerId).storeInput(dto.tick, recipe)
-        }
-
         val inputDtos2 = networkTransport.drainInputs2()
         inputDtos2.forEach { (connectionId, dto) ->
             val playerId = clientsGhosts.playerByConnection[connectionId]

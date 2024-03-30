@@ -5,12 +5,14 @@ import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.*
+import com.mgtriffid.games.cotta.core.serialization.dto.PlayersSawTicksDto
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.DeltaDto
 import com.mgtriffid.games.cotta.network.protocol.FullStateDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto2
+import com.mgtriffid.games.cotta.network.protocol.SimulationInputServerToClientDto2
 import com.mgtriffid.games.cotta.network.protocol.StateServerToClientDto2
 import com.mgtriffid.games.cotta.server.DataForClients
 import com.mgtriffid.games.cotta.server.ServerToClientDataDispatcher
@@ -49,8 +51,8 @@ class ServerToClientDataDispatcherImpl<
         }
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val whatToSend2 = ghost.whatToSend2()
-            logger.debug { "Sending data to $playerId : ${whatToSend2}" }
-//            network.send(ghost.connectionId, packData(currentTick, whatToSend2, playerId))
+            logger.info { "Sending data to $playerId : $whatToSend2" }
+            network.send(ghost.connectionId, packData(currentTick, whatToSend2, playerId))
             logger.debug { "Sent data to $playerId : $whatToSend2" }
         }
     }
@@ -80,14 +82,16 @@ class ServerToClientDataDispatcherImpl<
                 return dto
             }
             WhatToSend2.SIMULATION_INPUTS -> {
-                /*val inputDto2 = ServerToClientDto2()
-                inputDto2.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT2
-                inputDto2.payload = inputSerialization.serializePlayersInputs(
+                val dto = SimulationInputServerToClientDto2()
+                dto.tick = tick
+                dto.playersSawTicks = snapsSerialization.serializePlayersSawTicks(
+                    data.playersSawTicks().all()
+                )
+                dto.playersInputs = inputSerialization.serializePlayersInputs(
                     data.playerInputs()
                 )
-                inputDto2.tick = tick
-                return inputDto2*/
-                TODO()
+                dto.idSequence = data.idSequence(tick)
+                return dto
             }
         }
     }

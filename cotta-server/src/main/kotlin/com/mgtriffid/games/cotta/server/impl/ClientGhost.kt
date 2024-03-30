@@ -83,7 +83,7 @@ class ClientGhost(
             }.also { whatToSend ->
                 logOfSentData.addAll(whatToSend.necessaryData)
                 logOfSentData.removeAll { it.tick < tick - HISTORY_LENGTH }
-                logger.info { "What to send to connection $connectionId: $necessaryData" }
+                logger.debug { "What to send to connection $connectionId: $necessaryData" }
             }
         }
 

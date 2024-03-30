@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.registerClasses
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
+import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto2
 import com.mgtriffid.games.cotta.utils.drain
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -51,6 +52,9 @@ internal class KryonetCottaClientNetworkTransport(
                     is ServerToClientDto -> {
                         saver.save(obj, packetsQueue)
                         logger.debug { "Tick ${obj.tick}, kind ${obj.kindOfData}" }
+                    }
+                    is ServerToClientDto2 -> {
+                        logger.info { "Received a ${ServerToClientDto2::class.simpleName}: $obj" }
                     }
                 }
             }

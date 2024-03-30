@@ -19,4 +19,9 @@ fun Kryo.registerClasses() {
     register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
     register(EntityId::class.java)
     register(AuthoritativeEntityId::class.java)
+    register(ServerToClientDto2::class.java)
+    register(StateServerToClientDto2::class.java)
+    register(SimulationInputServerToClientDto2::class.java)
+    register(DeltaDto::class.java)
+    register(FullStateDto::class.java)
 }

@@ -19,7 +19,7 @@ import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
-import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto2
+import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
 import jakarta.inject.Inject
 import mu.KotlinLogging
@@ -69,7 +69,7 @@ class NetworkClientImpl<
                     localPlayer.set(snapsSerialization.deserializePlayerId(it.payload))
                 }
 
-                KindOfData.INPUT2 -> incomingDataBuffer.storeInput2(
+                KindOfData.INPUT -> incomingDataBuffer.storeInput(
                     it.tick,
                     inputSerialization.deserializePlayersInputs(it.payload)
                 )
@@ -85,7 +85,8 @@ class NetworkClientImpl<
     }
 
     override fun send(input: PlayerInput, currentTick: Long) {
-        val inputDto = ClientToServerInputDto2()
+        val inputDto =
+            ClientToServerInputDto()
         inputDto.tick = currentTick
         logger.debug { "Sending input for $currentTick : $input" }
         inputDto.payload = inputSerialization.serializeInput(input)
@@ -101,7 +102,7 @@ class NetworkClientImpl<
                 }
 
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                    return incomingDataBuffer.inputs2[tick]!!.also { logger.debug { "In getting delta: $it" } }
+                    return incomingDataBuffer.inputs[tick]!!.also { logger.debug { "In getting delta: $it" } }
                 }
 
                 override fun playersSawTicks(): Map<PlayerId, Long> {
@@ -157,7 +158,7 @@ class NetworkClientImpl<
 
     override fun deltaAvailable(tick: Long): Boolean {
         return incomingDataBuffer.deltas.containsKey(tick).also { logger.debug { "Delta present for tick $tick: $it" } }
-            && incomingDataBuffer.inputs2.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
+            && incomingDataBuffer.inputs.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
             && incomingDataBuffer.playersSawTicks.containsKey(tick).also { logger.debug { "sawTicks present for tick $tick: $it" } }
             && incomingDataBuffer.playersDeltas.containsKey(tick).also { logger.debug { "playersDelta present for tick $tick: $it" } }
     }

@@ -5,7 +5,6 @@ import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.serialization.*
-import com.mgtriffid.games.cotta.core.serialization.dto.PlayersSawTicksDto
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.DeltaDto
@@ -118,7 +117,7 @@ class ServerToClientDataDispatcherImpl<
                 )
 
                 val inputDto2 = ServerToClientDto()
-                inputDto2.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT2
+                inputDto2.kindOfData = com.mgtriffid.games.cotta.network.protocol.KindOfData.INPUT
                 inputDto2.payload = inputSerialization.serializePlayersInputs(
                     data.playerInputs()
                 )

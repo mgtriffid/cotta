@@ -19,7 +19,7 @@ class ClientIncomingDataBuffer<
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
     val playersDeltas = TreeMap<Long, PDR>()
-    val inputs2 = TreeMap<Long, Map<PlayerId, PlayerInput>>() // GROOM class with naming
+    val inputs = TreeMap<Long, Map<PlayerId, PlayerInput>>() // GROOM class with naming
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
 
     fun storeDelta(tick: Long, delta: DR) {
@@ -41,10 +41,10 @@ class ClientIncomingDataBuffer<
         cleanUpOldStates(tick)
     }
 
-    fun storeInput2(tick: Long, input: Map<PlayerId, PlayerInput>) {
-        logger.debug { "Storing input2 for $tick, data buffer ${this.hashCode()}" }
-        inputs2[tick] = input
-        cleanUpOldInputs2(tick)
+    fun storeInput(tick: Long, input: Map<PlayerId, PlayerInput>) {
+        logger.debug { "Storing input for $tick, data buffer ${this.hashCode()}" }
+        inputs[tick] = input
+        cleanUpOldInputs(tick)
     }
 
     fun storePlayersSawTicks(tick: Long, playersSawTicks: Map<PlayerId, Long>) {
@@ -64,8 +64,8 @@ class ClientIncomingDataBuffer<
         cleanUp(states, tick)
     }
 
-    private fun cleanUpOldInputs2(tick: Long) {
-        cleanUp(inputs2, tick)
+    private fun cleanUpOldInputs(tick: Long) {
+        cleanUp(inputs, tick)
     }
 
     // GROOM same on server

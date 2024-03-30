@@ -5,6 +5,6 @@ public enum KindOfData {
     STATE,
     PLAYER_ID,
     PLAYERS_DELTA,
-    INPUT2,
+    INPUT,
     PLAYERS_SAW_TICKS
 }

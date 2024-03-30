@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
@@ -12,26 +11,16 @@ import kotlin.math.min
 private val logger = KotlinLogging.logger {}
 
 class ServerIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
-    val inputs = TreeMap<Long, IR>()
-    val inputs2 = TreeMap<Long, PlayerInput>()
+    val inputs = TreeMap<Long, PlayerInput>()
 
-    fun storeInput(tick: Long, recipe: IR) {
-        inputs[tick] = recipe
-        cleanUpOldInputs(tick)
-    }
-
-    fun storeInput2(tick: Long, input: PlayerInput) {
-        inputs2[tick] = input
+    fun storeInput(tick: Long, input: PlayerInput) {
+        inputs[tick] = input
         logger.debug { "Storing input for tick $tick : $input" }
-        cleanUpOldInputs2(tick)
+        cleanUpOldInputs(tick)
     }
 
     private fun cleanUpOldInputs(tick: Long) {
         cleanUp(inputs, tick)
-    }
-
-    private fun cleanUpOldInputs2(tick: Long) {
-        cleanUp(inputs2, tick)
     }
 
     private fun cleanUp(data: TreeMap<Long, *>, tick: Long) {
@@ -42,8 +31,8 @@ class ServerIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe
     }
 
     fun hasEnoughInputsToStart(): Boolean {
-        if (inputs2.isEmpty()) return false
-        val lastInput = inputs2.lastKey()
-        return (0 until REQUIRED_CLIENT_INPUTS_BUFFER).all { inputs2.containsKey(lastInput - it) }
+        if (inputs.isEmpty()) return false
+        val lastInput = inputs.lastKey()
+        return (0 until REQUIRED_CLIENT_INPUTS_BUFFER).all { inputs.containsKey(lastInput - it) }
     }
 }

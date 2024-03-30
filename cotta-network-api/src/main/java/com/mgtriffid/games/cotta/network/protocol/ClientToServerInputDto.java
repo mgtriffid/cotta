@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.network.protocol;
 
-public class ClientToServerInputDto2 {
+public class ClientToServerInputDto {
     public long tick;
     public byte[] payload;
 }

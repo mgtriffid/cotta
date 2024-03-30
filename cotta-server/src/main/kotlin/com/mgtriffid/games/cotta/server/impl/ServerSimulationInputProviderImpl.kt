@@ -62,7 +62,7 @@ class ServerSimulationInputProviderImpl<
     }
 
     override fun fetch() {
-        val inputDtos2 = networkTransport.drainInputs2()
+        val inputDtos2 = networkTransport.drainInputs()
         inputDtos2.forEach { (connectionId, dto) ->
             val playerId = clientsGhosts.playerByConnection[connectionId]
             if (playerId == null) {
@@ -70,7 +70,7 @@ class ServerSimulationInputProviderImpl<
                 return@forEach
             }
             val input = inputSerialization.deserializeInput(dto.payload)
-            getBuffer(playerId).storeInput2(dto.tick, input)
+            getBuffer(playerId).storeInput(dto.tick, input)
         }
     }
 
@@ -82,9 +82,9 @@ class ServerSimulationInputProviderImpl<
             { playerId, ghost, tick ->
                 val buffer = getBuffer(playerId)
                 playersSawTicks[playerId] = tick
-                playerInputs[playerId] = buffer.inputs2[tick]!!
+                playerInputs[playerId] = buffer.inputs[tick]!!
                 ghost.setLastUsedTick(tick)
-                ghost.setLastUsedIncomingInput(buffer.inputs2[tick]!!)
+                ghost.setLastUsedIncomingInput(buffer.inputs[tick]!!)
             }
         val usePrevious: (PlayerId, ClientGhost, Long) -> Unit =
             { playerId, ghost, tick ->
@@ -99,7 +99,7 @@ class ServerSimulationInputProviderImpl<
                     if (buffer.hasEnoughInputsToStart()) {
                         ghost.setCursorState(RUNNING)
                         val tick =
-                            buffer.inputs2.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
+                            buffer.inputs.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
                         use(playerId, ghost, tick)
                     } else {
                         // do nothing. Ok, we don't have the input, no big deal.
@@ -111,7 +111,7 @@ class ServerSimulationInputProviderImpl<
                     val tick = lastUsedInput + 1
                     logger.debug { "Client input tick is $tick for $playerId" }
                     if (
-                        buffer.inputs2.containsKey(tick)
+                        buffer.inputs.containsKey(tick)
                     ) {
                         use(playerId, ghost, tick)
                     } else {

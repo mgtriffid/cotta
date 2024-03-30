@@ -5,7 +5,6 @@ import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.PlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
-import com.mgtriffid.games.cotta.core.serialization.StateSnapshot
 import mu.KotlinLogging
 import java.util.*
 import kotlin.math.min
@@ -18,7 +17,8 @@ class ClientIncomingDataBuffer<
     PDR: PlayersDeltaRecipe
     > {
     val states = TreeMap<Long, SR>()
-    val states2 = TreeMap<Long, Any>()
+    val states2 = TreeMap<Long, AuthoritativeStateData<SR, DR>>()
+    val simulationInputs = TreeMap<Long, SimulationInputData>()
     val deltas = TreeMap<Long, DR>()
     val playersDeltas = TreeMap<Long, PDR>()
     val inputs = TreeMap<Long, Map<PlayerId, PlayerInput>>() // GROOM class with naming
@@ -44,7 +44,16 @@ class ClientIncomingDataBuffer<
     }
 
     fun storeState2(tick: Long, s: AuthoritativeStateData<SR, DR>) {
+        states2[tick] = s
+        cleanUpOldStates2(tick)
+    }
 
+    fun storeSimulationInput2(
+        tick: Long,
+        simulationInputData: SimulationInputData
+    ) {
+        simulationInputs[tick] = simulationInputData
+        cleanupOldSimulationInputs(tick)
     }
 
     fun storeInput(tick: Long, input: Map<PlayerId, PlayerInput>) {
@@ -68,6 +77,14 @@ class ClientIncomingDataBuffer<
 
     private fun cleanUpOldStates(tick: Long) {
         cleanUp(states, tick)
+    }
+
+    private fun cleanUpOldStates2(tick: Long) {
+        cleanUp(states2, tick)
+    }
+
+    private fun cleanupOldSimulationInputs(tick: Long) {
+        cleanUp(simulationInputs, tick)
     }
 
     private fun cleanUpOldInputs(tick: Long) {

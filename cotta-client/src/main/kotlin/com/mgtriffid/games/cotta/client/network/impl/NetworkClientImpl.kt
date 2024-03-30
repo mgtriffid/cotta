@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.client.impl.AuthoritativeStateData
 import com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer
 import com.mgtriffid.games.cotta.client.impl.Delta
 import com.mgtriffid.games.cotta.client.impl.LocalPlayer
+import com.mgtriffid.games.cotta.client.impl.SimulationInputData
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
@@ -106,12 +107,19 @@ class NetworkClientImpl<
                 }
 
                 is SimulationInputServerToClientDto2 -> {
-/*
-                    incomingDataBuffer.storeMetaEntitiesDelta(
+                    incomingDataBuffer.storeSimulationInput2(
                         packet.tick,
-                        snapsSerialization.deserializePlayersDeltaRecipe(data.payload)
+                        SimulationInputData(
+                            packet.tick,
+                            snapsSerialization.deserializePlayersSawTicks(packet.playersSawTicks),
+                            inputSerialization.deserializePlayersInputs(packet.playersInputs),
+                            SimulationInputData.PlayersDiff(
+                                added = packet.playersDiff.added.map { PlayerId(it) }.toSet()
+                            ),
+                            packet.idSequence
+                        )
                     )
-*/
+
                 }
             }
         }

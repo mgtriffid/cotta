@@ -9,6 +9,7 @@ import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.DeltaDto
 import com.mgtriffid.games.cotta.network.protocol.FullStateDto
+import com.mgtriffid.games.cotta.network.protocol.PlayersDiffDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto2
 import com.mgtriffid.games.cotta.network.protocol.SimulationInputServerToClientDto2
@@ -90,6 +91,10 @@ class ServerToClientDataDispatcherImpl<
                 dto.playersInputs = inputSerialization.serializePlayersInputs(
                     data.playerInputs()
                 )
+                dto.playersDiff = PlayersDiffDto().apply {
+                    added = data.players().addedAtTick(tick).map { it.id }
+                        .toIntArray()
+                }
                 dto.idSequence = data.idSequence(tick)
                 return dto
             }

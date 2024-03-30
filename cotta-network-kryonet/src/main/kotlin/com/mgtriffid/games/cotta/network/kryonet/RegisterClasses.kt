@@ -24,4 +24,5 @@ fun Kryo.registerClasses() {
     register(DeltaDto::class.java)
     register(FullStateDto::class.java)
     register(IntArray::class.java)
+    register(PlayersDiffDto::class.java)
 }

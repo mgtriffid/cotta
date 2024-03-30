@@ -21,6 +21,7 @@ internal class KryonetCottaClientNetworkTransport(
 ) : CottaClientNetworkTransport {
     private lateinit var client: Client
     private val packetsQueue = ConcurrentLinkedQueue<ServerToClientDto>()
+    private val packetsQueue2 = ConcurrentLinkedQueue<ServerToClientDto2>()
 
     // TODO would be more clear to separate init and connect.
     override fun initialize() {
@@ -38,6 +39,10 @@ internal class KryonetCottaClientNetworkTransport(
 
     override fun drainIncomingData(): Collection<ServerToClientDto> {
         return packetsQueue.drain()
+    }
+
+    override fun drainIncomingData2(): Collection<ServerToClientDto2> {
+        return packetsQueue2.drain()
     }
 
     override fun send(obj: Any) {

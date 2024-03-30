@@ -1,8 +1,6 @@
 package com.mgtriffid.games.cotta.network.kryonet.client
 
-import com.mgtriffid.games.cotta.core.config.DebugConfig
 import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Issues
-import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Latency
 import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import java.util.Queue
 import java.util.concurrent.Executors

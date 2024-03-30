@@ -26,8 +26,7 @@ class CottaClientImpl @Inject constructor(
     @Named(SIMULATION) private val simulationTickProvider: TickProvider,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
-    private val drawableStateProvider: DrawableStateProvider,
-    private val lastClientTickProcessedByServer: LastClientTickProcessedByServer
+    private val drawableStateProvider: DrawableStateProvider
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial
 

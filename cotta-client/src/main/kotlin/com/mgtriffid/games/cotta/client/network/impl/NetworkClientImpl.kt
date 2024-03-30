@@ -84,6 +84,10 @@ class NetworkClientImpl<
         }
     }
 
+    override fun fetch2() {
+        val data = networkTransport.drainIncomingData2()
+    }
+
     override fun send(input: PlayerInput, currentTick: Long) {
         val inputDto =
             ClientToServerInputDto()

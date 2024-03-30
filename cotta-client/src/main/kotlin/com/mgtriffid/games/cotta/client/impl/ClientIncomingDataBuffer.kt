@@ -18,6 +18,7 @@ class ClientIncomingDataBuffer<
     > {
     val states = TreeMap<Long, SR>()
     val deltas = TreeMap<Long, DR>()
+    val states2 = TreeMap<Long, Any>()
     val playersDeltas = TreeMap<Long, PDR>()
     val inputs = TreeMap<Long, Map<PlayerId, PlayerInput>>() // GROOM class with naming
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()

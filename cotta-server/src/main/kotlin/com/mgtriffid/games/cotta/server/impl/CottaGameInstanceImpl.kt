@@ -78,6 +78,7 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     private fun registerPlayer(connectionId: ConnectionId, intent: EnterGameIntent) {
         logger.debug { "Received an intent to enter the game from connection '${connectionId.id}'" }
         val playerId = serverSimulation.enterGame(intent)
+
         clientsGhosts.addGhost(playerId, connectionId)
     }
 

@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.client.network.impl
 
 import com.mgtriffid.games.cotta.client.impl.AuthoritativeState
+import com.mgtriffid.games.cotta.client.impl.AuthoritativeStateData
 import com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer
 import com.mgtriffid.games.cotta.client.impl.Delta
 import com.mgtriffid.games.cotta.client.impl.LocalPlayer
@@ -21,6 +22,10 @@ import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.KindOfData
+import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
+import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto2
+import com.mgtriffid.games.cotta.network.protocol.SimulationInputServerToClientDto2
+import com.mgtriffid.games.cotta.network.protocol.StateServerToClientDto2
 import jakarta.inject.Inject
 import mu.KotlinLogging
 
@@ -85,7 +90,31 @@ class NetworkClientImpl<
     }
 
     override fun fetch2() {
-        val data = networkTransport.drainIncomingData2()
+        networkTransport.drainIncomingData2().forEach { packet ->
+            when (packet) {
+                is StateServerToClientDto2 -> {
+                    incomingDataBuffer.storeState2(
+                        packet.tick,
+                        AuthoritativeStateData(
+                            packet.tick,
+                            snapsSerialization.deserializeStateRecipe(packet.fullState.payload),
+                            packet.deltas.map { snapsSerialization.deserializeDeltaRecipe(it.payload) },
+                            PlayerId(packet.playerId),
+                            packet.playerIds.map { PlayerId(it) }.toSet()
+                        )
+                    )
+                }
+
+                is SimulationInputServerToClientDto2 -> {
+/*
+                    incomingDataBuffer.storeMetaEntitiesDelta(
+                        packet.tick,
+                        snapsSerialization.deserializePlayersDeltaRecipe(data.payload)
+                    )
+*/
+                }
+            }
+        }
     }
 
     override fun send(input: PlayerInput, currentTick: Long) {

@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.PlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
+import com.mgtriffid.games.cotta.core.serialization.StateSnapshot
 import mu.KotlinLogging
 import java.util.*
 import kotlin.math.min
@@ -17,8 +18,8 @@ class ClientIncomingDataBuffer<
     PDR: PlayersDeltaRecipe
     > {
     val states = TreeMap<Long, SR>()
-    val deltas = TreeMap<Long, DR>()
     val states2 = TreeMap<Long, Any>()
+    val deltas = TreeMap<Long, DR>()
     val playersDeltas = TreeMap<Long, PDR>()
     val inputs = TreeMap<Long, Map<PlayerId, PlayerInput>>() // GROOM class with naming
     val playersSawTicks = TreeMap<Long, Map<PlayerId, Long>>()
@@ -40,6 +41,10 @@ class ClientIncomingDataBuffer<
     fun storeState(tick: Long, state: SR) {
         states[tick] = state
         cleanUpOldStates(tick)
+    }
+
+    fun storeState2(tick: Long, s: AuthoritativeStateData<SR, DR>) {
+
     }
 
     fun storeInput(tick: Long, input: Map<PlayerId, PlayerInput>) {

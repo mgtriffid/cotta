@@ -13,6 +13,7 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
+import com.mgtriffid.games.cotta.server.Players
 import com.mgtriffid.games.cotta.server.ServerSimulation
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -27,7 +28,8 @@ class ServerSimulationImpl @Inject constructor(
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks,
     @Named(SIMULATION) private val tickProvider: TickProvider,
-    private val inputProcessing: InputProcessing
+    private val inputProcessing: InputProcessing,
+    private val players: Players
 ) : ServerSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
@@ -72,6 +74,7 @@ class ServerSimulationImpl @Inject constructor(
     override fun enterGame(intent: EnterGameIntent): PlayerId {
         val playerId = playerIdGenerator.nextId()
         enterGameIntents.add(Pair(intent, playerId))
+        players.add(playerId, tickProvider.tick)
         return playerId
     }
 

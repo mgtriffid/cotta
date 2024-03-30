@@ -23,4 +23,5 @@ fun Kryo.registerClasses() {
     register(SimulationInputServerToClientDto2::class.java)
     register(DeltaDto::class.java)
     register(FullStateDto::class.java)
+    register(IntArray::class.java)
 }

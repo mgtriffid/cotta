@@ -59,6 +59,7 @@ internal class KryonetCottaClientNetworkTransport(
                         logger.debug { "Tick ${obj.tick}, kind ${obj.kindOfData}" }
                     }
                     is ServerToClientDto2 -> {
+                        saver.save(obj, packetsQueue2)
                         logger.info { "Received a ${ServerToClientDto2::class.simpleName}: $obj" }
                     }
                 }

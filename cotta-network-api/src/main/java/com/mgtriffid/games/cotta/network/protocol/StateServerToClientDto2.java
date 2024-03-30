@@ -7,4 +7,5 @@ public class StateServerToClientDto2 implements ServerToClientDto2 {
     public FullStateDto fullState;
     public List<DeltaDto> deltas;
     public int playerId;
+    public int[] playerIds;
 }

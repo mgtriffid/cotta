@@ -1,18 +1,21 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.server.Players
 import java.util.*
-import kotlin.collections.HashMap
 import kotlin.math.min
 
-class MetaEntitiesImpl : Players {
-    private val newlyAdded = TreeMap<Long, List<PlayerId>>()
+class PlayersImpl : Players {
+    private val newlyAdded = TreeMap<Long, MutableList<PlayerId>>()
+    private val players = mutableSetOf<PlayerId>()
 
-    override fun recordNew(newPlayers: List<PlayerId>, tick: Long) {
-        newlyAdded[tick] = newPlayers
+    override fun add(playerId: PlayerId, tick: Long) {
+        newlyAdded.computeIfAbsent(tick) { _ -> ArrayList() }.add(playerId)
         cleanUp(newlyAdded, tick)
+    }
+
+    override fun all(): Set<PlayerId> {
+        return players
     }
 
     override fun addedAtTick(tick: Long): List<PlayerId> {

@@ -78,6 +78,7 @@ class ServerToClientDataDispatcherImpl<
                        )
                    }
                 }
+                dto.playerIds = data.players().all().map { it.id }.toIntArray()
                 return dto
             }
             WhatToSend2.SIMULATION_INPUTS -> {

@@ -103,8 +103,6 @@ class CottaServerModule(
 
             bind(ServerSimulationInputProvider::class.java)
                 .to(object : TypeLiteral<ServerSimulationInputProviderImpl<
-                    BytesStateRecipe,
-                    BytesDeltaRecipe,
                     BytesInputRecipe
                     >>() {})
                 .`in`(Scopes.SINGLETON)

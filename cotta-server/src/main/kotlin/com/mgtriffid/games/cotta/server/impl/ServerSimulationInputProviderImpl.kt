@@ -24,8 +24,6 @@ private val logger = KotlinLogging.logger {}
 const val REQUIRED_CLIENT_INPUTS_BUFFER = 3
 
 class ServerSimulationInputProviderImpl<
-    SR : StateRecipe,
-    DR : DeltaRecipe,
     IR : InputRecipe
     > @Inject constructor(
     private val nonPlayerInputProvider: NonPlayerInputProvider,
@@ -37,7 +35,7 @@ class ServerSimulationInputProviderImpl<
     private val clientsGhosts: ClientsGhosts<IR>,
 ) : ServerSimulationInputProvider {
     private val buffers =
-        HashMap<PlayerId, ServerIncomingDataBuffer<SR, DR, IR>>()
+        HashMap<PlayerId, ServerIncomingDataBuffer>()
 
     override fun getDelta(): ServerDelta {
         val clientsInput = getInput()
@@ -127,7 +125,7 @@ class ServerSimulationInputProviderImpl<
         )
     }
 
-    private fun getBuffer(playerId: PlayerId): ServerIncomingDataBuffer<SR, DR, IR> {
+    private fun getBuffer(playerId: PlayerId): ServerIncomingDataBuffer {
         return buffers.computeIfAbsent(playerId) { ServerIncomingDataBuffer() }
     }
 }

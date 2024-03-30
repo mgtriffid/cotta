@@ -1,16 +1,13 @@
 package com.mgtriffid.games.cotta.server.impl
 
 import com.mgtriffid.games.cotta.core.input.PlayerInput
-import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
-import com.mgtriffid.games.cotta.core.serialization.InputRecipe
-import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import mu.KotlinLogging
 import java.util.*
 import kotlin.math.min
 
 private val logger = KotlinLogging.logger {}
 
-class ServerIncomingDataBuffer<SR: StateRecipe, DR: DeltaRecipe, IR: InputRecipe> {
+class ServerIncomingDataBuffer {
     val inputs = TreeMap<Long, PlayerInput>()
 
     fun storeInput(tick: Long, input: PlayerInput) {

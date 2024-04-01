@@ -9,8 +9,6 @@ import com.mgtriffid.games.cotta.client.impl.LocalPlayer
 import com.mgtriffid.games.cotta.client.impl.SimulationInputData
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.MAX_LAG_COMP_DEPTH_TICKS
-import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
@@ -25,9 +23,8 @@ import com.mgtriffid.games.cotta.core.simulation.PlayersDiff
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
-import com.mgtriffid.games.cotta.network.protocol.KindOfData
-import com.mgtriffid.games.cotta.network.protocol.SimulationInputServerToClientDto2
-import com.mgtriffid.games.cotta.network.protocol.StateServerToClientDto2
+import com.mgtriffid.games.cotta.network.protocol.SimulationInputServerToClientDto
+import com.mgtriffid.games.cotta.network.protocol.StateServerToClientDto
 import jakarta.inject.Inject
 import mu.KotlinLogging
 
@@ -53,47 +50,9 @@ class NetworkClientImpl<
     }
 
     override fun fetch() {
-        val data = networkTransport.drainIncomingData()
-        data.forEach {
-            when (it.kindOfData) {
-                KindOfData.DELTA -> incomingDataBuffer.storeDelta(
-                    it.tick,
-                    snapsSerialization.deserializeDeltaRecipe(it.payload)
-                )
-
-                KindOfData.PLAYERS_DELTA -> incomingDataBuffer.storeMetaEntitiesDelta(
-                    it.tick,
-                    snapsSerialization.deserializePlayersDeltaRecipe(it.payload)
-                )
-
-                KindOfData.STATE -> incomingDataBuffer.storeState(
-                    it.tick,
-                    snapsSerialization.deserializeStateRecipe(it.payload)
-                )
-
-                KindOfData.PLAYER_ID -> {
-                    localPlayer.set(snapsSerialization.deserializePlayerId(it.payload))
-                }
-
-                KindOfData.INPUT -> incomingDataBuffer.storeInput(
-                    it.tick,
-                    inputSerialization.deserializePlayersInputs(it.payload)
-                )
-
-                KindOfData.PLAYERS_SAW_TICKS -> incomingDataBuffer.storePlayersSawTicks(
-                    it.tick,
-                    snapsSerialization.deserializePlayersSawTicks(it.payload)
-                )
-
-                null -> throw IllegalStateException("kindOfData is null in an incoming ServerToClientDto")
-            }
-        }
-    }
-
-    override fun fetch2() {
-        networkTransport.drainIncomingData2().forEach { packet ->
+        networkTransport.drainIncomingData().forEach { packet ->
             when (packet) {
-                is StateServerToClientDto2 -> {
+                is StateServerToClientDto -> {
                     incomingDataBuffer.storeState2(
                         packet.tick,
                         AuthoritativeStateData(
@@ -106,7 +65,7 @@ class NetworkClientImpl<
                     )
                 }
 
-                is SimulationInputServerToClientDto2 -> {
+                is SimulationInputServerToClientDto -> {
                     incomingDataBuffer.storeSimulationInput2(
                         packet.tick,
                         SimulationInputData(
@@ -134,34 +93,7 @@ class NetworkClientImpl<
         networkTransport.send(inputDto)
     }
 
-    override fun tryGetDelta(tick: Long): Delta? = if (deltaAvailable(tick)) {
-        TODO()
-        /*Delta(
-            playersDiff = stateSnapper.unpackPlayersDeltaRecipe((incomingDataBuffer.playersDeltas[tick]!!)),
-            input = object : SimulationInput {
-                override fun nonPlayerInput(): NonPlayerInput {
-                    return object : NonPlayerInput {}
-                }
-
-                override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                    return incomingDataBuffer.inputs[tick]!!.also { logger.debug { "In getting delta: $it" } }
-                }
-
-                override fun playersSawTicks(): Map<PlayerId, Long> {
-                    return incomingDataBuffer.playersSawTicks[tick]!!
-                }
-
-                override fun playersDiff() = PlayersDiff(
-                    incomingDataBuffer.playersDeltas[tick]!!
-                        .addedPlayers.toSet()
-                )
-            },
-        )*/
-    } else {
-        null
-    }
-
-    override fun tryGetDelta2(tick: Long): Delta? {
+    override fun tryGetDelta(tick: Long): Delta? {
         val data: SimulationInputData? = incomingDataBuffer.simulationInputs[tick]
         if (data == null) return null
         checkTick(data, tick)

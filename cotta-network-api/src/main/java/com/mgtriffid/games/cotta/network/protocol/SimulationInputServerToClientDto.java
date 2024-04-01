@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.network.protocol;
 
-public class SimulationInputServerToClientDto2 implements ServerToClientDto2 {
+public class SimulationInputServerToClientDto implements ServerToClientDto {
     public long tick;
     public byte[] playersSawTicks;
     public byte[] playersInputs;

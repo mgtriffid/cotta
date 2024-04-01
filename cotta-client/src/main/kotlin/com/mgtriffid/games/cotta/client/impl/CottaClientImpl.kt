@@ -45,8 +45,7 @@ class CottaClientImpl @Inject constructor(
                 }
 
                 is ClientState.AwaitingGameState -> {
-//                    network.fetch()
-                    network.fetch2()
+                    network.fetch()
                     when (val authoritativeState = network.tryGetAuthoritativeState()) {
                         is AuthoritativeState.Ready -> {
                             authoritativeState.apply(state, simulationTickProvider, globalTickProvider)
@@ -67,7 +66,7 @@ class CottaClientImpl @Inject constructor(
 
                 is ClientState.Running -> {
 //                    network.fetch()
-                    network.fetch2()
+                    network.fetch()
                     integrate()
                     clientState = ClientState.Running(it.currentTick + 1)
                 }

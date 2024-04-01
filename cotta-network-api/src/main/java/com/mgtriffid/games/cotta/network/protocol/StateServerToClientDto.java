@@ -2,7 +2,7 @@ package com.mgtriffid.games.cotta.network.protocol;
 
 import java.util.List;
 
-public class StateServerToClientDto2 implements ServerToClientDto2 {
+public class StateServerToClientDto implements ServerToClientDto {
     public long tick;
     public FullStateDto fullState;
     public List<DeltaDto> deltas;

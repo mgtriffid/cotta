@@ -6,10 +6,8 @@ import com.mgtriffid.games.cotta.core.input.PlayerInput
 
 interface NetworkClient {
     fun fetch()
-    fun fetch2()
     fun connect()
     fun tryGetDelta(tick: Long): Delta?
-    fun tryGetDelta2(tick: Long): Delta?
     fun tryGetAuthoritativeState(): AuthoritativeState
     fun deltaAvailable(tick: Long): Boolean
     fun send(input: PlayerInput, currentTick: Long)

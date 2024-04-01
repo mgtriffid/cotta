@@ -1,7 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
-import com.mgtriffid.games.cotta.client.ClientPlayers
 import com.mgtriffid.games.cotta.client.GuessedSimulation
 import com.mgtriffid.games.cotta.client.Instruction
 import com.mgtriffid.games.cotta.client.LastClientTickProcessedByServer
@@ -29,10 +28,9 @@ class SimulationsImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     @Named(GLOBAL) private val tickProvider: TickProvider,
     private val localPlayer: LocalPlayer,
-    private val players: ClientPlayers,
     private val predictionSimulation: PredictionSimulation,
     private val lastClientTickProcessedByServer: LastClientTickProcessedByServer
-    ): Simulations {
+): Simulations {
     override fun simulate() {
         val instructions = simulationDirector.instruct(tickProvider.tick).also { logger.debug { "Instructions: $it" } }
         // Now we need to consider the situation when we have guessed simulation.

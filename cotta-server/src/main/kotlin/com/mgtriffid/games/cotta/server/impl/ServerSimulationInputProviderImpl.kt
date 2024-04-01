@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.*
+import com.mgtriffid.games.cotta.core.simulation.PlayersDiff
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
@@ -50,6 +51,10 @@ class ServerSimulationInputProviderImpl<
             override fun inputForPlayers() = clientsInput.inputForPlayers
 
             override fun playersSawTicks() = clientsInput.playersSawTicks
+
+            override fun playersDiff(): PlayersDiff { // TODO wrong place obv
+                return PlayersDiff(emptySet())
+            }
         }
 
         simulationInputHolder.set(input)

@@ -1,12 +1,12 @@
-package com.mgtriffid.games.cotta.client.impl
+package com.mgtriffid.games.cotta.core.simulation.impl
 
-import com.mgtriffid.games.cotta.client.AuthoritativeSimulation
-import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.input.InputProcessing
+import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.simulation.Players
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
@@ -26,6 +26,7 @@ class AuthoritativeSimulationImpl @Inject constructor(
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks,
     private val inputProcessing: InputProcessing,
+    private val players: Players
 ) : AuthoritativeSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>() // TODO pathetic casts
 
@@ -37,10 +38,21 @@ class AuthoritativeSimulationImpl @Inject constructor(
         logger.debug { input.inputForPlayers() }
         fillPlayersSawTicks(input)
         simulate()
+        processPlayersDiff(input)
     }
 
     private fun processInput(input: SimulationInput) {
-        inputProcessing.process(input, state.entities(simulationTick.tick), effectBus)
+        inputProcessing.process(
+            input,
+            state.entities(simulationTick.tick),
+            effectBus
+        )
+    }
+
+    private fun processPlayersDiff(input: SimulationInput) {
+        input.playersDiff().added.forEach { playerId ->
+            players.add(playerId, simulationTick.tick)
+        }
     }
 
     private fun fillPlayersSawTicks(input: SimulationInput) {

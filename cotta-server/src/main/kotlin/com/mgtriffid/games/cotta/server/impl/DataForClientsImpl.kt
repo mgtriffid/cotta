@@ -9,7 +9,7 @@ import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.DataForClients
-import com.mgtriffid.games.cotta.server.Players
+import com.mgtriffid.games.cotta.core.simulation.Players
 import jakarta.inject.Inject
 import jakarta.inject.Named
 

@@ -10,4 +10,9 @@ interface SimulationInput {
     fun nonPlayerInput(): NonPlayerInput = NonPlayerInput.Blank
 
     fun playersSawTicks(): Map<PlayerId, Long>
+    fun playersDiff(): PlayersDiff
 }
+
+data class PlayersDiff(
+    val added: Set<PlayerId>,
+)

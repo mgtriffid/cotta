@@ -9,6 +9,8 @@ import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.registerComponents
+import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.simulation.PlayersDiff
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
@@ -26,11 +28,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class ServerSimulationTest {
+class AuthoritativeSimulationTest {
     private lateinit var tickProvider: TickProvider
     private lateinit var simulationInputHolder: SimulationInputHolder
     private lateinit var state: CottaState
-    private lateinit var serverSimulation: ServerSimulation
+    private lateinit var simulation: AuthoritativeSimulation
     private lateinit var playersSawTicks: PlayersSawTicks
     private lateinit var dataForClients: DataForClients
 
@@ -49,9 +51,11 @@ class ServerSimulationTest {
             override fun playersSawTicks(): Map<PlayerId, Long> {
                 return emptyMap()
             }
+
+            override fun playersDiff() = PlayersDiff(emptySet())
         })
         state = injector.getInstance(Key.get(CottaState::class.java, Names.named("simulation")))
-        serverSimulation = injector.getInstance(ServerSimulation::class.java)
+        simulation = injector.getInstance(AuthoritativeSimulation::class.java)
         registerComponents(GameStub(), injector.getInstance(ComponentRegistry::class.java))
         dataForClients = injector.getInstance(DataForClients::class.java)
         playersSawTicks = injector.getInstance(PlayersSawTicks::class.java)
@@ -62,10 +66,10 @@ class ServerSimulationTest {
         val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(createHealthTestComponent(0))
-        serverSimulation.registerSystem(RegenerationTestSystem::class)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
+        simulation.registerSystem(RegenerationTestSystem::class)
+        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
 
             override fun nonPlayerInput() = object: NonPlayerInput {}
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -75,6 +79,8 @@ class ServerSimulationTest {
             override fun playersSawTicks(): Map<PlayerId, Long> {
                 return emptyMap()
             }
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
 
         assertEquals(
@@ -88,10 +94,10 @@ class ServerSimulationTest {
         val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(createHealthTestComponent(0))
-        serverSimulation.registerSystem(RegenerationTestSystem::class)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
+        simulation.registerSystem(RegenerationTestSystem::class)
+        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
         repeat(2) {
-            serverSimulation.tick(object : SimulationInput {
+            simulation.tick(object : SimulationInput {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
@@ -100,6 +106,8 @@ class ServerSimulationTest {
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
                 }
+                override fun playersDiff() = PlayersDiff(emptySet())
+
             })
         }
 
@@ -120,13 +128,13 @@ class ServerSimulationTest {
 
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
-        serverSimulation.registerSystem(PlayerProcessingTestSystem::class)
-        serverSimulation.registerSystem(ShotFiredTestEffectConsumerSystem::class)
-        serverSimulation.registerSystem(MovementTestSystem::class)
-        serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
+        simulation.registerSystem(PlayerProcessingTestSystem::class)
+        simulation.registerSystem(ShotFiredTestEffectConsumerSystem::class)
+        simulation.registerSystem(MovementTestSystem::class)
+        simulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
 
         repeat(2) {
-            serverSimulation.tick(object : SimulationInput {
+            simulation.tick(object : SimulationInput {
 
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
@@ -136,6 +144,8 @@ class ServerSimulationTest {
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
                 }
+                override fun playersDiff() = PlayersDiff(emptySet())
+
             })
         }
 
@@ -144,7 +154,7 @@ class ServerSimulationTest {
             shoot = true
         )
 
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -152,6 +162,8 @@ class ServerSimulationTest {
             }
 
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
 
         val input2 = PlayerInputStub(
@@ -159,7 +171,7 @@ class ServerSimulationTest {
             shoot = true
         )
 
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -167,6 +179,8 @@ class ServerSimulationTest {
             }
 
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
 
         assertEquals(
@@ -187,12 +201,12 @@ class ServerSimulationTest {
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
         val input = PlayerInputStub(aim = 4, shoot = true)
-        serverSimulation.registerSystem(PlayerProcessingTestSystem::class)
-        serverSimulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
-        serverSimulation.registerSystem(MovementTestSystem::class)
-        serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
+        simulation.registerSystem(PlayerProcessingTestSystem::class)
+        simulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
+        simulation.registerSystem(MovementTestSystem::class)
+        simulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
         repeat(6) {
-            serverSimulation.tick(object : SimulationInput {
+            simulation.tick(object : SimulationInput {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
@@ -201,10 +215,12 @@ class ServerSimulationTest {
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
                 }
+                override fun playersDiff() = PlayersDiff(emptySet())
+
             })
         }
 
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -212,12 +228,14 @@ class ServerSimulationTest {
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
         val input2 = PlayerInputStub(
             aim = 4,
             shoot = false
         )
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return mapOf(playerId to input2)
@@ -225,6 +243,8 @@ class ServerSimulationTest {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
 
         assertEquals(
@@ -245,13 +265,13 @@ class ServerSimulationTest {
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
         val input = PlayerInputStub(aim = 4, shoot = true)
-        serverSimulation.registerSystem(PlayerProcessingTestSystem::class)
-        serverSimulation.registerSystem(StepOneShotFiredTestEffectConsumerSystem::class)
-        serverSimulation.registerSystem(LagCompensatedActualShotFiredTestEffectConsumer::class)
-        serverSimulation.registerSystem(MovementTestSystem::class)
-        serverSimulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
+        simulation.registerSystem(PlayerProcessingTestSystem::class)
+        simulation.registerSystem(StepOneShotFiredTestEffectConsumerSystem::class)
+        simulation.registerSystem(LagCompensatedActualShotFiredTestEffectConsumer::class)
+        simulation.registerSystem(MovementTestSystem::class)
+        simulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
         repeat(6) {
-            serverSimulation.tick(object : SimulationInput {
+            simulation.tick(object : SimulationInput {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return emptyMap()
                 }
@@ -260,10 +280,12 @@ class ServerSimulationTest {
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
                 }
+                override fun playersDiff() = PlayersDiff(emptySet())
+
             })
         }
 
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -271,12 +293,14 @@ class ServerSimulationTest {
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
         val input2 = PlayerInputStub(
             aim = 4,
             shoot = false
         )
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return mapOf(playerId to input2)
@@ -284,6 +308,8 @@ class ServerSimulationTest {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
 
         assertEquals(
@@ -295,9 +321,9 @@ class ServerSimulationTest {
     @Test
     fun `should invoke systems`() {
         state.entities().create()
-        serverSimulation.registerSystem(BlankTestSystem::class)
+        simulation.registerSystem(BlankTestSystem::class)
 
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                 return emptyMap()
             }
@@ -306,6 +332,8 @@ class ServerSimulationTest {
             override fun playersSawTicks(): Map<PlayerId, Long> {
                 return emptyMap()
             }
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
 
         assertEquals(
@@ -319,10 +347,10 @@ class ServerSimulationTest {
         val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(createHealthTestComponent(0))
-        serverSimulation.registerSystem(RegenerationTestSystem::class)
-        serverSimulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
+        simulation.registerSystem(RegenerationTestSystem::class)
+        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
 
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -332,6 +360,8 @@ class ServerSimulationTest {
             override fun playersSawTicks(): Map<PlayerId, Long> {
                 return emptyMap()
             }
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
 
         assertEquals(
@@ -347,7 +377,7 @@ class ServerSimulationTest {
             ownedBy = Entity.OwnedBy.Player(playerId)
         )
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
-        serverSimulation.registerSystem(PlayerProcessingTestSystem::class)
+        simulation.registerSystem(PlayerProcessingTestSystem::class)
         simulationInputHolder.set(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
@@ -356,8 +386,10 @@ class ServerSimulationTest {
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
-        serverSimulation.tick(object : SimulationInput {
+        simulation.tick(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -365,6 +397,8 @@ class ServerSimulationTest {
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
         assertEquals(
             4,
@@ -381,6 +415,8 @@ class ServerSimulationTest {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
+            override fun playersDiff() = PlayersDiff(emptySet())
+
         })
         assertEquals(
             4,

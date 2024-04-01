@@ -33,12 +33,16 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
+import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
+import com.mgtriffid.games.cotta.core.simulation.Players
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
+import com.mgtriffid.games.cotta.core.simulation.impl.AuthoritativeSimulationImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.EntityOwnerSawTickProviderImpl
+import com.mgtriffid.games.cotta.core.simulation.impl.PlayersImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.*
@@ -65,6 +69,7 @@ class CottaClientModule(
         bind(Simulations::class.java).to(SimulationsImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(AuthoritativeSimulation::class.java).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Players::class.java).to(PlayersImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(GuessedSimulation::class.java).to(GuessedSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 

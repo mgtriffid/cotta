@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
+import com.mgtriffid.games.cotta.core.simulation.PlayersDiff
 
 class SimulationInputData(
     val tick: Long,
@@ -9,8 +10,4 @@ class SimulationInputData(
     val playersInputs: Map<PlayerId, PlayerInput>,
     val playersDiff: PlayersDiff,
     val idSequence: Int,
-) {
-    data class PlayersDiff(
-        val added: Set<PlayerId>,
-    )
-}
+)

@@ -1,7 +1,7 @@
-package com.mgtriffid.games.cotta.server.impl
+package com.mgtriffid.games.cotta.core.simulation.impl
 
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.server.Players
+import com.mgtriffid.games.cotta.core.simulation.Players
 import java.util.*
 import kotlin.math.min
 

@@ -1,6 +1,5 @@
-package com.mgtriffid.games.cotta.client
+package com.mgtriffid.games.cotta.core.simulation
 
-import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import kotlin.reflect.KClass
 

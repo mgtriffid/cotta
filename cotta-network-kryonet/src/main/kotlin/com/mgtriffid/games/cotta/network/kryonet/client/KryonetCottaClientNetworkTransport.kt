@@ -67,8 +67,4 @@ internal class KryonetCottaClientNetworkTransport(
         }
         client.addListener(listener)
     }
-
-    private fun save(obj: ServerToClientDto) {
-        packetsQueue.add(obj)
-    }
 }

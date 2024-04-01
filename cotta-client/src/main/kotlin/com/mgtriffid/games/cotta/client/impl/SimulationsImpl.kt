@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
-import com.mgtriffid.games.cotta.client.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
 import com.mgtriffid.games.cotta.client.ClientPlayers
 import com.mgtriffid.games.cotta.client.GuessedSimulation
 import com.mgtriffid.games.cotta.client.Instruction
@@ -11,7 +11,6 @@ import com.mgtriffid.games.cotta.client.SimulationDirector
 import com.mgtriffid.games.cotta.client.Simulations
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.GLOBAL
-import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import jakarta.inject.Inject

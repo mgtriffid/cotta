@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.network.impl
 
+import com.mgtriffid.games.cotta.client.ClientSimulationInput
 import com.mgtriffid.games.cotta.client.impl.AuthoritativeState
 import com.mgtriffid.games.cotta.client.impl.AuthoritativeStateData
 import com.mgtriffid.games.cotta.client.impl.ClientIncomingDataBuffer
@@ -20,6 +21,7 @@ import com.mgtriffid.games.cotta.core.serialization.PlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.StateRecipe
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
+import com.mgtriffid.games.cotta.core.simulation.PlayersDiff
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
@@ -44,7 +46,6 @@ class NetworkClientImpl<
     private val stateSnapper: StateSnapper<SR, DR, PDR>,
     private val localPlayer: LocalPlayer
 ) : NetworkClient {
-    private val lagCompLimit: Int = 8 // TODO move to config and bind properly
     private val bufferLength: Int = 3
     override fun connect() {
         networkTransport.initialize()
@@ -109,13 +110,13 @@ class NetworkClientImpl<
                     incomingDataBuffer.storeSimulationInput2(
                         packet.tick,
                         SimulationInputData(
-                            packet.tick,
-                            snapsSerialization.deserializePlayersSawTicks(packet.playersSawTicks),
-                            inputSerialization.deserializePlayersInputs(packet.playersInputs),
-                            SimulationInputData.PlayersDiff(
+                            tick = packet.tick,
+                            playersSawTicks = snapsSerialization.deserializePlayersSawTicks(packet.playersSawTicks),
+                            playersInputs = inputSerialization.deserializePlayersInputs(packet.playersInputs),
+                            playersDiff = PlayersDiff(
                                 added = packet.playersDiff.added.map { PlayerId(it) }.toSet()
                             ),
-                            packet.idSequence
+                            idSequence = packet.idSequence
                         )
                     )
 
@@ -148,10 +149,46 @@ class NetworkClientImpl<
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return incomingDataBuffer.playersSawTicks[tick]!!
                 }
+
+                override fun playersDiff() = PlayersDiff(
+                    incomingDataBuffer.playersDeltas[tick]!!
+                        .addedPlayers.toSet()
+                )
             },
         )
     } else {
         null
+    }
+
+    fun getDelta2(tick: Long): Any? {
+        val data: SimulationInputData? = incomingDataBuffer.simulationInputs[tick]
+        if (data == null) return null
+        checkTick(data, tick)
+        ClientSimulationInput(
+            tick = tick,
+            simulationInput = object : SimulationInput {
+                override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
+                    return data.playersInputs
+                }
+
+                override fun nonPlayerInput(): NonPlayerInput {
+                    return NonPlayerInput.Blank
+                }
+
+                override fun playersSawTicks(): Map<PlayerId, Long> {
+                    return data.playersSawTicks
+                }
+
+                override fun playersDiff() = data.playersDiff
+            },
+            idSequence = data.idSequence)
+        TODO()
+    }
+
+    private fun checkTick(data: SimulationInputData, tick: Long) {
+        if (data.tick != tick) {
+            throw IllegalStateException("Tick mismatch: expected $tick, got ${data.tick}")
+        }
     }
 
     override fun tryGetAuthoritativeState(): AuthoritativeState {
@@ -170,9 +207,11 @@ class NetworkClientImpl<
                     state.advance(t - 1)
                     simulationTickProvider.tick++
                     globalTickProvider.tick++
+                    val delta =
+                        stateData.deltas[(t - fullStateTick - 1).toInt()]
                     stateSnapper.unpackDeltaRecipe(
                         state.entities(atTick = t),
-                        stateData.deltas[(t - fullStateTick - 1).toInt()]
+                        delta
                     )
                 }
                 localPlayer.set(stateData.playerId)
@@ -180,14 +219,6 @@ class NetworkClientImpl<
         } else {
             AuthoritativeState.NotReady
         }
-    }
-
-    private fun applyDelta(state: CottaState, tick: Long) {
-        applyDelta(state.entities(atTick = tick), tick - 1)
-    }
-
-    private fun applyDelta(entities: Entities, tick: Long) {
-        stateSnapper.unpackDeltaRecipe(entities, incomingDataBuffer.deltas[tick]!!)
     }
 
     private fun stateAvailable(): Boolean = incomingDataBuffer.states2.isNotEmpty()

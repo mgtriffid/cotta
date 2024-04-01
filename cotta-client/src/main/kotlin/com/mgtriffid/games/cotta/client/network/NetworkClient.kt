@@ -9,6 +9,7 @@ interface NetworkClient {
     fun fetch2()
     fun connect()
     fun tryGetDelta(tick: Long): Delta?
+    fun tryGetDelta2(tick: Long): Delta?
     fun tryGetAuthoritativeState(): AuthoritativeState
     fun deltaAvailable(tick: Long): Boolean
     fun send(input: PlayerInput, currentTick: Long)

@@ -49,8 +49,7 @@ class SimulationsImpl @Inject constructor(
             when (it) {
                 is Instruction.IntegrateAuthoritative -> {
                     val delta = deltas.get(it.tick)
-                    simulation.tick(delta.input)
-                    processPlayersDiff(delta)
+                    simulation.tick(delta.input.simulationInput)
                     lastConfirmedTick = getLastConfirmedTick(delta)
                 }
                 is Instruction.CopyAuthoritativeToGuessed -> {
@@ -66,10 +65,6 @@ class SimulationsImpl @Inject constructor(
         predict(lastConfirmedTick)
     }
 
-    private fun processPlayersDiff(delta: Delta) {
-        delta.playersDiff.forEach(players::add)
-    }
-
     private fun predict(serverSawOurTick: Long) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
@@ -80,7 +75,7 @@ class SimulationsImpl @Inject constructor(
     }
 
     private fun getLastConfirmedTick(delta: Delta) =
-        delta.input.playersSawTicks()[localPlayer.playerId] ?: 0L
+        delta.input.simulationInput.playersSawTicks()[localPlayer.playerId] ?: 0L
 
     private fun getCurrentTick(): Long {
         return tickProvider.tick

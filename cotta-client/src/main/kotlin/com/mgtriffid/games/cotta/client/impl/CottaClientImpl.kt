@@ -66,7 +66,7 @@ class CottaClientImpl @Inject constructor(
                 }
 
                 is ClientState.Running -> {
-                    network.fetch()
+//                    network.fetch()
                     network.fetch2()
                     integrate()
                     clientState = ClientState.Running(it.currentTick + 1)

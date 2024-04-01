@@ -135,7 +135,8 @@ class NetworkClientImpl<
     }
 
     override fun tryGetDelta(tick: Long): Delta? = if (deltaAvailable(tick)) {
-        Delta(
+        TODO()
+        /*Delta(
             playersDiff = stateSnapper.unpackPlayersDeltaRecipe((incomingDataBuffer.playersDeltas[tick]!!)),
             input = object : SimulationInput {
                 override fun nonPlayerInput(): NonPlayerInput {
@@ -155,16 +156,16 @@ class NetworkClientImpl<
                         .addedPlayers.toSet()
                 )
             },
-        )
+        )*/
     } else {
         null
     }
 
-    fun getDelta2(tick: Long): Any? {
+    override fun tryGetDelta2(tick: Long): Delta? {
         val data: SimulationInputData? = incomingDataBuffer.simulationInputs[tick]
         if (data == null) return null
         checkTick(data, tick)
-        ClientSimulationInput(
+        val input = ClientSimulationInput(
             tick = tick,
             simulationInput = object : SimulationInput {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -181,8 +182,9 @@ class NetworkClientImpl<
 
                 override fun playersDiff() = data.playersDiff
             },
-            idSequence = data.idSequence)
-        TODO()
+            idSequence = data.idSequence
+        )
+        return Delta(input)
     }
 
     private fun checkTick(data: SimulationInputData, tick: Long) {
@@ -228,9 +230,6 @@ class NetworkClientImpl<
     )
 
     override fun deltaAvailable(tick: Long): Boolean {
-        return incomingDataBuffer.deltas.containsKey(tick).also { logger.debug { "Delta present for tick $tick: $it" } }
-            && incomingDataBuffer.inputs.containsKey(tick).also { logger.debug { "Input present for tick $tick: $it" } }
-            && incomingDataBuffer.playersSawTicks.containsKey(tick).also { logger.debug { "sawTicks present for tick $tick: $it" } }
-            && incomingDataBuffer.playersDeltas.containsKey(tick).also { logger.debug { "playersDelta present for tick $tick: $it" } }
+        return incomingDataBuffer.simulationInputs.containsKey(tick)
     }
 }

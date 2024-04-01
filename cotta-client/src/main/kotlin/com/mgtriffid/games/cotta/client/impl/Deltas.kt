@@ -12,6 +12,6 @@ class DeltasImpl @Inject constructor(
     private val networkClient: NetworkClient
 ): Deltas {
     override fun get(tick: Long): Delta {
-        return networkClient.tryGetDelta(tick) ?: TODO("Not yet implemented")
+        return networkClient.tryGetDelta2(tick) ?: TODO("Not yet implemented")
     }
 }

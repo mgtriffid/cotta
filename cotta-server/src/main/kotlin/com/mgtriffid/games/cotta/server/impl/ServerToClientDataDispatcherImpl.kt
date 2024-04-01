@@ -40,10 +40,9 @@ class ServerToClientDataDispatcherImpl<
         val currentTick = tick.tick
         logger.debug { "Dispatching data to clients, currentTick=$currentTick" }
         clientsGhosts.data.forEach { (playerId, ghost) ->
-            val whatToSend2 = ghost.whatToSend()
-            logger.info { "Sending data to $playerId : $whatToSend2" }
-            network.send(ghost.connectionId, packData(currentTick, whatToSend2, playerId))
-            logger.debug { "Sent data to $playerId : $whatToSend2" }
+            val whatToSend = ghost.whatToSend()
+            logger.debug { "Sending data to $playerId : $whatToSend" }
+            network.send(ghost.connectionId, packData(currentTick, whatToSend, playerId))
         }
     }
 

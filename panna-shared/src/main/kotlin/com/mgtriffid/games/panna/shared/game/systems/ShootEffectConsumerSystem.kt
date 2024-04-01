@@ -127,6 +127,7 @@ class ShootEffectConsumerSystem : EffectsConsumerSystem<ShootEffect> {
         ctx.fire(
             createRailgunShotEffect(
                 shooter.id,
+                (shooter.ownedBy as? Entity.OwnedBy.Player)?.playerId ?: throw IllegalStateException("Who shot?"),
                 railStart.x,
                 railStart.y,
                 (intersectionPoint ?: railEnd).x,

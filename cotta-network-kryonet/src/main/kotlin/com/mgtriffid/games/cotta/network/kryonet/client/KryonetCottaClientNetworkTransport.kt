@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.network.kryonet.client
 
+import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryonet.Client
 import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
@@ -13,12 +14,14 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 private val logger = KotlinLogging.logger {}
 
-internal class KryonetCottaClientNetworkTransport(
+class KryonetCottaClientNetworkTransport(
     private val sender: Sender,
     private val saver: Saver
 ) : CottaClientNetworkTransport {
     private lateinit var client: Client
     private val packetsQueue = ConcurrentLinkedQueue<ServerToClientDto>()
+    val kryo: Kryo
+        get() = client.kryo
 
     // TODO would be more clear to separate init and connect.
     override fun initialize() {
@@ -48,7 +51,7 @@ internal class KryonetCottaClientNetworkTransport(
                 logger.debug { "Received $obj" }
                 when (obj) {
                     is ServerToClientDto -> {
-                        saver.save(obj, packetsQueue)
+                        saver.save(obj, packetsQueue::add)
                         logger.info { "Received a ${ServerToClientDto::class.simpleName}: $obj" }
                     }
                 }

@@ -4,7 +4,7 @@ import com.esotericsoftware.kryonet.Client
 import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Issues
 import java.util.concurrent.Executors
 
-internal interface Sender {
+interface Sender {
     fun send(client: Client, obj: Any)
 }
 

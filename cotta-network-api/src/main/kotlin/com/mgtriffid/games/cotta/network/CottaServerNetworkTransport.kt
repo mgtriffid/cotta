@@ -15,5 +15,5 @@ interface CottaServerNetworkTransport {
 
     fun drainInputs(): Collection<Pair<ConnectionId, ClientToServerInputDto>>
 
-    fun send(connectionId: ConnectionId, any: Any)
+    fun send(connectionId: ConnectionId, obj: Any)
 }

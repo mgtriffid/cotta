@@ -50,8 +50,7 @@ class ServerToClientDataDispatcherImpl<
         when (whatToSend) {
             WhatToSend.STATE -> {
                 val fullStateTick = tick - MAX_LAG_COMP_DEPTH_TICKS
-                val dto =
-                    StateServerToClientDto()
+                val dto = StateServerToClientDto()
                 dto.tick = tick
                 dto.fullState = FullStateDto().apply {
                     payload = snapsSerialization.serializeStateRecipe(

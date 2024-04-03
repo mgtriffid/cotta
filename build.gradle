@@ -231,6 +231,9 @@ project(":cotta-network-kryonet") {
         implementation project(":cotta-core")
         api "com.github.crykn:kryonet:2.22.7"
         implementation project(":cotta-utils")
+        implementation "com.google.guava:guava:33.1.0-jre"
+
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
     }
 }
 

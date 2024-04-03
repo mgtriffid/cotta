@@ -40,7 +40,8 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.EntityPro
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompensatingEffectProcessingContext
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.SimpleEffectProcessingContext
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
-import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaServerNetworkTransport
+import com.mgtriffid.games.cotta.network.kryonet.acking.AckingCottaServerNetworkTransport
+import com.mgtriffid.games.cotta.network.kryonet.server.KryonetCottaServerNetworkTransport
 import com.mgtriffid.games.cotta.server.*
 import com.mgtriffid.games.cotta.server.impl.*
 
@@ -121,7 +122,9 @@ class CottaServerModule(
     @Provides
     @Singleton
     fun provideCottaServerNetwork(): CottaServerNetworkTransport {
-        val network = KryonetCottaServerNetworkTransport()
+        val network = AckingCottaServerNetworkTransport(
+            KryonetCottaServerNetworkTransport()
+        )
         network.initialize()
         return network
     }

@@ -5,13 +5,13 @@ import java.util.Queue
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-internal interface Saver {
-    fun <T: Any> save(obj: T, packetsQueue: Queue<T>)
+interface Saver {
+    fun <T: Any> save(obj: T, block: (T) -> Unit)
 }
 
 internal class SimpleSaver : Saver {
-    override fun <T: Any> save(obj: T, packetsQueue: Queue<T>) {
-        packetsQueue.add(obj)
+    override fun <T: Any> save(obj: T, block: (T) -> Unit) {
+        block(obj)
     }
 }
 
@@ -21,15 +21,15 @@ internal class LaggingSaver(
 ) : Saver {
     private val executors = Executors.newScheduledThreadPool(1)
 
-    override fun <T: Any> save(obj: T, packetsQueue: Queue<T>) {
+    override fun <T: Any> save(obj: T, block: (T) -> Unit) {
         if (issues.packetLoss >= Math.random()) {
             return
         }
         executors.schedule(
-            { impl.save(obj, packetsQueue) },
+            { impl.save(obj, block) },
             issues.latency.random(),
             TimeUnit.MILLISECONDS
         )
-        impl.save(obj, packetsQueue)
+        impl.save(obj, block)
     }
 }

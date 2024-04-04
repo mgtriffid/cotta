@@ -20,10 +20,8 @@ class Connection(
     private val receivedPackets = ReceivedPackets()
     private var objectSequence = 0
     private val objectsInFlight = mutableMapOf<ObjectId, ObjectInFlight>()
-    private val squadronToObjects =
-        mutableMapOf<SquadronId, MutableSet<ObjectId>>()
 
-    private val squadronToPackets = TreeMap<SquadronId, Squadron>()
+    private val squadronsInFlight = TreeMap<SquadronId, Squadron>()
     val packetSequence: AtomicInteger = AtomicInteger()
 
     private val incomingSquadrons = CacheBuilder.newBuilder()
@@ -68,10 +66,10 @@ class Connection(
     }
 
     fun markSent(squadronId: SquadronId, objects: Set<ObjectId>, size: Int) {
-        squadronToObjects[squadronId] = objects.toMutableSet()
-        squadronToPackets[squadronId] = Squadron(
+        squadronsInFlight[squadronId] = Squadron(
             packets = (0 until size).map { PacketId(it + squadronId.id) }
-                .toMutableSet()
+                .toMutableSet(),
+            objects = objects.toMutableSet()
         )
         objects.forEach {
             objectsInFlight[it]?.squadrons?.add(squadronId) ?: logger.error { "Object $it not found" }
@@ -79,7 +77,7 @@ class Connection(
     }
 
     fun confirm(packetId: PacketId) {
-        val (k, v) = squadronToPackets.floorEntry(SquadronId(packetId.id))
+        val (k, v) = squadronsInFlight.floorEntry(SquadronId(packetId.id))
             ?: return
         if (packetId !in v.packets) {
             return
@@ -88,19 +86,17 @@ class Connection(
         v.packets.remove(packetId)
         if (v.packets.isEmpty()) {
             // squadron sent completely
-            squadronToPackets.remove(k)
+            squadronsInFlight.remove(k)
             // objects that are guaranteed to be delivered:
-            val objects = squadronToObjects.remove(k)!!
-            objects.forEach { objectId ->
+            v.objects.forEach { objectId ->
                 // remove all squadrons:
                 val squadrons = objectsInFlight.remove(objectId)?.squadrons
                 // remove this object from all squadrons:
                 squadrons?.forEach { squadronId ->
-                    val objectsInSquadron = squadronToObjects[squadronId]
-                    objectsInSquadron?.remove(objectId)
-                    if (objectsInSquadron?.isEmpty() == true) {
-                        squadronToObjects.remove(squadronId)
-                        squadronToPackets.remove(squadronId)
+                    val squadron = squadronsInFlight[squadronId]
+                    squadron?.objects?.remove(objectId)
+                    if (squadron?.objects?.isEmpty() == true) {
+                        squadronsInFlight.remove(squadronId)
                     }
                 }
             }
@@ -137,7 +133,7 @@ class Connection(
     }
 
     fun squadronsInFlight(): Int {
-        return squadronToPackets.size
+        return squadronsInFlight.size
     }
 }
 
@@ -155,7 +151,8 @@ value class ObjectId(val id: Int)
 value class PacketId(val id: Int)
 
 class Squadron(
-    val packets: MutableSet<PacketId>
+    val packets: MutableSet<PacketId>,
+    val objects: MutableSet<ObjectId>
 )
 
 class ObjectInFlight(

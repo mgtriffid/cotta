@@ -28,13 +28,6 @@ class AckingCottaClientNetworkTransport(
     private val saver: Saver
 ) : CottaClientNetworkTransport {
 
-    private val receivedPackets = ReceivedPackets()
-    private var packetSequence = 0
-
-    private val incomingSquadrons = CacheBuilder.newBuilder()
-        .expireAfterAccess(2, TimeUnit.MINUTES)
-        .build<SquadronId, IncomingSquadron>()
-
     private lateinit var client: Client
     private val packetsQueue = ConcurrentLinkedQueue<ServerToClientDto>()
 

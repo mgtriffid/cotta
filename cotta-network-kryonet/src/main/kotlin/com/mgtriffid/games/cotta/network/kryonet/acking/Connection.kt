@@ -19,11 +19,9 @@ class Connection(
 ) {
     private val receivedPackets = ReceivedPackets()
     private var objectSequence = 0
-    private val objectsInFlight = mutableMapOf<ObjectId, Any>()
+    private val objectsInFlight = mutableMapOf<ObjectId, ObjectInFlight>()
     private val squadronToObjects =
         mutableMapOf<SquadronId, MutableSet<ObjectId>>()
-    private val objectToSquadrons =
-        mutableMapOf<ObjectId, MutableSet<SquadronId>>()
 
     private val squadronToPackets = TreeMap<SquadronId, Squadron>()
     val packetSequence: AtomicInteger = AtomicInteger()
@@ -65,7 +63,7 @@ class Connection(
 
     fun track(obj: Any): ObjectId {
         val objectId = ObjectId(objectSequence++)
-        objectsInFlight[objectId] = obj
+        objectsInFlight[objectId] = ObjectInFlight(obj, mutableSetOf())
         return objectId
     }
 
@@ -76,8 +74,7 @@ class Connection(
                 .toMutableSet()
         )
         objects.forEach {
-            objectToSquadrons.computeIfAbsent(it) { mutableSetOf() }
-                .add(squadronId)
+            objectsInFlight[it]?.squadrons?.add(squadronId) ?: logger.error { "Object $it not found" }
         }
     }
 
@@ -87,6 +84,7 @@ class Connection(
         if (packetId !in v.packets) {
             return
         }
+        logger.info { "Confirmed $packetId" }
         v.packets.remove(packetId)
         if (v.packets.isEmpty()) {
             // squadron sent completely
@@ -95,7 +93,7 @@ class Connection(
             val objects = squadronToObjects.remove(k)!!
             objects.forEach { objectId ->
                 // remove all squadrons:
-                val squadrons = objectToSquadrons.remove(objectId)
+                val squadrons = objectsInFlight.remove(objectId)?.squadrons
                 // remove this object from all squadrons:
                 squadrons?.forEach { squadronId ->
                     val objectsInSquadron = squadronToObjects[squadronId]
@@ -105,7 +103,6 @@ class Connection(
                         squadronToPackets.remove(squadronId)
                     }
                 }
-                objectsInFlight.remove(objectId)
             }
         }
     }
@@ -124,9 +121,18 @@ class Connection(
             val dto = deserialize(bytes)
             saveObject(dto)
         }
+        processAcks(chunk.acks)
     }
 
-    fun objectsInFlight(): Set<Any> {
+    private fun processAcks(acks: Acks) {
+        (0..63).forEachIndexed { idx, bit ->
+            if (acks.received and (1L shl bit) != 0L) {
+                confirm(PacketId(acks.last - idx))
+            }
+        }
+    }
+
+    fun objectsInFlight(): Set<ObjectInFlight> {
         return objectsInFlight.values.toSet()
     }
 
@@ -150,4 +156,9 @@ value class PacketId(val id: Int)
 
 class Squadron(
     val packets: MutableSet<PacketId>
+)
+
+class ObjectInFlight(
+    val obj: Any,
+    val squadrons: MutableSet<SquadronId>
 )

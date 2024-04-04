@@ -4,6 +4,9 @@ import com.google.gson.Gson
 import com.mgtriffid.games.cotta.Game
 import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.config.DebugConfig
+import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Issues
+import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Latency
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
@@ -60,17 +63,29 @@ class PannaGame : CottaGame {
             row.forEachIndexed { colNumber, tile ->
                 when (tile) {
                     0 -> Unit
-                    1 -> createBlock(entities, idGenerator, rowNumber, colNumber)
+                    1 -> createBlock(
+                        entities, idGenerator, rowNumber, colNumber
+                    )
+
                     else -> throw RuntimeException("Unknown tile $tile")
                 }
             }
         }
     }
 
-    private fun createBlock(entities: Entities, idGenerator: () -> Int, rowNumber: Int, colNumber: Int) {
+    private fun createBlock(
+        entities: Entities,
+        idGenerator: () -> Int,
+        rowNumber: Int,
+        colNumber: Int
+    ) {
         val block = entities.createStatic(StaticEntityId(idGenerator()))
         block.addComponent(createDrawableComponent(SOLID_TERRAIN_TILE_STRATEGY))
-        block.addComponent(createPositionComponent(8 + colNumber * 16f, 8 + rowNumber * 16f))
+        block.addComponent(
+            createPositionComponent(
+                8 + colNumber * 16f, 8 + rowNumber * 16f
+            )
+        )
         block.addComponent(createSolidTerrainComponent())
         block.addComponent(createColliderComponent(16, 16))
     }
@@ -92,4 +107,24 @@ class PannaGame : CottaGame {
     }
 
     override val inputProcessing = PannaGameInputProcessing()
+}
+
+object NetworkWithIssues : DebugConfig {
+    override val emulatedNetworkConditions =
+        object : DebugConfig.EmulatedNetworkConditions.WithIssues {
+            override val sending = object : Issues {
+                override val latency = object : Latency {
+                    override val min: Long = 20
+                    override val max: Long = 80
+                }
+                override val packetLoss: Double = 0.0
+            }
+            override val receiving = object : Issues {
+                override val latency = object : Latency {
+                    override val min: Long = 20
+                    override val max: Long = 80
+                }
+                override val packetLoss: Double = 0.0
+            }
+        }
 }

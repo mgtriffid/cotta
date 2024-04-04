@@ -22,7 +22,7 @@ class ConnectionTest {
         val obj = "Obj"
         val objectId = connection.track(obj)
         connection.markSent(SquadronId(1), setOf(objectId), 1)
-        assertEquals(obj, connection.objectsInFlight().first())
+        assertEquals(obj, connection.objectsInFlight().first().obj)
     }
 
     @Test
@@ -40,7 +40,7 @@ class ConnectionTest {
         val objectId = connection.track(obj)
         connection.markSent(SquadronId(1), setOf(objectId), 2)
         connection.confirm(PacketId(2))
-        assertEquals(setOf(obj), connection.objectsInFlight())
+        assertEquals(obj, connection.objectsInFlight().first().obj)
     }
 
     @Test

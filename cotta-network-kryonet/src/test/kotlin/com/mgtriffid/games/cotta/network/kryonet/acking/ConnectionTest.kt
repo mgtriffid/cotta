@@ -9,7 +9,12 @@ class ConnectionTest {
 
     @BeforeEach
     fun setUp() {
-        connection = Connection()
+        connection = Connection(
+            serialize = { obj -> obj.toString().toByteArray() },
+            deserialize = { bytes -> String(bytes) },
+            sendChunk = { },
+            saveObject = { }
+        )
     }
 
     @Test

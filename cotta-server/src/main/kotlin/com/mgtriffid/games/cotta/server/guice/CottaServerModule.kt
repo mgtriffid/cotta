@@ -122,9 +122,7 @@ class CottaServerModule(
     @Provides
     @Singleton
     fun provideCottaServerNetwork(): CottaServerNetworkTransport {
-        val network = AckingCottaServerNetworkTransport(
-            KryonetCottaServerNetworkTransport()
-        )
+        val network = AckingCottaServerNetworkTransport()
         network.initialize()
         return network
     }

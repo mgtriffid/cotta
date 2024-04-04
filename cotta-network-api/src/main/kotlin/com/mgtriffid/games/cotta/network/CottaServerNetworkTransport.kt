@@ -7,7 +7,6 @@ import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
  * What are the requirements to this ServerNetwork? Should be updatable probably.
  */
 interface CottaServerNetworkTransport {
-    fun connections(): Set<ClientConnection>
 
     fun initialize() // questionable
 

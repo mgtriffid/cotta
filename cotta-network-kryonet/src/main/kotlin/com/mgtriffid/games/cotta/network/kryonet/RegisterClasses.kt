@@ -5,6 +5,7 @@ import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.network.kryonet.acking.Acks
 import com.mgtriffid.games.cotta.network.kryonet.acking.Chunk
 import com.mgtriffid.games.cotta.network.protocol.*
 
@@ -26,4 +27,5 @@ fun Kryo.registerClasses() {
     register(IntArray::class.java)
     register(PlayersDiffDto::class.java)
     register(Chunk::class.java)
+    register(Acks::class.java)
 }

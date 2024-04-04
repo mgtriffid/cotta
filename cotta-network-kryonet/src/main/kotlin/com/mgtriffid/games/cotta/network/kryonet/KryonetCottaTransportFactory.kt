@@ -30,6 +30,6 @@ class KryonetCottaTransportFactory {
     }
 
     fun createServer() : CottaServerNetworkTransport {
-        return AckingCottaServerNetworkTransport(KryonetCottaServerNetworkTransport())
+        return AckingCottaServerNetworkTransport()
     }
 }

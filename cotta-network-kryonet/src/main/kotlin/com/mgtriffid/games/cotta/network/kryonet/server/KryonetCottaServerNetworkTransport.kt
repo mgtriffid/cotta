@@ -52,8 +52,4 @@ class KryonetCottaServerNetworkTransport : CottaServerNetworkTransport {
     override fun send(connectionId: ConnectionId, obj: Any) {
         server.sendToUDP(connectionId.id, obj)
     }
-
-    override fun connections(): Set<ClientConnection> {
-        TODO("Not yet implemented")
-    }
 }

@@ -41,7 +41,6 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompen
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.SimpleEffectProcessingContext
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.acking.AckingCottaServerNetworkTransport
-import com.mgtriffid.games.cotta.network.kryonet.server.KryonetCottaServerNetworkTransport
 import com.mgtriffid.games.cotta.server.*
 import com.mgtriffid.games.cotta.server.impl.*
 

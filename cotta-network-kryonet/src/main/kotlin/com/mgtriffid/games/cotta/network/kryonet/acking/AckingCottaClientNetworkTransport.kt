@@ -80,8 +80,7 @@ class AckingCottaClientNetworkTransport(
                 when (obj) {
                     is Chunk -> {
                         logger.info { "Received a ${Chunk::class.simpleName} of size ${obj.data.size}" }
-                        connection.receiveChunk(obj)
-                        saver.save(obj, ::save)
+                        saver.save(obj, connection::receiveChunk)
                     }
                 }
             }

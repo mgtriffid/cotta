@@ -2,15 +2,14 @@ package com.mgtriffid.games.cotta.network.kryonet.acking
 
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
+import com.esotericsoftware.kryonet.Listener
 import com.esotericsoftware.kryonet.Server
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
-import com.mgtriffid.games.cotta.network.ClientConnection
 import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.ServerListener
 import com.mgtriffid.games.cotta.network.kryonet.registerClasses
-import com.mgtriffid.games.cotta.network.kryonet.server.KryonetCottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.protocol.ClientToServerInputDto
 import com.mgtriffid.games.cotta.network.protocol.EnterTheGameDto
 import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
@@ -43,7 +42,12 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
                     val input = Input(bytes)
                     server.kryo.readClassAndObject(input)
                 },
-                sendChunk = { chunk -> server.sendToUDP(connectionId.id, chunk) },
+                sendChunk = { chunk ->
+                    server.sendToUDP(
+                        connectionId.id,
+                        chunk
+                    )
+                },
                 saveObject = { save(it, connectionId) }
             )
         })
@@ -58,22 +62,40 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
     }
 
     private fun configureListener() {
-        val listener = ServerListener(
-            enterGameIntents = enterGameIntents,
-            clientToServerInputs = clientToServerInputs,
-        )
+        val listener = object : Listener {
+            override fun received(kryoCconnection: KryoConnection, obj: Any?) {
+                when (obj) {
+                    is Chunk -> {
+                        val connectionId = ConnectionId(kryoCconnection.id)
+                        connections[connectionId].receiveChunk(obj)
+                    }
+
+                    else -> {
+                        logger.warn { "Received unknown object: $obj" }
+                    }
+                }
+            }
+        }
+
         server.addListener(listener)
     }
 
     private fun save(obj: Any, connectionId: ConnectionId) {
         when (obj) {
             is EnterTheGameDto -> {
-                enterGameIntents.add(Pair(connectionId, EnterGameIntent(HashMap(obj.params))))
+                enterGameIntents.add(
+                    Pair(
+                        connectionId,
+                        EnterGameIntent(HashMap(obj.params))
+                    )
+                )
             }
+
             is ClientToServerInputDto -> {
                 logger.debug { "Received ${ClientToServerInputDto::class.simpleName}" }
                 clientToServerInputs.add(Pair(connectionId, obj))
             }
+
             else -> {
                 logger.warn { "Received unknown object: $obj" }
             }

@@ -22,7 +22,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
-import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.Players
@@ -61,7 +61,7 @@ class CottaServerModule(
             bind(CottaState::class.java).annotatedWith(named("simulation")).to(CottaStateImpl::class.java)
                 .`in`(Scopes.SINGLETON)
 
-            bind(AuthoritativeSimulation::class.java).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+            bind(Simulation::class.java).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
             bind(InputProcessing::class.java).toInstance(game.inputProcessing)
 
             bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)

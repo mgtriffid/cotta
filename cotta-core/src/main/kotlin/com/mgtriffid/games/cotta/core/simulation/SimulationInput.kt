@@ -15,4 +15,8 @@ interface SimulationInput {
 
 data class PlayersDiff(
     val added: Set<PlayerId>,
-)
+) {
+    companion object {
+        val Empty = PlayersDiff(emptySet())
+    }
+}

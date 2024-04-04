@@ -5,7 +5,7 @@ import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.input.InputProcessing
-import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.core.simulation.Players
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
@@ -27,7 +27,7 @@ class AuthoritativeSimulationImpl @Inject constructor(
     private val playersSawTicks: PlayersSawTicks,
     private val inputProcessing: InputProcessing,
     private val players: Players
-) : AuthoritativeSimulation {
+) : Simulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>() // TODO pathetic casts
 
     override fun tick(input: SimulationInput) {

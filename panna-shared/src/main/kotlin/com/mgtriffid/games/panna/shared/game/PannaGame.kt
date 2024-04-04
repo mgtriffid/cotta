@@ -95,7 +95,7 @@ class PannaGame : CottaGame {
     }
 
     override val config: CottaConfig = object : CottaConfig {
-        override val tickLength: Long = 100L
+        override val tickLength: Long = 50L
         override val debugConfig = NetworkWithIssues
     }
 
@@ -115,17 +115,17 @@ object NetworkWithIssues : DebugConfig {
         object : DebugConfig.EmulatedNetworkConditions.WithIssues {
             override val sending = object : Issues {
                 override val latency = object : Latency {
-                    override val min: Long = 20
+                    override val min: Long = 50
                     override val max: Long = 80
                 }
-                override val packetLoss: Double = 0.0
+                override val packetLoss: Double = 0.3
             }
             override val receiving = object : Issues {
                 override val latency = object : Latency {
-                    override val min: Long = 20
+                    override val min: Long = 50
                     override val max: Long = 80
                 }
-                override val packetLoss: Double = 0.0
+                override val packetLoss: Double = 0.3
             }
         }
 }

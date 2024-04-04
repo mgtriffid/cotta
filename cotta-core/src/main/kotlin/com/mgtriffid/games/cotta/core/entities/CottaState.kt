@@ -21,4 +21,6 @@ interface CottaState {
     fun setBlank(entities: Entities)
 
     fun setBlank(tick: Long)
+
+    fun copyTo(state: CottaState)
 }

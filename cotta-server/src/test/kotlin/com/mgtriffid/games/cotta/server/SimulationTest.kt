@@ -9,7 +9,7 @@ import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.registerComponents
-import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.core.simulation.PlayersDiff
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
@@ -28,11 +28,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class AuthoritativeSimulationTest {
+class SimulationTest {
     private lateinit var tickProvider: TickProvider
     private lateinit var simulationInputHolder: SimulationInputHolder
     private lateinit var state: CottaState
-    private lateinit var simulation: AuthoritativeSimulation
+    private lateinit var simulation: Simulation
     private lateinit var playersSawTicks: PlayersSawTicks
     private lateinit var dataForClients: DataForClients
 
@@ -55,7 +55,7 @@ class AuthoritativeSimulationTest {
             override fun playersDiff() = PlayersDiff(emptySet())
         })
         state = injector.getInstance(Key.get(CottaState::class.java, Names.named("simulation")))
-        simulation = injector.getInstance(AuthoritativeSimulation::class.java)
+        simulation = injector.getInstance(Simulation::class.java)
         registerComponents(GameStub(), injector.getInstance(ComponentRegistry::class.java))
         dataForClients = injector.getInstance(DataForClients::class.java)
         playersSawTicks = injector.getInstance(PlayersSawTicks::class.java)

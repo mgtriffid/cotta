@@ -102,7 +102,7 @@ class BytesStateSnapper @Inject constructor(
         unpackChangedEntities(entities, recipe.changedEntities)
         recipe.removedEntitiesIds.forEach(entities::remove)
         entities.setIdGenerator(recipe.idSequence)
-        logger.info { "Id coming from Server with delta is ${recipe.idSequence}" }
+        logger.debug { "Id coming from Server with delta is ${recipe.idSequence}" }
     }
 
     override fun snapPlayersDelta(

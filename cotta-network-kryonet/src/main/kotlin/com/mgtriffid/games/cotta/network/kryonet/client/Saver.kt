@@ -19,6 +19,7 @@ internal class LaggingSaver(
     private val issues: Issues,
     private val impl: Saver
 ) : Saver {
+    // TODO make those daemons so that when the main thread dies, they die too
     private val executors = Executors.newScheduledThreadPool(1)
 
     override fun <T: Any> save(obj: T, block: (T) -> Unit) {

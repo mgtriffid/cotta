@@ -71,7 +71,7 @@ class AckingCottaClientNetworkTransport(
             override fun received(kryoConnection: KryoConnection?, obj: Any?) {
                 when (obj) {
                     is Chunk -> {
-                        logger.info { "Received a ${Chunk::class.simpleName} of size ${obj.data.size}" }
+                        logger.debug { "Received a ${Chunk::class.simpleName} of size ${obj.data.size}" }
                         saver.save(obj, connection::receiveChunk)
                     }
                 }

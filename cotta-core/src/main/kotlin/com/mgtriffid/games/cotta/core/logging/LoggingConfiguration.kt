@@ -42,6 +42,8 @@ fun configureLogging() {
         "com.mgtriffid.games.cotta.client.impl.SimulationsImpl" to default,
         "com.mgtriffid.games.cotta.core.simulation.impl.AuthoritativeSimulationImpl" to default,
         "com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody" to default,
+        "com.mgtriffid.games.cotta.network.kryonet.acking.AckingCottaClientNetworkTransport" to default,
+        "com.mgtriffid.games.cotta.network.kryonet.acking.Connection" to default,
     ).forEach { (logger, level) ->
         (LoggerFactory.getLogger(logger) as Logger).level = level
     }

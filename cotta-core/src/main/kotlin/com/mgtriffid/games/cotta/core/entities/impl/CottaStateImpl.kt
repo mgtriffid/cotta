@@ -61,6 +61,10 @@ class CottaStateImpl @Inject constructor(
         this.blank = entities.deepCopy()
     }
 
+    override fun copyTo(state: CottaState) {
+        state.set(tick = latestTickSet, entities = entities(latestTickSet).deepCopy())
+    }
+
     private fun Long.toIndex() = (this % stateHistoryLength).toInt()
 
     private fun Entities.deepCopy(): Entities {

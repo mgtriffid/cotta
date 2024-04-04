@@ -9,13 +9,11 @@ import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.registerComponents
 import com.mgtriffid.games.cotta.core.serialization.InputRecipe
-import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.core.simulation.PlayersDiff
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
-import com.mgtriffid.games.cotta.network.ConnectionId
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
-import com.mgtriffid.games.cotta.network.purgatory.EnterGameIntent
 import com.mgtriffid.games.cotta.server.*
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -33,7 +31,7 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     @Named(SIMULATION) private val tickProvider: TickProvider,
     @Named("simulation") private val state: CottaState,
     private val serverToClientDataDispatcher: ServerToClientDataDispatcher,
-    private val serverSimulation: AuthoritativeSimulation,
+    private val serverSimulation: Simulation,
     private val serverSimulationInputProvider: ServerSimulationInputProvider
 ): CottaGameInstance {
 

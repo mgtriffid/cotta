@@ -28,15 +28,15 @@ class Connection(
 
     fun send(obj: Any) {
         synchronized(this) {
-            logger.info { "In flight: ${objectsInFlight.entries.map { (k, v) -> "$k -> ${v.obj.javaClass.simpleName}" }}" }
+            logger.trace { "In flight: ${objectsInFlight.entries.map { (k, v) -> "$k -> ${v.obj.javaClass.simpleName}" }}" }
             val packetSequence = packetSequence
             track(obj)
             val objectsToSent = getLastObjectsInFlight()
             val bytes = serialize(ArrayList(objectsToSent.values))
-            logger.info { "Bytes size is ${bytes.size}" }
+            logger.trace { "Bytes size is ${bytes.size}" }
             val chunked = bytes.chunked()
             val size = chunked.size
-            logger.info { " $size chunks" }
+            logger.trace { " $size chunks" }
             if (size > 128) {
                 throw IllegalArgumentException("Too many chunks")
             }
@@ -84,7 +84,7 @@ class Connection(
         if (packetId !in v.packets) {
             return
         }
-        logger.info { "Confirmed $packetId" }
+        logger.trace { "Confirmed $packetId" }
         v.packets.remove(packetId)
         if (v.packets.isEmpty()) {
             // squadron sent completely

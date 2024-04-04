@@ -33,7 +33,7 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesDeltaRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
-import com.mgtriffid.games.cotta.core.simulation.AuthoritativeSimulation
+import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.Players
@@ -68,10 +68,10 @@ class CottaClientModule(
 
         bind(Simulations::class.java).to(SimulationsImpl::class.java).`in`(Scopes.SINGLETON)
 
-        bind(AuthoritativeSimulation::class.java).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Simulation::class.java).annotatedWith(Names.named("simulation")).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Players::class.java).to(PlayersImpl::class.java).`in`(Scopes.SINGLETON)
 
-        bind(GuessedSimulation::class.java).to(GuessedSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Simulation::class.java).annotatedWith(Names.named("guessed")).to(GuessedSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 
         val simulationTickProvider = AtomicLongTickProvider()
         bind(TickProvider::class.java)
@@ -80,12 +80,17 @@ class CottaClientModule(
         bind(TickProvider::class.java)
             .annotatedWith(Names.named(GLOBAL))
             .toInstance(AtomicLongTickProvider())
+        bind(TickProvider::class.java)
+            .annotatedWith(Names.named("guessed"))
+            .toInstance(AtomicLongTickProvider())
         bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
         bind(SimulationDirector::class.java).to(SimulationDirectorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(DeltasPresent::class.java).to(DeltasPresentImpl::class.java).`in`(Scopes.SINGLETON)
         bind(Deltas::class.java).to(DeltasImpl::class.java).`in`(Scopes.SINGLETON)
         bind(LastClientTickProcessedByServer::class.java).toInstance(LastClientTickProcessedByServerImpl(0L))
         bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(CottaState::class.java).annotatedWith(Names.named("guessed")).to(CottaStateImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
 

@@ -40,7 +40,8 @@ class CottaClientImpl @Inject constructor(
         clientState.let {
             when (it) {
                 ClientState.Initial -> {
-                    network.connect()
+                    network.initialize()
+                    network.enterGame()
                     clientState = ClientState.AwaitingGameState(since = now())
                 }
 
@@ -53,6 +54,7 @@ class CottaClientImpl @Inject constructor(
                         }
 
                         AuthoritativeState.NotReady -> {
+                            network.enterGame()
                             if (now() - it.since > STATE_WAITING_THRESHOLD) {
                                 clientState = ClientState.Disconnected
                             }

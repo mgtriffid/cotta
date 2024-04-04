@@ -1,8 +1,6 @@
 package com.mgtriffid.games.cotta.network.kryonet.acking
 
-import com.esotericsoftware.kryo.io.Input
 import com.google.common.cache.CacheBuilder
-import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import mu.KotlinLogging
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -29,34 +27,38 @@ class Connection(
         .build<SquadronId, IncomingSquadron>()
 
     fun send(obj: Any) {
-        val bytes = serialize(obj)
-        logger.info { "Bytes size is ${bytes.size}" }
-        val packetSequence = packetSequence
-        val objectId = track(obj)
-        val chunked = bytes.chunked()
-        val size = chunked.size
-        logger.info { " $size chunks" }
-        if (size > 128) {
-            throw IllegalArgumentException("Too many chunks")
-        }
-        val squadronId = SquadronId(packetSequence.get())
-
-        chunked.forEachIndexed { idx, b ->
-            sendChunk(Chunk().apply {
-                this.acks = Acks().apply {
-                    last = receivedPackets.last
-                    received = receivedPackets.received
-                }
-                this.squadron = squadronId.id
-                packet = idx.toByte()
-                this.size = size.toByte()
-                data = b
+        synchronized(this) {
+            logger.info { "In flight: ${objectsInFlight.entries.map { (k, v) -> "$k -> ${v.obj.javaClass.simpleName}" }}" }
+            val packetSequence = packetSequence
+            track(obj)
+            val objectsToSent = getLastObjectsInFlight()
+            val bytes = serialize(ArrayList(objectsToSent.values))
+            logger.info { "Bytes size is ${bytes.size}" }
+            val chunked = bytes.chunked()
+            val size = chunked.size
+            logger.info { " $size chunks" }
+            if (size > 128) {
+                throw IllegalArgumentException("Too many chunks")
             }
-                .also { "Sending chunk of squadron ${it.squadron} and packet ${it.packet}" }
-            )
+            val squadronId = SquadronId(packetSequence.get())
+
+            chunked.forEachIndexed { idx, b ->
+                sendChunk(Chunk().apply {
+                    this.acks = Acks().apply {
+                        last = receivedPackets.last
+                        received = receivedPackets.received
+                    }
+                    this.squadron = squadronId.id
+                    packet = idx.toByte()
+                    this.size = size.toByte()
+                    data = b
+                }
+                    .also { "Sending chunk of squadron ${it.squadron} and packet ${it.packet}" }
+                )
+            }
+            packetSequence.addAndGet(size)
+            markSent(squadronId, objectsToSent.keys, size)
         }
-        packetSequence.addAndGet(size)
-        markSent(squadronId, setOf(objectId), size)
     }
 
     fun track(obj: Any): ObjectId {
@@ -104,20 +106,21 @@ class Connection(
     }
 
     fun receiveChunk(chunk: Chunk) {
-        val squadron = incomingSquadrons.get(SquadronId(chunk.squadron)) {
-            IncomingSquadron(Array(chunk.size.toInt()) { null })
-        }
-        receivedPackets.markReceived(chunk.squadron, chunk.packet)
-        squadron.data[chunk.packet.toInt()] = chunk.data
-        if (squadron.data.all { it != null }) {
-            // TODO optimize: allocate in advance, then copy, not copy-copy-copy
-            val bytes = squadron.data.fold(ByteArray(0)) { acc, bytes ->
-                acc + bytes!!
+        synchronized(this) {
+            val squadron = incomingSquadrons.get(SquadronId(chunk.squadron)) {
+                IncomingSquadron(Array(chunk.size.toInt()) { null })
             }
-            val dto = deserialize(bytes)
-            saveObject(dto)
+            receivedPackets.markReceived(chunk.squadron, chunk.packet)
+            squadron.data[chunk.packet.toInt()] = chunk.data
+            if (squadron.data.all { it != null }) {
+                // TODO optimize: allocate in advance, then copy, not copy-copy-copy
+                val bytes = squadron.data.fold(ByteArray(0)) { acc, bytes ->
+                    acc + bytes!!
+                }
+                (deserialize(bytes) as ArrayList<*>).forEach { saveObject(it) }
+            }
+            processAcks(chunk.acks)
         }
-        processAcks(chunk.acks)
     }
 
     private fun processAcks(acks: Acks) {
@@ -126,6 +129,12 @@ class Connection(
                 confirm(PacketId(acks.last - idx))
             }
         }
+    }
+
+    private fun getLastObjectsInFlight(): Map<ObjectId, Any> {
+        val objects = objectsInFlight.toSortedMap()
+        val ids = objects.keys.toList()
+        return ids.takeLast(8).associateWith { objects[it]!!.obj }
     }
 
     fun objectsInFlight(): Set<ObjectInFlight> {
@@ -145,7 +154,11 @@ value class SquadronId(val id: Int) : Comparable<SquadronId> {
 }
 
 @JvmInline
-value class ObjectId(val id: Int)
+value class ObjectId(val id: Int) : Comparable<ObjectId> {
+    override fun compareTo(other: ObjectId): Int {
+        return id.compareTo(other.id)
+    }
+}
 
 @JvmInline
 value class PacketId(val id: Int)

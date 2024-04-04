@@ -5,12 +5,12 @@ import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditio
 import java.util.concurrent.Executors
 
 interface Sender {
-    fun send(client: Client, obj: Any)
+    fun send(obj: Any, block: (Any) -> Unit)
 }
 
 internal class SimpleSender : Sender {
-    override fun send(client: Client, obj: Any) {
-        client.sendUDP(obj)
+    override fun send(obj: Any, block: (Any) -> Unit) {
+        block(obj)
     }
 }
 
@@ -20,12 +20,12 @@ internal class LaggingSender(
 ) : Sender {
 
     private val executors = Executors.newScheduledThreadPool(1)
-    override fun send(client: Client, obj: Any) {
+    override fun send(obj: Any, block: (Any) -> Unit) {
         if (issues.packetLoss >= Math.random()) {
             return
         }
         executors.schedule(
-            { impl.send(client, obj) },
+            { impl.send(obj, block) },
             issues.latency.random(),
             java.util.concurrent.TimeUnit.MILLISECONDS
         )

@@ -75,8 +75,11 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
         serverSimulationInputProvider.fetch()
         val delta = serverSimulationInputProvider.getDelta()
         val intents = network.drainEnterGameIntents()
-        val addedPlayers = intents.map { (connectionId, _) ->
+        val addedPlayers = intents.mapNotNull { (connectionId, _) ->
             logger.debug { "Received an intent to enter the game from connection '${connectionId.id}'" }
+            if (clientsGhosts.playerByConnection[connectionId] != null) {
+                return@mapNotNull null
+            }
             val playerId = playerIdGenerator.nextId()
             clientsGhosts.addGhost(playerId, connectionId)
             playerId

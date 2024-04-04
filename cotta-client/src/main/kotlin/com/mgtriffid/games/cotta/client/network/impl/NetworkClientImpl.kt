@@ -44,8 +44,12 @@ class NetworkClientImpl<
     private val localPlayer: LocalPlayer
 ) : NetworkClient {
     private val bufferLength: Int = 3
-    override fun connect() {
+
+    override fun initialize() {
         networkTransport.initialize()
+    }
+
+    override fun enterGame() {
         networkTransport.sendEnterGameIntent()
     }
 

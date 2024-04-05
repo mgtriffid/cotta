@@ -24,7 +24,7 @@ class MetricsDisplay(spriteBatch: SpriteBatch) {
         stage.isDebugAll = true
     }
 
-    fun updateBufferLength(bufferLength: Double) {
+    fun updateBufferLength(bufferLength: MetricStats) {
         bufferLengthDisplay.setText(bufferLength.toString())
     }
 

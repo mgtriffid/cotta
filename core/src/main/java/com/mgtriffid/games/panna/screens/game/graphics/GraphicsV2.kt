@@ -21,6 +21,7 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.panna.screens.game.SCALE
 import com.mgtriffid.games.panna.screens.game.debug.MetricsDisplay
+import com.mgtriffid.games.panna.screens.game.debug.toMetricStats
 import com.mgtriffid.games.panna.screens.game.graphics.actors.ActorFactory
 import com.mgtriffid.games.panna.screens.game.graphics.actors.PannaActor
 import com.mgtriffid.games.panna.screens.game.graphics.textures.PannaTextures
@@ -99,7 +100,7 @@ class GraphicsV2 {
             camera.update()
         }
         stage.draw()
-        metricsDisplay.updateBufferLength(metrics.histogram("buffer_ahead").snapshot.mean)
+        metricsDisplay.updateBufferLength(metrics.histogram("buffer_ahead").toMetricStats())
         metricsDisplay.stage.act()
         metricsDisplay.stage.draw()
     }

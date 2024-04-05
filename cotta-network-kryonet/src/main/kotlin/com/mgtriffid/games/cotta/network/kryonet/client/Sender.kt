@@ -1,8 +1,6 @@
 package com.mgtriffid.games.cotta.network.kryonet.client
 
-import com.esotericsoftware.kryonet.Client
 import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Issues
-import java.util.concurrent.Executors
 
 interface Sender {
     fun send(obj: Any, block: (Any) -> Unit)
@@ -19,7 +17,8 @@ internal class LaggingSender(
     private val impl: Sender
 ) : Sender {
 
-    private val executors = Executors.newScheduledThreadPool(1)
+    private val executors = daemonScheduledExecutorService()
+
     override fun send(obj: Any, block: (Any) -> Unit) {
         if (issues.packetLoss >= Math.random()) {
             return

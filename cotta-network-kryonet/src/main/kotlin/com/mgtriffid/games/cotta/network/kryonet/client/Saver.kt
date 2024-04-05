@@ -1,8 +1,6 @@
 package com.mgtriffid.games.cotta.network.kryonet.client
 
 import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Issues
-import java.util.Queue
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 interface Saver {
@@ -19,8 +17,7 @@ internal class LaggingSaver(
     private val issues: Issues,
     private val impl: Saver
 ) : Saver {
-    // TODO make those daemons so that when the main thread dies, they die too
-    private val executors = Executors.newScheduledThreadPool(1)
+    private val executors = daemonScheduledExecutorService()
 
     override fun <T: Any> save(obj: T, block: (T) -> Unit) {
         if (issues.packetLoss >= Math.random()) {

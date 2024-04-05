@@ -2,6 +2,9 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.codahale.metrics.Histogram
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 class IncomingDataBufferMonitor(
     private val incomingDataBuffer: ClientIncomingDataBuffer<*, *>,
@@ -11,10 +14,11 @@ class IncomingDataBufferMonitor(
     fun measure() {
         var tick = globalTick.tick
         var count = 0
-        while(incomingDataBuffer.simulationInputs.containsKey(tick)) {
+        while (incomingDataBuffer.simulationInputs.containsKey(tick)) {
             count++
             tick++
         }
+        logger.info { "Count: $count" }
         bufferHistogram.update(count)
     }
 }

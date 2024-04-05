@@ -6,6 +6,7 @@ import com.codahale.metrics.SlidingTimeWindowArrayReservoir
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Scopes
+import com.google.inject.Singleton
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.client.*
@@ -57,7 +58,6 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaTransportFactory
 import jakarta.inject.Named
-import jakarta.inject.Singleton
 import java.util.concurrent.TimeUnit
 
 class CottaClientModule(
@@ -72,15 +72,21 @@ class CottaClientModule(
         bindNetwork()
         bind(CottaClient::class.java)
             .to(object : TypeLiteral<CottaClientImpl>() {})
-        bind(Int::class.java).annotatedWith(Names.named("historyLength")).toInstance(8)
-        bind(Int::class.java).annotatedWith(Names.named("stateHistoryLength")).toInstance(128)
+        bind(Int::class.java).annotatedWith(Names.named("historyLength"))
+            .toInstance(8)
+        bind(Int::class.java).annotatedWith(Names.named("stateHistoryLength"))
+            .toInstance(128)
 
-        bind(Simulations::class.java).to(SimulationsImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Simulations::class.java).to(SimulationsImpl::class.java)
+            .`in`(Scopes.SINGLETON)
 
-        bind(Simulation::class.java).annotatedWith(Names.named("simulation")).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(Players::class.java).to(PlayersImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Simulation::class.java).annotatedWith(Names.named("simulation"))
+            .to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Players::class.java).to(PlayersImpl::class.java)
+            .`in`(Scopes.SINGLETON)
 
-        bind(Simulation::class.java).annotatedWith(Names.named("guessed")).to(GuessedSimulationImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Simulation::class.java).annotatedWith(Names.named("guessed"))
+            .to(GuessedSimulationImpl::class.java).`in`(Scopes.SINGLETON)
 
         val simulationTickProvider = AtomicLongTickProvider()
         bind(TickProvider::class.java)
@@ -92,16 +98,29 @@ class CottaClientModule(
         bind(TickProvider::class.java)
             .annotatedWith(Names.named("guessed"))
             .toInstance(AtomicLongTickProvider())
-        bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
-        bind(SimulationDirector::class.java).to(SimulationDirectorImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(DeltasPresent::class.java).to(DeltasPresentImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(Deltas::class.java).to(DeltasImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(LastClientTickProcessedByServer::class.java).toInstance(LastClientTickProcessedByServerImpl(0L))
-        bind(CottaState::class.java).annotatedWith(Names.named("simulation")).to(CottaStateImpl::class.java)
+        bind(CottaClock::class.java).toInstance(
+            CottaClockImpl(
+                simulationTickProvider,
+                game.config.tickLength
+            )
+        )
+        bind(SimulationDirector::class.java).to(SimulationDirectorImpl::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(CottaState::class.java).annotatedWith(Names.named("guessed")).to(CottaStateImpl::class.java)
+        bind(DeltasPresent::class.java).to(DeltasPresentImpl::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(Deltas::class.java).to(DeltasImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(LastClientTickProcessedByServer::class.java).toInstance(
+            LastClientTickProcessedByServerImpl(0L)
+        )
+        bind(CottaState::class.java).annotatedWith(Names.named("simulation"))
+            .to(CottaStateImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(CottaState::class.java).annotatedWith(Names.named("guessed"))
+            .to(CottaStateImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java)
+            .`in`(Scopes.SINGLETON)
 
         bind(InvokersFactory::class.java)
             .annotatedWith(Names.named("simulation"))
@@ -114,20 +133,29 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
 
         bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
-        bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(EffectBus::class.java).annotatedWith(Names.named("prediction")).to(EffectBusImpl::class.java)
+        bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("historical")).to(
-            HistoricalLagCompensatingEffectBus::class.java
-        ).`in`(Scopes.SINGLETON)
-        bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("lagCompensated")).to(
-            LagCompensatingEffectBusImpl::class.java
-        ).`in`(Scopes.SINGLETON)
-        bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java)
+        bind(EffectBus::class.java).to(EffectBusImpl::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(Entities::class.java).annotatedWith(Names.named("latest")).to(LatestEntities::class.java)
-        bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(EffectBus::class.java).annotatedWith(Names.named("prediction"))
+            .to(EffectBusImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("historical"))
+            .to(
+                HistoricalLagCompensatingEffectBus::class.java
+            ).`in`(Scopes.SINGLETON)
+        bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("lagCompensated"))
+            .to(
+                LagCompensatingEffectBusImpl::class.java
+            ).`in`(Scopes.SINGLETON)
+        bind(EntityOwnerSawTickProvider::class.java).to(
+            EntityOwnerSawTickProviderImpl::class.java
+        )
+            .`in`(Scopes.SINGLETON)
+        bind(Entities::class.java).annotatedWith(Names.named("latest"))
+            .to(LatestEntities::class.java)
+        bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(EffectProcessingContext::class.java)
             .annotatedWith(Names.named("lagCompensated"))
             .to(LagCompensatingEffectProcessingContext::class.java)
@@ -136,12 +164,16 @@ class CottaClientModule(
             .annotatedWith(Names.named("simple"))
             .to(SimpleEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(ClientPlayers::class.java).to(ClientPlayersImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(ClientPlayers::class.java).to(ClientPlayersImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(InputProcessing::class.java).toInstance(game.inputProcessing)
 
-        bind(PredictionSimulation::class.java).to(PredictionSimulationImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(CottaState::class.java).annotatedWith(Names.named("prediction")).to(CottaStateImpl::class.java)
+        bind(PredictionSimulation::class.java).to(PredictionSimulationImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(CottaState::class.java).annotatedWith(Names.named("prediction"))
+            .to(CottaStateImpl::class.java)
             .`in`(Scopes.SINGLETON)
         val predictionTickProvider = AtomicLongTickProvider()
         bind(TickProvider::class.java)
@@ -150,11 +182,13 @@ class CottaClientModule(
         bind(TickProvider::class.java)
             .annotatedWith(Names.named("localInput"))
             .toInstance(AtomicLongTickProvider())
-        val predictionClock = CottaClockImpl(predictionTickProvider, game.config.tickLength)
+        val predictionClock =
+            CottaClockImpl(predictionTickProvider, game.config.tickLength)
         bind(CottaClock::class.java)
             .annotatedWith(Names.named("prediction"))
             .toInstance(predictionClock)
-        bind(Entities::class.java).annotatedWith(Names.named("prediction")).to(PredictedLatestEntities::class.java)
+        bind(Entities::class.java).annotatedWith(Names.named("prediction"))
+            .to(PredictedLatestEntities::class.java)
         bind(PredictionEffectsConsumerSystemInvoker::class.java)
             .to(PredictionEffectsConsumerSystemInvokerImpl::class.java)
             .`in`(Scopes.SINGLETON)
@@ -166,7 +200,8 @@ class CottaClientModule(
             .to(PredictionTracingEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
 
-        bind(LocalPlayerInputs::class.java).to(LocalPlayerInputsImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(LocalPlayerInputs::class.java).to(LocalPlayerInputsImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(CreateEntityStrategy::class.java)
             .annotatedWith(Names.named("effectProcessing"))
             .to(SimpleCreateEntityStrategy::class.java)
@@ -175,12 +210,16 @@ class CottaClientModule(
             .annotatedWith(Names.named("prediction"))
             .to(PredictionCreateEntityStrategy::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(PredictedEntityIdGenerator::class.java).to(PredictedEntityIdGeneratorImpl::class.java)
+        bind(PredictedEntityIdGenerator::class.java).to(
+            PredictedEntityIdGeneratorImpl::class.java
+        )
             .`in`(Scopes.SINGLETON)
-        bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength")).toInstance(128)
+        bind(Int::class.java).annotatedWith(Names.named("clientInputBufferLength"))
+            .toInstance(128)
         bind(LocalPlayer::class.java).toInstance(LocalPlayer())
 
-        bind(DrawableStateProvider::class.java).to(DrawableStateProviderImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(DrawableStateProvider::class.java).to(DrawableStateProviderImpl::class.java)
+            .`in`(Scopes.SINGLETON)
         bind(Interpolators::class.java).`in`(Scopes.SINGLETON)
 
         install(BytesSerializationModule(game.playerInputKClass))
@@ -200,16 +239,26 @@ class CottaClientModule(
                     >>() {})
             .`in`(Scopes.SINGLETON)
 
-        bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java)
+            .`in`(Scopes.SINGLETON)
+        bind(MetricRegistry::class.java).toInstance(metricRegistry)
     }
 
     @Provides
     @Singleton
     private fun provideIncomingDataBufferMonitor(
-        incomingDataBuffer: ClientIncomingDataBuffer<*, *>,
+        incomingDataBuffer: ClientIncomingDataBuffer<
+            BytesStateRecipe,
+            BytesDeltaRecipe
+            >,
         @Named("global") globalTick: TickProvider,
     ): IncomingDataBufferMonitor {
-        val bufferHistogram = Histogram(SlidingTimeWindowArrayReservoir(2000, TimeUnit.MILLISECONDS))
+        val bufferHistogram = Histogram(
+            SlidingTimeWindowArrayReservoir(
+                2000,
+                TimeUnit.MILLISECONDS
+            )
+        )
         metricRegistry.register("buffer_ahead", bufferHistogram)
         return IncomingDataBufferMonitor(
             incomingDataBuffer,

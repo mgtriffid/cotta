@@ -6,22 +6,21 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
-import com.badlogic.gdx.scenes.scene2d.actions.DelayAction
-import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.codahale.metrics.MetricRegistry
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.panna.screens.game.SCALE
+import com.mgtriffid.games.panna.screens.game.debug.MetricsDisplay
 import com.mgtriffid.games.panna.screens.game.graphics.actors.ActorFactory
 import com.mgtriffid.games.panna.screens.game.graphics.actors.PannaActor
 import com.mgtriffid.games.panna.screens.game.graphics.textures.PannaTextures
@@ -42,13 +41,17 @@ class GraphicsV2 {
     lateinit var viewport: Viewport
     private val entityActors = HashMap<EntityId, PannaActor>()
     private lateinit var clickToJoinLabel: Label
+    private lateinit var spriteBatch: SpriteBatch
+    private lateinit var metricsDisplay: MetricsDisplay
 
     fun initialize() {
         textures = PannaTextures()
+        spriteBatch = SpriteBatch()
         textures.init()
         actorFactory.initialize(textures)
         prepareStage()
         setCrosshairCursor()
+        prepareMetricsDisplay()
     }
 
     private fun setCrosshairCursor() {
@@ -58,20 +61,27 @@ class GraphicsV2 {
 
     private fun prepareStage() {
         viewport = ExtendViewport(960f, 960 * 9 / 16f)
-        stage = Stage(viewport)
+        stage = Stage(viewport, spriteBatch)
+
         clickToJoinLabel = createClickToJoinLabel()
         stage.addActor(clickToJoinLabel)
+    }
+
+    private fun prepareMetricsDisplay() {
+        metricsDisplay = MetricsDisplay(spriteBatch)
     }
 
     fun dispose() {
         stage.dispose()
         textures.dispose()
+        metricsDisplay.dispose()
     }
 
     fun draw(
         state: DrawableState.Ready,
         delta: Float,
-        mayJoin: Boolean
+        mayJoin: Boolean,
+        metrics: MetricRegistry
     ) {
         processEntities(state)
         processEffects(state)
@@ -89,6 +99,9 @@ class GraphicsV2 {
             camera.update()
         }
         stage.draw()
+        metricsDisplay.updateBufferLength(metrics.histogram("buffer_ahead").snapshot.mean)
+        metricsDisplay.stage.act()
+        metricsDisplay.stage.draw()
     }
 
     // GROOM 4 levels of indent is too many

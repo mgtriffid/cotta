@@ -58,7 +58,7 @@ class GameScreen(
                 if (noDude(state)) {
                     input.mayJoin = true
                 }
-                graphics.draw(state, delta, input.mayJoin)
+                graphics.draw(state, delta, input.mayJoin, gdxAdapter.metrics())
             }
         }
     }

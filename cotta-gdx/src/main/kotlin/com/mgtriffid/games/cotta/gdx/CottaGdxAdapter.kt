@@ -47,4 +47,6 @@ class CottaGdxAdapter(
     fun getDrawableState(alpha: Float, components: List<KClass<out Component<*>>>): DrawableState {
         return cottaClient.getDrawableState(alpha, *components.toTypedArray())
     }
+
+    fun metrics() = cottaClient.debugMetrics
 }

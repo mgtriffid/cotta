@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.impl
 
+import com.codahale.metrics.MetricRegistry
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.client.*
 import com.mgtriffid.games.cotta.client.network.NetworkClient
@@ -28,6 +29,7 @@ class CottaClientImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider,
     private val incomingDataBufferMonitor: IncomingDataBufferMonitor,
+    override val debugMetrics: MetricRegistry
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial
 

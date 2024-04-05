@@ -76,6 +76,7 @@ project(":core") {
         implementation "com.google.code.gson:gson:2.8.6"
         implementation "com.github.kittinunf.fuel:fuel:2.3.1"
         implementation "space.earlygrey:shapedrawer:$shapedrawerVersion"
+        implementation "io.dropwizard.metrics:metrics-core:$metricsVersion"
     }
 }
 
@@ -246,6 +247,9 @@ project(":cotta-gdx") {
     dependencies {
         implementation project(":cotta-client")
         implementation project(":cotta-core")
+
+        // TODO this is not needed at all, better to remove this dependency
+        implementation "io.dropwizard.metrics:metrics-core:$metricsVersion"
     }
 }
 

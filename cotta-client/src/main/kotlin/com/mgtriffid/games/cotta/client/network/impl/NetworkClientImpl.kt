@@ -37,7 +37,7 @@ class NetworkClientImpl<
     PDR: PlayersDeltaRecipe
     > @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
-    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR, PDR>,
+    private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR>,
     private val snapsSerialization: SnapsSerialization<SR, DR, PDR>,
     private val inputSerialization: InputSerialization<IR>,
     private val stateSnapper: StateSnapper<SR, DR, PDR>,
@@ -57,7 +57,7 @@ class NetworkClientImpl<
         networkTransport.drainIncomingData().forEach { packet ->
             when (packet) {
                 is StateServerToClientDto -> {
-                    incomingDataBuffer.storeState2(
+                    incomingDataBuffer.storeState(
                         packet.tick,
                         AuthoritativeStateData(
                             packet.tick,
@@ -70,7 +70,7 @@ class NetworkClientImpl<
                 }
 
                 is SimulationInputServerToClientDto -> {
-                    incomingDataBuffer.storeSimulationInput2(
+                    incomingDataBuffer.storeSimulationInput(
                         packet.tick,
                         SimulationInputData(
                             tick = packet.tick,
@@ -133,8 +133,8 @@ class NetworkClientImpl<
         return if (stateAvailable() && bufferedEnough()) {
             AuthoritativeState.Ready { state, simulationTickProvider, globalTickProvider ->
                 logger.debug { "Setting state from authoritative" }
-                val tick = incomingDataBuffer.states2.lastKey()
-                val stateData = incomingDataBuffer.states2[tick]!!
+                val tick = incomingDataBuffer.states.lastKey()
+                val stateData = incomingDataBuffer.states[tick]!!
                 val fullStateTick = tick - MAX_LAG_COMP_DEPTH_TICKS
                 state.setBlank(fullStateTick)
                 simulationTickProvider.tick = fullStateTick
@@ -159,10 +159,10 @@ class NetworkClientImpl<
         }
     }
 
-    private fun stateAvailable(): Boolean = incomingDataBuffer.states2.isNotEmpty()
+    private fun stateAvailable(): Boolean = incomingDataBuffer.states.isNotEmpty()
 
     private fun bufferedEnough(): Boolean = incomingDataBuffer.simulationInputs.keys.containsAll(
-        ((incomingDataBuffer.states2.lastKey() + 1)..(incomingDataBuffer.states2.lastKey() + bufferLength)).toList()
+        ((incomingDataBuffer.states.lastKey() + 1)..(incomingDataBuffer.states.lastKey() + bufferLength)).toList()
     )
 
     override fun deltaAvailable(tick: Long): Boolean {

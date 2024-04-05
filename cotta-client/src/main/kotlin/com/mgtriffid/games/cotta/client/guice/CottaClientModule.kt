@@ -187,8 +187,7 @@ class CottaClientModule(
         bind(object : TypeLiteral<
             ClientIncomingDataBuffer<
                 BytesStateRecipe,
-                BytesDeltaRecipe,
-                BytesPlayersDeltaRecipe
+                BytesDeltaRecipe
                 >>() {})
             .toInstance(ClientIncomingDataBuffer())
         bind(NetworkClient::class.java)
@@ -207,7 +206,7 @@ class CottaClientModule(
     @Provides
     @Singleton
     private fun provideIncomingDataBufferMonitor(
-        incomingDataBuffer: ClientIncomingDataBuffer<*, *, *>,
+        incomingDataBuffer: ClientIncomingDataBuffer<*, *>,
         @Named("global") globalTick: TickProvider,
     ): IncomingDataBufferMonitor {
         val bufferHistogram = Histogram(SlidingTimeWindowArrayReservoir(2000, TimeUnit.MILLISECONDS))

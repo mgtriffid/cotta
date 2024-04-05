@@ -4,7 +4,7 @@ import com.codahale.metrics.Histogram
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 
 class IncomingDataBufferMonitor(
-    private val incomingDataBuffer: ClientIncomingDataBuffer<*, *, *>,
+    private val incomingDataBuffer: ClientIncomingDataBuffer<*, *>,
     private val globalTick: TickProvider,
     private val bufferHistogram: Histogram
 ) {

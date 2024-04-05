@@ -49,7 +49,7 @@ class AckingCottaClientNetworkTransport(
     }
 
     private fun chunkSerializer(): ChunkSerializer {
-        val histogram = Histogram(SlidingTimeWindowArrayReservoir(3000, TimeUnit.MILLISECONDS))
+        val histogram = Histogram(SlidingTimeWindowArrayReservoir(2000, TimeUnit.MILLISECONDS))
         metricRegistry.register("sent_chunk_size", histogram)
         return MeasuringChunkSerializer(
             KryoChunkSerializer(client.kryo),

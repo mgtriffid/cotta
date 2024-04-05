@@ -1,7 +1,10 @@
 package com.mgtriffid.games.cotta.client.guice
 
+import com.codahale.metrics.Histogram
 import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.SlidingTimeWindowArrayReservoir
 import com.google.inject.AbstractModule
+import com.google.inject.Provides
 import com.google.inject.Scopes
 import com.google.inject.TypeLiteral
 import com.google.inject.name.Names
@@ -53,6 +56,9 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessi
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.*
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.KryonetCottaTransportFactory
+import jakarta.inject.Named
+import jakarta.inject.Singleton
+import java.util.concurrent.TimeUnit
 
 class CottaClientModule(
     private val game: CottaGame,
@@ -196,6 +202,21 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
 
         bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java).`in`(Scopes.SINGLETON)
+    }
+
+    @Provides
+    @Singleton
+    private fun provideIncomingDataBufferMonitor(
+        incomingDataBuffer: ClientIncomingDataBuffer<*, *, *>,
+        @Named("global") globalTick: TickProvider,
+    ): IncomingDataBufferMonitor {
+        val bufferHistogram = Histogram(SlidingTimeWindowArrayReservoir(2000, TimeUnit.MILLISECONDS))
+        metricRegistry.register("buffer_ahead", bufferHistogram)
+        return IncomingDataBufferMonitor(
+            incomingDataBuffer,
+            globalTick,
+            bufferHistogram
+        )
     }
 
     private fun bindNetwork() {

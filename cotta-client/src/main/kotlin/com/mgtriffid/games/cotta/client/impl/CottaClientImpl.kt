@@ -26,7 +26,8 @@ class CottaClientImpl @Inject constructor(
     @Named(SIMULATION) private val simulationTickProvider: TickProvider,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
-    private val drawableStateProvider: DrawableStateProvider
+    private val drawableStateProvider: DrawableStateProvider,
+    private val incomingDataBufferMonitor: IncomingDataBufferMonitor,
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial
 
@@ -68,6 +69,7 @@ class CottaClientImpl @Inject constructor(
 
                 is ClientState.Running -> {
                     network.fetch()
+                    measureBuffer()
                     integrate()
                     clientState = ClientState.Running(it.currentTick + 1)
                 }
@@ -89,6 +91,10 @@ class CottaClientImpl @Inject constructor(
         simulations.simulate()
 
         sendDataToServer()
+    }
+
+    private fun measureBuffer() {
+        incomingDataBufferMonitor.measure()
     }
 
     private fun sendDataToServer() {

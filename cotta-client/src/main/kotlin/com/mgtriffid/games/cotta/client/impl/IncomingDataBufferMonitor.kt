@@ -18,7 +18,7 @@ class IncomingDataBufferMonitor(
             count++
             tick++
         }
-        logger.info { "Count: $count" }
+        logger.debug { "Count: $count" }
         bufferHistogram.update(count)
     }
 }

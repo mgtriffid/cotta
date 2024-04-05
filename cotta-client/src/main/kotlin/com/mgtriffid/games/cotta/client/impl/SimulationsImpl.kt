@@ -44,7 +44,7 @@ class SimulationsImpl @Inject constructor(
 ) : Simulations {
     override fun simulate() {
         val instructions = simulationDirector.instruct(tickProvider.tick)
-            .also { logger.info { "Instructions: $it" } }
+            .also { logger.debug { "Instructions: $it" } }
         // Now we need to consider the situation when we have guessed simulation.
         // Suddenly it breaks tickProvider. Right now we have only one, and it
         // is shared between simulation and, let's say, Global Orchestration.

@@ -1,6 +1,9 @@
 package com.mgtriffid.games.cotta.network.kryonet.acking
 
 import com.codahale.metrics.Histogram
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 class MeasuringChunkSerializer(
     private val impl: ChunkSerializer,
@@ -15,6 +18,8 @@ class MeasuringChunkSerializer(
     }
 
     private fun recordSize(bytes: ByteArray) {
-        sizeHistogram.update(bytes.size.toLong())
+        val size = bytes.size.toLong()
+        sizeHistogram.update(size)
+        logger.info { "Recorded size: $size" }
     }
 }

@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.panna.screens.menu.MenuScreen
 
+// TODO make table even prettier, now it's kind ugly. Use NinePatch?
 class MetricsDisplay(spriteBatch: SpriteBatch) {
     private val viewport: Viewport = FitViewport(960f, 540f)
     val stage: Stage = Stage(viewport, spriteBatch)

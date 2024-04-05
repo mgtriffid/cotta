@@ -211,6 +211,8 @@ project(":cotta-client") {
         implementation "com.google.inject:guice:7.0.0"
 
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+        implementation "io.dropwizard.metrics:metrics-core:4.2.25"
     }
 }
 

@@ -10,8 +10,7 @@ class ConnectionTest {
     @BeforeEach
     fun setUp() {
         connection = Connection(
-            serialize = { obj -> obj.toString().toByteArray() },
-            deserialize = { bytes -> String(bytes) },
+            serializer = StubSerializer,
             sendChunk = { },
             saveObject = { }
         )
@@ -82,5 +81,15 @@ class ConnectionTest {
         connection.confirm(PacketId(6))
 
         assertEquals(0, connection.squadronsInFlight())
+    }
+}
+
+private object StubSerializer : ChunkSerializer {
+    override fun serialize(objs: ArrayList<Any>): ByteArray {
+        return objs.toString().toByteArray()
+    }
+
+    override fun deserialize(bytes: ByteArray): ArrayList<*> {
+        return arrayListOf(String(bytes))
     }
 }

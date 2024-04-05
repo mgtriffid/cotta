@@ -10,8 +10,7 @@ private val logger = KotlinLogging.logger {}
 
 // TODO optimize the hell out of it
 class Connection(
-    private val serialize: (Any) -> ByteArray,
-    private val deserialize: (ByteArray) -> Any,
+    private val serializer: ChunkSerializer,
     private val sendChunk: (Chunk) -> Unit,
     private val saveObject: (Any) -> Unit
 ) {
@@ -31,8 +30,8 @@ class Connection(
             logger.trace { "In flight: ${objectsInFlight.entries.map { (k, v) -> "$k -> ${v.obj.javaClass.simpleName}" }}" }
             val packetSequence = packetSequence
             track(obj)
-            val objectsToSent = getLastObjectsInFlight()
-            val bytes = serialize(ArrayList(objectsToSent.values))
+            val objectsToSent = getLastObjectsInFlight() // this
+            val bytes = serializer.serialize(ArrayList(objectsToSent.values)) // this
             logger.trace { "Bytes size is ${bytes.size}" }
             val chunked = bytes.chunked()
             val size = chunked.size
@@ -44,7 +43,7 @@ class Connection(
 
             chunked.forEachIndexed { idx, b ->
                 sendChunk(Chunk().apply {
-                    this.acks = Acks().apply {
+                    this.acks = Acks().apply {// track how many not confirmed?
                         last = receivedPackets.last
                         received = receivedPackets.received
                     }
@@ -63,7 +62,7 @@ class Connection(
 
     fun track(obj: Any): ObjectId {
         val objectId = ObjectId(objectSequence++)
-        objectsInFlight[objectId] = ObjectInFlight(obj, mutableSetOf())
+        objectsInFlight[objectId] = ObjectInFlight(obj, mutableSetOf()) // track when added
         return objectId
     }
 
@@ -92,6 +91,7 @@ class Connection(
             // objects that are guaranteed to be delivered:
             v.objects.forEach { objectId ->
                 // remove all squadrons:
+                // track when removed - meaningful latency
                 val squadrons = objectsInFlight.remove(objectId)?.squadrons
                 // remove this object from all squadrons:
                 squadrons?.forEach { squadronId ->
@@ -117,7 +117,7 @@ class Connection(
                 val bytes = squadron.data.fold(ByteArray(0)) { acc, bytes ->
                     acc + bytes!!
                 }
-                (deserialize(bytes) as ArrayList<*>).forEach { saveObject(it) }
+                serializer.deserialize(bytes).forEach { saveObject(it) }
             }
             processAcks(chunk.acks)
         }

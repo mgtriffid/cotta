@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.network.kryonet.acking
 import com.esotericsoftware.kryo.io.Input
 import com.esotericsoftware.kryo.io.Output
 import com.esotericsoftware.kryonet.Client
-import com.esotericsoftware.kryonet.Connection
 import com.esotericsoftware.kryonet.Listener
 import com.google.common.cache.CacheBuilder
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
@@ -31,19 +30,7 @@ class AckingCottaClientNetworkTransport(
     private lateinit var client: Client
     private val packetsQueue = ConcurrentLinkedQueue<ServerToClientDto>()
 
-    private val connection = Connection(
-        serialize = { obj ->
-            Output(1024 * 1024).also { output ->
-                client.kryo.writeClassAndObject(output, obj)
-            }.toBytes()
-        },
-        deserialize = { bytes ->
-            val input = Input(bytes)
-            client.kryo.readClassAndObject(input)
-        },
-        sendChunk = { chunk -> client.sendUDP(chunk) },
-        saveObject = { save(it) }
-    )
+    private lateinit var connection: Connection
 
     override fun initialize() {
         client = Client()
@@ -52,6 +39,11 @@ class AckingCottaClientNetworkTransport(
         client.start()
         // TODO configuration
         client.connect(5000, "127.0.0.1", 16001, 16002)
+        connection = Connection(
+            serializer = KryoChunkSerializer(client.kryo),
+            sendChunk = { chunk -> client.sendUDP(chunk) },
+            saveObject = { save(it) }
+        )
     }
 
     override fun sendEnterGameIntent() {

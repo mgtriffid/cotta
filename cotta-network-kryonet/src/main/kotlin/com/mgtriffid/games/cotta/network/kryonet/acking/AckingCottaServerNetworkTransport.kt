@@ -33,15 +33,7 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
         .expireAfterAccess(2, TimeUnit.MINUTES)
         .build<ConnectionId, Connection>(CacheLoader.from { connectionId ->
             Connection(
-                serialize = { obj ->
-                    Output(1024 * 1024).also { output ->
-                        server.kryo.writeClassAndObject(output, obj)
-                    }.toBytes()
-                },
-                deserialize = { bytes ->
-                    val input = Input(bytes)
-                    server.kryo.readClassAndObject(input)
-                },
+                serializer = KryoChunkSerializer(server.kryo),
                 sendChunk = { chunk ->
                     server.sendToUDP(
                         connectionId.id,

@@ -31,6 +31,7 @@ allprojects {
 
         gsonVersion = '2.10.1'
         junitVersion = '5.9.1'
+        metricsVersion = '4.2.25'
     }
 
     repositories {
@@ -212,7 +213,7 @@ project(":cotta-client") {
 
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
-        implementation "io.dropwizard.metrics:metrics-core:4.2.25"
+        implementation "io.dropwizard.metrics:metrics-core:$metricsVersion"
     }
 }
 
@@ -236,6 +237,8 @@ project(":cotta-network-kryonet") {
         implementation "com.google.guava:guava:33.1.0-jre"
 
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+
+        implementation "io.dropwizard.metrics:metrics-core:$metricsVersion"
     }
 }
 

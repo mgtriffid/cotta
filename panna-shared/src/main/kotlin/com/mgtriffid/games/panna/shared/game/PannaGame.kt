@@ -118,14 +118,14 @@ object NetworkWithIssues : DebugConfig {
                     override val min: Long = 50
                     override val max: Long = 80
                 }
-                override val packetLoss: Double = 0.3
+                override val packetLoss: Double = 0.05
             }
             override val receiving = object : Issues {
                 override val latency = object : Latency {
                     override val min: Long = 50
                     override val max: Long = 80
                 }
-                override val packetLoss: Double = 0.3
+                override val packetLoss: Double = 0.05
             }
         }
 }

@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.guice
 
+import com.codahale.metrics.MetricRegistry
 import com.google.inject.AbstractModule
 import com.google.inject.Scopes
 import com.google.inject.TypeLiteral
@@ -57,6 +58,8 @@ class CottaClientModule(
     private val game: CottaGame,
     private val input: CottaClientInput
 ) : AbstractModule() {
+    private val metricRegistry = MetricRegistry()
+
     override fun configure() {
         bind(CottaGame::class.java).toInstance(game)
         bind(CottaClientInput::class.java).toInstance(input)
@@ -197,6 +200,10 @@ class CottaClientModule(
 
     private fun bindNetwork() {
         bind(CottaClientNetworkTransport::class.java)
-            .toInstance(KryonetCottaTransportFactory().createClient(game.config.debugConfig.emulatedNetworkConditions))
+            .toInstance(
+                KryonetCottaTransportFactory(metricRegistry).createClient(
+                    game.config.debugConfig.emulatedNetworkConditions
+                )
+            )
     }
 }

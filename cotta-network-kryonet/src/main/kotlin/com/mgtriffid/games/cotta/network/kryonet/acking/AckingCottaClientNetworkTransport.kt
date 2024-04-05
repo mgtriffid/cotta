@@ -1,10 +1,10 @@
 package com.mgtriffid.games.cotta.network.kryonet.acking
 
-import com.esotericsoftware.kryo.io.Input
-import com.esotericsoftware.kryo.io.Output
+import com.codahale.metrics.Histogram
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.SlidingTimeWindowArrayReservoir
 import com.esotericsoftware.kryonet.Client
 import com.esotericsoftware.kryonet.Listener
-import com.google.common.cache.CacheBuilder
 import com.mgtriffid.games.cotta.network.CottaClientNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.client.Saver
 import com.mgtriffid.games.cotta.network.kryonet.client.Sender
@@ -24,7 +24,8 @@ private val logger = KotlinLogging.logger {}
 
 class AckingCottaClientNetworkTransport(
     private val sender: Sender, // TODO make use of
-    private val saver: Saver
+    private val saver: Saver,
+    private val metricRegistry: MetricRegistry
 ) : CottaClientNetworkTransport {
 
     private lateinit var client: Client
@@ -39,10 +40,20 @@ class AckingCottaClientNetworkTransport(
         client.start()
         // TODO configuration
         client.connect(5000, "127.0.0.1", 16001, 16002)
+        val serializer = chunkSerializer()
         connection = Connection(
-            serializer = KryoChunkSerializer(client.kryo),
+            serializer = serializer,
             sendChunk = { chunk -> client.sendUDP(chunk) },
             saveObject = { save(it) }
+        )
+    }
+
+    private fun chunkSerializer(): ChunkSerializer {
+        val histogram = Histogram(SlidingTimeWindowArrayReservoir(3000, TimeUnit.MILLISECONDS))
+        metricRegistry.register("sent_chunk_size", histogram)
+        return MeasuringChunkSerializer(
+            KryoChunkSerializer(client.kryo),
+            histogram
         )
     }
 

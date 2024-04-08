@@ -14,7 +14,7 @@ class CottaGdxAdapter(
     private val game: CottaGame,
     private val input: CottaClientGdxInput
 ) {
-    private lateinit var cottaClient: CottaClient
+    private lateinit var client: CottaClient
 
     private var nextTickAt: Long = -1
     private var tickLength: Long = -1
@@ -22,7 +22,7 @@ class CottaGdxAdapter(
     fun initialize() {
         logger.debug { "Tick length is ${game.config.tickLength}" }
         tickLength = game.config.tickLength
-        cottaClient = CottaClientFactory().create(game, input)
+        client = CottaClientFactory().create(game, input)
         nextTickAt = now()
     }
 
@@ -32,7 +32,7 @@ class CottaGdxAdapter(
         var tickHappened = false
         val now = now()
         if (nextTickAt <= now) {
-            cottaClient.tick()
+            client.tick()
             nextTickAt += tickLength
             tickHappened = true
         }
@@ -45,8 +45,8 @@ class CottaGdxAdapter(
     }
 
     fun getDrawableState(alpha: Float, components: List<KClass<out Component<*>>>): DrawableState {
-        return cottaClient.getDrawableState(alpha, *components.toTypedArray())
+        return client.getDrawableState(alpha, *components.toTypedArray())
     }
 
-    fun metrics() = cottaClient.debugMetrics
+    fun metrics() = client.debugMetrics
 }

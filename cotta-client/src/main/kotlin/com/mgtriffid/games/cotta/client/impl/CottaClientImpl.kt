@@ -29,12 +29,15 @@ class CottaClientImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     private val drawableStateProvider: DrawableStateProvider,
     private val incomingDataBufferMonitor: IncomingDataBufferMonitor,
-    override val debugMetrics: MetricRegistry
+    override val debugMetrics: MetricRegistry,
+    private val paceRegulator: PaceRegulator
 ) : CottaClient {
+
     private var clientState: ClientState = ClientState.Initial
 
     private var nextTickAt = now()
     private var tickLength: Long = -1
+
     override fun initialize() {
         game.initializeStaticState(state.entities(getCurrentTick()))
         state.setBlank(state.entities(getCurrentTick()))
@@ -44,16 +47,21 @@ class CottaClientImpl @Inject constructor(
     override fun update(): UpdateResult {
         var tickHappened = false
 
-        logger.debug { "Running ${CottaClientImpl::class.simpleName}" }
         val now = now()
         if (nextTickAt <= now) {
             tick()
-            nextTickAt += tickLength
+            nextTickAt += getClientTickLength()
             tickHappened = true
         }
 
-        return UpdateResult(tickHappened, 1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat())
+        return UpdateResult(
+            tickHappened,
+            1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat()
+        )
     }
+
+    private fun getClientTickLength() =
+        paceRegulator.calculate(tickLength, debugMetrics)
 
     private fun tick() {
         clientState.let {
@@ -100,7 +108,10 @@ class CottaClientImpl @Inject constructor(
         }
     }
 
-    override fun getDrawableState(alpha: Float, vararg components: KClass<out Component<*>>): DrawableState {
+    override fun getDrawableState(
+        alpha: Float,
+        vararg components: KClass<out Component<*>>
+    ): DrawableState {
         return drawableStateProvider.get(alpha, components)
     }
 
@@ -122,7 +133,10 @@ class CottaClientImpl @Inject constructor(
 
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick
-        network.send(playerInputs.get(getCurrentTick() - 1), getCurrentTick() - 1)
+        network.send(
+            playerInputs.get(getCurrentTick() - 1),
+            getCurrentTick() - 1
+        )
     }
 
     // called before advancing tick

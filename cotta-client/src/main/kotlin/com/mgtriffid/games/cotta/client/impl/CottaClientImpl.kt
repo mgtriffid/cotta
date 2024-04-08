@@ -33,13 +33,29 @@ class CottaClientImpl @Inject constructor(
 ) : CottaClient {
     private var clientState: ClientState = ClientState.Initial
 
+    private var nextTickAt = now()
+    private var tickLength: Long = -1
     override fun initialize() {
         game.initializeStaticState(state.entities(getCurrentTick()))
         state.setBlank(state.entities(getCurrentTick()))
+        tickLength = game.config.tickLength
     }
 
-    override fun tick() {
+    override fun update(): UpdateResult {
+        var tickHappened = false
+
         logger.debug { "Running ${CottaClientImpl::class.simpleName}" }
+        val now = now()
+        if (nextTickAt <= now) {
+            tick()
+            nextTickAt += tickLength
+            tickHappened = true
+        }
+
+        return UpdateResult(tickHappened, 1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat())
+    }
+
+    private fun tick() {
         clientState.let {
             when (it) {
                 ClientState.Initial -> {
@@ -50,9 +66,14 @@ class CottaClientImpl @Inject constructor(
 
                 is ClientState.AwaitingGameState -> {
                     network.fetch()
-                    when (val authoritativeState = network.tryGetAuthoritativeState()) {
+                    when (val authoritativeState =
+                        network.tryGetAuthoritativeState()) {
                         is AuthoritativeState.Ready -> {
-                            authoritativeState.apply(state, simulationTickProvider, globalTickProvider)
+                            authoritativeState.apply(
+                                state,
+                                simulationTickProvider,
+                                globalTickProvider
+                            )
                             clientState = ClientState.Running(getCurrentTick())
                         }
 

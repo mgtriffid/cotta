@@ -179,9 +179,6 @@ class CottaClientModule(
         bind(TickProvider::class.java)
             .annotatedWith(Names.named("prediction"))
             .toInstance(predictionTickProvider)
-        bind(TickProvider::class.java)
-            .annotatedWith(Names.named("localInput"))
-            .toInstance(AtomicLongTickProvider())
         val predictionClock =
             CottaClockImpl(predictionTickProvider, game.config.tickLength)
         bind(CottaClock::class.java)

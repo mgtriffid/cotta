@@ -6,4 +6,5 @@ public class SimulationInputServerToClientDto implements ServerToClientDto {
     public byte[] playersInputs;
     public PlayersDiffDto playersDiff;
     public int idSequence;
+    public int confirmedClientInput;
 }

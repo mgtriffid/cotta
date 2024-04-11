@@ -133,10 +133,9 @@ class CottaClientImpl @Inject constructor(
 
     private fun sendDataToServer() {
         // since this method is called after advancing tick, we need to send inputs for the previous tick
-        network.send(
-            playerInputs.get(getCurrentTick() - 1),
-            getCurrentTick() - 1
-        )
+        playerInputs.unsent().forEach {
+            network.send(it.first, it.second, it.third)
+        }
     }
 
     // called before advancing tick

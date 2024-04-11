@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesImpl
+import com.mgtriffid.games.cotta.core.input.ClientInputId
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.simulation.invokers.InvokersFactory
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
@@ -22,17 +23,15 @@ class PredictionSimulationImpl @Inject constructor(
     @Named("prediction") private val state: CottaState,
     @Named("prediction") override val effectBus: EffectBus,
     @Named("prediction") private val tickProvider: TickProvider,
-    @Named("localInput") private val localInputTickProvider: TickProvider,
     private val inputs: LocalPlayerInputs,
     private val inputProcessing: InputProcessing,
     private val localPlayer: LocalPlayer,
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
-    override fun predict(initialEntities: Entities, ticks: List<Long>, authoritativeTick: Long) {
-        val lag = authoritativeTick - ticks.first()
+    override fun predict(initialEntities: Entities, inputs: List<ClientInputId>, authoritativeTick: Long) {
         startPredictionFrom(initialEntities, authoritativeTick)
-        run(ticks, lag)
+        run(inputs)
     }
 
     private fun startPredictionFrom(entities: Entities, tick: Long) {
@@ -43,16 +42,15 @@ class PredictionSimulationImpl @Inject constructor(
         }
     }
 
-    private fun run(ticks: List<Long>, lag: Long) {
-        logger.debug { "Running prediction simulation for ticks $ticks" }
-        for (tick in ticks) {
-            localInputTickProvider.tick = tick
-            logger.debug { "Running prediction simulation for tick $tick" }
+    private fun run(inputIds: List<ClientInputId>) {
+        logger.debug { "Running prediction using inputs $inputs" }
+        for (inputId in inputIds) {
+            logger.debug { "Running prediction simulation for input $inputId" }
             effectBus.clear()
             logger.debug { "Advancing state: to tick ${tickProvider.tick}" }
             state.advance(tickProvider.tick)
             tickProvider.tick++
-            inputProcessing.processPlayerInput(localPlayer.playerId, inputs.get(tick), state.entities(tickProvider.tick), effectBus)
+            inputProcessing.processPlayerInput(localPlayer.playerId, inputs.get(inputId), state.entities(tickProvider.tick), effectBus)
             simulate()
         }
     }

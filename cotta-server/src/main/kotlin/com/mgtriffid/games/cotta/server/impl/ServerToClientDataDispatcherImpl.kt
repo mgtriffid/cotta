@@ -86,6 +86,7 @@ class ServerToClientDataDispatcherImpl<
                         .toIntArray()
                 }
                 dto.idSequence = data.idSequence(tick)
+                dto.confirmedClientInput = clientsGhosts.data[playerId]?.lastUsedInput()?.id ?: 0
                 return dto
             }
         }

@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.server.impl
 
+import com.mgtriffid.games.cotta.core.input.ClientInputId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.network.ConnectionId
 import mu.KotlinLogging
@@ -12,6 +13,7 @@ private const val HISTORY_LENGTH = 128
 class ClientGhost(
     val connectionId: ConnectionId
 ) {
+    var lastInputUsedOnTick: Long = -1
     private var stateSent = false
     private var lastUsedIncomingInput: PlayerInput? = null
     private val clientTickCursor = ClientTickCursor()
@@ -33,15 +35,15 @@ class ClientGhost(
         clientTickCursor.state = state
     }
 
-    fun setLastUsedTick(tick: Long) {
-        clientTickCursor.lastUsedInput = tick
+    fun setLastUsedInputId(id: ClientInputId) {
+        clientTickCursor.lastUsedInput = id
     }
 
-    fun lastUsedInput(): Long {
+    fun lastUsedInput(): ClientInputId {
         return clientTickCursor.lastUsedInput
     }
 
-    fun setLastUsedIncomingInput(playerInput: PlayerInput) {
+    fun setLastUsedInput(playerInput: PlayerInput) {
         this.lastUsedIncomingInput = playerInput
     }
 
@@ -49,8 +51,12 @@ class ClientGhost(
         return lastUsedIncomingInput ?: throw IllegalStateException("No last used input")
     }
 
+    fun setInputLastUsedOnTick(tick: Long) {
+        this.lastInputUsedOnTick = tick
+    }
+
     class ClientTickCursor {
-        var lastUsedInput = -1L
+        var lastUsedInput = ClientInputId(-1)
         var state = State.AWAITING_INPUTS
 
         enum class State {

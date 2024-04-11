@@ -2,7 +2,6 @@ package com.mgtriffid.games.cotta.client.impl
 
 import com.mgtriffid.games.cotta.client.ClientSimulationInput
 import com.mgtriffid.games.cotta.core.simulation.Simulation
-import com.mgtriffid.games.cotta.client.GuessedSimulation
 import com.mgtriffid.games.cotta.client.Instruction
 import com.mgtriffid.games.cotta.client.LastClientTickProcessedByServer
 import com.mgtriffid.games.cotta.client.LocalPlayerInputs
@@ -15,13 +14,13 @@ import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.input.ClientInputId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.PlayersDiff
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import jakarta.inject.Inject
 import jakarta.inject.Named
-import jdk.jfr.Name
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -54,13 +53,13 @@ class SimulationsImpl @Inject constructor(
         // for sending inputs properly, for fetching necessary data, etc.
         // tick is advanced inside;
         tickProvider.tick++
-        var lastConfirmedTick = 0L
+        var lastConfirmedInput: ClientInputId? = null
         instructions.forEachIndexed { index, it ->
             when (it) {
                 is Instruction.IntegrateAuthoritative -> {
                     val delta = deltas.get(it.tick)
                     simulation.tick(delta.input.simulationInput)
-                    lastConfirmedTick = getLastConfirmedTick(delta)
+                    lastConfirmedInput = getLastConfirmedInput(delta)
                 }
 
                 is Instruction.CopyAuthoritativeToGuessed -> {
@@ -72,13 +71,16 @@ class SimulationsImpl @Inject constructor(
                     val input = knownDelta.input
                     val guessedInput = guessInput(input, tickProvider.tick)
                     guessedSimulation.tick(guessedInput.simulationInput)
+                    lastConfirmedInput = ClientInputId(getLastConfirmedInput(knownDelta).id + (tickProvider.tick - it.tick).toInt())
                 }
             }
         }
 //        simulation.tick(delta.input)
-        lastClientTickProcessedByServer.tick = lastConfirmedTick
         predict(
-            lastConfirmedTick, when (instructions.last()) {
+            lastConfirmedInput = lastConfirmedInput ?: throw IllegalStateException(
+                "No way ${Instruction.CopyAuthoritativeToGuessed::class.simpleName} was the only instruction"
+            ),
+            takeStateFrom = when (instructions.last()) {
                 is Instruction.IntegrateAuthoritative -> SimulationKind.AUTHORITATIVE
                 is Instruction.CopyAuthoritativeToGuessed -> throw IllegalStateException(
                     "CopyAuthoritativeToGuessed should not be the last instruction"
@@ -119,7 +121,8 @@ class SimulationsImpl @Inject constructor(
 
                 override fun playersDiff() = PlayersDiff.Empty
             },
-            idSequence = input.idSequence
+            idSequence = input.idSequence,
+            confirmedClientInput = ClientInputId(input.confirmedClientInput.id + (tick - input.tick).toInt())
         )
     }
 
@@ -128,11 +131,11 @@ class SimulationsImpl @Inject constructor(
         GUESSED,
     }
 
-    private fun predict(serverSawOurTick: Long, takeStateFrom: SimulationKind) {
+    private fun predict(lastConfirmedInput: ClientInputId, takeStateFrom: SimulationKind) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
-        val unprocessedTicks =
-            playerInputs.all().keys.filter { it > serverSawOurTick }
+        val unconfirmedInputs =
+            playerInputs.all().keys.filter { it.id > lastConfirmedInput.id }
                 .also { logger.debug { it.joinToString() } } // TODO explicit sorting
         logger.debug { "Setting initial predictions state with tick $currentTick" }
         predictionSimulation.predict(
@@ -140,14 +143,13 @@ class SimulationsImpl @Inject constructor(
                 SimulationKind.AUTHORITATIVE -> state
                 SimulationKind.GUESSED -> guessedState
             }.entities(currentTick),
-            unprocessedTicks,
+            unconfirmedInputs,
             currentTick
         )
     }
 
-    private fun getLastConfirmedTick(delta: Delta) =
-        delta.input.simulationInput.playersSawTicks()[localPlayer.playerId]
-            ?: 0L
+    private fun getLastConfirmedInput(delta: Delta) =
+        delta.input.confirmedClientInput
 
     private fun getCurrentTick(): Long {
         return tickProvider.tick

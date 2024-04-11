@@ -10,6 +10,7 @@ import com.mgtriffid.games.cotta.client.impl.SimulationInputData
 import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.core.MAX_LAG_COMP_DEPTH_TICKS
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.input.ClientInputId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.DeltaRecipe
@@ -79,7 +80,8 @@ class NetworkClientImpl<
                             playersDiff = PlayersDiff(
                                 added = packet.playersDiff.added.map { PlayerId(it) }.toSet()
                             ),
-                            idSequence = packet.idSequence
+                            idSequence = packet.idSequence,
+                            confirmedClientInput = ClientInputId(packet.confirmedClientInput)
                         )
                     )
 
@@ -88,11 +90,15 @@ class NetworkClientImpl<
         }
     }
 
-    override fun send(input: PlayerInput, currentTick: Long) {
-        val inputDto =
-            ClientToServerInputDto()
-        inputDto.tick = currentTick
-        logger.debug { "Sending input for $currentTick : $input" }
+    override fun send(
+        inputId: ClientInputId,
+        input: PlayerInput,
+        sawTick: Long
+    ) {
+        val inputDto = ClientToServerInputDto()
+        inputDto.inputId = inputId.id
+        inputDto.sawTick = sawTick
+        logger.debug { "Sending input for $sawTick : $input" }
         inputDto.payload = inputSerialization.serializeInput(input)
         networkTransport.send(inputDto)
     }
@@ -118,7 +124,8 @@ class NetworkClientImpl<
 
                 override fun playersDiff() = data.playersDiff
             },
-            idSequence = data.idSequence
+            idSequence = data.idSequence,
+            confirmedClientInput = data.confirmedClientInput
         )
         return Delta(input)
     }

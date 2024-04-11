@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.input.ClientInputId
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.*
@@ -22,8 +23,11 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
+// TODO make this configurable
 const val REQUIRED_CLIENT_INPUTS_BUFFER = 3
 
+// TODO remove this parameter, we're not going to have different serialization
+//  mechanisms
 class ServerSimulationInputProviderImpl<
     IR : InputRecipe
     > @Inject constructor(
@@ -73,7 +77,7 @@ class ServerSimulationInputProviderImpl<
                 return@forEach
             }
             val input = inputSerialization.deserializeInput(dto.payload)
-            getBuffer(playerId).storeInput(dto.tick, input)
+            getBuffer(playerId).storeInput2(ClientInputId(dto.inputId), input, dto.sawTick)
         }
     }
 
@@ -81,29 +85,21 @@ class ServerSimulationInputProviderImpl<
         val playersSawTicks = HashMap<PlayerId, Long>()
         val playerInputs = HashMap<PlayerId, PlayerInput>()
 
-        val use: (PlayerId, ClientGhost, Long) -> Unit =
-            { playerId, ghost, tick ->
-                val buffer = getBuffer(playerId)
-                playersSawTicks[playerId] = tick
-                playerInputs[playerId] = buffer.inputs[tick]!!
-                ghost.setLastUsedTick(tick)
-                ghost.setLastUsedIncomingInput(buffer.inputs[tick]!!)
-            }
-        val usePrevious: (PlayerId, ClientGhost, Long) -> Unit =
-            { playerId, ghost, tick ->
-                playersSawTicks[playerId] = tick
-                playerInputs[playerId] = ghost.getLastUsedIncomingInput()
-                ghost.setLastUsedTick(tick)
-            }
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val buffer = getBuffer(playerId)
             when (ghost.tickCursorState()) {
                 AWAITING_INPUTS -> {
                     if (buffer.hasEnoughInputsToStart()) {
                         ghost.setCursorState(RUNNING)
-                        val tick =
-                            buffer.inputs.lastKey() - REQUIRED_CLIENT_INPUTS_BUFFER + 1
-                        use(playerId, ghost, tick)
+                        val id = ClientInputId(
+                            buffer.inputs2.lastKey().id - REQUIRED_CLIENT_INPUTS_BUFFER + 1
+                        )
+                        val (input, sawTick) = buffer.inputs2[id]!!
+                        playersSawTicks[playerId] = sawTick
+                        playerInputs[playerId] = input
+                        ghost.setLastUsedInputId(id)
+                        ghost.setLastUsedInput(input)
+                        ghost.setInputLastUsedOnTick(tickProvider.tick)
                     } else {
                         // do nothing. Ok, we don't have the input, no big deal.
                     }
@@ -111,14 +107,23 @@ class ServerSimulationInputProviderImpl<
 
                 RUNNING -> {
                     val lastUsedInput = ghost.lastUsedInput()
-                    val tick = lastUsedInput + 1
-                    logger.debug { "Client input tick is $tick for $playerId" }
+                    val toUse = ClientInputId(lastUsedInput.id + 1)
+                    logger.debug { "Client input tick is $toUse for $playerId" }
                     if (
-                        buffer.inputs.containsKey(tick)
+                        buffer.inputs2.containsKey(toUse)
                     ) {
-                        use(playerId, ghost, tick)
+                        val (input, sawTick) = buffer.inputs2[toUse]!!
+                        playersSawTicks[playerId] = sawTick
+                        playerInputs[playerId] = input
+                        ghost.setLastUsedInputId(toUse)
+                        ghost.setLastUsedInput(input)
+                        ghost.setInputLastUsedOnTick(tickProvider.tick)
                     } else {
-                        usePrevious(playerId, ghost, tick)
+                        val input = ghost.getLastUsedIncomingInput()
+                        val inputId = ghost.lastUsedInput()
+                        val sawTick = buffer.inputs2[inputId]!!.second + (tickProvider.tick - ghost.lastInputUsedOnTick)
+                        playersSawTicks[playerId] = sawTick
+                        playerInputs[playerId] = input
                     }
                 }
             }

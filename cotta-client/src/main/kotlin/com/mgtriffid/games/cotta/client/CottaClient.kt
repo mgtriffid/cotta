@@ -17,6 +17,5 @@ interface CottaClient {
 }
 
 data class UpdateResult(
-    val tickHappened: Boolean,
     val alpha: Float
 )

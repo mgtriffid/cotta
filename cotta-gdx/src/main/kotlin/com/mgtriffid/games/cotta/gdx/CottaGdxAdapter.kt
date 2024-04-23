@@ -23,7 +23,7 @@ class CottaGdxAdapter(
     operator fun invoke() : Float {
         input.accumulate()
 
-        return client.update().also { if (it.tickHappened) input.clear() }.alpha
+        return client.update().alpha
     }
 
     fun getDrawableState(alpha: Float, components: List<KClass<out Component<*>>>): DrawableState {

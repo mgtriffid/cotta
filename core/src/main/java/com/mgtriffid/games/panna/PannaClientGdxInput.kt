@@ -35,7 +35,7 @@ class PannaClientGdxInput(
             storage.lookAt,
             storage.joinPressed,
             storage.switchWeapon
-        )
+        ).also { clear() }
     }
 
     override fun accumulate() {
@@ -64,7 +64,7 @@ class PannaClientGdxInput(
         return atan2Deg360(relY, relX)
     }
 
-    override fun clear() {
+    private fun clear() {
         with(storage) {
             leftPressed = false
             rightPressed = false

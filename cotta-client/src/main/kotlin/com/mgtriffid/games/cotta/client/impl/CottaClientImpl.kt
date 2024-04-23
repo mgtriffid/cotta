@@ -45,17 +45,15 @@ class CottaClientImpl @Inject constructor(
     }
 
     override fun update(): UpdateResult {
-        var tickHappened = false
 
         val now = now()
+
         if (nextTickAt <= now) {
             tick()
             nextTickAt += getClientTickLength()
-            tickHappened = true
         }
 
         return UpdateResult(
-            tickHappened,
             1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat()
         )
     }

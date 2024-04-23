@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.client.impl
 import com.mgtriffid.games.cotta.client.ClientSimulationInput
 import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.client.Instruction
-import com.mgtriffid.games.cotta.client.LastClientTickProcessedByServer
 import com.mgtriffid.games.cotta.client.LocalPlayerInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.SimulationDirector
@@ -37,24 +36,15 @@ class SimulationsImpl @Inject constructor(
     @Named(GLOBAL) private val tickProvider: TickProvider,
     private val localPlayer: LocalPlayer,
     private val predictionSimulation: PredictionSimulation,
-    private val lastClientTickProcessedByServer: LastClientTickProcessedByServer,
     @Named("simulation") private val authoritativeTickProvider: TickProvider,
     @Named("guessed") private val guessedTickProvider: TickProvider
 ) : Simulations {
     override fun simulate() {
         val instructions = simulationDirector.instruct(tickProvider.tick)
             .also { logger.debug { "Instructions: $it" } }
-        // Now we need to consider the situation when we have guessed simulation.
-        // Suddenly it breaks tickProvider. Right now we have only one, and it
-        // is shared between simulation and, let's say, Global Orchestration.
-        // Ideally simulation tick is one thing, guessed simulation tick - another.
-        // And so is Predicted simulation tick. And finally the global one.
-        // Looks like what we have currently is exactly Global tick: it is responsible
-        // for sending inputs properly, for fetching necessary data, etc.
-        // tick is advanced inside;
         tickProvider.tick++
         var lastConfirmedInput: ClientInputId? = null
-        instructions.forEachIndexed { index, it ->
+        instructions.forEach {
             when (it) {
                 is Instruction.IntegrateAuthoritative -> {
                     val delta = deltas.get(it.tick)
@@ -75,7 +65,6 @@ class SimulationsImpl @Inject constructor(
                 }
             }
         }
-//        simulation.tick(delta.input)
         predict(
             lastConfirmedInput = lastConfirmedInput ?: throw IllegalStateException(
                 "No way ${Instruction.CopyAuthoritativeToGuessed::class.simpleName} was the only instruction"

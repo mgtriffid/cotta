@@ -63,6 +63,7 @@ class CottaClientImpl @Inject constructor(
     private fun getClientTickLength() =
         paceRegulator.calculate(tickLength, debugMetrics)
 
+    // Should I ask for the state more frequently than at the game's refresh rate?
     private fun tick() {
         clientState.let {
             when (it) {

@@ -56,9 +56,6 @@ class CottaClientImpl @Inject constructor(
             )
         } }
 
-//            UpdateResult(
-//            1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat()
-
     }
 
     private fun getClientTickLength() =

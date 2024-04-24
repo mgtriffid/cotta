@@ -11,7 +11,7 @@ interface PredictionSimulation {
     fun <T : CottaSystem> registerSystem(systemClass: KClass<T>)
     fun predict(
         initialEntities: Entities,
-        inputs: List<ClientInputId>,
+        lastConfirmedInputId: ClientInputId,
         authoritativeTick: Long,
     )
 

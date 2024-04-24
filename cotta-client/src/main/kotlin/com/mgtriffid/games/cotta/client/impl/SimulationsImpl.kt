@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.client.impl
 import com.mgtriffid.games.cotta.client.ClientSimulationInput
 import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.client.Instruction
-import com.mgtriffid.games.cotta.client.LocalPlayerInputs
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.SimulationDirector
 import com.mgtriffid.games.cotta.client.Simulations
@@ -29,12 +28,10 @@ class SimulationsImpl @Inject constructor(
     @Named(SIMULATION) private val simulation: Simulation,
     @Named("guessed") private val guessedSimulation: Simulation,
     private val simulationDirector: SimulationDirector,
-    private val playerInputs: LocalPlayerInputs,
     private val deltas: Deltas,
     @Named("simulation") private val state: CottaState,
     @Named("guessed") private val guessedState: CottaState,
     @Named(GLOBAL) private val tickProvider: TickProvider,
-    private val localPlayer: LocalPlayer,
     private val predictionSimulation: PredictionSimulation,
     @Named("simulation") private val authoritativeTickProvider: TickProvider,
     @Named("guessed") private val guessedTickProvider: TickProvider
@@ -123,16 +120,13 @@ class SimulationsImpl @Inject constructor(
     private fun predict(lastConfirmedInput: ClientInputId, takeStateFrom: SimulationKind) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
-        val unconfirmedInputs =
-            playerInputs.all().keys.filter { it.id > lastConfirmedInput.id }
-                .also { logger.debug { it.joinToString() } } // TODO explicit sorting
         logger.debug { "Setting initial predictions state with tick $currentTick" }
         predictionSimulation.predict(
             when (takeStateFrom) {
                 SimulationKind.AUTHORITATIVE -> state
                 SimulationKind.GUESSED -> guessedState
             }.entities(currentTick),
-            unconfirmedInputs,
+            lastConfirmedInput,
             currentTick
         )
     }

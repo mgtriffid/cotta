@@ -29,9 +29,12 @@ class PredictionSimulationImpl @Inject constructor(
 ) : PredictionSimulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>()
 
-    override fun predict(initialEntities: Entities, inputs: List<ClientInputId>, authoritativeTick: Long) {
+    override fun predict(initialEntities: Entities, lastConfirmedInputId: ClientInputId, authoritativeTick: Long) {
+        val unconfirmedInputs =
+            inputs.all().keys.filter { it.id > lastConfirmedInputId.id }
+                .also { logger.debug { it.joinToString() } } // TODO explicit sorting
         startPredictionFrom(initialEntities, authoritativeTick)
-        run(inputs)
+        run(unconfirmedInputs)
     }
 
     private fun startPredictionFrom(entities: Entities, tick: Long) {

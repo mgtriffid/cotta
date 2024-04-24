@@ -20,6 +20,6 @@ class MeasuringChunkSerializer(
     private fun recordSize(bytes: ByteArray) {
         val size = bytes.size.toLong()
         sizeHistogram.update(size)
-        logger.info { "Recorded size: $size" }
+        logger.debug { "Recorded size: $size" }
     }
 }

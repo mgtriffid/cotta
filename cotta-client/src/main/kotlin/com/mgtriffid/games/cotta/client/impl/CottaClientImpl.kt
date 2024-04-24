@@ -45,17 +45,20 @@ class CottaClientImpl @Inject constructor(
     }
 
     override fun update(): UpdateResult {
-
-        val now = now()
-
-        if (nextTickAt <= now) {
             tick()
-            nextTickAt += getClientTickLength()
-        }
 
-        return UpdateResult(
-            1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat()
-        )
+        return clientState.let { when (it) {
+            ClientState.Initial -> UpdateResult.AwaitingGameState
+            is ClientState.AwaitingGameState -> UpdateResult.AwaitingGameState
+            ClientState.Disconnected -> UpdateResult.Disconnected
+            is ClientState.Running -> UpdateResult.Running(
+                1.0f - (nextTickAt - now()).toFloat() / getClientTickLength().toFloat()
+            )
+        } }
+
+//            UpdateResult(
+//            1.0f - (nextTickAt - now).toFloat() / tickLength.toFloat()
+
     }
 
     private fun getClientTickLength() =
@@ -82,6 +85,7 @@ class CottaClientImpl @Inject constructor(
                                 globalTickProvider
                             )
                             clientState = ClientState.Running(getCurrentTick())
+                            nextTickAt = now()
                         }
 
                         AuthoritativeState.NotReady -> {
@@ -99,11 +103,22 @@ class CottaClientImpl @Inject constructor(
 
                 is ClientState.Running -> {
                     network.fetch()
-                    measureBuffer()
-                    integrate()
+                    run()
                     clientState = ClientState.Running(it.currentTick + 1)
                 }
             }
+        }
+    }
+
+    private fun run() {
+        val now = now()
+        logger.info { "nextTickAt is $nextTickAt, now is $now, difference is ${now - nextTickAt}" }
+        logger.info { "Global tick is ${globalTickProvider.tick}, simulation tick is ${simulationTickProvider.tick}" }
+        if (nextTickAt <= now) {
+            logger.info { "run called" }
+            measureBuffer()
+            integrate()
+            nextTickAt += getClientTickLength()
         }
     }
 

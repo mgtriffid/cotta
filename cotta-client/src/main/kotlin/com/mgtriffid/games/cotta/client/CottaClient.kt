@@ -16,6 +16,8 @@ interface CottaClient {
     val debugMetrics: MetricRegistry
 }
 
-data class UpdateResult(
-    val alpha: Float
-)
+sealed interface UpdateResult {
+    data object AwaitingGameState : UpdateResult
+    data object Disconnected : UpdateResult
+    data class Running(val alpha: Float) : UpdateResult
+}

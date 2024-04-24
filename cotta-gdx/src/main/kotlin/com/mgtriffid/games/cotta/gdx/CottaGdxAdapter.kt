@@ -23,7 +23,10 @@ class CottaGdxAdapter(
     operator fun invoke() : Float {
         input.accumulate()
 
-        return client.update().alpha
+        return client.update().let { when (it) {
+            is com.mgtriffid.games.cotta.client.UpdateResult.Running -> it.alpha
+            else -> 0.0f
+        } }
     }
 
     fun getDrawableState(alpha: Float, components: List<KClass<out Component<*>>>): DrawableState {

@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.client.impl
 import com.mgtriffid.games.cotta.client.ClientSimulationInput
 import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.client.Instruction
-import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.SimulationDirector
 import com.mgtriffid.games.cotta.client.Simulations
 import com.mgtriffid.games.cotta.core.CottaGame
@@ -32,15 +31,27 @@ class SimulationsImpl @Inject constructor(
     @Named("simulation") private val state: CottaState,
     @Named("guessed") private val guessedState: CottaState,
     @Named(GLOBAL) private val tickProvider: TickProvider,
-    private val predictionSimulation: PredictionSimulation,
     @Named("simulation") private val authoritativeTickProvider: TickProvider,
     @Named("guessed") private val guessedTickProvider: TickProvider
 ) : Simulations {
+
+    private var lastConfirmedInput: ClientInputId? = null
+
+    override fun getLastConfirmedInput(): ClientInputId {
+        return lastConfirmedInput ?: throw IllegalStateException("No last confirmed input")
+    }
+
+    private lateinit var lastSimulationKind: SimulationKind
+
+    override fun getLastSimulationKind(): SimulationKind {
+        return lastSimulationKind
+    }
+
     override fun simulate() {
         val instructions = simulationDirector.instruct(tickProvider.tick)
             .also { logger.info { "Instructions: $it" } }
         tickProvider.tick++
-        var lastConfirmedInput: ClientInputId? = null
+//        var lastConfirmedInput: ClientInputId? = null
         instructions.forEach {
             when (it) {
                 is Instruction.IntegrateAuthoritative -> {
@@ -62,18 +73,16 @@ class SimulationsImpl @Inject constructor(
                 }
             }
         }
-        predict(
-            lastConfirmedInput = lastConfirmedInput ?: throw IllegalStateException(
-                "No way ${Instruction.CopyAuthoritativeToGuessed::class.simpleName} was the only instruction"
-            ),
-            takeStateFrom = when (instructions.last()) {
-                is Instruction.IntegrateAuthoritative -> SimulationKind.AUTHORITATIVE
-                is Instruction.CopyAuthoritativeToGuessed -> throw IllegalStateException(
-                    "CopyAuthoritativeToGuessed should not be the last instruction"
-                )
+        lastSimulationKind = when (instructions.last()) {
+            is Instruction.IntegrateAuthoritative -> SimulationKind.AUTHORITATIVE
+            is Instruction.CopyAuthoritativeToGuessed -> throw IllegalStateException(
+                "CopyAuthoritativeToGuessed should not be the last instruction"
+            )
 
-                is Instruction.IntegrateGuessed -> SimulationKind.GUESSED
-            }
+            is Instruction.IntegrateGuessed -> SimulationKind.GUESSED
+        }
+        lastConfirmedInput = lastConfirmedInput ?: throw IllegalStateException(
+            "No way ${Instruction.CopyAuthoritativeToGuessed::class.simpleName} was the only instruction"
         )
     }
 
@@ -112,23 +121,9 @@ class SimulationsImpl @Inject constructor(
         )
     }
 
-    private enum class SimulationKind {
+    enum class SimulationKind {
         AUTHORITATIVE,
         GUESSED,
-    }
-
-    private fun predict(lastConfirmedInput: ClientInputId, takeStateFrom: SimulationKind) {
-        logger.debug { "Predicting" }
-        val currentTick = getCurrentTick()
-        logger.debug { "Setting initial predictions state with tick $currentTick" }
-        predictionSimulation.predict(
-            when (takeStateFrom) {
-                SimulationKind.AUTHORITATIVE -> state
-                SimulationKind.GUESSED -> guessedState
-            }.entities(currentTick),
-            lastConfirmedInput,
-            currentTick
-        )
     }
 
     private fun getLastConfirmedInput(delta: Delta) =

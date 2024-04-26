@@ -8,6 +8,7 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.input.ClientInputId
 import com.mgtriffid.games.cotta.utils.now
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -24,9 +25,11 @@ class CottaClientImpl @Inject constructor(
     private val playerInputs: LocalPlayerInputs,
     private val simulations: Simulations,
     @Named(GLOBAL) private val globalTickProvider: TickProvider,
+    private val predictionSimulation: PredictionSimulation,
     @Named(SIMULATION) private val simulationTickProvider: TickProvider,
     override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
+    @Named("guessed") private val guessedState: CottaState,
     private val drawableStateProvider: DrawableStateProvider,
     private val incomingDataBufferMonitor: IncomingDataBufferMonitor,
     override val debugMetrics: MetricRegistry,
@@ -115,8 +118,23 @@ class CottaClientImpl @Inject constructor(
             logger.info { "run called" }
             measureBuffer()
             integrate()
+            predict(simulations.getLastConfirmedInput(), simulations.getLastSimulationKind())
             nextTickAt += getClientTickLength()
         }
+    }
+
+    private fun predict(lastConfirmedInput: ClientInputId, takeStateFrom: SimulationsImpl.SimulationKind) {
+        logger.debug { "Predicting" }
+        val currentTick = getCurrentTick()
+//        logger.debug { "Setting initial predictions state with tick $currentTick" }
+        predictionSimulation.predict(
+            when (takeStateFrom) {
+                SimulationsImpl.SimulationKind.AUTHORITATIVE -> state
+                SimulationsImpl.SimulationKind.GUESSED -> guessedState
+            }.entities(currentTick),
+            lastConfirmedInput,
+            currentTick
+        )
     }
 
     override fun getDrawableState(

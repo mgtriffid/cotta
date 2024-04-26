@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.client.CottaClientFactory
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.Component
+import com.mgtriffid.games.cotta.utils.now
 import kotlin.reflect.KClass
 
 private val logger: mu.KLogger = mu.KotlinLogging.logger {}
@@ -23,7 +24,7 @@ class CottaGdxAdapter(
     operator fun invoke() : Float {
         input.accumulate()
 
-        return client.update().let { when (it) {
+        return client.update(now()).let { when (it) {
             is com.mgtriffid.games.cotta.client.UpdateResult.Running -> it.alpha
             else -> 0.0f
         } }

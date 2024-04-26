@@ -41,9 +41,9 @@ class SimulationsImpl @Inject constructor(
         return lastConfirmedInput ?: throw IllegalStateException("No last confirmed input")
     }
 
-    private lateinit var lastSimulationKind: SimulationKind
+    private lateinit var lastSimulationKind: Simulations.SimulationKind
 
-    override fun getLastSimulationKind(): SimulationKind {
+    override fun getLastSimulationKind(): Simulations.SimulationKind {
         return lastSimulationKind
     }
 
@@ -74,12 +74,12 @@ class SimulationsImpl @Inject constructor(
             }
         }
         lastSimulationKind = when (instructions.last()) {
-            is Instruction.IntegrateAuthoritative -> SimulationKind.AUTHORITATIVE
+            is Instruction.IntegrateAuthoritative -> Simulations.SimulationKind.AUTHORITATIVE
             is Instruction.CopyAuthoritativeToGuessed -> throw IllegalStateException(
                 "CopyAuthoritativeToGuessed should not be the last instruction"
             )
 
-            is Instruction.IntegrateGuessed -> SimulationKind.GUESSED
+            is Instruction.IntegrateGuessed -> Simulations.SimulationKind.GUESSED
         }
         lastConfirmedInput = lastConfirmedInput ?: throw IllegalStateException(
             "No way ${Instruction.CopyAuthoritativeToGuessed::class.simpleName} was the only instruction"
@@ -119,11 +119,6 @@ class SimulationsImpl @Inject constructor(
             idSequence = input.idSequence,
             confirmedClientInput = ClientInputId(input.confirmedClientInput.id + (tick - input.tick).toInt())
         )
-    }
-
-    enum class SimulationKind {
-        AUTHORITATIVE,
-        GUESSED,
     }
 
     private fun getLastConfirmedInput(delta: Delta) =

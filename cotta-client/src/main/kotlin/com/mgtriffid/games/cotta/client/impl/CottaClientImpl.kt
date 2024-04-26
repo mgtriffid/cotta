@@ -9,7 +9,6 @@ import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.*
 import com.mgtriffid.games.cotta.core.input.ClientInputId
-import com.mgtriffid.games.cotta.utils.now
 import jakarta.inject.Named
 import mu.KotlinLogging
 import kotlin.reflect.KClass
@@ -38,7 +37,8 @@ class CottaClientImpl @Inject constructor(
 
     private var clientState: ClientState = ClientState.Initial
 
-    private var nextTickAt = now()
+    private var nextSimulationTickAt = -1L
+    private var nextLocalTickAt = -1L
     private var tickLength: Long = -1
 
     override fun initialize() {
@@ -47,15 +47,15 @@ class CottaClientImpl @Inject constructor(
         tickLength = game.config.tickLength
     }
 
-    override fun update(): UpdateResult {
-            tick()
+    override fun update(now: Long): UpdateResult {
+        tick(now)
 
         return clientState.let { when (it) {
             ClientState.Initial -> UpdateResult.AwaitingGameState
             is ClientState.AwaitingGameState -> UpdateResult.AwaitingGameState
             ClientState.Disconnected -> UpdateResult.Disconnected
             is ClientState.Running -> UpdateResult.Running(
-                1.0f - (nextTickAt - now()).toFloat() / getClientTickLength().toFloat()
+                1.0f - (nextSimulationTickAt - now).toFloat() / getClientTickLength().toFloat()
             )
         } }
 
@@ -65,13 +65,13 @@ class CottaClientImpl @Inject constructor(
         paceRegulator.calculate(tickLength, debugMetrics)
 
     // Should I ask for the state more frequently than at the game's refresh rate?
-    private fun tick() {
+    private fun tick(now: Long) {
         clientState.let {
             when (it) {
                 ClientState.Initial -> {
                     network.initialize()
                     network.enterGame()
-                    clientState = ClientState.AwaitingGameState(since = now())
+                    clientState = ClientState.AwaitingGameState(since = now)
                 }
 
                 is ClientState.AwaitingGameState -> {
@@ -85,12 +85,13 @@ class CottaClientImpl @Inject constructor(
                                 globalTickProvider
                             )
                             clientState = ClientState.Running(getCurrentTick())
-                            nextTickAt = now()
+                            nextSimulationTickAt = now
+                            nextLocalTickAt = now
                         }
 
                         AuthoritativeState.NotReady -> {
                             network.enterGame()
-                            if (now() - it.since > STATE_WAITING_THRESHOLD) {
+                            if (now - it.since > STATE_WAITING_THRESHOLD) {
                                 clientState = ClientState.Disconnected
                             }
                         }
@@ -103,34 +104,39 @@ class CottaClientImpl @Inject constructor(
 
                 is ClientState.Running -> {
                     network.fetch()
-                    run()
+                    run(now)
                     clientState = ClientState.Running(it.currentTick + 1)
                 }
             }
         }
     }
 
-    private fun run() {
-        val now = now()
-        logger.info { "nextTickAt is $nextTickAt, now is $now, difference is ${now - nextTickAt}" }
+    private fun run(now: Long) {
+        logger.info { "nextTickAt is $nextSimulationTickAt, now is $now, difference is ${now - nextSimulationTickAt}" }
         logger.info { "Global tick is ${globalTickProvider.tick}, simulation tick is ${simulationTickProvider.tick}" }
-        if (nextTickAt <= now) {
+        if (nextSimulationTickAt <= now) {
             logger.info { "run called" }
             measureBuffer()
             integrate()
+            nextSimulationTickAt += getClientTickLength()
+        }
+        if (nextLocalTickAt <= now) {
+            logger.info { "local tick called" }
+            processLocalInput()
             predict(simulations.getLastConfirmedInput(), simulations.getLastSimulationKind())
-            nextTickAt += getClientTickLength()
+            nextLocalTickAt += getClientTickLength()
+            sendDataToServer()
         }
     }
 
-    private fun predict(lastConfirmedInput: ClientInputId, takeStateFrom: SimulationsImpl.SimulationKind) {
+    private fun predict(lastConfirmedInput: ClientInputId, takeStateFrom: Simulations.SimulationKind) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
 //        logger.debug { "Setting initial predictions state with tick $currentTick" }
         predictionSimulation.predict(
             when (takeStateFrom) {
-                SimulationsImpl.SimulationKind.AUTHORITATIVE -> state
-                SimulationsImpl.SimulationKind.GUESSED -> guessedState
+                Simulations.SimulationKind.AUTHORITATIVE -> state
+                Simulations.SimulationKind.GUESSED -> guessedState
             }.entities(currentTick),
             lastConfirmedInput,
             currentTick
@@ -150,10 +156,8 @@ class CottaClientImpl @Inject constructor(
 
     private fun integrate() {
         logger.debug { "Integrating" }
-        processLocalInput()
         simulations.simulate()
 
-        sendDataToServer()
     }
 
     private fun measureBuffer() {

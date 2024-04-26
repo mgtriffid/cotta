@@ -239,7 +239,7 @@ class CottaClientModule(
         bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(MetricRegistry::class.java).toInstance(metricRegistry)
-        bind(PaceRegulator::class.java).to(NoOpPaceRegulatorImpl::class.java)
+        bind(PaceRegulator::class.java).to(MetricsAwarePaceRegulator::class.java)
             .`in`(Scopes.SINGLETON)
     }
 

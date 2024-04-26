@@ -50,19 +50,27 @@ class CottaClientImpl @Inject constructor(
     override fun update(now: Long): UpdateResult {
         tick(now)
 
-        return clientState.let { when (it) {
-            ClientState.Initial -> UpdateResult.AwaitingGameState
-            is ClientState.AwaitingGameState -> UpdateResult.AwaitingGameState
-            ClientState.Disconnected -> UpdateResult.Disconnected
-            is ClientState.Running -> UpdateResult.Running(
-                1.0f - (nextSimulationTickAt - now).toFloat() / getClientTickLength().toFloat()
-            )
-        } }
-
+        return clientState.let {
+            when (it) {
+                ClientState.Initial -> UpdateResult.AwaitingGameState
+                is ClientState.AwaitingGameState -> UpdateResult.AwaitingGameState
+                ClientState.Disconnected -> UpdateResult.Disconnected
+                is ClientState.Running -> UpdateResult.Running(
+                    InterpolationAlphas(
+                        1.0f - (nextSimulationTickAt - now).toFloat() / getSimulationTickLength().toFloat(),
+                        1.0f - (nextLocalTickAt - now).toFloat() / getLocalTickLength().toFloat(),
+                    )
+                )
+            }
+        }
     }
 
-    private fun getClientTickLength() =
-        paceRegulator.calculate(tickLength, debugMetrics)
+    private fun getLocalTickLength() =
+        paceRegulator.localTickLength(tickLength, debugMetrics)
+
+    private fun getSimulationTickLength(): Long {
+        return paceRegulator.simulationTickLength(tickLength, debugMetrics)
+    }
 
     // Should I ask for the state more frequently than at the game's refresh rate?
     private fun tick(now: Long) {
@@ -114,22 +122,34 @@ class CottaClientImpl @Inject constructor(
     private fun run(now: Long) {
         logger.info { "nextTickAt is $nextSimulationTickAt, now is $now, difference is ${now - nextSimulationTickAt}" }
         logger.info { "Global tick is ${globalTickProvider.tick}, simulation tick is ${simulationTickProvider.tick}" }
+        measureBuffer()
         if (nextSimulationTickAt <= now) {
             logger.info { "run called" }
-            measureBuffer()
             integrate()
-            nextSimulationTickAt += getClientTickLength()
+            nextSimulationTickAt += paceRegulator.simulationTickLength(
+                tickLength,
+                debugMetrics
+            )
         }
         if (nextLocalTickAt <= now) {
             logger.info { "local tick called" }
             processLocalInput()
-            predict(simulations.getLastConfirmedInput(), simulations.getLastSimulationKind())
-            nextLocalTickAt += getClientTickLength()
+            predict(
+                simulations.getLastConfirmedInput(),
+                simulations.getLastSimulationKind()
+            )
+            nextLocalTickAt += paceRegulator.localTickLength(
+                tickLength,
+                debugMetrics
+            )
             sendDataToServer()
         }
     }
 
-    private fun predict(lastConfirmedInput: ClientInputId, takeStateFrom: Simulations.SimulationKind) {
+    private fun predict(
+        lastConfirmedInput: ClientInputId,
+        takeStateFrom: Simulations.SimulationKind
+    ) {
         logger.debug { "Predicting" }
         val currentTick = getCurrentTick()
 //        logger.debug { "Setting initial predictions state with tick $currentTick" }
@@ -144,10 +164,10 @@ class CottaClientImpl @Inject constructor(
     }
 
     override fun getDrawableState(
-        alpha: Float,
+        alphas: InterpolationAlphas,
         vararg components: KClass<out Component<*>>
     ): DrawableState {
-        return drawableStateProvider.get(alpha, components)
+        return drawableStateProvider.get(alphas, components)
     }
 
     private fun getCurrentTick(): Long {

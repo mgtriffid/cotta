@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.gdx
 import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
 import com.mgtriffid.games.cotta.client.DrawableState
+import com.mgtriffid.games.cotta.client.InterpolationAlphas
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.utils.now
@@ -21,18 +22,22 @@ class CottaGdxAdapter(
         client = CottaClientFactory().create(game, input)
     }
 
-    operator fun invoke() : Float {
+    operator fun invoke() : InterpolationAlphas {
         input.accumulate()
 
         return client.update(now()).let { when (it) {
-            is com.mgtriffid.games.cotta.client.UpdateResult.Running -> it.alpha
-            else -> 0.0f
-        } }
+            is com.mgtriffid.games.cotta.client.UpdateResult.Running -> it.alphas
+            else -> emptyInterpolationAlphas
+        } }.also {
+            logger.info { "Alpha for drawable state is $it" }
+        }
     }
 
-    fun getDrawableState(alpha: Float, components: List<KClass<out Component<*>>>): DrawableState {
-        return client.getDrawableState(alpha, *components.toTypedArray())
+    fun getDrawableState(alphas: InterpolationAlphas, components: List<KClass<out Component<*>>>): DrawableState {
+        return client.getDrawableState(alphas, *components.toTypedArray())
     }
 
     fun metrics() = client.debugMetrics
 }
+
+private val emptyInterpolationAlphas = InterpolationAlphas(0.0f, 0.0f)

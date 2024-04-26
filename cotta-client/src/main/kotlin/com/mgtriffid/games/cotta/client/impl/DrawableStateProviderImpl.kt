@@ -4,6 +4,7 @@ import com.mgtriffid.games.cotta.client.DrawableEffect
 import com.mgtriffid.games.cotta.client.DrawableEffects
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.client.DrawableStateProvider
+import com.mgtriffid.games.cotta.client.InterpolationAlphas
 import com.mgtriffid.games.cotta.client.LastClientTickProcessedByServer
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.interpolation.Interpolators
@@ -37,7 +38,7 @@ class DrawableStateProviderImpl @Inject constructor(
     private val previouslyPredicted = TreeMap<Long, Collection<DrawableEffect>>()
 
     // GROOM what the actual fuck
-    override fun get(alpha: Float, components: Array<out KClass<out Component<*>>>): DrawableState {
+    override fun get(alphas: InterpolationAlphas, components: Array<out KClass<out Component<*>>>): DrawableState {
         if (globalTickProvider.tick == 0L) return DrawableState.NotReady
         val onlyNeeded: Collection<Entity>.() -> Collection<Entity> = {
             filter { entity ->
@@ -49,8 +50,8 @@ class DrawableStateProviderImpl @Inject constructor(
         // Here guessed vs authoritative becomes interesting. CottaStateView?
         val authoritativeCurrent = this.state.entities(this.simulationTickProvider.tick).all().onlyNeeded()
         val authoritativePrevious = this.state.entities(this.simulationTickProvider.tick - 1).all().onlyNeeded()
-        val predicted = interpolate(predictedPrevious, predictedCurrent, alpha, components.toList())
-        val authoritative = interpolate(authoritativePrevious, authoritativeCurrent, alpha, components.toList())
+        val predicted = interpolate(predictedPrevious, predictedCurrent, alphas.prediction, components.toList())
+        val authoritative = interpolate(authoritativePrevious, authoritativeCurrent, alphas.simulation, components.toList())
         val predictedIds = predicted.map { it.id }
         val entities =
             (predicted + authoritative.filter {

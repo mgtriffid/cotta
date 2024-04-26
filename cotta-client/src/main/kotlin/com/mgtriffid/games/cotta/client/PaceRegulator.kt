@@ -4,5 +4,6 @@ import com.codahale.metrics.MetricRegistry
 
 // TODO better name
 interface PaceRegulator {
-    fun calculate(tickLength: Long, metrics: MetricRegistry): Long
+    fun localTickLength(tickLength: Long, metrics: MetricRegistry): Long
+    fun simulationTickLength(tickLength: Long, metrics: MetricRegistry): Long
 }

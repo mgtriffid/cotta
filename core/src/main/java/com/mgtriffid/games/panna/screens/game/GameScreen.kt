@@ -2,6 +2,7 @@ package com.mgtriffid.games.panna.screens.game
 
 import com.badlogic.gdx.ScreenAdapter
 import com.mgtriffid.games.cotta.client.DrawableState
+import com.mgtriffid.games.cotta.client.InterpolationAlphas
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.gdx.CottaGdxAdapter
 import com.mgtriffid.games.panna.PannaClientGdxInput
@@ -51,8 +52,11 @@ class GameScreen(
         graphics.dispose()
     }
 
-    private fun draw(alpha: Float, delta: Float) {
-        when (val state = getDrawableState(alpha)) {
+    private fun draw(
+        alphas: InterpolationAlphas,
+        delta: Float
+    ) {
+        when (val state = getDrawableState(alphas)) {
             DrawableState.NotReady -> return
             is DrawableState.Ready -> {
                 if (noDude(state)) {
@@ -70,7 +74,7 @@ class GameScreen(
         }
     }
 
-    private fun getDrawableState(alpha: Float): DrawableState {
-        return gdxAdapter.getDrawableState(alpha, drawableComponents)
+    private fun getDrawableState(alphas: InterpolationAlphas): DrawableState {
+        return gdxAdapter.getDrawableState(alphas, drawableComponents)
     }
 }

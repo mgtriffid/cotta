@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.client.network.impl
 
+import com.codahale.metrics.MetricRegistry
 import com.mgtriffid.games.cotta.client.ClientSimulationInput
 import com.mgtriffid.games.cotta.client.impl.AuthoritativeState
 import com.mgtriffid.games.cotta.client.impl.AuthoritativeStateData
@@ -42,7 +43,8 @@ class NetworkClientImpl<
     private val snapsSerialization: SnapsSerialization<SR, DR, PDR>,
     private val inputSerialization: InputSerialization<IR>,
     private val stateSnapper: StateSnapper<SR, DR, PDR>,
-    private val localPlayer: LocalPlayer
+    private val localPlayer: LocalPlayer,
+    private val metrics: MetricRegistry
 ) : NetworkClient {
     private val bufferLength: Int = 3
 
@@ -84,10 +86,16 @@ class NetworkClientImpl<
                             confirmedClientInput = ClientInputId(packet.confirmedClientInput)
                         )
                     )
-
+                    recordBufferLength(packet)
                 }
             }
         }
+    }
+
+    private fun recordBufferLength(packet: SimulationInputServerToClientDto) {
+        logger.info { "Buffer length: ${packet.bufferLength}" }
+        metrics.histogram("server_buffer_ahead")
+            .update(packet.bufferLength.toInt())
     }
 
     override fun send(

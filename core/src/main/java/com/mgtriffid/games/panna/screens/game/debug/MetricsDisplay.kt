@@ -15,6 +15,7 @@ class MetricsDisplay(spriteBatch: SpriteBatch) {
     private val rows = mapOf(
         "buffer_ahead" to Row("buffer_ahead"),
         "sent_chunk_size" to Row("sent_chunk_size"),
+        "server_buffer_ahead" to Row("server_buffer_ahead"),
     )
 
     init {
@@ -40,6 +41,10 @@ class MetricsDisplay(spriteBatch: SpriteBatch) {
 
     fun updateSentChunkSize(sentChunkSize: MetricStats) {
         rows["sent_chunk_size"]?.update(sentChunkSize)
+    }
+
+    fun updateServerBufferLength(serverBufferLength: MetricStats) {
+        rows["server_buffer_ahead"]?.update(serverBufferLength)
     }
 
     fun dispose() {

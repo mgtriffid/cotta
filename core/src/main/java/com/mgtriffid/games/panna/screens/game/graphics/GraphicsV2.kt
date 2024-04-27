@@ -102,6 +102,7 @@ class GraphicsV2 {
         stage.draw()
         metricsDisplay.updateBufferLength(metrics.histogram("buffer_ahead").toMetricStats())
         metricsDisplay.updateSentChunkSize(metrics.histogram("sent_chunk_size").toMetricStats())
+        metricsDisplay.updateServerBufferLength(metrics.histogram("server_buffer_ahead").toMetricStats())
         metricsDisplay.stage.act()
         metricsDisplay.stage.draw()
     }

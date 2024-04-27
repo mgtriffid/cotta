@@ -14,6 +14,7 @@ import com.mgtriffid.games.cotta.network.protocol.ServerToClientDto
 import com.mgtriffid.games.cotta.network.protocol.SimulationInputServerToClientDto
 import com.mgtriffid.games.cotta.network.protocol.StateServerToClientDto
 import com.mgtriffid.games.cotta.server.DataForClients
+import com.mgtriffid.games.cotta.server.ServerSimulationInputProvider
 import com.mgtriffid.games.cotta.server.ServerToClientDataDispatcher
 import jakarta.inject.Named
 import mu.KotlinLogging
@@ -21,10 +22,10 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class ServerToClientDataDispatcherImpl<
-    SR: StateRecipe,
-    DR: DeltaRecipe,
-    IR: InputRecipe,
-    PDR: PlayersDeltaRecipe
+    SR : StateRecipe,
+    DR : DeltaRecipe,
+    IR : InputRecipe,
+    PDR : PlayersDeltaRecipe
     > @Inject constructor(
     @Named(SIMULATION) private val tick: TickProvider,
     private val clientsGhosts: ClientsGhosts<IR>,
@@ -34,6 +35,7 @@ class ServerToClientDataDispatcherImpl<
     private val snapsSerialization: SnapsSerialization<SR, DR, PDR>,
     private val inputSerialization: InputSerialization<IR>,
     private val data: DataForClients,
+    private val inputProvider: ServerSimulationInputProvider,
 ) : ServerToClientDataDispatcher {
 
     override fun dispatch() {
@@ -42,11 +44,18 @@ class ServerToClientDataDispatcherImpl<
         clientsGhosts.data.forEach { (playerId, ghost) ->
             val whatToSend = ghost.whatToSend()
             logger.debug { "Sending data to $playerId : $whatToSend" }
-            network.send(ghost.connectionId, packData(currentTick, whatToSend, playerId))
+            network.send(
+                ghost.connectionId,
+                packData(currentTick, whatToSend, playerId)
+            )
         }
     }
 
-    private fun packData(tick: Long, whatToSend: WhatToSend, playerId: PlayerId): ServerToClientDto {
+    private fun packData(
+        tick: Long,
+        whatToSend: WhatToSend,
+        playerId: PlayerId
+    ): ServerToClientDto {
         when (whatToSend) {
             WhatToSend.STATE -> {
                 val fullStateTick = tick - MAX_LAG_COMP_DEPTH_TICKS
@@ -58,26 +67,29 @@ class ServerToClientDataDispatcherImpl<
                     )
                 }
                 dto.playerId = playerId.id
-                dto.deltas = ((tick - MAX_LAG_COMP_DEPTH_TICKS + 1)..tick).map { t ->
-                   DeltaDto().apply {
-                       payload = snapsSerialization.serializeDeltaRecipe(
-                           stateSnapper.snapDelta(
-                               prev = data.entities(tick - 1),
-                               curr = data.entities(tick)
-                           )
-                       )
-                   }
-                }
+                dto.deltas =
+                    ((tick - MAX_LAG_COMP_DEPTH_TICKS + 1)..tick).map { t ->
+                        DeltaDto().apply {
+                            payload = snapsSerialization.serializeDeltaRecipe(
+                                stateSnapper.snapDelta(
+                                    prev = data.entities(tick - 1),
+                                    curr = data.entities(tick)
+                                )
+                            )
+                        }
+                    }
                 dto.playerIds = data.players().all().map { it.id }.toIntArray()
                 return dto
             }
+
             WhatToSend.SIMULATION_INPUTS -> {
                 val dto =
                     SimulationInputServerToClientDto()
                 dto.tick = tick - 1
-                dto.playersSawTicks = snapsSerialization.serializePlayersSawTicks(
-                    data.playersSawTicks().all()
-                )
+                dto.playersSawTicks =
+                    snapsSerialization.serializePlayersSawTicks(
+                        data.playersSawTicks().all()
+                    )
                 dto.playersInputs = inputSerialization.serializePlayersInputs(
                     data.playerInputs()
                 )
@@ -86,7 +98,13 @@ class ServerToClientDataDispatcherImpl<
                         .toIntArray()
                 }
                 dto.idSequence = data.idSequence(tick)
-                dto.confirmedClientInput = clientsGhosts.data[playerId]?.lastUsedInput()?.id ?: 0
+                dto.confirmedClientInput =
+                    clientsGhosts.data[playerId]?.lastUsedInput()?.id ?: 0
+                dto.bufferLength = Math.min(
+                    inputProvider.bufferAheadLength(
+                        playerId
+                    ), 127
+                ).toByte()
                 return dto
             }
         }

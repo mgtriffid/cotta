@@ -138,4 +138,24 @@ class ServerSimulationInputProviderImpl<
     private fun getBuffer(playerId: PlayerId): ServerIncomingDataBuffer {
         return buffers.computeIfAbsent(playerId) { ServerIncomingDataBuffer() }
     }
+
+    override fun bufferAheadLength(playerId: PlayerId): Int {
+        val ghost = clientsGhosts.data[playerId]
+        if (ghost == null) {
+            logger.warn { "Could not find a ghost for player ${playerId.id}, can't calculate buffer length" }
+            return 0
+        }
+        val state = ghost.tickCursorState()
+        if (state == AWAITING_INPUTS) {
+            logger.debug { "Awaiting inputs for player ${playerId.id}" }
+            return 0
+        }
+        val lastUsedInput = ghost.lastUsedInput()
+        val buffer = getBuffer(playerId)
+        var ret = 0
+        while (buffer.inputs2.containsKey(ClientInputId(lastUsedInput.id + ret + 1))) {
+            ret++
+        }
+        return ret
+    }
 }

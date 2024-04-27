@@ -5,6 +5,8 @@ import com.mgtriffid.games.cotta.client.PaceRegulator
 
 private val logger: mu.KLogger = mu.KotlinLogging.logger {}
 
+// BUG this is not enough. What is observed is that with packet loss 0.05
+//  the server_buffer_ahead metric jumps from 0 to a lot and then back to 0
 class MetricsAwarePaceRegulator : PaceRegulator {
     override fun localTickLength(
         tickLength: Long,

@@ -153,11 +153,13 @@ class ServerSimulationInputProviderImpl<
             return 0
         }
         val lastUsedInput = ghost.lastUsedInput()
+        logger.debug { "Last used input : ${lastUsedInput.id}" }
         val buffer = getBuffer(playerId)
         var ret = 0
+        logger.debug { "Buffer keys: ${buffer.inputs2.subMap(lastUsedInput, true, buffer.inputs2.lastKey(), true).keys.map { it.id }}" }
         while (buffer.inputs2.containsKey(ClientInputId(lastUsedInput.id + ret + 1))) {
             ret++
         }
-        return ret
+        return ret.also { logger.debug { "Calculated Buffer length is $it" } }
     }
 }

@@ -31,15 +31,17 @@ class Connection(
             val packetSequence = packetSequence
             track(obj)
             val objectsToSent = getLastObjectsInFlight() // this
+            logger.debug { "Sending ${objectsToSent.size} objects: ${objectsToSent.keys}" }
             val bytes = serializer.serialize(ArrayList(objectsToSent.values)) // this
-            logger.trace { "Bytes size is ${bytes.size}" }
+            logger.debug { "Bytes size is ${bytes.size}" }
             val chunked = bytes.chunked()
             val size = chunked.size
-            logger.trace { " $size chunks" }
+            logger.debug { " $size chunks" }
             if (size > 128) {
                 throw IllegalArgumentException("Too many chunks")
             }
             val squadronId = SquadronId(packetSequence.get())
+            logger.debug { "SquadronId is $squadronId" }
 
             chunked.forEachIndexed { idx, b ->
                 sendChunk(Chunk().apply {
@@ -62,6 +64,7 @@ class Connection(
 
     fun track(obj: Any): ObjectId {
         val objectId = ObjectId(objectSequence++)
+        logger.debug { "Tracking object $objectId" }
         objectsInFlight[objectId] = ObjectInFlight(obj, mutableSetOf()) // track when added
         return objectId
     }
@@ -83,13 +86,15 @@ class Connection(
         if (packetId !in v.packets) {
             return
         }
-        logger.trace { "Confirmed $packetId" }
+        logger.debug { "Confirmed $packetId" }
         v.packets.remove(packetId)
         if (v.packets.isEmpty()) {
+            logger.debug { "Whole squadron $k seems to be done" }
             // squadron sent completely
             squadronsInFlight.remove(k)
             // objects that are guaranteed to be delivered:
             v.objects.forEach { objectId ->
+                logger.debug { "An object $objectId belongs to squadron $k" }
                 // remove all squadrons:
                 // track when removed - meaningful latency
                 val squadrons = objectsInFlight.remove(objectId)?.squadrons

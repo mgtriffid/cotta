@@ -39,6 +39,14 @@ class ClientGhost(
         clientTickCursor.lastUsedInput = id
     }
 
+    fun setLastPresentInputId(id: ClientInputId) {
+        clientTickCursor.lastPresentInput = id
+    }
+
+    fun getLastPresentInputId(): ClientInputId {
+        return clientTickCursor.lastPresentInput
+    }
+
     fun lastUsedInput(): ClientInputId {
         return clientTickCursor.lastUsedInput
     }
@@ -57,6 +65,7 @@ class ClientGhost(
 
     class ClientTickCursor {
         var lastUsedInput = ClientInputId(-1)
+        var lastPresentInput = ClientInputId(-1)
         var state = State.AWAITING_INPUTS
 
         enum class State {

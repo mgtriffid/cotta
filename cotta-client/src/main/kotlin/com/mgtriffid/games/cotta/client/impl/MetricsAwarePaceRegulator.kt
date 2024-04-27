@@ -11,10 +11,10 @@ class MetricsAwarePaceRegulator : PaceRegulator {
         metrics: MetricRegistry
     ): Long {
         val histogram = metrics.histogram("server_buffer_ahead").snapshot
-        if (histogram.min < 1) {
+        if (histogram.min < 2) {
             return (tickLength * 0.9f).toLong()
         }
-        if (histogram.min > 1) {
+        if (histogram.min > 2) {
             return (tickLength * 1.1f).toLong()
         }
         return tickLength

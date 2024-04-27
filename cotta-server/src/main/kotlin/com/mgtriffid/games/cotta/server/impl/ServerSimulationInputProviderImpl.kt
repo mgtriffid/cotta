@@ -113,6 +113,7 @@ class ServerSimulationInputProviderImpl<
                         buffer.inputs2.containsKey(toUse)
                     ) {
                         val (input, sawTick) = buffer.inputs2[toUse]!!
+                        ghost.setLastPresentInputId(toUse)
                         playersSawTicks[playerId] = sawTick
                         playerInputs[playerId] = input
                         ghost.setLastUsedInputId(toUse)
@@ -120,7 +121,8 @@ class ServerSimulationInputProviderImpl<
                         ghost.setInputLastUsedOnTick(tickProvider.tick)
                     } else {
                         val input = ghost.getLastUsedIncomingInput()
-                        val inputId = ghost.lastUsedInput()
+                        val inputId = ghost.getLastPresentInputId()
+                        ghost.setLastUsedInputId(toUse)
                         val sawTick = buffer.inputs2[inputId]!!.second + (tickProvider.tick - ghost.lastInputUsedOnTick)
                         playersSawTicks[playerId] = sawTick
                         playerInputs[playerId] = input

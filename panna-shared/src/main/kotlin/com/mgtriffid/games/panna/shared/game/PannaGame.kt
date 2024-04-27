@@ -96,7 +96,7 @@ class PannaGame : CottaGame {
 
     override val config: CottaConfig = object : CottaConfig {
         override val tickLength: Long = 50L
-//        override val debugConfig = NetworkWithIssues
+        override val debugConfig = NetworkWithIssues
     }
 
     override val playerInputKClass = PannaPlayerInput::class

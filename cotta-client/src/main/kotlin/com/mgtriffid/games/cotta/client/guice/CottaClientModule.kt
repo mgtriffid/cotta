@@ -259,6 +259,14 @@ class CottaClientModule(
             )
         )
         metricRegistry.register("buffer_ahead", bufferHistogram)
+        // GROOM idiotic place to declare this histogram, need to reorganize
+        val serverBufferHistogram = Histogram(
+            SlidingTimeWindowArrayReservoir(
+                2000,
+                TimeUnit.MILLISECONDS
+            )
+        )
+        metricRegistry.register("server_buffer_ahead", serverBufferHistogram)
         return IncomingDataBufferMonitor(
             incomingDataBuffer,
             globalTick,

@@ -43,7 +43,8 @@ class AckingCottaClientNetworkTransport(
         val serializer = chunkSerializer()
         connection = Connection(
             serializer = serializer,
-            sendChunk = { chunk -> client.sendUDP(chunk) },
+            // TODO a potential thread-safety issue here
+            sendChunk = { chunk -> sender.send(chunk) { client.sendUDP(it) } },
             saveObject = { save(it) }
         )
     }
@@ -66,7 +67,7 @@ class AckingCottaClientNetworkTransport(
     }
 
     override fun send(obj: Any) {
-        sender.send(obj, connection::send)
+        connection.send(obj)
     }
 
     private fun configureListener() {

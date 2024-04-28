@@ -46,6 +46,7 @@ fun configureLogging() {
         "com.mgtriffid.games.cotta.network.kryonet.acking.Connection" to Level.DEBUG,
         "com.mgtriffid.games.cotta.client.impl.IncomingDataBufferMonitor" to default,
         "com.mgtriffid.games.cotta.network.kryonet.acking.MeasuringChunkSerializer" to default,
+        "com.mgtriffid.games.cotta.server.impl.ServerSimulationInputProviderImpl" to Level.DEBUG
     ).forEach { (logger, level) ->
         (LoggerFactory.getLogger(logger) as Logger).level = level
     }

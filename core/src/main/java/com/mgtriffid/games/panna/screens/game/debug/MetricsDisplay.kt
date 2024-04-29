@@ -51,7 +51,7 @@ class MetricsDisplay(spriteBatch: SpriteBatch) {
         stage.dispose()
     }
 
-    class Row(
+    private class Row(
         name: String
     ) {
         val name = Label(name, MenuScreen.Styles.formInputLabelStyle)

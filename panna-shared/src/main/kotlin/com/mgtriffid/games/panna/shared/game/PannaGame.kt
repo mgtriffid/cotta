@@ -27,6 +27,7 @@ import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.*
 import com.mgtriffid.games.panna.shared.tiled.TiledMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.concurrent.Volatile
 
 @Game
 class PannaGame : CottaGame {
@@ -96,7 +97,7 @@ class PannaGame : CottaGame {
 
     override val config: CottaConfig = object : CottaConfig {
         override val tickLength: Long = 50L
-        override val debugConfig = NetworkWithIssues
+        override val debugConfig = NetworkWithDynamicIssues
     }
 
     override val playerInputKClass = PannaPlayerInput::class
@@ -128,4 +129,23 @@ object NetworkWithIssues : DebugConfig {
                 override val packetLoss: Double = 0.05
             }
         }
+}
+
+object NetworkWithDynamicIssues : DebugConfig {
+    override val emulatedNetworkConditions: ConfigurableNetworkConditions = ConfigurableNetworkConditions()
+}
+
+class ConfigurableNetworkConditions : DebugConfig.EmulatedNetworkConditions.WithIssues {
+    override val sending: ConfigurableIssues = ConfigurableIssues()
+    override val receiving: ConfigurableIssues = ConfigurableIssues()
+}
+
+class ConfigurableIssues : Issues {
+    override val latency: ConfigurableLatency = ConfigurableLatency()
+    @Volatile override var packetLoss: Double = 0.0
+}
+
+class ConfigurableLatency : Latency {
+    @Volatile override var min: Long = 0
+    @Volatile override var max: Long = 0
 }

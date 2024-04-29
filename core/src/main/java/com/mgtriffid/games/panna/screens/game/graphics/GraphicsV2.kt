@@ -21,6 +21,7 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.panna.screens.game.SCALE
 import com.mgtriffid.games.panna.screens.game.debug.MetricsDisplay
+import com.mgtriffid.games.panna.screens.game.debug.NetworkConditionsDisplay
 import com.mgtriffid.games.panna.screens.game.debug.toMetricStats
 import com.mgtriffid.games.panna.screens.game.graphics.actors.ActorFactory
 import com.mgtriffid.games.panna.screens.game.graphics.actors.PannaActor
@@ -28,6 +29,7 @@ import com.mgtriffid.games.panna.screens.game.graphics.textures.PannaTextures
 import com.mgtriffid.games.panna.shared.BULLET_STRATEGY
 import com.mgtriffid.games.panna.shared.CHARACTER_STRATEGY
 import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
+import com.mgtriffid.games.panna.shared.game.ConfigurableNetworkConditions
 import com.mgtriffid.games.panna.shared.game.components.DrawableComponent
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
@@ -44,8 +46,10 @@ class GraphicsV2 {
     private lateinit var clickToJoinLabel: Label
     private lateinit var spriteBatch: SpriteBatch
     private lateinit var metricsDisplay: MetricsDisplay
+    private lateinit var networkConditions: ConfigurableNetworkConditions
+    private lateinit var networkConditionsDisplay: NetworkConditionsDisplay
 
-    fun initialize() {
+    fun initialize(networkConditions: ConfigurableNetworkConditions) {
         textures = PannaTextures()
         spriteBatch = SpriteBatch()
         textures.init()
@@ -53,6 +57,8 @@ class GraphicsV2 {
         prepareStage()
         setCrosshairCursor()
         prepareMetricsDisplay()
+        this.networkConditions = networkConditions
+        prepareNetworkConditionsDisplay()
     }
 
     private fun setCrosshairCursor() {
@@ -72,10 +78,15 @@ class GraphicsV2 {
         metricsDisplay = MetricsDisplay(spriteBatch)
     }
 
+    private fun prepareNetworkConditionsDisplay() {
+        networkConditionsDisplay = NetworkConditionsDisplay(spriteBatch)
+    }
+
     fun dispose() {
         stage.dispose()
         textures.dispose()
         metricsDisplay.dispose()
+        networkConditionsDisplay.dispose()
     }
 
     fun draw(
@@ -105,6 +116,9 @@ class GraphicsV2 {
         metricsDisplay.updateServerBufferLength(metrics.histogram("server_buffer_ahead").toMetricStats())
         metricsDisplay.stage.act()
         metricsDisplay.stage.draw()
+        networkConditionsDisplay.updateNetworkConditions(networkConditions)
+        networkConditionsDisplay.stage.act()
+        networkConditionsDisplay.stage.draw()
     }
 
     // GROOM 4 levels of indent is too many

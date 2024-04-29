@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.gdx.CottaClientGdxInput
 import com.mgtriffid.games.panna.shared.PannaPlayerInput
+import com.mgtriffid.games.panna.shared.game.ConfigurableNetworkConditions
 import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_LEFT
 import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_NONE
 import com.mgtriffid.games.panna.shared.game.components.WALKING_DIRECTION_RIGHT
@@ -18,7 +19,7 @@ private val logger = KotlinLogging.logger {}
 
 class PannaClientGdxInput(
     // TODO either remove or use for determining lookAt and other things
-    private val viewport: Viewport
+    private val viewport: Viewport,
 ) : CottaClientGdxInput {
     var mayJoin = false
     private val storage = Storage()

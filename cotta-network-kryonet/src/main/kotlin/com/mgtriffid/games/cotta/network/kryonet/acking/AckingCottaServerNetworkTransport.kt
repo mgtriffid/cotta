@@ -27,6 +27,7 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
     private val clientToServerInputs =
         ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>()
     private val chunkSerializer = KryoChunkSerializer()
+    private val disconnects = ConcurrentLinkedQueue<ConnectionId>()
 
     private val connections = CacheBuilder.newBuilder()
         .expireAfterAccess(2, TimeUnit.MINUTES)
@@ -66,6 +67,10 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
                     }
                 }
             }
+
+            override fun disconnected(kryoConnection: KryoConnection) {
+                disconnects.add(ConnectionId(kryoConnection.id))
+            }
         }
 
         server.addListener(listener)
@@ -95,6 +100,10 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
 
     override fun drainEnterGameIntents(): Collection<Pair<ConnectionId, EnterGameIntent>> {
         return enterGameIntents.drain()
+    }
+
+    override fun drainDisconnects(): Collection<ConnectionId> {
+        return disconnects.drain()
     }
 
     override fun drainInputs(): Collection<Pair<ConnectionId, ClientToServerInputDto>> {

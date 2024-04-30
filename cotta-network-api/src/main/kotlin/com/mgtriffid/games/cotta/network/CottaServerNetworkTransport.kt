@@ -12,6 +12,8 @@ interface CottaServerNetworkTransport {
 
     fun drainEnterGameIntents(): Collection<Pair<ConnectionId, EnterGameIntent>>
 
+    fun drainDisconnects(): Collection<ConnectionId>
+
     fun drainInputs(): Collection<Pair<ConnectionId, ClientToServerInputDto>>
 
     fun send(connectionId: ConnectionId, obj: Any)

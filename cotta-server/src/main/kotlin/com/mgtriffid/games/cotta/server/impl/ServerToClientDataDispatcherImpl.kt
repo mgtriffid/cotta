@@ -96,6 +96,8 @@ class ServerToClientDataDispatcherImpl<
                 dto.playersDiff = PlayersDiffDto().apply {
                     added = data.players().addedAtTick(tick).map { it.id }
                         .toIntArray()
+                    removed = data.players().removedAtTick(tick).map { it.id }
+                        .toIntArray()
                 }
                 dto.idSequence = data.idSequence(tick)
                 dto.confirmedClientInput =

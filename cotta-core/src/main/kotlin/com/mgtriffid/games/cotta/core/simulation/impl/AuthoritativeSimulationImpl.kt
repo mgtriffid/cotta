@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.core.simulation.impl
 
+import com.mgtriffid.games.cotta.core.PlayersHandler
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
@@ -26,6 +27,7 @@ class AuthoritativeSimulationImpl @Inject constructor(
     private val effectBus: EffectBus,
     private val playersSawTicks: PlayersSawTicks,
     private val inputProcessing: InputProcessing,
+    private val playersHandler: PlayersHandler,
     private val players: Players
 ) : Simulation {
     private val systemInvokers = ArrayList<Pair<SystemInvoker<*>, CottaSystem>>() // TODO pathetic casts
@@ -52,6 +54,10 @@ class AuthoritativeSimulationImpl @Inject constructor(
     private fun processPlayersDiff(input: SimulationInput) {
         input.playersDiff().added.forEach { playerId ->
             players.add(playerId, simulationTick.tick)
+        }
+        input.playersDiff().removed.forEach { playerId ->
+            players.remove(playerId, simulationTick.tick)
+            playersHandler.onLeaveGame(playerId, state.entities(simulationTick.tick))
         }
     }
 

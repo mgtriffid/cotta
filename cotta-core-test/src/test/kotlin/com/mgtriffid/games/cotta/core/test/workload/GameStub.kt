@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.core.test.workload
 import com.mgtriffid.games.cotta.Game
 import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.PlayersHandler
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
@@ -39,6 +40,11 @@ object GameStub : CottaGame {
             entities: Entities,
             effectBus: EffectBus
         ) {
+        }
+    }
+
+    override val playersHandler = object : PlayersHandler {
+        override fun onLeaveGame(playerId: PlayerId, entities: Entities) {
         }
     }
 }

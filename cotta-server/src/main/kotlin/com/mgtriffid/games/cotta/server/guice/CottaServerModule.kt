@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server.guice
 import com.google.inject.*
 import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.PlayersHandler
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.clock.CottaClock
@@ -50,6 +51,7 @@ class CottaServerModule(
     override fun configure(binder: Binder) {
         with(binder) {
             bind(CottaGame::class.java).toInstance(game)
+            bind(PlayersHandler::class.java).toInstance(game.playersHandler)
 
             val simulationTickProvider = AtomicLongTickProvider()
             bind(TickProvider::class.java)

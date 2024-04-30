@@ -57,7 +57,7 @@ class ServerSimulationInputProviderImpl<
             override fun playersSawTicks() = clientsInput.playersSawTicks
 
             override fun playersDiff(): PlayersDiff { // TODO wrong place obv
-                return PlayersDiff(emptySet())
+                return PlayersDiff(emptySet(), emptySet())
             }
         }
 

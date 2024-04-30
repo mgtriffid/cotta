@@ -86,7 +86,8 @@ class NetworkClientImpl<
                             playersSawTicks = snapsSerialization.deserializePlayersSawTicks(packet.playersSawTicks),
                             playersInputs = inputSerialization.deserializePlayersInputs(packet.playersInputs),
                             playersDiff = PlayersDiff(
-                                added = packet.playersDiff.added.map { PlayerId(it) }.toSet()
+                                added = packet.playersDiff.added.map { PlayerId(it) }.toSet(),
+                                removed = packet.playersDiff.removed.map { PlayerId(it) }.toSet()
                             ),
                             idSequence = packet.idSequence,
                             confirmedClientInput = ClientInputId(packet.confirmedClientInput)

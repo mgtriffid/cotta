@@ -24,4 +24,6 @@ interface CottaGame {
     val playerInputKClass: KClass<out PlayerInput>
 
     val inputProcessing: InputProcessing
+
+    val playersHandler: PlayersHandler
 }

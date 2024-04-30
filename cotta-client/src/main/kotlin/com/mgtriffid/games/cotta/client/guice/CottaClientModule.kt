@@ -20,6 +20,7 @@ import com.mgtriffid.games.cotta.client.network.NetworkClient
 import com.mgtriffid.games.cotta.client.network.impl.NetworkClientImpl
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.GLOBAL
+import com.mgtriffid.games.cotta.core.PlayersHandler
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.clock.impl.CottaClockImpl
@@ -68,6 +69,7 @@ class CottaClientModule(
 
     override fun configure() {
         bind(CottaGame::class.java).toInstance(game)
+        bind(PlayersHandler::class.java).toInstance(game.playersHandler)
         bind(CottaClientInput::class.java).toInstance(input)
         bindNetwork()
         bind(CottaClient::class.java)

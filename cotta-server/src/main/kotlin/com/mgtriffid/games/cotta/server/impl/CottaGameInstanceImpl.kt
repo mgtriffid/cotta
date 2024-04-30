@@ -72,8 +72,9 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     private fun fetchInput(): SimulationInput {
         serverSimulationInputProvider.fetch()
         val delta = serverSimulationInputProvider.getDelta()
-        val intents = network.drainEnterGameIntents()
-        val addedPlayers = intents.mapNotNull { (connectionId, _) ->
+        val etgIntents = network.drainEnterGameIntents()
+        val disconnects = network.drainDisconnects()
+        val addedPlayers = etgIntents.mapNotNull { (connectionId, _) ->
             logger.debug { "Received an intent to enter the game from connection '${connectionId.id}'" }
             if (clientsGhosts.playerByConnection[connectionId] != null) {
                 return@mapNotNull null
@@ -82,9 +83,18 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
             clientsGhosts.addGhost(playerId, connectionId)
             playerId
         }.toSet()
+        val removedPlayers = disconnects.mapNotNull { connectionId ->
+            logger.debug { "Received a disconnect from connection '${connectionId.id}'" }
+            val playerId = clientsGhosts.playerByConnection[connectionId]
+            if (playerId != null) {
+                clientsGhosts.removeGhost(playerId)
+                return@mapNotNull playerId
+            }
+            null
+        }.toSet()
         return object : SimulationInput by delta.input {
             override fun playersDiff(): PlayersDiff {
-                return PlayersDiff(addedPlayers)
+                return PlayersDiff(addedPlayers, removedPlayers)
             }
         }
     }

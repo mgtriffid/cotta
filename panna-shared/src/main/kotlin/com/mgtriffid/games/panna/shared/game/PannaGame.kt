@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.mgtriffid.games.cotta.Game
 import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
+import com.mgtriffid.games.cotta.core.PlayersHandler
 import com.mgtriffid.games.cotta.core.config.DebugConfig
 import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Issues
 import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Latency
@@ -109,6 +110,8 @@ class PannaGame : CottaGame {
     }
 
     override val inputProcessing = PannaGameInputProcessing()
+
+    override val playersHandler = PannaPlayersHandler()
 }
 
 object NetworkWithIssues : DebugConfig {

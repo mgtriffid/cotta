@@ -52,7 +52,7 @@ class SimulationTest {
                 return emptyMap()
             }
 
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
         })
         state = injector.getInstance(Key.get(CottaState::class.java, Names.named("simulation")))
         simulation = injector.getInstance(Simulation::class.java)
@@ -79,7 +79,7 @@ class SimulationTest {
             override fun playersSawTicks(): Map<PlayerId, Long> {
                 return emptyMap()
             }
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
 
@@ -106,7 +106,7 @@ class SimulationTest {
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
                 }
-                override fun playersDiff() = PlayersDiff(emptySet())
+                override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
             })
         }
@@ -144,7 +144,7 @@ class SimulationTest {
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
                 }
-                override fun playersDiff() = PlayersDiff(emptySet())
+                override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
             })
         }
@@ -162,7 +162,7 @@ class SimulationTest {
             }
 
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
 
@@ -179,7 +179,7 @@ class SimulationTest {
             }
 
             override fun playersSawTicks() = emptyMap<PlayerId, Long>()
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
 
@@ -215,7 +215,7 @@ class SimulationTest {
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
                 }
-                override fun playersDiff() = PlayersDiff(emptySet())
+                override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
             })
         }
@@ -228,7 +228,7 @@ class SimulationTest {
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
         val input2 = PlayerInputStub(
@@ -243,7 +243,7 @@ class SimulationTest {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
 
@@ -280,7 +280,7 @@ class SimulationTest {
                 override fun playersSawTicks(): Map<PlayerId, Long> {
                     return emptyMap()
                 }
-                override fun playersDiff() = PlayersDiff(emptySet())
+                override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
             })
         }
@@ -293,7 +293,7 @@ class SimulationTest {
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
         val input2 = PlayerInputStub(
@@ -308,7 +308,7 @@ class SimulationTest {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
 
@@ -332,7 +332,7 @@ class SimulationTest {
             override fun playersSawTicks(): Map<PlayerId, Long> {
                 return emptyMap()
             }
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
 
@@ -360,7 +360,7 @@ class SimulationTest {
             override fun playersSawTicks(): Map<PlayerId, Long> {
                 return emptyMap()
             }
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
 
@@ -386,7 +386,7 @@ class SimulationTest {
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
         simulation.tick(object : SimulationInput {
@@ -397,7 +397,7 @@ class SimulationTest {
             }
 
             override fun playersSawTicks() = mapOf(playerId to 2L)
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
         assertEquals(
@@ -415,7 +415,7 @@ class SimulationTest {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 
             override fun playersSawTicks() = mapOf(playerId to 3L)
-            override fun playersDiff() = PlayersDiff(emptySet())
+            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
 
         })
         assertEquals(

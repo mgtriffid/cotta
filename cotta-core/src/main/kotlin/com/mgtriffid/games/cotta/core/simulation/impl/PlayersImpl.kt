@@ -7,11 +7,19 @@ import kotlin.math.min
 
 class PlayersImpl : Players {
     private val newlyAdded = TreeMap<Long, MutableList<PlayerId>>()
+    private val newlyRemoved = TreeMap<Long, MutableList<PlayerId>>()
     private val players = mutableSetOf<PlayerId>()
 
     override fun add(playerId: PlayerId, tick: Long) {
         newlyAdded.computeIfAbsent(tick) { _ -> ArrayList() }.add(playerId)
         cleanUp(newlyAdded, tick)
+        players.add(playerId)
+    }
+
+    override fun remove(playerId: PlayerId, tick: Long) {
+        newlyRemoved.computeIfAbsent(tick) { _ -> ArrayList() }.add(playerId)
+        cleanUp(newlyRemoved, tick)
+        players.remove(playerId)
     }
 
     override fun all(): Set<PlayerId> {
@@ -20,6 +28,10 @@ class PlayersImpl : Players {
 
     override fun addedAtTick(tick: Long): List<PlayerId> {
         return newlyAdded[tick] ?: emptyList()
+    }
+
+    override fun removedAtTick(tick: Long): List<PlayerId> {
+        return newlyRemoved[tick] ?: emptyList()
     }
 
     private fun cleanUp(data: TreeMap<Long, *>, tick: Long) {

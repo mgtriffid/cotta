@@ -123,8 +123,4 @@ class SimulationsImpl @Inject constructor(
 
     private fun getLastConfirmedInput(delta: Delta) =
         delta.input.confirmedClientInput
-
-    private fun getCurrentTick(): Long {
-        return tickProvider.tick
-    }
 }

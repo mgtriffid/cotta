@@ -43,6 +43,7 @@ class GameScreen(
     override fun show() {
         val game = PannaGame()
         networkConditions = game.config.debugConfig.emulatedNetworkConditions as ConfigurableNetworkConditions
+        networkConditions.resetToDefault()
         graphics.initialize(networkConditions)
         input = PannaClientGdxInput(graphics.viewport)
         gdxAdapter = CottaGdxAdapter(game, input)
@@ -97,6 +98,7 @@ class GameScreen(
         updateResult: UpdateResult,
         delta: Float
     ) {
+        logger.info { "Update result: $updateResult" }
         when (updateResult) {
             UpdateResult.AwaitingGameState -> return
             UpdateResult.Disconnected -> gdxGame.screen = DisconnectedScreen(gdxGame)

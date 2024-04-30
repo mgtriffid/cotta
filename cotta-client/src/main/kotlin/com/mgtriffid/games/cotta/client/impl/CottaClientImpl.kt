@@ -74,6 +74,7 @@ class CottaClientImpl @Inject constructor(
 
     // Should I ask for the state more frequently than at the game's refresh rate?
     private fun tick(now: Long) {
+        logger.debug { "Tick at $now" }
         clientState.let {
             when (it) {
                 ClientState.Initial -> {

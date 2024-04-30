@@ -15,6 +15,7 @@ import com.mgtriffid.games.cotta.utils.drain
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
+import kotlin.math.log
 
 typealias KryoConnection = com.esotericsoftware.kryonet.Connection
 
@@ -37,7 +38,9 @@ class AckingCottaClientNetworkTransport(
         client = Client()
         client.kryo.registerClasses()
         configureListener()
+        logger.info { "Starting client" }
         client.start()
+        logger.info { "Client started, connecting" }
         // TODO configuration
         client.connect(5000, "127.0.0.1", 16001, 16002)
         val serializer = chunkSerializer()
@@ -50,10 +53,18 @@ class AckingCottaClientNetworkTransport(
     }
 
     private fun chunkSerializer(): ChunkSerializer {
-        val histogram = Histogram(SlidingTimeWindowArrayReservoir(2000, TimeUnit.MILLISECONDS))
+        val histogram = Histogram(
+            SlidingTimeWindowArrayReservoir(
+                2000,
+                TimeUnit.MILLISECONDS
+            )
+        )
         metricRegistry.register("sent_chunk_size", histogram)
         return MeasuringChunkSerializer(
-            KryoChunkSerializer(client.kryo),
+            KryoChunkSerializer().apply {
+                kryoSer.registerClasses()
+                kryoDeser.registerClasses()
+            },
             histogram
         )
     }

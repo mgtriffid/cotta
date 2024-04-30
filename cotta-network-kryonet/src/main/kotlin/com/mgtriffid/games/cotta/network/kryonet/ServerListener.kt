@@ -27,17 +27,17 @@ class ServerListener(
     }
 
     override fun received(connection: Connection, obj: Any?) {
-        logger.debug { "Received an incoming $obj from ${connection.id}" }
+        logger.info { "Received an incoming $obj from ${connection.id}" }
         when (obj) {
             is EnterTheGameDto -> {
                 enterGameIntents.add(Pair(ConnectionId(connection.id), deserialize(obj)))
             }
             is ClientToServerInputDto -> {
-                logger.debug { "Received ${ClientToServerInputDto::class.simpleName}" }
+                logger.info { "Received ${ClientToServerInputDto::class.simpleName}" }
                 clientToServerInputs.add(Pair(ConnectionId(connection.id), obj))
             }
             else -> {
-                logger.warn { "Received unknown object: $obj" }
+                logger.info { "Received unknown object: $obj" }
             }
         }
     }

@@ -49,7 +49,9 @@ class NetworkClientImpl<
     private val bufferLength: Int = 3
 
     override fun initialize() {
+        logger.info { "Initializing network transport" }
         networkTransport.initialize()
+        logger.info { "Network transport initialized" }
     }
 
     override fun enterGame() {

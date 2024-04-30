@@ -138,6 +138,14 @@ object NetworkWithDynamicIssues : DebugConfig {
 class ConfigurableNetworkConditions : DebugConfig.EmulatedNetworkConditions.WithIssues {
     override val sending: ConfigurableIssues = ConfigurableIssues()
     override val receiving: ConfigurableIssues = ConfigurableIssues()
+    fun resetToDefault() {
+        sending.latency.min = 0
+        sending.latency.max = 0
+        sending.packetLoss = 0.0
+        receiving.latency.min = 0
+        receiving.latency.max = 0
+        receiving.packetLoss = 0.0
+    }
 }
 
 class ConfigurableIssues : Issues {

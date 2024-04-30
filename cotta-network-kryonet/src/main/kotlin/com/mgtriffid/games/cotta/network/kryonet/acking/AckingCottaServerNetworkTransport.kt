@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.network.kryonet.acking
 
+import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryonet.Listener
 import com.esotericsoftware.kryonet.Server
 import com.google.common.cache.CacheBuilder
@@ -25,12 +26,13 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
         ConcurrentLinkedQueue<Pair<ConnectionId, EnterGameIntent>>()
     private val clientToServerInputs =
         ConcurrentLinkedQueue<Pair<ConnectionId, ClientToServerInputDto>>()
+    private val chunkSerializer = KryoChunkSerializer()
 
     private val connections = CacheBuilder.newBuilder()
         .expireAfterAccess(2, TimeUnit.MINUTES)
         .build<ConnectionId, Connection>(CacheLoader.from { connectionId ->
             Connection(
-                serializer = KryoChunkSerializer(server.kryo),
+                serializer = chunkSerializer,
                 sendChunk = { chunk ->
                     server.sendToUDP(
                         connectionId.id,
@@ -44,7 +46,7 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
     override fun initialize() {
         logger.info { "Initializing ${this::class.simpleName}..." }
         server = Server()
-        server.kryo.registerClasses()
+        listOf(server.kryo, chunkSerializer.kryoSer, chunkSerializer.kryoDeser).forEach { it.registerClasses() }
         configureListener()
         server.bind(16001, 16002)
         server.start()

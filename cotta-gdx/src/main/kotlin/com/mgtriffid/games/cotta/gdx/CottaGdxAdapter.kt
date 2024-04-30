@@ -36,5 +36,3 @@ class CottaGdxAdapter(
 
     fun metrics() = client.debugMetrics
 }
-
-private val emptyInterpolationAlphas = InterpolationAlphas(0.0f, 0.0f)

@@ -18,7 +18,9 @@ allprojects {
     apply plugin: "eclipse"
     apply plugin: "kotlin"
 
-    version = '1.0'
+    group = 'com.mgtriffid.cotta'
+    version = '0.1.0-SNAPSHOT'
+
     ext {
         appName = "cotta"
         gdxVersion = '1.12.1'
@@ -140,6 +142,18 @@ project(":panna-devutils") {
 }
 
 project(":cotta-server") {
+    apply plugin: "maven-publish"
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
     apply {
         plugin("com.google.devtools.ksp")
     }
@@ -159,10 +173,33 @@ project(":cotta-server") {
 }
 
 project(":cotta-annotations") {
+    apply plugin: "maven-publish"
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
 }
 
 project(":cotta-annotations-processor") {
+    apply plugin: "maven-publish"
 
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
     dependencies {
         implementation project(":cotta-annotations")
         implementation project(":cotta-core")
@@ -173,6 +210,19 @@ project(":cotta-annotations-processor") {
 }
 
 project(":cotta-core") {
+    apply plugin: "maven-publish"
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
+
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         api "org.slf4j:slf4j-api:2.0.3"
@@ -202,6 +252,18 @@ project(":cotta-core-test") {
 }
 
 project(":cotta-client") {
+    apply plugin: "maven-publish"
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -219,6 +281,19 @@ project(":cotta-client") {
 }
 
 project(":cotta-network-api") {
+    apply plugin: "maven-publish"
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
+
     dependencies {
         implementation project(":cotta-core")
         implementation project(":cotta-annotations")
@@ -229,7 +304,18 @@ project(":cotta-network-api") {
 }
 
 project(":cotta-network-kryonet") {
+    apply plugin: "maven-publish"
 
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
     dependencies {
         implementation project(":cotta-network-api")
         implementation project(":cotta-core")
@@ -244,6 +330,20 @@ project(":cotta-network-kryonet") {
 }
 
 project(":cotta-gdx") {
+
+    apply plugin: "maven-publish"
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
+
     dependencies {
         implementation project(":cotta-client")
         implementation project(":cotta-core")
@@ -254,6 +354,18 @@ project(":cotta-gdx") {
 }
 
 project(":cotta-utils") {
+    apply plugin: "maven-publish"
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
 }
 
 project(":panna-lobby") {

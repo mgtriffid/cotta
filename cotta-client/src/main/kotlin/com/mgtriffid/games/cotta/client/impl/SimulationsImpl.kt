@@ -47,11 +47,14 @@ class SimulationsImpl @Inject constructor(
         return lastSimulationKind
     }
 
+    override fun hopeless(): Boolean {
+        return (tickProvider.tick - authoritativeTickProvider.tick) * game.config.tickLength > 5000
+    }
+
     override fun simulate() {
         val instructions = simulationDirector.instruct(tickProvider.tick)
             .also { logger.info { "Instructions: $it" } }
         tickProvider.tick++
-//        var lastConfirmedInput: ClientInputId? = null
         instructions.forEach {
             when (it) {
                 is Instruction.IntegrateAuthoritative -> {
@@ -100,7 +103,7 @@ class SimulationsImpl @Inject constructor(
                 tick - input.tick + t
             }
         return ClientSimulationInput(
-            tick = input.tick,
+            tick = tick,
             simulationInput = object : SimulationInput {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
                     return input.simulationInput.inputForPlayers()

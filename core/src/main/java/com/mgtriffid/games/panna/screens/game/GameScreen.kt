@@ -4,10 +4,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.client.InterpolationAlphas
+import com.mgtriffid.games.cotta.client.UpdateResult
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.gdx.CottaGdxAdapter
 import com.mgtriffid.games.panna.PannaClientGdxInput
 import com.mgtriffid.games.panna.PannaGdxGame
+import com.mgtriffid.games.panna.screens.DisconnectedScreen
 import com.mgtriffid.games.panna.screens.game.graphics.GraphicsV2
 import com.mgtriffid.games.panna.shared.game.ConfigurableIssues
 import com.mgtriffid.games.panna.shared.game.ConfigurableNetworkConditions
@@ -92,9 +94,17 @@ class GameScreen(
     }
 
     private fun draw(
-        alphas: InterpolationAlphas,
+        updateResult: UpdateResult,
         delta: Float
     ) {
+        when (updateResult) {
+            UpdateResult.AwaitingGameState -> return
+            UpdateResult.Disconnected -> gdxGame.screen = DisconnectedScreen(gdxGame)
+            is UpdateResult.Running -> draw(updateResult.alphas, delta)
+        }
+    }
+
+    private fun draw(alphas: InterpolationAlphas, delta: Float) {
         when (val state = getDrawableState(alphas)) {
             DrawableState.NotReady -> return
             is DrawableState.Ready -> {

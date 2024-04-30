@@ -13,4 +13,5 @@ interface NetworkClient {
     fun deltaAvailable(tick: Long): Boolean
     fun send(inputId: ClientInputId, input: PlayerInput, sawTick: Long)
     fun enterGame()
+    fun disconnect()
 }

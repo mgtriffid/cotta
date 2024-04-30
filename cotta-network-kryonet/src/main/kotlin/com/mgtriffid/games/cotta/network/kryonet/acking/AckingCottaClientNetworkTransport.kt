@@ -70,6 +70,10 @@ class AckingCottaClientNetworkTransport(
         connection.send(obj)
     }
 
+    override fun disconnect() {
+        client.stop()
+    }
+
     private fun configureListener() {
         val listener = object : Listener {
             override fun received(kryoConnection: KryoConnection?, obj: Any?) {

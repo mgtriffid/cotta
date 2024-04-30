@@ -100,23 +100,32 @@ class CottaClientImpl @Inject constructor(
                         AuthoritativeState.NotReady -> {
                             network.enterGame()
                             if (now - it.since > STATE_WAITING_THRESHOLD) {
-                                clientState = ClientState.Disconnected
+                                disconnect()
                             }
                         }
                     }
                 }
 
-                ClientState.Disconnected -> {
-                    // TODO
-                }
-
                 is ClientState.Running -> {
                     network.fetch()
-                    run(now)
-                    clientState = ClientState.Running(it.currentTick + 1)
+                    if (simulations.hopeless()) {
+                        disconnect()
+                    } else {
+                        run(now)
+                        clientState = ClientState.Running(it.currentTick + 1)
+                    }
+                }
+
+                is ClientState.Disconnected -> {
+                    // do nothing
                 }
             }
         }
+    }
+
+    private fun disconnect() {
+        clientState = ClientState.Disconnected
+        network.disconnect()
     }
 
     private fun run(now: Long) {

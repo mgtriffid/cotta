@@ -56,6 +56,10 @@ class NetworkClientImpl<
         networkTransport.sendEnterGameIntent()
     }
 
+    override fun disconnect() {
+        networkTransport.disconnect()
+    }
+
     override fun fetch() {
         networkTransport.drainIncomingData().forEach { packet ->
             when (packet) {

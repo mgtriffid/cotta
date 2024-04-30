@@ -6,6 +6,7 @@ interface Simulations {
     fun simulate()
     fun getLastConfirmedInput(): ClientInputId
     fun getLastSimulationKind(): SimulationKind
+    fun hopeless(): Boolean
     enum class SimulationKind {
         AUTHORITATIVE,
         GUESSED,

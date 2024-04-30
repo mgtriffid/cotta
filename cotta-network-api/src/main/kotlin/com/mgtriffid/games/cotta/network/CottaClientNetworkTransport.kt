@@ -10,4 +10,6 @@ interface CottaClientNetworkTransport {
     fun drainIncomingData(): Collection<ServerToClientDto>
 
     fun send(obj: Any)
+
+    fun disconnect()
 }

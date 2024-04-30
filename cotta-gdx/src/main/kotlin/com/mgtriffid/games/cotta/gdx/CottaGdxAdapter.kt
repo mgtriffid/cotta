@@ -4,6 +4,8 @@ import com.mgtriffid.games.cotta.client.CottaClient
 import com.mgtriffid.games.cotta.client.CottaClientFactory
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.client.InterpolationAlphas
+import com.mgtriffid.games.cotta.client.UpdateResult
+import com.mgtriffid.games.cotta.client.impl.CottaClientImpl
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.utils.now
@@ -22,15 +24,10 @@ class CottaGdxAdapter(
         client = CottaClientFactory().create(game, input)
     }
 
-    operator fun invoke() : InterpolationAlphas {
+    operator fun invoke() : UpdateResult {
         input.accumulate()
 
-        return client.update(now()).let { when (it) {
-            is com.mgtriffid.games.cotta.client.UpdateResult.Running -> it.alphas
-            else -> emptyInterpolationAlphas
-        } }.also {
-            logger.info { "Alpha for drawable state is $it" }
-        }
+        return client.update(now())
     }
 
     fun getDrawableState(alphas: InterpolationAlphas, components: List<KClass<out Component<*>>>): DrawableState {

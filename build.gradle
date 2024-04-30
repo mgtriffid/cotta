@@ -269,7 +269,7 @@ project(":cotta-client") {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
         implementation project(":cotta-network-api")
-        implementation project(":cotta-network-kryonet") // TODO questionnable
+        implementation project(":cotta-network-kryonet") // TODO questionable
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
         implementation "com.google.inject:guice:7.0.0"

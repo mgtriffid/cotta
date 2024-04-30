@@ -123,7 +123,10 @@ class CottaServerModule(
     @Provides
     @Singleton
     fun provideCottaServerNetwork(): CottaServerNetworkTransport {
-        val network = AckingCottaServerNetworkTransport()
+        val network = AckingCottaServerNetworkTransport(
+            game.config.network.ports.tcp,
+            game.config.network.ports.udp
+        )
         network.initialize()
         return network
     }

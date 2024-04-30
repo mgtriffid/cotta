@@ -277,7 +277,10 @@ class CottaClientModule(
         bind(CottaClientNetworkTransport::class.java)
             .toInstance(
                 KryonetCottaTransportFactory(metricRegistry).createClient(
-                    game.config.debugConfig.emulatedNetworkConditions
+                    game.config.debugConfig.emulatedNetworkConditions,
+                    game.config.network.ports.tcp,
+                    game.config.network.ports.udp,
+                    game.config.network.serverHost
                 )
             )
     }

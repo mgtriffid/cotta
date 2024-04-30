@@ -3,8 +3,26 @@ package com.mgtriffid.games.cotta.core.config
 
 interface CottaConfig {
     val tickLength: Long
+    val network: NetworkConfig
+        get() = object : NetworkConfig {
+            override val ports = object : NetworkConfig.Ports {
+                override val tcp = 16001
+                override val udp = 16002
+            }
+            override val serverHost = "127.0.0.1"
+        }
     val debugConfig: DebugConfig
-        get() = object : DebugConfig { }
+        get() = object : DebugConfig {}
+}
+
+interface NetworkConfig {
+    val ports: Ports
+    val serverHost: String
+
+    interface Ports {
+        val tcp: Int
+        val udp: Int
+    }
 }
 
 interface DebugConfig {

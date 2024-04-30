@@ -20,7 +20,10 @@ private val logger = KotlinLogging.logger {}
 
 // TODO more flexible configuration: allow larger datagrams through config,
 //  allow more chunks than 256, etc.
-class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
+class AckingCottaServerNetworkTransport(
+    private val tcpPort: Int,
+    private val udpPort: Int
+) : CottaServerNetworkTransport {
     private lateinit var server: Server
     private val enterGameIntents =
         ConcurrentLinkedQueue<Pair<ConnectionId, EnterGameIntent>>()
@@ -49,7 +52,7 @@ class AckingCottaServerNetworkTransport : CottaServerNetworkTransport {
         server = Server()
         listOf(server.kryo, chunkSerializer.kryoSer, chunkSerializer.kryoDeser).forEach { it.registerClasses() }
         configureListener()
-        server.bind(16001, 16002)
+        server.bind(tcpPort, udpPort)
         server.start()
     }
 

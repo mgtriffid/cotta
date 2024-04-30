@@ -24,8 +24,11 @@ const val DATAGRAM_SIZE = 512
 private val logger = KotlinLogging.logger {}
 
 class AckingCottaClientNetworkTransport(
-    private val sender: Sender, // TODO make use of
+    private val sender: Sender,
     private val saver: Saver,
+    private val tcpPort: Int,
+    private val udpPort: Int,
+    private val serverHost: String,
     private val metricRegistry: MetricRegistry
 ) : CottaClientNetworkTransport {
 

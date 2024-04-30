@@ -14,10 +14,22 @@ import com.mgtriffid.games.cotta.network.kryonet.client.SimpleSaver
 import com.mgtriffid.games.cotta.network.kryonet.client.SimpleSender
 
 class KryonetCottaTransportFactory(private val metricRegistry: MetricRegistry) {
-    fun createClient(emulatedNetworkConditions: DebugConfig.EmulatedNetworkConditions): CottaClientNetworkTransport {
+    fun createClient(
+        emulatedNetworkConditions: DebugConfig.EmulatedNetworkConditions,
+        tcpPort: Int,
+        udpPort: Int,
+        serverHost: String
+    ): CottaClientNetworkTransport {
         return when (emulatedNetworkConditions) {
             Perfect -> {
-                AckingCottaClientNetworkTransport(SimpleSender(), SimpleSaver(), metricRegistry)
+                AckingCottaClientNetworkTransport(
+                    SimpleSender(),
+                    SimpleSaver(),
+                    tcpPort,
+                    udpPort,
+                    serverHost,
+                    metricRegistry
+                )
             }
             is WithIssues -> {
                 AckingCottaClientNetworkTransport(
@@ -26,13 +38,12 @@ class KryonetCottaTransportFactory(private val metricRegistry: MetricRegistry) {
                         impl = SimpleSender()
                     ),
                     saver = LaggingSaver(emulatedNetworkConditions.receiving, SimpleSaver()),
+                    tcpPort = tcpPort,
+                    udpPort = udpPort,
+                    serverHost = serverHost,
                     metricRegistry = metricRegistry
                 )
             }
         }
-    }
-
-    fun createServer() : CottaServerNetworkTransport {
-        return AckingCottaServerNetworkTransport()
     }
 }

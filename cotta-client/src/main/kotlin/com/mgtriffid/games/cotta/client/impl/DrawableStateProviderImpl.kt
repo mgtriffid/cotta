@@ -5,7 +5,6 @@ import com.mgtriffid.games.cotta.client.DrawableEffects
 import com.mgtriffid.games.cotta.client.DrawableState
 import com.mgtriffid.games.cotta.client.DrawableStateProvider
 import com.mgtriffid.games.cotta.client.InterpolationAlphas
-import com.mgtriffid.games.cotta.client.LastClientTickProcessedByServer
 import com.mgtriffid.games.cotta.client.PredictionSimulation
 import com.mgtriffid.games.cotta.client.interpolation.Interpolators
 import com.mgtriffid.games.cotta.core.GLOBAL

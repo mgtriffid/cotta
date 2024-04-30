@@ -110,9 +110,6 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
         bind(Deltas::class.java).to(DeltasImpl::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(LastClientTickProcessedByServer::class.java).toInstance(
-            LastClientTickProcessedByServerImpl(0L)
-        )
         bind(CottaState::class.java).annotatedWith(Names.named("simulation"))
             .to(CottaStateImpl::class.java)
             .`in`(Scopes.SINGLETON)

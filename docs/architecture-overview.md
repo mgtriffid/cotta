@@ -2,7 +2,7 @@
 Cotta does not make assumptions about the main framework or library that you use
 for your game, but was built with LibGDX in mind.
 
-![Cotta architecture](../docs/images/architecture-overview.jpg)
+![Cotta architecture](images/architecture-overview.jpg)
 
 ## Roles
 - LibGDX (or similar) is used to render the game and handle raw user input

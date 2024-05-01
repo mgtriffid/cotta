@@ -165,8 +165,6 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
         bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(ClientPlayers::class.java).to(ClientPlayersImpl::class.java)
-            .`in`(Scopes.SINGLETON)
         bind(InputProcessing::class.java).toInstance(game.inputProcessing)
 
         bind(PredictionSimulation::class.java).to(PredictionSimulationImpl::class.java)

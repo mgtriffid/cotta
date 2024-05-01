@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.core.registry.impl
 
-import com.mgtriffid.games.cotta.ComponentData
+import com.mgtriffid.games.cotta.core.annotations.ComponentData
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentKey
 import com.mgtriffid.games.cotta.core.registry.ComponentSpec

@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.core.test.workload
 
-import com.mgtriffid.games.cotta.Game
+import com.mgtriffid.games.cotta.core.annotations.Game
 import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.PlayersHandler
@@ -12,7 +12,6 @@ import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
-import kotlin.reflect.KClass
 
 @Game
 object GameStub : CottaGame {

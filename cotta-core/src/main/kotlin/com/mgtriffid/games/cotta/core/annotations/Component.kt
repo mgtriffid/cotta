@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta
+package com.mgtriffid.games.cotta.core.annotations
 
 import java.lang.annotation.Inherited
 

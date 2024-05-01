@@ -101,7 +101,6 @@ project(":panna-shared") {
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
-        implementation project(":cotta-annotations")
         implementation project(":cotta-client")
         implementation "org.mapeditor:libtiled:1.4.2"
         implementation "javax.xml.bind:jaxb-api:2.3.1"
@@ -161,7 +160,6 @@ project(":cotta-server") {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
         implementation project(":cotta-core")
         implementation project(":cotta-utils")
-        implementation project(":cotta-annotations")
         implementation project(":cotta-network-api")
         implementation project(":cotta-network-kryonet") // TODO not needed directly
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
@@ -169,21 +167,6 @@ project(":cotta-server") {
         ksp project(":cotta-annotations-processor")
 
         implementation "com.google.inject:guice:7.0.0"
-    }
-}
-
-project(":cotta-annotations") {
-    apply plugin: "maven-publish"
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-            }
-        }
-        repositories {
-            mavenLocal()
-        }
     }
 }
 
@@ -201,7 +184,6 @@ project(":cotta-annotations-processor") {
         }
     }
     dependencies {
-        implementation project(":cotta-annotations")
         implementation project(":cotta-core")
         implementation "com.google.devtools.ksp:symbol-processing-api:1.7.10-1.0.6"
         implementation "com.squareup:kotlinpoet:1.16.0"
@@ -229,7 +211,6 @@ project(":cotta-core") {
         api "ch.qos.logback:logback-classic:1.4.4"
         api project(":cotta-utils")
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-        implementation project(":cotta-annotations")
         implementation "com.esotericsoftware:kryo:5.0.0"
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
         implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
@@ -245,7 +226,6 @@ project(":cotta-core-test") {
     dependencies {
         implementation project(":cotta-core")
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-        implementation project(":cotta-annotations")
         ksp project(":cotta-annotations-processor")
         implementation "com.esotericsoftware:kryo:5.0.0"
     }
@@ -296,7 +276,6 @@ project(":cotta-network-api") {
 
     dependencies {
         implementation project(":cotta-core")
-        implementation project(":cotta-annotations")
         implementation "com.google.code.gson:gson:$gsonVersion"
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"

@@ -65,9 +65,9 @@ class PredictionSimulationImpl @Inject constructor(
         }
     }
 
-    override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
-        logger.info { "Registering ${systemClass.simpleName} for prediction simulation" }
-        systemInvokers.add(invokersFactory.createInvoker(systemClass))
+    override fun registerSystem(system: CottaSystem) {
+        logger.info { "Registering ${system::class.simpleName} for prediction simulation" }
+        systemInvokers.add(invokersFactory.createInvoker(system))
     }
 
     override fun getLocalPredictedEntities(): Collection<Entity> {

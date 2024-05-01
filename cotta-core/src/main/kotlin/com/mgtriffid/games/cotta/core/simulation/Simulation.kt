@@ -5,5 +5,5 @@ import kotlin.reflect.KClass
 
 interface Simulation {
     fun tick(input: SimulationInput)
-    fun <T : CottaSystem> registerSystem(systemClass: KClass<T>)
+    fun registerSystem(system: CottaSystem)
 }

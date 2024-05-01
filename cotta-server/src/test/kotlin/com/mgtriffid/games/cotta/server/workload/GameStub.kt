@@ -13,12 +13,12 @@ import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
+import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.server.workload.components.PlayerControlledStubComponent
-import kotlin.reflect.KClass
 
 @Game
 class GameStub : CottaGame {
-    override val serverSystems: List<KClass<*>> = emptyList()
+    override val systems: List<CottaSystem> = emptyList()
     override val nonPlayerInputProvider = object : NonPlayerInputProvider {
         override fun input(entities: Entities) = object : NonPlayerInput {}
     }

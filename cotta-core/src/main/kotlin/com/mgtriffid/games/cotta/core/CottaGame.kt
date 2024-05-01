@@ -5,12 +5,13 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.input.PlayerInput
+import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import kotlin.reflect.KClass
 
 // Implement this to configure your actual game
 interface CottaGame {
 
-    val serverSystems: List<KClass<*>>
+    val systems: List<CottaSystem>
 
     val nonPlayerInputProvider: NonPlayerInputProvider
     // how to start

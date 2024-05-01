@@ -16,9 +16,7 @@ class PredictionInvokersFactory @Inject constructor(
     private val effectsConsumerInvoker: PredictionEffectsConsumerSystemInvoker,
     private val entityProcessingInvoker: PredictionEntityProcessingSystemInvoker,
 ) : InvokersFactory {
-    override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, CottaSystem> {
-        val ctor = systemClass.getConstructor()
-        val system: CottaSystem = ctor.call()
+    override fun createInvoker(system: CottaSystem): Pair<SystemInvoker<*>, CottaSystem> {
         return when (system) {
 
             is EffectsConsumerSystem<*> -> {

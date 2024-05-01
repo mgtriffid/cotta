@@ -61,7 +61,7 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     }
 
     private fun registerSystems() {
-        game.serverSystems.forEach { serverSimulation.registerSystem(it as KClass<CottaSystem>) }
+        game.systems.forEach(serverSimulation::registerSystem)
     }
 
     private fun tick() {

@@ -6,5 +6,5 @@ import kotlin.reflect.KClass
 // TODO consider having different factories as different interfaces,
 //      for they are solving different problems
 interface InvokersFactory {
-    fun <T: CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, CottaSystem>
+    fun createInvoker(system: CottaSystem): Pair<SystemInvoker<*>, CottaSystem>
 }

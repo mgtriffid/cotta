@@ -32,24 +32,24 @@ import kotlin.concurrent.Volatile
 
 @Game
 class PannaGame : CottaGame {
-    override val serverSystems = listOf(
-        WalkingInputProcessingSystem::class,
-        SwitchWeaponSystem::class,
-        ShootingProcessingSystem::class,
-        WalkingEffectConsumerSystem::class,
-        JumpEffectConsumerSystem::class,
-        MovementSystem::class,
-        ShootEffectConsumerSystem::class,
-        ShootBulletEffectConsumer::class,
-        MovementEffectConsumerSystem::class,
-        CoyoteSystem::class,
-        GravitySystem::class,
-        JoinBattleEffectConsumerSystem::class,
-        BulletCollisionSystem::class,
-        BulletHitsDudeEffectConsumer::class,
-        RailgunShotEffectConsumerSystem::class,
-        RailgunHitsDudeEffectConsumer::class,
-        DeathSystem::class,
+    override val systems = listOf(
+        WalkingInputProcessingSystem(),
+        SwitchWeaponSystem(),
+        ShootingProcessingSystem(),
+        WalkingEffectConsumerSystem(),
+        JumpEffectConsumerSystem(),
+        MovementSystem(),
+        ShootEffectConsumerSystem(),
+        ShootBulletEffectConsumer(),
+        MovementEffectConsumerSystem(),
+        CoyoteSystem(),
+        GravitySystem(),
+        JoinBattleEffectConsumerSystem(),
+        BulletCollisionSystem(),
+        BulletHitsDudeEffectConsumer(),
+        RailgunShotEffectConsumerSystem(),
+        RailgunHitsDudeEffectConsumer(),
+        DeathSystem(),
     )
 
     override fun initializeServerState(entities: Entities) {

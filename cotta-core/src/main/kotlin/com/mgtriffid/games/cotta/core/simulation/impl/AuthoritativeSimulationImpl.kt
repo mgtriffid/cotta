@@ -71,7 +71,7 @@ class AuthoritativeSimulationImpl @Inject constructor(
         }
     }
 
-    override fun <T : CottaSystem> registerSystem(systemClass: KClass<T>) {
-        systemInvokers.add(invokersFactory.createInvoker(systemClass))
+    override fun registerSystem(system: CottaSystem) {
+        systemInvokers.add(invokersFactory.createInvoker(system))
     }
 }

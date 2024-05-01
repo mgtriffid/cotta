@@ -17,9 +17,7 @@ class SimulationInvokersFactory @Inject constructor(
     private val entityProcessingSystemInvoker: EntityProcessingSystemInvoker,
 ) : InvokersFactory {
 
-    override fun <T : CottaSystem> createInvoker(systemClass: KClass<T>): Pair<SystemInvoker<*>, T> {
-        val ctor = systemClass.getConstructor()
-        val system = ctor.call()
+    override fun createInvoker(system: CottaSystem): Pair<SystemInvoker<*>, CottaSystem> {
         return when (system) {
             is EntityProcessingSystem -> {
                 // normal stuff, uses LatestEntities and lagCompensatingEffectBus (why not normal tho)
@@ -27,7 +25,7 @@ class SimulationInvokersFactory @Inject constructor(
             }
 
             is EffectsConsumerSystem<*> -> if (
-                systemClass.hasAnnotation<LagCompensated>()
+                system::class.hasAnnotation<LagCompensated>()
             ) {
                 Pair(lagCompensatingEffectsConsumerInvoker, system)
             } else {

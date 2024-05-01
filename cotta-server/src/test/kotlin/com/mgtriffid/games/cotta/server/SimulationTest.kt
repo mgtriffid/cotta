@@ -66,8 +66,8 @@ class SimulationTest {
         val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(createHealthTestComponent(0))
-        simulation.registerSystem(RegenerationTestSystem::class)
-        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
+        simulation.registerSystem(RegenerationTestSystem())
+        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem())
 
         simulation.tick(object : SimulationInput {
 
@@ -94,8 +94,8 @@ class SimulationTest {
         val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(createHealthTestComponent(0))
-        simulation.registerSystem(RegenerationTestSystem::class)
-        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
+        simulation.registerSystem(RegenerationTestSystem())
+        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem())
         repeat(2) {
             simulation.tick(object : SimulationInput {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -128,10 +128,10 @@ class SimulationTest {
 
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
-        simulation.registerSystem(PlayerProcessingTestSystem::class)
-        simulation.registerSystem(ShotFiredTestEffectConsumerSystem::class)
-        simulation.registerSystem(MovementTestSystem::class)
-        simulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
+        simulation.registerSystem(PlayerProcessingTestSystem())
+        simulation.registerSystem(ShotFiredTestEffectConsumerSystem())
+        simulation.registerSystem(MovementTestSystem())
+        simulation.registerSystem(EntityShotTestEffectConsumerSystem())
 
         repeat(2) {
             simulation.tick(object : SimulationInput {
@@ -201,10 +201,10 @@ class SimulationTest {
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
         val input = PlayerInputStub(aim = 4, shoot = true)
-        simulation.registerSystem(PlayerProcessingTestSystem::class)
-        simulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer::class)
-        simulation.registerSystem(MovementTestSystem::class)
-        simulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
+        simulation.registerSystem(PlayerProcessingTestSystem())
+        simulation.registerSystem(LagCompensatedShotFiredTestEffectConsumer())
+        simulation.registerSystem(MovementTestSystem())
+        simulation.registerSystem(EntityShotTestEffectConsumerSystem())
         repeat(6) {
             simulation.tick(object : SimulationInput {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -265,11 +265,11 @@ class SimulationTest {
         val damageDealer = state.entities().create(ownedBy = Entity.OwnedBy.Player(playerId))
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
         val input = PlayerInputStub(aim = 4, shoot = true)
-        simulation.registerSystem(PlayerProcessingTestSystem::class)
-        simulation.registerSystem(StepOneShotFiredTestEffectConsumerSystem::class)
-        simulation.registerSystem(LagCompensatedActualShotFiredTestEffectConsumer::class)
-        simulation.registerSystem(MovementTestSystem::class)
-        simulation.registerSystem(EntityShotTestEffectConsumerSystem::class)
+        simulation.registerSystem(PlayerProcessingTestSystem())
+        simulation.registerSystem(StepOneShotFiredTestEffectConsumerSystem())
+        simulation.registerSystem(LagCompensatedActualShotFiredTestEffectConsumer())
+        simulation.registerSystem(MovementTestSystem())
+        simulation.registerSystem(EntityShotTestEffectConsumerSystem())
         repeat(6) {
             simulation.tick(object : SimulationInput {
                 override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -321,7 +321,7 @@ class SimulationTest {
     @Test
     fun `should invoke systems`() {
         state.entities().create()
-        simulation.registerSystem(BlankTestSystem::class)
+        simulation.registerSystem(BlankTestSystem())
 
         simulation.tick(object : SimulationInput {
             override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
@@ -347,8 +347,8 @@ class SimulationTest {
         val entity = state.entities().create()
         val entityId = entity.id
         entity.addComponent(createHealthTestComponent(0))
-        simulation.registerSystem(RegenerationTestSystem::class)
-        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem::class)
+        simulation.registerSystem(RegenerationTestSystem())
+        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem())
 
         simulation.tick(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
@@ -377,7 +377,7 @@ class SimulationTest {
             ownedBy = Entity.OwnedBy.Player(playerId)
         )
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
-        simulation.registerSystem(PlayerProcessingTestSystem::class)
+        simulation.registerSystem(PlayerProcessingTestSystem())
         simulationInputHolder.set(object : SimulationInput {
             override fun nonPlayerInput() = object: NonPlayerInput {}
 

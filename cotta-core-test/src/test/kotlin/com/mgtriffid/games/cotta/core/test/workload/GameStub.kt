@@ -11,11 +11,12 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.SimulationInput
+import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import kotlin.reflect.KClass
 
 @Game
 object GameStub : CottaGame {
-    override val serverSystems: List<KClass<*>> = emptyList()
+    override val systems = emptyList<CottaSystem>()
     override val nonPlayerInputProvider: NonPlayerInputProvider = TODO()
     override fun initializeServerState(entities: Entities) {
     }

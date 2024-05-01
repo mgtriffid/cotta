@@ -62,8 +62,8 @@ class CottaClientFactory {
         guessedSimulation: Simulation
     ) {
 
-        game.serverSystems.forEach { system ->
-            clientSimulation.registerSystem(system as KClass<CottaSystem>)
+        game.systems.forEach { system ->
+            clientSimulation.registerSystem(system)
             guessedSimulation.registerSystem(system)
             if (isPredicted(system)) {
                 predictionSimulation.registerSystem(system)
@@ -71,7 +71,7 @@ class CottaClientFactory {
         }
     }
 
-    private fun isPredicted(system: KClass<CottaSystem>): Boolean {
-        return system.hasAnnotation<Predicted>()
+    private fun isPredicted(system: CottaSystem): Boolean {
+        return system::class.hasAnnotation<Predicted>()
     }
 }

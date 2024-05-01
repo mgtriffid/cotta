@@ -91,10 +91,6 @@ class PannaGame : CottaGame {
         block.addComponent(createColliderComponent(16, 16))
     }
 
-    override val nonPlayerInputProvider = object : NonPlayerInputProvider {
-        override fun input(entities: Entities) = object : NonPlayerInput {}
-    }
-
     override val config: CottaConfig = object : CottaConfig {
         override val tickLength: Long = 50L
         override val debugConfig = NetworkWithDynamicIssues

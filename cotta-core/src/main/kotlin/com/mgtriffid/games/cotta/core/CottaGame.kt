@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.core
 import com.mgtriffid.games.cotta.core.config.CottaConfig
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.input.InputProcessing
+import com.mgtriffid.games.cotta.core.input.NoOpNonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
@@ -14,6 +15,7 @@ interface CottaGame {
     val systems: List<CottaSystem>
 
     val nonPlayerInputProvider: NonPlayerInputProvider
+        get() = NoOpNonPlayerInputProvider
     // how to start
     fun initializeServerState(entities: Entities)
 

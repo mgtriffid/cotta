@@ -18,8 +18,12 @@ allprojects {
     apply plugin: "eclipse"
     apply plugin: "kotlin"
 
+    java {
+        withSourcesJar()
+    }
+
     group = 'com.mgtriffid.cotta'
-    version = '0.1.0-SNAPSHOT'
+    version = '0.1.0'
 
     ext {
         appName = "cotta"

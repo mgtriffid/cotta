@@ -16,7 +16,6 @@ import com.mgtriffid.games.cotta.core.systems.CottaSystem
 @Game
 object GameStub : CottaGame {
     override val systems = emptyList<CottaSystem>()
-    override val nonPlayerInputProvider: NonPlayerInputProvider = TODO()
     override fun initializeServerState(entities: Entities) {
     }
 

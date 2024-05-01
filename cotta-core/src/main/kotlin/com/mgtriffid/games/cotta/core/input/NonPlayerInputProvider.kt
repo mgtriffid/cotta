@@ -8,3 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 interface NonPlayerInputProvider {
     fun input(entities: Entities): NonPlayerInput
 }
+
+object NoOpNonPlayerInputProvider : NonPlayerInputProvider {
+    override fun input(entities: Entities): NonPlayerInput = NonPlayerInput.Blank
+}

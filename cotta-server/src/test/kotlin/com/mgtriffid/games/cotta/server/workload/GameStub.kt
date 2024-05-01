@@ -19,9 +19,6 @@ import com.mgtriffid.games.cotta.server.workload.components.PlayerControlledStub
 @Game
 class GameStub : CottaGame {
     override val systems: List<CottaSystem> = emptyList()
-    override val nonPlayerInputProvider = object : NonPlayerInputProvider {
-        override fun input(entities: Entities) = object : NonPlayerInput {}
-    }
     override val inputProcessing = InputProcessingStub()
     override fun initializeServerState(entities: Entities) {}
     override fun initializeStaticState(entities: Entities) {}

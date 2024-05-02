@@ -7,8 +7,8 @@ It is well known that netcode is a hard part of game development, but there are
 not too many libraries for Java ecosystem. Cotta fills this gap.
 
 # For whom?
-Cotta **does suit** needs of Java game developers who build fast room-based
-multiplayer games:
+Cotta fits needs of Java game developers who build fast room-based multiplayer
+games:
 - Shooters, be it top-down or first-person: those are games where instant input
 feedback on client is crucial, as well as lag compensation for hitscan weapons
 - MOBAs, which are not very different from top-down shooters if we talk about

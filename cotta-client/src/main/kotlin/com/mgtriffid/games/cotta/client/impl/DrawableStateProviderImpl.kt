@@ -62,11 +62,13 @@ class DrawableStateProviderImpl @Inject constructor(
         // TODO consider possible edge cases when the number of ticks we're ahead of server changes due to changing
         //  network conditions.
         val effects = if (lastTickEffectsWereReturned < globalTickProvider.tick) {
-            logger.debug { "Simulation tick: ${globalTickProvider.tick}" }
+            logger.debug { "Global tick: ${globalTickProvider.tick}" }
             logger.debug { "Prediction tick: ${predictionTickProvider.tick}" }
+            logger.debug { "Simulation tick: ${simulationTickProvider.tick}" }
             lastTickEffectsWereReturned = globalTickProvider.tick
             val predictedEffects = predictionSimulation.effectBus.effects().map(::DrawableEffect)
-            val previouslyPredictedEffects = previouslyPredicted[predictionTickProvider.tick + 1] // TODO why +1?
+            logger.debug { "Predicted effects: $predictedEffects" }
+            val previouslyPredictedEffects = previouslyPredicted[globalTickProvider.tick]
             logger.debug { "previouslyPredictedEffects: $previouslyPredictedEffects" }
             val real = effectBus.effects().map(::DrawableEffect)
             logger.debug { "Real effects: $real" }
@@ -75,7 +77,7 @@ class DrawableStateProviderImpl @Inject constructor(
                 override val predicted: Collection<DrawableEffect> = predictedEffects
                 override val mispredicted: Collection<DrawableEffect> = emptyList()
             }
-            previouslyPredicted[globalTickProvider.tick] = predictedEffects
+            previouslyPredicted[predictionTickProvider.tick] = predictedEffects
             cleanUpOldPredictedEffects()
             effects
         } else {

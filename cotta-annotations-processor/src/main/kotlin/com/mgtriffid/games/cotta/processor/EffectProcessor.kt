@@ -133,7 +133,7 @@ class EffectProcessor(
             .toList()
 
     private fun writeRegistry(effects: List<KSClassDeclaration>, game: KSClassDeclaration) {
-        if (effects.isEmpty()) return
+//        if (effects.isEmpty()) return
         val pkg = game.packageName.asString()
         val gameName = game.simpleName.asString()
         val registryClassName = "$gameName$EFFECTS_CLASS_SUFFIX"

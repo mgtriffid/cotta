@@ -162,7 +162,7 @@ project(":cotta-server") {
     }
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-        implementation project(":cotta-core")
+        api project(":cotta-core")
         implementation project(":cotta-utils")
         implementation project(":cotta-network-api")
         implementation project(":cotta-network-kryonet") // TODO not needed directly
@@ -251,7 +251,7 @@ project(":cotta-client") {
 
     dependencies {
         api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-        implementation project(":cotta-core")
+        api project(":cotta-core")
         implementation project(":cotta-network-api")
         implementation project(":cotta-network-kryonet") // TODO questionable
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
@@ -328,8 +328,8 @@ project(":cotta-gdx") {
     }
 
     dependencies {
-        implementation project(":cotta-client")
-        implementation project(":cotta-core")
+        api project(":cotta-client")
+        api project(":cotta-core")
 
         // TODO this is not needed at all, better to remove this dependency
         implementation "io.dropwizard.metrics:metrics-core:$metricsVersion"

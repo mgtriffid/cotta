@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.client.interpolation
 
-import com.mgtriffid.games.cotta.client.annotation.Interpolated
+import com.mgtriffid.games.cotta.core.annotations.Interpolated
 import com.mgtriffid.games.cotta.core.entities.Component
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass

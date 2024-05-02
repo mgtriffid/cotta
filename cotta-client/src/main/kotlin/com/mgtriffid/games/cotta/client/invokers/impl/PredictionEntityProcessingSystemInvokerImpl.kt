@@ -23,6 +23,7 @@ class PredictionEntityProcessingSystemInvokerImpl @Inject constructor(
             .forEach { process(it, system) }
     }
 
+    // TODO allow custom prediction culling algorithms, this is too simplistic.
     private fun Entity.shouldBePredicted() = ownedBy == Entity.OwnedBy.Player(localPlayer.playerId)
 
     private fun process(entity: Entity, system: EntityProcessingSystem) {

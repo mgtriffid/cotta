@@ -54,6 +54,7 @@ class AuthoritativeSimulationImpl @Inject constructor(
     private fun processPlayersDiff(input: SimulationInput) {
         input.playersDiff().added.forEach { playerId ->
             players.add(playerId, simulationTick.tick)
+            playersHandler.onEnterGame(playerId, state.entities(simulationTick.tick))
         }
         input.playersDiff().removed.forEach { playerId ->
             players.remove(playerId, simulationTick.tick)

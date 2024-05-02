@@ -22,7 +22,9 @@ import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.toEntityId
 import kotlin.reflect.KClass
 
-class BytesInputSerialization(val inputKClass: KClass<out PlayerInput>) : InputSerialization<BytesInputRecipe> {
+class BytesInputSerialization(
+    private val inputKClass: KClass<out PlayerInput>
+) : InputSerialization<BytesInputRecipe> {
     // TODO this is a potential source of confusion for someone who digs into the code.
     //      Like, why are there so many instances of Kryo, and why are they all being registered with different classes?
     private val kryo = Kryo()
@@ -36,6 +38,7 @@ class BytesInputSerialization(val inputKClass: KClass<out PlayerInput>) : InputS
         kryo.register(BytesInputRecipeDto::class.java)
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(ArrayList::class.java, CollectionSerializer<ArrayList<Any?>>())
+        // TODO support enums or other kinds of non-primitive values properly
         kryo.register(inputKClass.java, DataClassSerializer(inputKClass))
     }
 

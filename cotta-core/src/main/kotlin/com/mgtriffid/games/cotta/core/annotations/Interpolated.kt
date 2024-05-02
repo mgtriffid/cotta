@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.client.annotation
+package com.mgtriffid.games.cotta.core.annotations
 
 @Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)

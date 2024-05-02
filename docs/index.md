@@ -34,12 +34,11 @@ responsiveness and smoothness
 - [Quick start](quick-start.md)
 - [Architecture overview](architecture-overview.md)
 - [User guide](user-guide.md)
-- []
 
 # Inspired by
-- [Quantum](https://www.photonengine.com/quantum#)
-- Glenn Fielder's [articles](https://gafferongames.com/)
 - A GDC... No, **THE** GDC [talk by Blizzard about Overwatch netcode](https://www.youtube.com/watch?v=W3aieHjyNvw)
+- [Photon Quantum](https://www.photonengine.com/quantum#)
+- Glenn Fielder's [articles](https://gafferongames.com/)
 
 # Features
 - Built-in Entity-Component-System engine

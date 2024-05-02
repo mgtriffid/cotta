@@ -17,10 +17,10 @@ interface CottaGame {
     val nonPlayerInputProvider: NonPlayerInputProvider
         get() = NoOpNonPlayerInputProvider
     // how to start
-    fun initializeServerState(entities: Entities)
+    fun initializeServerState(entities: Entities) {}
 
     // TODO make it not possible to add input components, ensure it only operates on static part, etc. More safety.
-    fun initializeStaticState(entities: Entities)
+    fun initializeStaticState(entities: Entities) {}
 
     val config: CottaConfig
 

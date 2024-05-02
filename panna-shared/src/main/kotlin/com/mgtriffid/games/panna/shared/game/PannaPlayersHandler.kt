@@ -7,6 +7,11 @@ import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 
 class PannaPlayersHandler : PlayersHandler {
+
+    override fun onEnterGame(playerId: PlayerId, entities: Entities) {
+
+    }
+
     override fun onLeaveGame(playerId: PlayerId, entities: Entities) {
         val entitiesToRemove = entities.all().filter {
             it.hasComponent(SteamManPlayerComponent::class) && it.ownedBy == Entity.OwnedBy.Player(playerId)

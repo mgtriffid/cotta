@@ -53,7 +53,7 @@ class SimulationsImpl @Inject constructor(
 
     override fun simulate() {
         val instructions = simulationDirector.instruct(tickProvider.tick)
-            .also { logger.info { "Instructions: $it" } }
+            .also { logger.debug { "Instructions: $it" } }
         tickProvider.tick++
         instructions.forEach {
             when (it) {

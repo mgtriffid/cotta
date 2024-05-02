@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import com.esotericsoftware.minlog.Log
 import org.slf4j.LoggerFactory
+import kotlin.reflect.jvm.internal.impl.renderer.DescriptorRenderer.ValueParametersHandler.DEFAULT
 
 fun configureLogging() {
     // KryoNet:
@@ -19,7 +20,7 @@ fun configureLogging() {
         "com.mgtriffid.games.cotta.network.kryonet" to default,
         "com.mgtriffid.games.cotta.core.simulation.invokers" to default,
         "com.mgtriffid.games.panna.shared.game.systems" to default,
-        "com.mgtriffid.games.cotta.client.impl.CottaClientImpl" to Level.DEBUG,
+        "com.mgtriffid.games.cotta.client.impl.CottaClientImpl" to default,
         "com.mgtriffid.games.cotta.core.registry.ComponentsRegistry" to default,
         "com.mgtriffid.games.cotta.server.impl.ServerToClientDataDispatcherImpl" to default,
         "com.mgtriffid.games.cotta.client.invokers.impl.PredictionCreateEntityStrategy" to default,
@@ -46,7 +47,10 @@ fun configureLogging() {
         "com.mgtriffid.games.cotta.network.kryonet.acking.Connection" to default,
         "com.mgtriffid.games.cotta.client.impl.IncomingDataBufferMonitor" to default,
         "com.mgtriffid.games.cotta.network.kryonet.acking.MeasuringChunkSerializer" to default,
-        "com.mgtriffid.games.cotta.server.impl.ServerSimulationInputProviderImpl" to default
+        "com.mgtriffid.games.cotta.server.impl.ServerSimulationInputProviderImpl" to default,
+        "com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterListWindow" to default,
+        "com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterListModel" to default,
+        "com.mgtriffid.games.panna.screens.menu.components.characterlist.CharacterListWindow" to default,
     ).forEach { (logger, level) ->
         (LoggerFactory.getLogger(logger) as Logger).level = level
     }

@@ -98,7 +98,7 @@ class GameScreen(
         updateResult: UpdateResult,
         delta: Float
     ) {
-        logger.info { "Update result: $updateResult" }
+        logger.trace { "Update result: $updateResult" }
         when (updateResult) {
             UpdateResult.AwaitingGameState -> return
             UpdateResult.Disconnected -> gdxGame.screen = DisconnectedScreen(gdxGame)

@@ -130,11 +130,11 @@ class CottaClientImpl @Inject constructor(
     }
 
     private fun run(now: Long) {
-        logger.info { "nextTickAt is $nextSimulationTickAt, now is $now, difference is ${now - nextSimulationTickAt}" }
-        logger.info { "Global tick is ${globalTickProvider.tick}, simulation tick is ${simulationTickProvider.tick}" }
+        logger.debug { "nextTickAt is $nextSimulationTickAt, now is $now, difference is ${now - nextSimulationTickAt}" }
+        logger.debug { "Global tick is ${globalTickProvider.tick}, simulation tick is ${simulationTickProvider.tick}" }
         measureBuffer()
         if (nextSimulationTickAt <= now) {
-            logger.info { "run called" }
+            logger.debug { "run called" }
             integrate()
             nextSimulationTickAt += paceRegulator.simulationTickLength(
                 tickLength,
@@ -142,7 +142,7 @@ class CottaClientImpl @Inject constructor(
             )
         }
         if (nextLocalTickAt <= now) {
-            logger.info { "local tick called" }
+            logger.debug { "local tick called" }
             processLocalInput()
             predict(
                 simulations.getLastConfirmedInput(),

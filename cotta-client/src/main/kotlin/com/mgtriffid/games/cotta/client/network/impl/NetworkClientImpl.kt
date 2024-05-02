@@ -100,7 +100,7 @@ class NetworkClientImpl<
     }
 
     private fun recordBufferLength(packet: SimulationInputServerToClientDto) {
-        logger.info { "Buffer length: ${packet.bufferLength}" }
+        logger.trace { "Buffer length: ${packet.bufferLength}" }
         metrics.histogram("server_buffer_ahead")
             .update(packet.bufferLength.toInt())
     }

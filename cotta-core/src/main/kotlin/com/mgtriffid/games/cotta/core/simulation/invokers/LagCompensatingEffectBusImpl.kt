@@ -4,17 +4,12 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.EffectPublisher
 import jakarta.inject.Inject
-import jakarta.inject.Named
 
 // TODO better naming
 // TODO better placing
 interface LagCompensatingEffectBus : EffectBus {
     fun getTickForEffect(effect: CottaEffect): Long?
 }
-
-class HistoricalLagCompensatingEffectBus @Inject constructor(
-    @Named("lagCompensated") val impl: LagCompensatingEffectBus,
-): LagCompensatingEffectBus by impl
 
 class LagCompensatingEffectBusImpl @Inject constructor(
     private val effectBus: EffectBus,

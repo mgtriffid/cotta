@@ -72,8 +72,6 @@ class CottaServerModule(
             bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
 
             bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(LagCompensatingEffectBus::class.java).annotatedWith(named("historical"))
-                .to(HistoricalLagCompensatingEffectBus::class.java).`in`(Scopes.SINGLETON)
             bind(LagCompensatingEffectBus::class.java).annotatedWith(named("lagCompensated"))
                 .to(LagCompensatingEffectBusImpl::class.java).`in`(Scopes.SINGLETON)
 

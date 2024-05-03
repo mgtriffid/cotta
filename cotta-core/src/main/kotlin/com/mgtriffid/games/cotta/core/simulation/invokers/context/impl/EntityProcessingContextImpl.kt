@@ -9,7 +9,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class EntityProcessingContextImpl @Inject constructor(
-    @Named("historical") private val lagCompensatingEffectBus: LagCompensatingEffectBus,
+    @Named("lagCompensated") private val lagCompensatingEffectBus: LagCompensatingEffectBus,
     @Named("latest") private val entities: Entities,
     private val clock: CottaClock,
 ) : EntityProcessingContext {

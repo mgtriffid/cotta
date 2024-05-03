@@ -23,7 +23,7 @@ allprojects {
     }
 
     group = 'com.mgtriffid.cotta'
-    version = '0.1.0'
+    version = '0.1.1-SNAPSHOT'
 
     ext {
         appName = "cotta"

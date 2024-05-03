@@ -51,8 +51,7 @@ class CottaServerModule(
 ) : Module {
     override fun configure(binder: Binder) {
         with(binder) {
-            bind(CottaGame::class.java).toInstance(game)
-            bind(PlayersHandler::class.java).toInstance(game.playersHandler)
+            bindGameParts()
 
             val simulationTickProvider = AtomicLongTickProvider()
             bind(TickProvider::class.java)
@@ -65,9 +64,7 @@ class CottaServerModule(
                 .`in`(Scopes.SINGLETON)
 
             bind(Simulation::class.java).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)
-            bind(InputProcessing::class.java).toInstance(game.inputProcessing)
 
-            bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
             bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java).`in`(Scopes.SINGLETON)
             bind(Players::class.java).to(PlayersImpl::class.java).`in`(Scopes.SINGLETON)
             bind(PlayersSawTicks::class.java).to(PlayersSawTickImpl::class.java).`in`(Scopes.SINGLETON)
@@ -119,6 +116,13 @@ class CottaServerModule(
             bind(object : TypeLiteral<ClientsGhosts<BytesInputRecipe>>() {}).`in`(Scopes.SINGLETON)
             bind(ComponentRegistry::class.java).to(ComponentRegistryImpl::class.java).`in`(Scopes.SINGLETON)
         }
+    }
+
+    private fun Binder.bindGameParts() {
+        bind(CottaGame::class.java).toInstance(game)
+        bind(PlayersHandler::class.java).toInstance(game.playersHandler)
+        bind(NonPlayerInputProvider::class.java).toInstance(game.nonPlayerInputProvider)
+        bind(InputProcessing::class.java).toInstance(game.inputProcessing)
     }
 
     @Provides

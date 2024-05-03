@@ -45,7 +45,7 @@ class AckingCottaClientNetworkTransport(
         client.start()
         logger.info { "Client started, connecting" }
         // TODO configuration
-        client.connect(5000, "127.0.0.1", 16001, 16002)
+        client.connect(5000, serverHost, tcpPort, udpPort)
         val serializer = chunkSerializer()
         connection = Connection(
             serializer = serializer,

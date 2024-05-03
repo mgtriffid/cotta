@@ -20,18 +20,6 @@ The plan is roughly as follows:
 - Launch and see the game in action
 - Try cool features of Cotta such as prediction and interpolation
 
-## Installation
-### Local installation
-Clone the `cotta` repository and build it with Gradle:
-```shell
-git clone https://github.com/mgtriffid/cotta.git
-cd cotta
-git checkout 0.1.0
-./gradlew publish
-```
-### From a repository
-Coming soon...
-
 ## Simplest project possible
 ### Initialize a LibGDX project
 The project called `gdx-liftoff` is a good starting point. Just follow the
@@ -47,6 +35,13 @@ Since we're developing a multiplayer game, in addition to the default
 And on the "Languages" tab check **Kotlin**. And generate and open in IDE(A).
 
 ### Add Cotta dependencies to the project
+Add `jitpack.io` to your repositories section, if not yet:
+```gradle
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+```
+
 Define the version of Cotta in the root `gradle.properties`:
 ```properties
 cottaVersion='0.1.0'

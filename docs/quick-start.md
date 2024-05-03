@@ -26,6 +26,7 @@ Clone the `cotta` repository and build it with Gradle:
 ```shell
 git clone https://github.com/mgtriffid/cotta.git
 cd cotta
+git checkout 0.1.0
 ./gradlew publish
 ```
 ### From a repository

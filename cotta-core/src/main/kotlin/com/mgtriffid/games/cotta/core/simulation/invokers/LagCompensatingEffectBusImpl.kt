@@ -25,7 +25,6 @@ class HistoricalLagCompensatingEffectBus @Inject constructor(
         return object : EffectPublisher {
             override fun fire(effect: CottaEffect) {
                 implPublisher.fire(effect)
-                history.record(effect, impl.getTickForEffect(effect), tickProvider.tick)
             }
         }
     }

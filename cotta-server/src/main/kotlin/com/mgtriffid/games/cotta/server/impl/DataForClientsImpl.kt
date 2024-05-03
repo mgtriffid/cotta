@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta.server.impl
 
-import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
@@ -20,10 +19,6 @@ data class DataForClientsImpl @Inject constructor(
     private val players: Players,
     private val playersSawTicks: PlayersSawTicks,
 ) : DataForClients {
-    override fun effects(tick: Long): Collection<CottaEffect> {
-        return effectsHistory.forTick(tick)
-    }
-
     override fun playerInputs(): Map<PlayerId, PlayerInput> {
         return simulationInputHolder.get().inputForPlayers()
     }

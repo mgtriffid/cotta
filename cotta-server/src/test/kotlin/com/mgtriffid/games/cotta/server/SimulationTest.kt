@@ -343,34 +343,6 @@ class SimulationTest {
     }
 
     @Test
-    fun `should return effects that are to be returned to clients`() {
-        val entity = state.entities().create()
-        val entityId = entity.id
-        entity.addComponent(createHealthTestComponent(0))
-        simulation.registerSystem(RegenerationTestSystem())
-        simulation.registerSystem(HealthRegenerationTestEffectsConsumerSystem())
-
-        simulation.tick(object : SimulationInput {
-            override fun nonPlayerInput() = object: NonPlayerInput {}
-
-            override fun inputForPlayers(): Map<PlayerId, PlayerInput> {
-                return emptyMap()
-            }
-
-            override fun playersSawTicks(): Map<PlayerId, Long> {
-                return emptyMap()
-            }
-            override fun playersDiff() = PlayersDiff(emptySet(), emptySet())
-
-        })
-
-        assertEquals(
-            createHealthRegenerationTestEffect(entityId, 1),
-            dataForClients.effects(tick = tickProvider.tick).first()
-        )
-    }
-
-    @Test
     fun `should prepare inputs to be sent to clients`() {
         val playerId = PlayerId(0)
         val damageDealer = state.entities().create(

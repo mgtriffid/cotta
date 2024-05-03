@@ -39,6 +39,7 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.*
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.EntityProcessingContextImpl
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.LagCompensatingEffectProcessingContext
+import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.SimpleCreateEntityStrategy
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.impl.SimpleEffectProcessingContext
 import com.mgtriffid.games.cotta.network.CottaServerNetworkTransport
 import com.mgtriffid.games.cotta.network.kryonet.acking.AckingCottaServerNetworkTransport
@@ -93,7 +94,7 @@ class CottaServerModule(
                 SimpleEffectProcessingContext::class.java
             ).`in`(Scopes.SINGLETON)
             bind(CreateEntityStrategy::class.java).annotatedWith(named("effectProcessing")).to(
-                CreateAndRecordCreateEntityStrategy::class.java
+                SimpleCreateEntityStrategy::class.java
             ).`in`(Scopes.SINGLETON)
             bind(DataForClients::class.java).to(DataForClientsImpl::class.java).`in`(Scopes.SINGLETON)
             install(BytesSerializationModule(game.playerInputKClass))

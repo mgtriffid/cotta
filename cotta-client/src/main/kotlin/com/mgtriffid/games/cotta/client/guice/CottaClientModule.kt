@@ -40,13 +40,11 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.simulation.Simulation
-import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.Players
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.impl.AuthoritativeSimulationImpl
-import com.mgtriffid.games.cotta.core.simulation.impl.EffectsHistoryImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.EntityOwnerSawTickProviderImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
@@ -132,8 +130,6 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
 
         bind(SawTickHolder::class.java).toInstance(SawTickHolder(null))
-        bind(EffectsHistory::class.java).to(EffectsHistoryImpl::class.java)
-            .`in`(Scopes.SINGLETON)
         bind(EffectBus::class.java).to(EffectBusImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(EffectBus::class.java).annotatedWith(Names.named("prediction"))

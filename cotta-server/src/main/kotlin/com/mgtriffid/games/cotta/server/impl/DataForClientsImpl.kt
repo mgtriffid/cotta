@@ -4,7 +4,6 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
-import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.server.DataForClients
@@ -13,7 +12,6 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 data class DataForClientsImpl @Inject constructor(
-    private val effectsHistory: EffectsHistory,
     private val simulationInputHolder: SimulationInputHolder,
     @Named("simulation") private val state: CottaState,
     private val players: Players,

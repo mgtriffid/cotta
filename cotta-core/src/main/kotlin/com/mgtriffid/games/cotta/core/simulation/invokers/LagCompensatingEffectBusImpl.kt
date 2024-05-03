@@ -1,11 +1,8 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
-import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.effects.EffectPublisher
-import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.simulation.EffectsHistory
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
@@ -16,19 +13,8 @@ interface LagCompensatingEffectBus : EffectBus {
 }
 
 class HistoricalLagCompensatingEffectBus @Inject constructor(
-    val history: EffectsHistory,
     @Named("lagCompensated") val impl: LagCompensatingEffectBus,
-    @Named(SIMULATION) val tickProvider: TickProvider
-): LagCompensatingEffectBus by impl {
-    override fun publisher(): EffectPublisher {
-        val implPublisher = impl.publisher()
-        return object : EffectPublisher {
-            override fun fire(effect: CottaEffect) {
-                implPublisher.fire(effect)
-            }
-        }
-    }
-}
+): LagCompensatingEffectBus by impl
 
 class LagCompensatingEffectBusImpl @Inject constructor(
     private val effectBus: EffectBus,

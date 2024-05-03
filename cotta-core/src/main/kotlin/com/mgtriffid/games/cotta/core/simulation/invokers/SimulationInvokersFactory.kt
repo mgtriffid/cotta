@@ -1,15 +1,13 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers
 
-import com.mgtriffid.games.cotta.core.annotations.LagCompensated
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.EntityProcessingSystemInvoker
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.LagCompensatingEffectsConsumerInvoker
 import com.mgtriffid.games.cotta.core.simulation.invokers.impl.SimpleEffectsConsumerSystemInvoker
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.systems.EntityProcessingSystem
+import com.mgtriffid.games.cotta.core.systems.LagCompensatedEffectsConsumerSystem
 import jakarta.inject.Inject
-import kotlin.reflect.KClass
-import kotlin.reflect.full.hasAnnotation
 
 class SimulationInvokersFactory @Inject constructor(
     private val lagCompensatingEffectsConsumerInvoker: LagCompensatingEffectsConsumerInvoker,
@@ -25,7 +23,7 @@ class SimulationInvokersFactory @Inject constructor(
             }
 
             is EffectsConsumerSystem<*> -> if (
-                system::class.hasAnnotation<LagCompensated>()
+                system is LagCompensatedEffectsConsumerSystem<*>
             ) {
                 Pair(lagCompensatingEffectsConsumerInvoker, system)
             } else {

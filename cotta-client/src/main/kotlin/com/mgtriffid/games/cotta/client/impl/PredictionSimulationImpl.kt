@@ -13,7 +13,6 @@ import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import mu.KotlinLogging
-import kotlin.reflect.KClass
 
 private val logger = KotlinLogging.logger {}
 

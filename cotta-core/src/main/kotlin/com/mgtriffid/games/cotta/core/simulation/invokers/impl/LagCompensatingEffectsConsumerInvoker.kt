@@ -20,8 +20,8 @@ class LagCompensatingEffectsConsumerInvoker @Inject constructor(
     private val sawTickHolder: SawTickHolder,
     @Named("lagCompensated") private val context: EffectProcessingContext,
     private val playersSawTicks: PlayersSawTicks
-) : SystemInvoker<EffectsConsumerSystem<*>> {
-    override fun invoke(system: EffectsConsumerSystem<*>) {
+) : SystemInvoker<LagCompensatedEffectsConsumerSystem<*>> {
+    override fun invoke(system: LagCompensatedEffectsConsumerSystem<*>) {
         logger.debug { "Invoked ${system::class.qualifiedName}" }
         if (system::class.simpleName == "MovementEffectConsumerSystem") {
             logger.info { "Invoked MovementEffectConsumerSystem in simulation" }
@@ -32,16 +32,12 @@ class LagCompensatingEffectsConsumerInvoker @Inject constructor(
         }
     }
 
-    private fun <T: CottaEffect> process(effect: CottaEffect, system: EffectsConsumerSystem<T>) {
+    private fun <T: CottaEffect> process(effect: CottaEffect, system: LagCompensatedEffectsConsumerSystem<T>) {
         logger.debug { "${system::class.simpleName} processing effect $effect" }
         if (system.effectType.isAssignableFrom(effect::class.java)) {
             val e = system.effectType.cast(effect)
-            if (system is LagCompensatedEffectsConsumerSystem) {
-                val playerId = system.player(e)
-                sawTickHolder.tick = playersSawTicks[playerId]
-            } else {
-                sawTickHolder.tick = effectBus.getTickForEffect(effect)
-            }
+            val playerId = system.player(e)
+            sawTickHolder.tick = playersSawTicks[playerId]
             system.handle(e, context)
 
             sawTickHolder.tick = null

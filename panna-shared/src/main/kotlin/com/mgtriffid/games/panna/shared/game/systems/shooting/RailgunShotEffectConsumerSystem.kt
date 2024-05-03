@@ -2,21 +2,16 @@ package com.mgtriffid.games.panna.shared.game.systems.shooting
 
 import com.badlogic.gdx.math.Intersector.intersectSegmentRectangle
 import com.badlogic.gdx.math.Rectangle
-import com.mgtriffid.games.cotta.core.annotations.LagCompensated
-import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
-import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.systems.LagCompensatedEffectsConsumerSystem
 import com.mgtriffid.games.panna.shared.game.components.PositionComponent
 import com.mgtriffid.games.panna.shared.game.components.SteamManPlayerComponent
 import com.mgtriffid.games.panna.shared.game.components.physics.ColliderComponent
-import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunHitsDudeEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.RailgunShotEffect
 import com.mgtriffid.games.panna.shared.game.effects.shooting.createRailgunHitsDudeEffect
 
-@LagCompensated
 class RailgunShotEffectConsumerSystem : LagCompensatedEffectsConsumerSystem<RailgunShotEffect> {
     override fun player(effect: RailgunShotEffect): PlayerId {
         return effect.shooterPlayerId

@@ -16,4 +16,8 @@ class CottaClockImpl(
     override fun delta(): Float {
         return tickLengthSeconds
     }
+
+    override fun deltaMs(): Long {
+        return tickLength
+    }
 }

@@ -1,12 +1,11 @@
 package com.mgtriffid.games.cotta.core.simulation.invokers.impl
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
+import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
-import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBus
 import com.mgtriffid.games.cotta.core.simulation.invokers.SawTickHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.SystemInvoker
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessingContext
-import com.mgtriffid.games.cotta.core.systems.EffectsConsumerSystem
 import com.mgtriffid.games.cotta.core.systems.LagCompensatedEffectsConsumerSystem
 import jakarta.inject.Inject
 import jakarta.inject.Named
@@ -16,7 +15,7 @@ private val logger = KotlinLogging.logger {}
 
 // TODO forbid creation of Entities here or make Entities created in the latest tick
 class LagCompensatingEffectsConsumerInvoker @Inject constructor(
-    @Named("lagCompensated") private val effectBus: LagCompensatingEffectBus,
+    private val effectBus: EffectBus,
     private val sawTickHolder: SawTickHolder,
     @Named("lagCompensated") private val context: EffectProcessingContext,
     private val playersSawTicks: PlayersSawTicks

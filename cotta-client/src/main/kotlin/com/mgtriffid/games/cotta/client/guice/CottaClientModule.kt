@@ -135,10 +135,6 @@ class CottaClientModule(
         bind(EffectBus::class.java).annotatedWith(Names.named("prediction"))
             .to(EffectBusImpl::class.java)
             .`in`(Scopes.SINGLETON)
-        bind(LagCompensatingEffectBus::class.java).annotatedWith(Names.named("lagCompensated"))
-            .to(
-                LagCompensatingEffectBusImpl::class.java
-            ).`in`(Scopes.SINGLETON)
         bind(EntityOwnerSawTickProvider::class.java).to(
             EntityOwnerSawTickProviderImpl::class.java
         )

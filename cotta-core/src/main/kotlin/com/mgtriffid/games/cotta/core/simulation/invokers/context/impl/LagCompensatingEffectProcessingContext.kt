@@ -3,11 +3,11 @@ package com.mgtriffid.games.cotta.core.simulation.invokers.context.impl
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.clock.CottaClock
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
+import com.mgtriffid.games.cotta.core.effects.EffectBus
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.simulation.invokers.LagCompensatingEffectBus
 import com.mgtriffid.games.cotta.core.simulation.invokers.ReadingFromPreviousTickEntities
 import com.mgtriffid.games.cotta.core.simulation.invokers.SawTickHolder
 import com.mgtriffid.games.cotta.core.simulation.invokers.context.CreateEntityStrategy
@@ -16,7 +16,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class LagCompensatingEffectProcessingContext @Inject constructor(
-    @Named("lagCompensated") private val lagCompensatingEffectBus: LagCompensatingEffectBus,
+    private val effectBus: EffectBus,
     @Named("simulation") private val state: CottaState,
     private val sawTickHolder: SawTickHolder,
     @Named("effectProcessing") private val createEntityStrategy: CreateEntityStrategy,
@@ -25,7 +25,7 @@ class LagCompensatingEffectProcessingContext @Inject constructor(
 ) : EffectProcessingContext {
 
     override fun fire(effect: CottaEffect) {
-        lagCompensatingEffectBus.publisher().fire(effect)
+        effectBus.publisher().fire(effect)
     }
 
     override fun clock(): CottaClock {

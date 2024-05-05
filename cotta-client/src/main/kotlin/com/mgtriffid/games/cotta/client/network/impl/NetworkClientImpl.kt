@@ -33,10 +33,10 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class NetworkClientImpl<
-    SR: StateRecipe,
-    DR: DeltaRecipe,
-    IR: InputRecipe,
-    PDR: PlayersDeltaRecipe
+    SR : StateRecipe,
+    DR : DeltaRecipe,
+    IR : InputRecipe,
+    PDR : PlayersDeltaRecipe
     > @Inject constructor(
     private val networkTransport: CottaClientNetworkTransport,
     private val incomingDataBuffer: ClientIncomingDataBuffer<SR, DR>,
@@ -71,7 +71,11 @@ class NetworkClientImpl<
                         AuthoritativeStateData(
                             packet.tick,
                             snapsSerialization.deserializeStateRecipe(packet.fullState.payload),
-                            packet.deltas.map { snapsSerialization.deserializeDeltaRecipe(it.payload) },
+                            packet.deltas.map {
+                                snapsSerialization.deserializeDeltaRecipe(
+                                    it.payload
+                                )
+                            },
                             PlayerId(packet.playerId),
                             packet.playerIds.map { PlayerId(it) }.toSet()
                         )
@@ -83,11 +87,23 @@ class NetworkClientImpl<
                         packet.tick,
                         SimulationInputData(
                             tick = packet.tick,
-                            playersSawTicks = snapsSerialization.deserializePlayersSawTicks(packet.playersSawTicks),
-                            playersInputs = inputSerialization.deserializePlayersInputs(packet.playersInputs),
+                            playersSawTicks = snapsSerialization.deserializePlayersSawTicks(
+                                packet.playersSawTicks
+                            ),
+                            playersInputs = inputSerialization.deserializePlayersInputs(
+                                packet.playersInputs
+                            ),
                             playersDiff = PlayersDiff(
-                                added = packet.playersDiff.added.map { PlayerId(it) }.toSet(),
-                                removed = packet.playersDiff.removed.map { PlayerId(it) }.toSet()
+                                added = packet.playersDiff.added.map {
+                                    PlayerId(
+                                        it
+                                    )
+                                }.toSet(),
+                                removed = packet.playersDiff.removed.map {
+                                    PlayerId(
+                                        it
+                                    )
+                                }.toSet()
                             ),
                             idSequence = packet.idSequence,
                             confirmedClientInput = ClientInputId(packet.confirmedClientInput)
@@ -119,8 +135,8 @@ class NetworkClientImpl<
     }
 
     override fun tryGetDelta(tick: Long): Delta? {
-        val data: SimulationInputData? = incomingDataBuffer.simulationInputs[tick]
-        if (data == null) return null
+        val data: SimulationInputData =
+            incomingDataBuffer.simulationInputs[tick] ?: return null
         checkTick(data, tick)
         val input = ClientSimulationInput(
             tick = tick,
@@ -145,6 +161,7 @@ class NetworkClientImpl<
         return Delta(input)
     }
 
+    // TODO remove
     private fun checkTick(data: SimulationInputData, tick: Long) {
         if (data.tick != tick) {
             throw IllegalStateException("Tick mismatch: expected $tick, got ${data.tick}")
@@ -155,13 +172,16 @@ class NetworkClientImpl<
         return if (stateAvailable() && bufferedEnough()) {
             AuthoritativeState.Ready { state, simulationTickProvider, globalTickProvider ->
                 logger.debug { "Setting state from authoritative" }
-                val tick = incomingDataBuffer.states.lastKey()
+                val tick = incomingDataBuffer.states.lastSet
                 val stateData = incomingDataBuffer.states[tick]!!
                 val fullStateTick = tick - MAX_LAG_COMP_DEPTH_TICKS
                 state.setBlank(fullStateTick)
                 simulationTickProvider.tick = fullStateTick
                 globalTickProvider.tick = fullStateTick
-                stateSnapper.unpackStateRecipe(state.entities(fullStateTick), stateData.state)
+                stateSnapper.unpackStateRecipe(
+                    state.entities(fullStateTick),
+                    stateData.state
+                )
                 // TODO review these indices CAREFULLY, it's easy to miss smth
                 ((fullStateTick + 1)..tick).forEach { t ->
                     state.advance(t - 1)
@@ -181,13 +201,15 @@ class NetworkClientImpl<
         }
     }
 
-    private fun stateAvailable(): Boolean = incomingDataBuffer.states.isNotEmpty()
+    private fun stateAvailable(): Boolean =
+        incomingDataBuffer.states.isNotEmpty()
 
-    private fun bufferedEnough(): Boolean = incomingDataBuffer.simulationInputs.keys.containsAll(
-        ((incomingDataBuffer.states.lastKey() + 1)..(incomingDataBuffer.states.lastKey() + bufferLength)).toList()
-    )
+    private fun bufferedEnough(): Boolean =
+        ((incomingDataBuffer.states.lastSet + 1)..(incomingDataBuffer.states.lastSet + bufferLength)).all {
+            incomingDataBuffer.simulationInputs[it] != null
+        }
 
     override fun deltaAvailable(tick: Long): Boolean {
-        return incomingDataBuffer.simulationInputs.containsKey(tick)
+        return incomingDataBuffer.simulationInputs[tick] != null
     }
 }

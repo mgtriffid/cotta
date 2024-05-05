@@ -14,7 +14,7 @@ class IncomingDataBufferMonitor(
     fun measure() {
         var tick = globalTick.tick
         var count = 0
-        while (incomingDataBuffer.simulationInputs.containsKey(tick)) {
+        while (incomingDataBuffer.simulationInputs[tick] != null) {
             count++
             tick++
         }

@@ -92,9 +92,9 @@ class ServerSimulationInputProviderImpl<
                     if (buffer.hasEnoughInputsToStart()) {
                         ghost.setCursorState(RUNNING)
                         val id = ClientInputId(
-                            buffer.inputs2.lastKey().id - REQUIRED_CLIENT_INPUTS_BUFFER + 1
+                            (buffer.inputs.lastSet - REQUIRED_CLIENT_INPUTS_BUFFER + 1).toInt()
                         )
-                        val (input, sawTick) = buffer.inputs2[id]!!
+                        val (input, sawTick) = buffer.inputs[id.id.toLong()]!!
                         playersSawTicks[playerId] = sawTick
                         playerInputs[playerId] = input
                         ghost.setLastUsedInputId(id)
@@ -110,9 +110,9 @@ class ServerSimulationInputProviderImpl<
                     val toUse = ClientInputId(lastUsedInput.id + 1)
                     logger.debug { "Client input tick is $toUse for $playerId" }
                     if (
-                        buffer.inputs2.containsKey(toUse)
+                        buffer.inputs[toUse.id.toLong()] != null
                     ) {
-                        val (input, sawTick) = buffer.inputs2[toUse]!!
+                        val (input, sawTick) = buffer.inputs[toUse.id.toLong()]!!
                         ghost.setLastPresentInputId(toUse)
                         playersSawTicks[playerId] = sawTick
                         playerInputs[playerId] = input
@@ -123,7 +123,7 @@ class ServerSimulationInputProviderImpl<
                         val input = ghost.getLastUsedIncomingInput()
                         val inputId = ghost.getLastPresentInputId()
                         ghost.setLastUsedInputId(toUse)
-                        val sawTick = buffer.inputs2[inputId]!!.second + (tickProvider.tick - ghost.lastInputUsedOnTick)
+                        val sawTick = buffer.inputs[inputId.id.toLong()]!!.second + (tickProvider.tick - ghost.lastInputUsedOnTick)
                         playersSawTicks[playerId] = sawTick
                         playerInputs[playerId] = input
                     }
@@ -156,8 +156,7 @@ class ServerSimulationInputProviderImpl<
         logger.debug { "Last used input : ${lastUsedInput.id}" }
         val buffer = getBuffer(playerId)
         var ret = 0
-        logger.debug { "Buffer keys: ${buffer.inputs2.subMap(lastUsedInput, true, buffer.inputs2.lastKey(), true).keys.map { it.id }}" }
-        while (buffer.inputs2.containsKey(ClientInputId(lastUsedInput.id + ret + 1))) {
+        while (buffer.inputs[lastUsedInput.id.toLong() + ret + 1] != null) {
             ret++
         }
         return ret.also { logger.debug { "Calculated Buffer length is $it" } }

@@ -349,6 +349,10 @@ project(":cotta-utils") {
             mavenLocal()
         }
     }
+
+    dependencies {
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+    }
 }
 
 project(":panna-lobby") {

@@ -8,7 +8,7 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 interface EffectProcessingContext {
     fun fire(effect: CottaEffect)
 
-    fun entities(): Entities // mutable entities TODO change to return something that can't create Entities
+    fun entities(): Entities // mutable entities
 
     fun createEntity(ownedBy: Entity.OwnedBy): Entity
 

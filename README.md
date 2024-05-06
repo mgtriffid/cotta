@@ -1,5 +1,7 @@
 # Cotta: Kotlin game development library that solves netcode.
 
+[![Release](https://jitpack.io/v/mgtriffid/cotta.svg)](https://jitpack.io/#mgtriffid/cotta)
+
 ## Overview
 Cotta is an [ECS](https://en.wikipedia.org/wiki/Entity_component_system)-based
 game development library for Java/Kotlin built with multiplayer in mind.

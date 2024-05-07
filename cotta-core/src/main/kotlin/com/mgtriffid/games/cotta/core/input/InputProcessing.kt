@@ -8,6 +8,11 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * Processes input for the simulation. By implementing this interface, you can
+ * specify how data from [PlayerInput] and [NonPlayerInput] is passed to some
+ * components of Entities.
+ */
 interface InputProcessing {
     fun process(
         input: SimulationInput,

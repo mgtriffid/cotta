@@ -1,8 +1,17 @@
 package com.mgtriffid.games.cotta.core.config
 
-
+/**
+ * Technical configuration for the game.
+ */
 interface CottaConfig {
+    /**
+     * Tick length, in milliseconds.
+     */
     val tickLength: Long
+
+    /**
+     * Network configuration.
+     */
     val network: NetworkConfig
         get() = object : NetworkConfig {
             override val ports = object : NetworkConfig.Ports {

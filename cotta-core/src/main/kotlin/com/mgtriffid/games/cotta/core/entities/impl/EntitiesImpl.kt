@@ -7,7 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import java.util.concurrent.atomic.AtomicInteger
 
-class EntitiesImpl(private val componentRegistry: ComponentRegistry) : Entities {
+class EntitiesImpl(private val componentRegistry: ComponentRegistry) : EntitiesInternal {
     private var idGenerator = AtomicInteger()
     private val dynamic = HashMap<EntityId, Entity>()
     private var static = HashMap<EntityId, Entity>()

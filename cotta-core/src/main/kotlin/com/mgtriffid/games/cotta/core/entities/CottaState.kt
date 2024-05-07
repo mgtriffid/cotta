@@ -1,6 +1,7 @@
 package com.mgtriffid.games.cotta.core.entities
 
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 
 interface CottaState {
@@ -10,15 +11,15 @@ interface CottaState {
             64
         )
     }
-    fun entities(atTick: Long): Entities
+    fun entities(atTick: Long): EntitiesInternal
 
     fun advance(tick: Long)
 
-    fun set(tick: Long, entities: Entities)
+    fun set(tick: Long, entities: EntitiesInternal)
 
     fun wipe() // maybe not needed for Simulation; maybe need to extract a separate interface for Predicted
 
-    fun setBlank(entities: Entities)
+    fun setBlank(entities: EntitiesInternal)
 
     fun setBlank(tick: Long)
 

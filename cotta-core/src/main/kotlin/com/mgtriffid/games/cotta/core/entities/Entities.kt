@@ -22,16 +22,7 @@ interface Entities {
     fun get(id: EntityId): Entity?
     fun getOrNotFound(id: EntityId): Entity = get(id) ?: throw EntityNotExistsException("Could not find entity $id")
 
-    // TODO make internal, should not be exposed to developers
-    fun currentId(): Int
     fun all(): Collection<Entity>
     fun dynamic(): Collection<Entity>
-    // TODO Should not be exposed to developers.
-    fun create(id: EntityId, ownedBy: Entity.OwnedBy = Entity.OwnedBy.System): Entity
     fun remove(id: EntityId)
-    // TODO should not be accessible for developers. Instead the whole static
-    //  state creation should not be any different from regular creation of
-    //  entities for the developer.
-    // TODO should not be exposed to developers
-    fun setIdGenerator(idSequence: Int)
 }

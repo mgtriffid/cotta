@@ -31,6 +31,7 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
 import com.mgtriffid.games.cotta.core.input.InputProcessing
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
@@ -169,6 +170,8 @@ class CottaClientModule(
         bind(CottaClock::class.java)
             .annotatedWith(Names.named("prediction"))
             .toInstance(predictionClock)
+        bind(EntitiesInternal::class.java).annotatedWith(Names.named("prediction"))
+            .to(PredictedLatestEntities::class.java)
         bind(Entities::class.java).annotatedWith(Names.named("prediction"))
             .to(PredictedLatestEntities::class.java)
         bind(PredictionEffectsConsumerSystemInvoker::class.java)

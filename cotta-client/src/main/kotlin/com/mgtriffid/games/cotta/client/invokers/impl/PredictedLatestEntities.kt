@@ -5,13 +5,14 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class PredictedLatestEntities @Inject constructor(
     @Named("prediction") private val state: CottaState,
     @Named("prediction") private val tickProvider: TickProvider
-): Entities {
+): EntitiesInternal {
     override fun create(ownedBy: Entity.OwnedBy): Entity {
         return entities().create(ownedBy)
     }

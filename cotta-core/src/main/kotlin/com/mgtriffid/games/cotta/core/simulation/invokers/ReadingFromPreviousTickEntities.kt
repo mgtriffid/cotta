@@ -41,10 +41,6 @@ class ReadingFromPreviousTickEntities(
         throw NotImplementedError("Is not supposed to be called on Server")
     }
 
-    override fun createStatic(id: EntityId): Entity {
-        throw IllegalStateException("Cannot create static entity while running the game")
-    }
-
     override fun setIdGenerator(idSequence: Int) {
         getEntities().setIdGenerator(idSequence)
     }

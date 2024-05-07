@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server.impl
 import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.CottaState
+import com.mgtriffid.games.cotta.core.entities.CreatingStaticEntities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
@@ -55,7 +56,7 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
     }
 
     private fun initializeState() {
-        game.initializeStaticState(state.entities(tickProvider.tick))
+        game.initializeStaticState(CreatingStaticEntities(state.entities(tickProvider.tick)))
         state.setBlank(state.entities(tickProvider.tick))
         game.initializeServerState(state.entities(tickProvider.tick))
     }

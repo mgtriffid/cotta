@@ -45,9 +45,5 @@ class LatestEntities @Inject constructor(
         return entities().create(id, ownedBy)
     }
 
-    override fun createStatic(id: EntityId): Entity {
-        throw IllegalStateException("Cannot create static entity while running the game")
-    }
-
     private fun entities() = state.entities(tick.tick)
 }

@@ -32,7 +32,6 @@ interface Entities {
     // TODO should not be accessible for developers. Instead the whole static
     //  state creation should not be any different from regular creation of
     //  entities for the developer.
-    fun createStatic(id: EntityId): Entity
     // TODO should not be exposed to developers
     fun setIdGenerator(idSequence: Int)
 }

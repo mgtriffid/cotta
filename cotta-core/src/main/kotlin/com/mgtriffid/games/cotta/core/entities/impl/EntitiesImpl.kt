@@ -24,10 +24,6 @@ class EntitiesImpl(private val componentRegistry: ComponentRegistry) : Entities 
         return idGenerator.get()
     }
 
-    override fun createStatic(id: EntityId): Entity {
-        return EntityImpl(componentRegistry, id, Entity.OwnedBy.System).also { static[id] = it }
-    }
-
     override fun setIdGenerator(idSequence: Int) {
         idGenerator.set(idSequence)
     }

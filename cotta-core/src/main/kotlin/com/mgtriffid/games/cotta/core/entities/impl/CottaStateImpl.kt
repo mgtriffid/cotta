@@ -15,9 +15,9 @@ class CottaStateImpl @Inject constructor(
     @Named("stateHistoryLength") private val stateHistoryLength: Int
 ) : CottaState {
 
-    private lateinit var blank: Entities
+    private lateinit var blank: EntitiesInternal
 
-    private val entitiesArray = Array<Entities?>(stateHistoryLength) { null }
+    private val entitiesArray = Array<EntitiesInternal?>(stateHistoryLength) { null }
 
     private var latestTickSet = 0L
 
@@ -25,7 +25,7 @@ class CottaStateImpl @Inject constructor(
         entitiesArray[0] = EntitiesImpl(componentRegistry)
     }
 
-    override fun entities(atTick: Long): Entities {
+    override fun entities(atTick: Long): EntitiesInternal {
         if (atTick > latestTickSet) {
             throw EcsRuntimeException("Cannot retrieve entities at tick $atTick: latest stored tick is $latestTickSet")
         }
@@ -43,7 +43,7 @@ class CottaStateImpl @Inject constructor(
         set(tick + 1, entities.deepCopy())
     }
 
-    override fun set(tick: Long, entities: Entities) {
+    override fun set(tick: Long, entities: EntitiesInternal) {
         entitiesArray[tick.toIndex()] = entities
         latestTickSet = max(latestTickSet, tick)
     }
@@ -57,7 +57,7 @@ class CottaStateImpl @Inject constructor(
         latestTickSet = 0L
     }
 
-    override fun setBlank(entities: Entities) {
+    override fun setBlank(entities: EntitiesInternal) {
         this.blank = entities.deepCopy()
     }
 
@@ -67,7 +67,7 @@ class CottaStateImpl @Inject constructor(
 
     private fun Long.toIndex() = (this % stateHistoryLength).toInt()
 
-    private fun Entities.deepCopy(): Entities {
+    private fun EntitiesInternal.deepCopy(): EntitiesInternal {
         return if (this is EntitiesImpl) {
             this.deepCopy()
         } else {

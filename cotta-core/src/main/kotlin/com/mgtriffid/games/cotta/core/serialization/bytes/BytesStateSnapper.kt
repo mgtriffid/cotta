@@ -7,6 +7,7 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.serialization.StateSnapper
@@ -35,14 +36,14 @@ class BytesStateSnapper @Inject constructor(
 
     // TODO stupid naming
     override fun snapState(
-        entities: Entities,
+        entities: EntitiesInternal,
     ): BytesStateRecipe {
         return BytesStateRecipe(
             entities.dynamic().map { entity -> packEntity(entity) },
         )
     }
 
-    override fun snapDelta(prev: Entities, curr: Entities): BytesDeltaRecipe {
+    override fun snapDelta(prev: EntitiesInternal, curr: EntitiesInternal): BytesDeltaRecipe {
         return snapDelta(prev.dynamic(), curr.dynamic(), curr.currentId())
     }
 
@@ -95,7 +96,7 @@ class BytesStateSnapper @Inject constructor(
     }
 
     override fun unpackDeltaRecipe(
-        entities: Entities,
+        entities: EntitiesInternal,
         recipe: BytesDeltaRecipe
     ) {
         unpackAddedEntities(entities, recipe.addedEntities)
@@ -144,14 +145,14 @@ class BytesStateSnapper @Inject constructor(
     }
 
     private fun unpackAddedEntities(
-        entities: Entities,
+        entities: EntitiesInternal,
         addedEntities: List<BytesEntityRecipe>
     ) {
         addedEntities.forEach { unpackEntityRecipe(entities, it) }
     }
 
     private fun unpackEntityRecipe(
-        entities: Entities,
+        entities: EntitiesInternal,
         recipe: BytesEntityRecipe
     ) {
         val entity = entities.create(recipe.entityId, recipe.ownedBy)
@@ -173,7 +174,7 @@ class BytesStateSnapper @Inject constructor(
     }
 
     override fun unpackStateRecipe(
-        entities: Entities,
+        entities: EntitiesInternal,
         recipe: BytesStateRecipe
     ) {
         recipe.entities.forEach { entityRecipe ->

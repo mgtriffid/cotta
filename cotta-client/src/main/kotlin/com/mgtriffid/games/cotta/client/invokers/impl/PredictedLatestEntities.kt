@@ -5,13 +5,14 @@ import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.TickProvider
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
 class PredictedLatestEntities @Inject constructor(
     @Named("prediction") private val state: CottaState,
     @Named("prediction") private val tickProvider: TickProvider
-): Entities {
+): EntitiesInternal {
     override fun create(ownedBy: Entity.OwnedBy): Entity {
         return entities().create(ownedBy)
     }
@@ -38,10 +39,6 @@ class PredictedLatestEntities @Inject constructor(
 
     override fun create(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
         return entities().create(id, ownedBy)
-    }
-
-    override fun createStatic(id: EntityId): Entity {
-        throw IllegalStateException("Cannot create static entity while running the game")
     }
 
     override fun setIdGenerator(idSequence: Int) {

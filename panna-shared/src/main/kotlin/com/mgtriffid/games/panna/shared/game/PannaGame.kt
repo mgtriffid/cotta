@@ -56,16 +56,13 @@ class PannaGame : CottaGame {
     }
 
     override fun initializeStaticState(entities: Entities) {
-        val ids = AtomicInteger()
-        val idGenerator = { ids.incrementAndGet() }
-
         val tiles = readTerrainFromTiled()
         tiles.forEachIndexed { rowNumber, row ->
             row.forEachIndexed { colNumber, tile ->
                 when (tile) {
                     0 -> Unit
                     1 -> createBlock(
-                        entities, idGenerator, rowNumber, colNumber
+                        entities, rowNumber, colNumber
                     )
 
                     else -> throw RuntimeException("Unknown tile $tile")
@@ -76,11 +73,10 @@ class PannaGame : CottaGame {
 
     private fun createBlock(
         entities: Entities,
-        idGenerator: () -> Int,
         rowNumber: Int,
         colNumber: Int
     ) {
-        val block = entities.createStatic(StaticEntityId(idGenerator()))
+        val block = entities.create()
         block.addComponent(createDrawableComponent(SOLID_TERRAIN_TILE_STRATEGY))
         block.addComponent(
             createPositionComponent(

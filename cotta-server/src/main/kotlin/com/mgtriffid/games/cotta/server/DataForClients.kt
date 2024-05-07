@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.Players
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
@@ -12,7 +13,7 @@ import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
  * states, ownership, players "who saw which tick" situations, effects, inputs for entities, etc.
  */
 interface DataForClients {
-    fun entities(tick: Long): Entities
+    fun entities(tick: Long): EntitiesInternal
     fun players(): Players
     fun playersSawTicks(): PlayersSawTicks
     fun playerInputs(): Map<PlayerId, PlayerInput>

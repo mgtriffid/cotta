@@ -42,7 +42,7 @@ class CottaClientImpl @Inject constructor(
     private var tickLength: Long = -1
 
     override fun initialize() {
-        game.initializeStaticState(state.entities(getCurrentTick()))
+        game.initializeStaticState(CreatingStaticEntities(state.entities(getCurrentTick())))
         state.setBlank(state.entities(getCurrentTick()))
         tickLength = game.config.tickLength
     }

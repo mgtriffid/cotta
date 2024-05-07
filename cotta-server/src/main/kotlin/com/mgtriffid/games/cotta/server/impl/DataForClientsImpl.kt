@@ -3,6 +3,7 @@ package com.mgtriffid.games.cotta.server.impl
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
@@ -21,7 +22,7 @@ data class DataForClientsImpl @Inject constructor(
         return simulationInputHolder.get().inputForPlayers()
     }
 
-    override fun entities(tick: Long): Entities {
+    override fun entities(tick: Long): EntitiesInternal {
         return state.entities(tick)
     }
 

@@ -22,7 +22,21 @@ interface Entities {
     fun get(id: EntityId): Entity?
     fun getOrNotFound(id: EntityId): Entity = get(id) ?: throw EntityNotExistsException("Could not find entity $id")
 
+    /**
+     * Returns all Entities existing in the current tick.
+     */
     fun all(): Collection<Entity>
+
+    /**
+     * Returns all Entities that are dynamic (i.e. not static). Static entities
+     * are those created in the
+     * [com.mgtriffid.games.cotta.core.CottaGame.initializeStaticState] method.
+     */
     fun dynamic(): Collection<Entity>
+
+    /**
+     * Removes an Entity. Happens immediately, removals are not postponed until
+     * the end of the tick (this behavior may change).
+     */
     fun remove(id: EntityId)
 }

@@ -524,4 +524,9 @@ time is within the tick length, and the square moves smoothly.
 These and other features will be covered in further guides.
 
 ## Code
-All code from here is available at https://github.com/mgtriffid/cotta-showcase
+All code from here is available here https://github.com/mgtriffid/cotta-showcase ,
+revision [78db8dc2f48f25ddcfaf10d5ecf10ffe9050b378](https://github.com/mgtriffid/cotta-showcase/commit/78db8dc2f48f25ddcfaf10d5ecf10ffe9050b378)
+
+
+## Next
+Next let's get to know [Effects](effects.md).

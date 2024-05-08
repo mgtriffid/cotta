@@ -32,6 +32,7 @@ responsiveness and smoothness
 
 # Documentation
 - [Quick start](quick-start.md)
+- [Effects](effects.md)
 - [Architecture overview](architecture-overview.md)
 - [User guide](user-guide.md)
 

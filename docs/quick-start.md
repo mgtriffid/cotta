@@ -44,7 +44,7 @@ repositories {
 
 Define the version of Cotta in the root `gradle.properties`:
 ```properties
-cottaVersion='0.1.1'
+cottaVersion='0.1.2'
 ```
 
 The submodules in the resulting project need the dependencies as follows:
@@ -220,7 +220,7 @@ class MovementSystem : EntityProcessingSystem {
 }
 ```
 
-As of version `0.1.1`, all `EntityProcessingSystem`s are called for all
+As of version `0.1.2`, all `EntityProcessingSystem`s are called for all
 Entities, so we need to check for components existence here to filter out those
 that don't have to be moved (if we have any). In the future this API will likely
 change.

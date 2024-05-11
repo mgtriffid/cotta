@@ -164,17 +164,17 @@ fun BytesComponentRecipe.toDto(): BytesComponentRecipeDto {
 fun BytesChangedEntityRecipe.toDto(): BytesChangedEntityRecipeDto {
     val ret = BytesChangedEntityRecipeDto()
     ret.entityId = entityId.toDto()
-    ret.addedComponents = ArrayList(addedComponents.map { it.toDto() })
-    ret.changedComponents = ArrayList(changedComponents.map { it.toDto() })
-    ret.removedComponents = ArrayList(removedComponents.map { it.key })
+    ret.addedComponents = if (addedComponents.isEmpty()) ArrayList() else ArrayList(addedComponents.map { it.toDto() })
+    ret.changedComponents = if (changedComponents.isEmpty()) ArrayList() else ArrayList(changedComponents.map { it.toDto() })
+    ret.removedComponents = if (removedComponents.isEmpty()) ArrayList() else ArrayList(removedComponents.map { it.key })
     return ret
 }
 
 fun BytesDeltaRecipe.toDto(): BytesDeltaRecipeDto {
     val ret = BytesDeltaRecipeDto()
-    ret.addedEntities = ArrayList(addedEntities.map { it.toDto() })
-    ret.changedEntities = ArrayList(changedEntities.map { it.toDto() })
-    ret.removedEntitiesIds = ArrayList(removedEntitiesIds.map { it.toDto() })
+    ret.addedEntities = if (addedEntities.isEmpty()) ArrayList() else ArrayList(addedEntities.map { it.toDto() })
+    ret.changedEntities = if (changedEntities.isEmpty()) ArrayList() else ArrayList(changedEntities.map { it.toDto() })
+    ret.removedEntitiesIds = if (removedEntitiesIds.isEmpty()) ArrayList() else ArrayList(removedEntitiesIds.map { it.toDto() })
     ret.idSequence = idSequence
     return ret
 }

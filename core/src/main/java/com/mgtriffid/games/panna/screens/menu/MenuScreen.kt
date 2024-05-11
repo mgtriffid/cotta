@@ -75,7 +75,6 @@ class MenuScreen(
 
     private fun prepareStage() {
         stage = Stage()
-        stage.addActor(AnimatedImage(createAnimation()))
         Gdx.input.inputProcessor = stage
 
         buildLoginForm()

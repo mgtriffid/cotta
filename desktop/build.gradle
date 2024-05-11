@@ -7,7 +7,7 @@ project.ext.assetsDir = new File("../assets")
 
 import org.gradle.internal.os.OperatingSystem
 
-/*task run(dependsOn: classes, type: JavaExec) {
+task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
@@ -18,7 +18,7 @@ import org.gradle.internal.os.OperatingSystem
         // Required to run on macOS
         jvmArgs += "-XstartOnFirstThread"
     }
-}*/
+}
 
 task debug(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName

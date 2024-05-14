@@ -6,3 +6,7 @@ sourceSets.main.resources.srcDirs = [ "src/main/resources" ]
 sourceSets.test.kotlin.srcDirs = [ "src/test/kotlin" ]
 
 eclipse.project.name = "panna-shared"
+
+test {
+    useJUnitPlatform()
+}

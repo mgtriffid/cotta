@@ -66,12 +66,4 @@ class CottaStateImpl @Inject constructor(
     }
 
     private fun Long.toIndex() = (this % stateHistoryLength).toInt()
-
-    private fun EntitiesInternal.deepCopy(): EntitiesInternal {
-        return if (this is EntitiesImpl) {
-            this.deepCopy()
-        } else {
-            TODO()
-        }
-    }
 }

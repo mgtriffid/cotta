@@ -8,7 +8,6 @@ import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
@@ -110,11 +109,6 @@ fun EntityId.toDto(): EntityIdDto {
         is AuthoritativeEntityId -> EntityIdDto().also {
             it.id = id
             it.kind = EntityIdDto.Kind.AUTHORITATIVE
-        }
-        is PredictedEntityId -> EntityIdDto().also {
-            it.id = id
-            it.kind = EntityIdDto.Kind.PREDICTED
-            it.playerId = playerId.id
         }
         is StaticEntityId -> EntityIdDto().also {
             it.id = id

@@ -1,2 +1,6 @@
 sourceCompatibility = 1.8
 sourceSets.test.kotlin.srcDirs = [ "src/test/kotlin" ]
+
+test {
+    useJUnitPlatform()
+}

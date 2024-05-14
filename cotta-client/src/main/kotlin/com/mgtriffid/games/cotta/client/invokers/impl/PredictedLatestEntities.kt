@@ -45,5 +45,9 @@ class PredictedLatestEntities @Inject constructor(
         entities().setIdGenerator(idSequence)
     }
 
+    override fun deepCopy(): EntitiesInternal {
+        return entities().deepCopy() // should never be called TODO remove
+    }
+
     private fun entities() = state.entities(tickProvider.tick)
 }

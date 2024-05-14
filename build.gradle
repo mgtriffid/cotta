@@ -229,9 +229,10 @@ project(":cotta-core-test") {
 
     dependencies {
         implementation project(":cotta-core")
-        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         ksp project(":cotta-annotations-processor")
         implementation "com.esotericsoftware:kryo:5.0.0"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
     }
 }
 

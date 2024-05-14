@@ -8,4 +8,5 @@ interface EntitiesInternal : Entities {
     fun currentId(): Int
     fun create(id: EntityId, ownedBy: Entity.OwnedBy = Entity.OwnedBy.System): Entity
     fun setIdGenerator(idSequence: Int)
+    fun deepCopy(): EntitiesInternal
 }

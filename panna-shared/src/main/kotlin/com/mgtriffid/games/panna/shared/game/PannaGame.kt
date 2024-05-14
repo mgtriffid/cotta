@@ -7,10 +7,7 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.config.DebugConfig
 import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Issues
 import com.mgtriffid.games.cotta.core.config.DebugConfig.EmulatedNetworkConditions.WithIssues.Latency
-import com.mgtriffid.games.cotta.core.input.NonPlayerInputProvider
 import com.mgtriffid.games.cotta.core.entities.Entities
-import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
-import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.panna.shared.PannaPlayerInput
 import com.mgtriffid.games.panna.shared.SOLID_TERRAIN_TILE_STRATEGY
 import com.mgtriffid.games.panna.shared.game.components.*
@@ -26,7 +23,6 @@ import com.mgtriffid.games.panna.shared.game.systems.shooting.ShootingProcessing
 import com.mgtriffid.games.panna.shared.game.systems.shooting.SwitchWeaponSystem
 import com.mgtriffid.games.panna.shared.game.systems.walking.*
 import com.mgtriffid.games.panna.shared.tiled.TiledMap
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.Volatile
 
 @Game

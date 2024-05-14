@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.test.entities
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+//import com.mgtriffid.games.cotta.core.entities.arrays.ArraysBasedCottaState
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
@@ -11,14 +12,18 @@ import com.mgtriffid.games.cotta.core.test.workload.components.PositionTestCompo
 import com.mgtriffid.games.cotta.core.test.workload.components.createPositionTestComponent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
 class EntitiesTest {
 
     private lateinit var tickProvider: TickProvider
     private lateinit var componentRegistry: ComponentRegistry
 
-    @BeforeEach fun setUp() {
+    @BeforeEach
+    fun setUp() {
         tickProvider = AtomicLongTickProvider()
         componentRegistry = ComponentRegistryImpl(
             com.esotericsoftware.kryo.Kryo(),
@@ -26,9 +31,12 @@ class EntitiesTest {
         registerComponents(GameStub, componentRegistry)
     }
 
-    @Test
-    fun `should return hasComponent of true after component added`() {
-        val cottaState = CottaState.getInstance(componentRegistry)
+    @ParameterizedTest
+    @MethodSource("states")
+    fun `should return hasComponent of true after component added`(
+        stateFactory: CottaStateFactory
+    ) {
+        val cottaState = stateFactory.getInstance(componentRegistry)
         val entities = cottaState.entities()
         val entity = entities.create()
         entity.addComponent(createPositionTestComponent(0, 0))
@@ -36,9 +44,12 @@ class EntitiesTest {
         assertTrue(entity.hasComponent(PositionTestComponent::class))
     }
 
-    @Test
-    fun `should return component with correct values after added`() {
-        val cottaState = CottaState.getInstance(componentRegistry)
+    @ParameterizedTest
+    @MethodSource("states")
+    fun `should return component with correct values after added`(
+        stateFactory: CottaStateFactory
+    ) {
+        val cottaState = stateFactory.getInstance(componentRegistry)
         val entities = cottaState.entities()
         val entity = entities.create()
         entity.addComponent(createPositionTestComponent(1, 1))
@@ -46,9 +57,12 @@ class EntitiesTest {
         assertEquals(1, entity.getComponent(PositionTestComponent::class).x)
     }
 
-    @Test
-    fun `should say hasComponent is false if it was removed`() {
-        val cottaState = CottaState.getInstance(componentRegistry)
+    @ParameterizedTest
+    @MethodSource("states")
+    fun `should say hasComponent is false if it was removed`(
+        stateFactory: CottaStateFactory
+    ) {
+        val cottaState = stateFactory.getInstance(componentRegistry)
         val entities = cottaState.entities()
         val entity = entities.create()
         entity.addComponent(createPositionTestComponent(0, 0))
@@ -57,9 +71,12 @@ class EntitiesTest {
         assertFalse(entity.hasComponent(PositionTestComponent::class))
     }
 
-    @Test
-    fun `cottaState should use the same Entities if called repeatedly`() {
-        val cottaState = CottaState.getInstance(componentRegistry)
+    @ParameterizedTest
+    @MethodSource("states")
+    fun `cottaState should use the same Entities if called repeatedly`(
+        stateFactory: CottaStateFactory
+    ) {
+        val cottaState = stateFactory.getInstance(componentRegistry)
         val entities = cottaState.entities()
         val entity = entities.create()
         entity.addComponent(createPositionTestComponent(1, 1))
@@ -67,13 +84,17 @@ class EntitiesTest {
 
         assertEquals(
             1,
-            cottaState.entities().get(entityId)?.getComponent(PositionTestComponent::class)?.x
+            cottaState.entities().get(entityId)
+                ?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
-    @Test
-    fun `should have the same value for components after advancing a tick`() {
-        val cottaState = CottaState.getInstance(componentRegistry)
+    @ParameterizedTest
+    @MethodSource("states")
+    fun `should have the same value for components after advancing a tick`(
+        stateFactory: CottaStateFactory
+    ) {
+        val cottaState = stateFactory.getInstance(componentRegistry)
         val entities = cottaState.entities()
         val entity = entities.create()
         entity.addComponent(createPositionTestComponent(1, 1))
@@ -83,13 +104,17 @@ class EntitiesTest {
 
         assertEquals(
             1,
-            cottaState.entities().get(entityId)?.getComponent(PositionTestComponent::class)?.x
+            cottaState.entities().get(entityId)
+                ?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
-    @Test
-    fun `should remember previous value after advancing`() {
-        val cottaState = CottaState.getInstance(componentRegistry)
+    @ParameterizedTest
+    @MethodSource("states")
+    fun `should remember previous value after advancing`(
+        stateFactory: CottaStateFactory
+    ) {
+        val cottaState = stateFactory.getInstance(componentRegistry)
         val entities = cottaState.entities()
         val entity = entities.create()
         entity.addComponent(createPositionTestComponent(1, 1))
@@ -100,13 +125,17 @@ class EntitiesTest {
 
         assertEquals(
             1,
-            cottaState.entities(tick).get(entityId)?.getComponent(PositionTestComponent::class)?.x
+            cottaState.entities(tick).get(entityId)
+                ?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
-    @Test
-    fun `should remember previous value after advancing and altering value`() {
-        val cottaState = CottaState.getInstance(componentRegistry)
+    @ParameterizedTest
+    @MethodSource("states")
+    fun `should remember previous value after advancing and altering value`(
+        stateFactory: CottaStateFactory
+    ) {
+        val cottaState = stateFactory.getInstance(componentRegistry)
         val entities = cottaState.entities()
         val entity = entities.create()
         entity.addComponent(createPositionTestComponent(1, 1))
@@ -115,17 +144,22 @@ class EntitiesTest {
 
         cottaState.advance()
 
-        cottaState.entities().get(entityId)?.getComponent(PositionTestComponent::class)?.x = 2
+        cottaState.entities().get(entityId)
+            ?.getComponent(PositionTestComponent::class)?.x = 2
 
         assertEquals(
             1,
-            cottaState.entities(tick).get(entityId)?.getComponent(PositionTestComponent::class)?.x
+            cottaState.entities(tick).get(entityId)
+                ?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
-    @Test
-    fun `should be possible to advance like 100 times`() {
-        val cottaState = CottaState.getInstance(componentRegistry)
+    @ParameterizedTest
+    @MethodSource("states")
+    fun `should be possible to advance like 100 times`(
+        stateFactory: CottaStateFactory
+    ) {
+        val cottaState = stateFactory.getInstance(componentRegistry)
         val entities = cottaState.entities()
         val entity = entities.create()
         entity.addComponent(createPositionTestComponent(1, 1))
@@ -137,7 +171,8 @@ class EntitiesTest {
 
         assertEquals(
             1,
-            cottaState.entities().get(entityId)?.getComponent(PositionTestComponent::class)?.x
+            cottaState.entities().get(entityId)
+                ?.getComponent(PositionTestComponent::class)?.x
         )
     }
 
@@ -145,5 +180,31 @@ class EntitiesTest {
     private fun CottaState.advance() {
         advance(tickProvider.tick)
         tickProvider.tick++
+    }
+
+    interface CottaStateFactory {
+        fun getInstance(componentRegistry: ComponentRegistry): CottaState
+    }
+
+    private class CottaStateImplFactory : CottaStateFactory {
+        override fun getInstance(componentRegistry: ComponentRegistry): CottaState {
+            return CottaState.getInstance(componentRegistry)
+        }
+    }
+
+    private class ArrayBasedCottaStateFactory : CottaStateFactory {
+        override fun getInstance(componentRegistry: ComponentRegistry): CottaState {
+            return ArraysBasedCottaState(componentRegistry)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun states(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(CottaStateImplFactory()),
+//                Arguments.of(ArrayBasedCottaStateFactory())
+            )
+        }
     }
 }

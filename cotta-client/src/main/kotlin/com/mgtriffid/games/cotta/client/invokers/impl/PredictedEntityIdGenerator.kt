@@ -1,7 +1,7 @@
 package com.mgtriffid.games.cotta.client.invokers.impl
 
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 
 interface PredictedEntityIdGenerator {
-    fun getId(): PredictedEntityId
+    fun getId(): EntityId
 }

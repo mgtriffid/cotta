@@ -8,7 +8,6 @@ import com.google.inject.TypeLiteral
 import com.google.inject.name.Names.named
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
@@ -56,7 +55,6 @@ class BytesSerializationModule(
 
     private fun registerIds(kryo: Kryo) {
         kryo.register(AuthoritativeEntityId::class.java, DataClassSerializer(AuthoritativeEntityId::class))
-        kryo.register(PredictedEntityId::class.java, DataClassSerializer(PredictedEntityId::class))
         kryo.register(StaticEntityId::class.java, DataClassSerializer(StaticEntityId::class))
     }
 }

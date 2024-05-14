@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.core.serialization.bytes
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 
 object ConversionUtils {
@@ -82,10 +81,6 @@ object ConversionUtils {
                 writeInt(bytes, -1, offset)
                 writeInt(bytes, entityId.id, offset + 4)
             }
-            is PredictedEntityId -> {
-                writeInt(bytes, entityId.playerId.id, offset)
-                writeInt(bytes, entityId.id, offset + 4)
-            }
             is StaticEntityId -> {
                 writeInt(bytes, -2, offset)
                 writeInt(bytes, entityId.id, offset + 4)
@@ -98,7 +93,7 @@ object ConversionUtils {
         return when (type) {
             -1 -> AuthoritativeEntityId(readInt(byteArray, offset + 4))
             -2 -> StaticEntityId(readInt(byteArray, offset + 4))
-            else -> PredictedEntityId(PlayerId(readInt(byteArray, offset)), readInt(byteArray, offset + 4))
+            else -> throw IllegalStateException("Unknown entity id type: $type")
         }
     }
 }

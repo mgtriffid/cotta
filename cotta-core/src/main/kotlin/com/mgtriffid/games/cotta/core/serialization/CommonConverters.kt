@@ -4,7 +4,6 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.PredictedEntityId
 import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityOwnedByDto
@@ -12,7 +11,6 @@ import com.mgtriffid.games.cotta.core.serialization.dto.EntityOwnedByDto
 fun EntityIdDto.toEntityId(): EntityId {
     return when (kind) {
         EntityIdDto.Kind.AUTHORITATIVE -> AuthoritativeEntityId(id)
-        EntityIdDto.Kind.PREDICTED -> PredictedEntityId(PlayerId(playerId), id)
         EntityIdDto.Kind.STATIC -> StaticEntityId(id)
         null -> throw IllegalStateException("${EntityIdDto::class.simpleName}.${EntityIdDto::kind.name} is null")
     }

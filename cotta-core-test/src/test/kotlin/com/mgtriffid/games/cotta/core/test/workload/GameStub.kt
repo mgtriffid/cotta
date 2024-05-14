@@ -22,8 +22,10 @@ object GameStub : CottaGame {
     override fun initializeStaticState(entities: Entities) {
     }
 
-    override val config: CottaConfig = TODO()
-    override val playerInputKClass = TODO()
+    override val config: CottaConfig
+        get() = TODO()
+    override val playerInputKClass
+        get() = TODO()
 
     override val inputProcessing = object : InputProcessing {
         override fun process(

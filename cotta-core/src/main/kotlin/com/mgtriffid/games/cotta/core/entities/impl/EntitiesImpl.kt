@@ -1,6 +1,5 @@
 package com.mgtriffid.games.cotta.core.entities.impl
 
-import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
@@ -44,7 +43,7 @@ class EntitiesImpl(private val componentRegistry: ComponentRegistry) : EntitiesI
         dynamic.remove(id)
     }
 
-    fun deepCopy(): EntitiesImpl {
+    override fun deepCopy(): EntitiesImpl {
         val ret = EntitiesImpl(componentRegistry)
         ret.idGenerator = AtomicInteger(idGenerator.get())
         dynamic.forEach { (id: EntityId, entity: Entity) ->

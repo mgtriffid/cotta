@@ -2,22 +2,16 @@ package com.mgtriffid.games.cotta.core.serialization
 
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityOwnedByDto
 
 fun EntityIdDto.toEntityId(): EntityId {
-    return when (kind) {
-        EntityIdDto.Kind.AUTHORITATIVE -> AuthoritativeEntityId(id)
-        EntityIdDto.Kind.STATIC -> StaticEntityId(id)
-        null -> throw IllegalStateException("${EntityIdDto::class.simpleName}.${EntityIdDto::kind.name} is null")
-    }
+    return EntityId(id)
 }
 
 fun Entity.OwnedBy.toDto(): EntityOwnedByDto {
-    val ret = EntityOwnedByDto();
+    val ret = EntityOwnedByDto()
     when (this) {
         is Entity.OwnedBy.Player -> {
             ret.ownedBySystem = false

@@ -80,10 +80,10 @@ class BytesStateSnapper @Inject constructor(
         val addedComponents = currComponents.filter { cc ->
             prevComponents.none { pc -> getKey(cc) == getKey(pc) }
         }
-        val changedComponents: Map<Component<*>, Component<*>> =
+        val changedComponents: Map<Component, Component> =
             currComponents.associateWith { cc ->
                 prevComponents.find { pc -> (getKey(pc) == getKey(cc)) && (pc != cc) }
-            }.filterValues { it != null } as Map<Component<*>, Component<*>>
+            }.filterValues { it != null }.mapValues { it.value!! }
 
         return BytesChangedEntityRecipe(
             entityId = curr.id,
@@ -163,14 +163,14 @@ class BytesStateSnapper @Inject constructor(
         }
     }
 
-    private fun unpackComponentRecipe(componentRecipe: BytesComponentRecipe): Component<*> {
+    private fun <C: Component> unpackComponentRecipe(componentRecipe: BytesComponentRecipe): C {
         val input = Input(componentRecipe.data)
-        return kryo.readClassAndObject(input) as Component<*>
+        return kryo.readClassAndObject(input) as C
     }
 
-    private fun unpackComponentDeltaRecipe(componentRecipe: BytesComponentDeltaRecipe): Component<*> {
+    private fun unpackComponentDeltaRecipe(componentRecipe: BytesComponentDeltaRecipe): Component{
         val input = Input(componentRecipe.data)
-        return kryo.readClassAndObject(input) as Component<*>
+        return kryo.readClassAndObject(input) as Component
     }
 
     override fun unpackStateRecipe(
@@ -193,7 +193,7 @@ class BytesStateSnapper @Inject constructor(
         )
     }
 
-    private fun packComponent(component: Component<*>): BytesComponentRecipe {
+    private fun packComponent(component: Component): BytesComponentRecipe {
         return BytesComponentRecipe(
             data = kryo.run {
                 val output = Output(1024)
@@ -203,7 +203,7 @@ class BytesStateSnapper @Inject constructor(
         )
     }
 
-    private fun packComponentDelta(curr: Component<*>): BytesComponentDeltaRecipe {
+    private fun packComponentDelta(curr: Component): BytesComponentDeltaRecipe {
         return BytesComponentDeltaRecipe(
             data = kryo.run {
                 val output = Output(1024)
@@ -213,11 +213,11 @@ class BytesStateSnapper @Inject constructor(
         )
     }
 
-    private fun getKey(component: Component<*>): ShortComponentKey {
+    private fun getKey(component: Component): ShortComponentKey {
         return generatedComponentRegistry.getKey(component::class)
     }
 
-    private fun getComponentClassByKey(key: ShortComponentKey): KClass<out Component<*>> {
+    private fun getComponentClassByKey(key: ShortComponentKey): KClass<out Component> {
         return generatedComponentRegistry.getComponentClassByKey(key)
     }
 }

@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 @Component
 interface CharacterInputComponent2 :
-    MutableComponent<CharacterInputComponent2> {
+    MutableComponent {
 
     @ComponentData
     var direction: Byte

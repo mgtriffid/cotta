@@ -15,22 +15,22 @@ class EntityImpl(
     override val id: EntityId,
     override val ownedBy: Entity.OwnedBy,
 ) : Entity {
-    private var components = IntMap<Component<*>>()
-    private var historicalComponents = IntMap<Component<*>>()
+    private var components = IntMap<Component>()
+    private var historicalComponents = IntMap<Component>()
 
-    override fun <T : Component<T>> hasComponent(clazz: KClass<T>): Boolean {
+    override fun <T: Component> hasComponent(clazz: KClass<T>): Boolean {
         val key = componentRegistry.getKey(clazz)
         return components(key).containsKey(key.key.toInt())
     }
 
-    override fun <T : Component<T>> getComponent(clazz: KClass<T>): T {
+    override fun <T : Component> getComponent(clazz: KClass<T>): T {
         val key = componentRegistry.getKey(clazz)
         @Suppress("UNCHECKED_CAST")
         return components(key).get(key.key.toInt()) as? T
             ?: throw EcsRuntimeException("No such component")
     }
 
-    override fun addComponent(component: Component<*>) {
+    override fun <C: Component> addComponent(component: C) {
         val key = componentRegistry.getKey(component::class)
         components(key).put(key.key.toInt(), component)
     }
@@ -42,7 +42,7 @@ class EntityImpl(
             components
         }
 
-    override fun <T : Component<T>> removeComponent(clazz: KClass<T>) {
+    override fun <T : Component> removeComponent(clazz: KClass<T>) {
         val key = componentRegistry.getKey(clazz)
         components(key).remove(componentRegistry.getKey(clazz).key.toInt())
     }
@@ -55,13 +55,13 @@ class EntityImpl(
         val ret = EntityImpl(componentRegistry, id, ownedBy)
         ret.components = components
         historicalComponents.forEach { entry ->
-            val value = (entry.value as MutableComponent<*>).copy()
+            val value = (entry.value as MutableComponent).copy()
             ret.historicalComponents.put(entry.key, value)
         }
         return ret
     }
 
-    override fun components(): Collection<Component<*>> {
+    override fun components(): Collection<Component> {
         return components.values().toList() + historicalComponents.values().toList()
     }
 }

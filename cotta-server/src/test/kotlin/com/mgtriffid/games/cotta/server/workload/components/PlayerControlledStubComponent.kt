@@ -5,7 +5,7 @@ import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 @Component
 interface PlayerControlledStubComponent :
-    MutableComponent<PlayerControlledStubComponent> {
+    MutableComponent {
     var aim: Int
     var shoot: Boolean
 }

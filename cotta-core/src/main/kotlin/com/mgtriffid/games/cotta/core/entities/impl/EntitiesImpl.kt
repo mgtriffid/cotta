@@ -1,7 +1,6 @@
 package com.mgtriffid.games.cotta.core.entities.impl
 
 import com.mgtriffid.games.cotta.core.entities.Entity
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import java.util.concurrent.atomic.AtomicInteger
@@ -12,7 +11,7 @@ class EntitiesImpl(private val componentRegistry: ComponentRegistry) : EntitiesI
     private var static = HashMap<EntityId, Entity>()
 
     override fun create(ownedBy: Entity.OwnedBy): Entity {
-        return EntityImpl(componentRegistry, AuthoritativeEntityId(idGenerator.incrementAndGet()), ownedBy).also { dynamic[it.id] = it }
+        return EntityImpl(componentRegistry, EntityId(idGenerator.incrementAndGet()), ownedBy).also { dynamic[it.id] = it }
     }
 
     override fun create(id: EntityId, ownedBy: Entity.OwnedBy): Entity {

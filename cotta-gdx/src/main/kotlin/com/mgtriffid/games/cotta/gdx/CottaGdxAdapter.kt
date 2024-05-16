@@ -30,7 +30,7 @@ class CottaGdxAdapter(
         return client.update(now())
     }
 
-    fun getDrawableState(alphas: InterpolationAlphas, components: List<KClass<out Component<*>>>): DrawableState {
+    fun getDrawableState(alphas: InterpolationAlphas, components: List<KClass<out Component>>): DrawableState {
         return client.getDrawableState(alphas, *components.toTypedArray())
     }
 

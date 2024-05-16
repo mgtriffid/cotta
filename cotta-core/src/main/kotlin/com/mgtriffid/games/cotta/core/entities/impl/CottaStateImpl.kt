@@ -61,6 +61,9 @@ class CottaStateImpl @Inject constructor(
         this.blank = entities.deepCopy()
     }
 
+    // If we copy from authoritative to guessed and then later we guess someone
+    // shot a railgun - we need do lag compensate. But this doesn't look into
+    // past because only latest tick set!
     override fun copyTo(state: CottaState) {
         state.set(tick = latestTickSet, entities = entities(latestTickSet).deepCopy())
     }

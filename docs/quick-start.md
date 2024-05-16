@@ -170,14 +170,14 @@ Let's define components for position and to mark an entity as controlled by a
 player:
 
 ```kotlin
-interface PositionComponent : MutableComponent<PositionComponent> {
+interface PositionComponent : MutableComponent {
     var x: Float
     var y: Float
 }
 ```
 
 ```kotlin
-interface ControllableComponent : MutableComponent<ControllableComponent> {
+interface ControllableComponent : MutableComponent {
     var direction: Byte
     val playerId: PlayerId
 }
@@ -344,8 +344,8 @@ a file `DrawableComponents.kt`
 [//]: # (TODO remove this, make this guide use Kotlin everywhere)
 
 ```kotlin
-fun getDrawableComponentClasses(): List<KClass<Component<*>>> = listOf(
-    position as KClass<Component<*>>
+fun getDrawableComponentClasses(): List<KClass<Component>> = listOf(
+    position as KClass<Component>
 )
 
 val position = PositionComponent::class
@@ -388,7 +388,7 @@ public void render() {
     }
 }
 
-private final List<KClass<Component<?>>> drawableComponents = DrawableComponentsKt.getDrawableComponentClasses();
+private final List<KClass<Component>> drawableComponents = DrawableComponentsKt.getDrawableComponentClasses();
 
 private void draw(UpdateResult.Running result) {
     DrawableState state = gdxAdapter.getDrawableState(result.getAlphas(), drawableComponents);
@@ -412,7 +412,7 @@ public class Main extends ApplicationAdapter {
     private Texture character;
     private CottaGdxAdapter gdxAdapter;
 
-    private final List<KClass<Component<?>>> drawableComponents = DrawableComponentsKt.getDrawableComponentClasses();
+    private final List<KClass<Component>> drawableComponents = DrawableComponentsKt.getDrawableComponentClasses();
 
     @Override
     public void create() {
@@ -512,7 +512,7 @@ class MovementSystem : EntityProcessingSystem {
 
 Annotate both fields of the `PositionComponent` as `@Interpolated`:
 ```kotlin
-interface PositionComponent : MutableComponent<PositionComponent> {
+interface PositionComponent : MutableComponent {
     @Interpolated var x: Float
     @Interpolated var y: Float
 }

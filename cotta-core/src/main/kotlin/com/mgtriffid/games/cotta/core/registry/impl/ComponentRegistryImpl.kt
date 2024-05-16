@@ -17,28 +17,28 @@ import kotlin.reflect.KClass
 class ComponentRegistryImpl @Inject constructor(
     @Named("snapper") private val kryo: Kryo,
 ) : ComponentRegistry {
-    private val componentKeyByClass = HashMap<KClass<out Component<*>>, ShortComponentKey>()
+    private val componentKeyByClass = HashMap<KClass<out Component>, ShortComponentKey>()
     private var componentSpecByKey = ArrayList<ComponentSpec2>()
 
     private val componentRegistrationListeners = ArrayList<ComponentRegistrationListener>()
     private val effectRegistrationListeners = ArrayList<EffectRegistrationListener>()
 
-    override fun getKey(kClass: KClass<out Component<*>>): ShortComponentKey {
+    override fun getKey(kClass: KClass<out Component>): ShortComponentKey {
         return componentKeyByClass[kClass] ?: throw IllegalArgumentException("No key for $kClass")
     }
 
-    override fun getDeclaredComponent(kClass: KClass<out Component<*>>): KClass<out Component<*>> {
+    override fun getDeclaredComponent(kClass: KClass<out Component>): KClass<out Component> {
         return getComponentClassByKey(getKey(kClass))
     }
 
-    override fun getComponentClassByKey(key: ShortComponentKey): KClass<out Component<*>> {
+    override fun getComponentClassByKey(key: ShortComponentKey): KClass<out Component> {
         return componentSpecByKey[key.key.toInt()].kClass
     }
 
     override fun registerComponent(
         key: ShortComponentKey,
-        kClass: KClass<out Component<*>>,
-        kClassImpl: KClass<out Component<*>>,
+        kClass: KClass<out Component>,
+        kClassImpl: KClass<out Component>,
         historical: Boolean
     ) {
         componentKeyByClass[kClass] = key
@@ -78,6 +78,6 @@ class ComponentRegistryImpl @Inject constructor(
 }
 
 private data class ComponentSpec2(
-    val kClass: KClass<out Component<*>>,
+    val kClass: KClass<out Component>,
     val historical: Boolean
 )

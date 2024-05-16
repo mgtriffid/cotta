@@ -79,7 +79,7 @@ Since we use `ControllableComponent` there as a Component which Systems use, we
 also add `isShooting` to it:
 
 ```kotlin
-interface ControllableComponent : MutableComponent<ControllableComponent> {
+interface ControllableComponent : MutableComponent {
     var direction: Byte
     var isShooting: Boolean
     val playerId: PlayerId
@@ -116,7 +116,7 @@ will introduce orientation to the square, so that when the shoot button is
 pressed, it shoots at the direction the square is facing.
 
 ```kotlin
-interface PositionComponent : MutableComponent<PositionComponent> {
+interface PositionComponent : MutableComponent {
     @Interpolated var x: Float
     @Interpolated var y: Float
     var orientation: Byte
@@ -238,7 +238,7 @@ of `cotta-showcase`.
 So what we have to do is add a VelocityComponent and move bullets.
 
 ```kotlin
-interface VelocityComponent : MutableComponent<VelocityComponent> {
+interface VelocityComponent : MutableComponent {
     var x: Float
     var y: Float
 }

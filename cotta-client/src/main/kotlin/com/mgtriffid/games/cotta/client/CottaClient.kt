@@ -9,7 +9,7 @@ interface CottaClient {
     fun initialize()
 
     fun update(now: Long): UpdateResult
-    fun getDrawableState(alphas: InterpolationAlphas, vararg components: KClass<out Component<*>>): DrawableState
+    fun getDrawableState(alphas: InterpolationAlphas, vararg components: KClass<out Component>): DrawableState
 
     // TODO better place or better beans. This is here now only for drawing. Incorrect.
     val localPlayer: LocalPlayer // TODO read-only view

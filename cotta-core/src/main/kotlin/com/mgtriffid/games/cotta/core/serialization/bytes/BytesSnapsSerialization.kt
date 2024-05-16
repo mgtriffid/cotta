@@ -62,7 +62,6 @@ class BytesSnapsSerialization : SnapsSerialization<
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
         kryo.register(EntityIdDto::class.java)
-        kryo.register(EntityIdDto.Kind::class.java)
         kryo.register(PlayerIdDto::class.java)
         kryo.register(BytesCreateEntityTraceDto::class.java)
         kryo.register(BytesCreateEntityTracesDto::class.java)

@@ -3,7 +3,6 @@ package com.mgtriffid.games.cotta.network.kryonet
 import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.network.kryonet.acking.Acks
 import com.mgtriffid.games.cotta.network.kryonet.acking.Chunk
@@ -18,7 +17,7 @@ fun Kryo.registerClasses() {
     register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
     register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
     register(EntityId::class.java)
-    register(AuthoritativeEntityId::class.java)
+    register(EntityId::class.java)
     register(ServerToClientDto::class.java)
     register(StateServerToClientDto::class.java)
     register(SimulationInputServerToClientDto::class.java)

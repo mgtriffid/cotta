@@ -5,7 +5,7 @@ import com.mgtriffid.games.cotta.core.annotations.ComponentData
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 @Component
-interface VelocityComponent : MutableComponent<VelocityComponent> {
+interface VelocityComponent : MutableComponent {
     @ComponentData
     var velX: Float
     @ComponentData

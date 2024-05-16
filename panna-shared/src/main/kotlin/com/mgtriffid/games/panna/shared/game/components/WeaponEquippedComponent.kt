@@ -5,7 +5,7 @@ import com.mgtriffid.games.cotta.core.annotations.ComponentData
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 @Component
-interface WeaponEquippedComponent : MutableComponent<WeaponEquippedComponent> {
+interface WeaponEquippedComponent : MutableComponent {
     @ComponentData
     var equipped: Byte
     @ComponentData

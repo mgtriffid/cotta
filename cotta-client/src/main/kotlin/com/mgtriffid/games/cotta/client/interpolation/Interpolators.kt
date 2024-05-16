@@ -10,9 +10,9 @@ import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSubclassOf
 
 class Interpolators {
-    private val interpolators = HashMap<KClass<out Component<*>>, ComponentInterpolator<*>>()
+    private val interpolators = HashMap<KClass<out Component>, ComponentInterpolator<*>>()
 
-    fun <C: Component<C>> register(klass: KClass<out Component<C>>) {
+    fun <C: Component> register(klass: KClass<C>) {
         var interpolatedFields = klass.declaredMemberProperties.filter { it.hasAnnotation<Interpolated>() }
         if (interpolatedFields.isEmpty()) {
             return
@@ -22,12 +22,12 @@ class Interpolators {
         interpolators[klass] = createInterpolator(interpolatedFields)
     }
 
-    private fun <C: Component<C>> createInterpolator(fields: List<KMutableProperty1<C, *>>): ComponentInterpolator<*> {
+    private fun <C: Component> createInterpolator(fields: List<KMutableProperty1<C, *>>): ComponentInterpolator<*> {
         val fieldInterpolators: List<FieldInterpolator<C, *>> = fields.map { createFieldInterpolator(it) }
         return ComponentInterpolator(fieldInterpolators)
     }
 
-    private fun <C: Component<C>, V> createFieldInterpolator(property: KMutableProperty1<C, V>): FieldInterpolator<C, V> {
+    private fun <C: Component, V> createFieldInterpolator(property: KMutableProperty1<C, V>): FieldInterpolator<C, V> {
         val type = property.returnType
         val interpolator = when (type.classifier) {
             Float::class -> FloatInterpolator()
@@ -42,14 +42,14 @@ class Interpolators {
     }
 
     // TODO somehow refactor and make this return interpolated component; refactor in CottaClientImpl accordingly
-    fun <C: Component<C>> interpolate(prev: C, curr: C, interpolated: C, alpha: Float) {
+    fun <C: Component> interpolate(prev: C, curr: C, interpolated: C, alpha: Float) {
         interpolators.keys.find { prev::class.isSubclassOf(it) }?.let {
             @Suppress("UNCHECKED_CAST")
             (interpolators[it] as? ComponentInterpolator<C>)?.interpolate(prev, curr, interpolated, alpha)
         }
     }
 
-    private class FieldInterpolator<T: Component<T>, V>(
+    private class FieldInterpolator<T: Component, V>(
         val property: KMutableProperty1<T, V>,
         val interpolator: Interpolator<V>)
     {
@@ -61,7 +61,7 @@ class Interpolators {
         }
     }
 
-    private class ComponentInterpolator<T : Component<T>>(
+    private class ComponentInterpolator<T : Component>(
         private val fieldInterpolators: List<FieldInterpolator<T, *>>
     ) {
         fun interpolate(from: T, to: T, target: T, alpha: Float) {

@@ -5,7 +5,7 @@ import com.mgtriffid.games.cotta.core.annotations.ComponentData
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 @Component
-interface LookingAtComponent : MutableComponent<LookingAtComponent> {
+interface LookingAtComponent : MutableComponent {
     @ComponentData
     var lookAt: Float
 }

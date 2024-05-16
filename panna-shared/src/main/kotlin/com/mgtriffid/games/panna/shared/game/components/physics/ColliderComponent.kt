@@ -4,7 +4,7 @@ import com.mgtriffid.games.cotta.core.annotations.ComponentData
 import com.mgtriffid.games.cotta.core.entities.Component
 
 @com.mgtriffid.games.cotta.core.annotations.Component
-interface ColliderComponent : Component<ColliderComponent> {
+interface ColliderComponent : Component {
     @ComponentData
     val width: Int
     @ComponentData

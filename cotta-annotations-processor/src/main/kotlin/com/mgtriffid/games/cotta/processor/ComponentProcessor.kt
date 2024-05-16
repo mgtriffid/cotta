@@ -11,6 +11,9 @@ import com.mgtriffid.games.cotta.core.codegen.Constants.GET_COMPONENTS_METHOD
 import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
+import com.mgtriffid.games.cotta.core.entities.PlayerId
+import com.mgtriffid.games.cotta.core.entities.arrays.ComponentStorage
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.impl.ComponentInternal
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
@@ -36,7 +39,8 @@ class ComponentProcessor(
     fun process(game: KSClassDeclaration) {
         val components = getComponentInterfaces(game)
         components.forEach {
-            writeImplementation(it)
+            writeImplementationV1(it)
+            writeImplementationV2(it)
         }
         writeRegistry(components, game)
     }
@@ -54,20 +58,263 @@ class ComponentProcessor(
                         )
                 }
             }
-            .filter { it.packageName.asString().startsWith(game.packageName.asString()) }.toList()
+            .filter {
+                it.packageName.asString()
+                    .startsWith(game.packageName.asString())
+            }.toList()
     }
 
-    private fun writeImplementation(component: KSClassDeclaration) {
+    private fun writeImplementationV1(component: KSClassDeclaration) {
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
-        val properties: List<ProcessableComponentFieldSpec> = getProcessableComponentFieldSpecs(component)
-        val fileSpecBuilder = FileSpec.builder(pkg, "${componentName}$IMPL_SUFFIX")
+        val properties: List<ProcessableComponentFieldSpec> =
+            getProcessableComponentFieldSpecs(component)
+        val fileSpecBuilder =
+            FileSpec.builder(pkg, "${componentName}$IMPL_SUFFIX")
         if (properties.isNotEmpty()) {
-            buildDataClassImplementation(fileSpecBuilder, componentName, component, properties)
+            buildDataClassImplementation(
+                fileSpecBuilder,
+                componentName,
+                component,
+                 properties
+            )
         } else {
-            buildSingletonImplementation(fileSpecBuilder, componentName, component)
+            buildSingletonImplementation(
+                fileSpecBuilder,
+                componentName,
+                component
+            )
         }
         fileSpecBuilder.build().writeTo(codeGenerator, false)
+    }
+
+    private fun writeImplementationV2(component: KSClassDeclaration) {
+        // make a storage which is a class with a bunch of indices
+        writeDataStorage(component)
+        writeProxy(component)
+    }
+
+    private fun writeDataStorage(component: KSClassDeclaration) {
+        val pkg = component.packageName.asString()
+        val componentName = component.simpleName.asString()
+        val fileSpecBuilder =
+            FileSpec.builder(pkg, "${componentName}DataStorage")
+        val properties: List<ProcessableComponentFieldSpec> =
+            getProcessableComponentFieldSpecs(component)
+        fileSpecBuilder.addType(buildStorageType(componentName, component, properties))
+        fileSpecBuilder.build().writeTo(codeGenerator, false)
+    }
+
+    private fun buildStorageType(
+        componentName: String,
+        component: KSClassDeclaration,
+        properties: List<ProcessableComponentFieldSpec>
+    ): TypeSpec {
+        val builder = TypeSpec.classBuilder("${componentName}DataStorage")
+        properties.forEach { fieldSpec ->
+            builder.addProperty(writeArrayStorage(fieldSpec))
+        }
+        builder.addSuperinterface(
+            ComponentStorage.Data::class.asTypeName().parameterizedBy(
+                component.asStarProjectedType().toTypeName()
+            ))
+
+
+        builder.addFunction(grow(properties))
+        builder.addFunction(set(properties, component))
+        builder.addFunction(remove(properties))
+        builder.addFunction(fGet(component))
+
+        return builder.build()
+    }
+
+    private fun fGet(component: KSClassDeclaration): FunSpec {
+        return FunSpec.builder("get")
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter("index", Int::class)
+            .returns(component.asStarProjectedType().toTypeName())
+            .addStatement("val ret = ${component.simpleName.asString()}Proxy(this)")
+            .addStatement("ret.pointer = index")
+            .addStatement("return ret")
+            .build()
+    }
+
+    private fun grow(properties: List<ProcessableComponentFieldSpec>): FunSpec {
+        val builder = FunSpec.builder("grow")
+        builder.addModifiers(KModifier.OVERRIDE)
+
+        properties.forEach {
+            builder.addStatement("val ${it.name}New = ${it.name}.copyOf(${it.name}.size * 2)")
+            builder.addStatement("${it.name} = ${it.name}New")
+        }
+        return builder.build()
+    }
+
+    private fun set(
+        properties: List<ProcessableComponentFieldSpec>,
+        component: KSClassDeclaration
+    ): FunSpec {
+        val builder = FunSpec.builder("set")
+            .addModifiers(KModifier.OVERRIDE)
+            .addModifiers(KModifier.OPERATOR)
+            .addParameter("index", Int::class)
+            .addParameter("component", component.asStarProjectedType().toTypeName())
+
+        properties.forEach {
+            builder.addStatement("${it.name}[index] = ${
+                when (it.type) {
+                    EntityId::class.asTypeName() -> "component.${it.name}.id"
+                    PlayerId::class.asTypeName() -> "component.${it.name}.id"
+                    else -> "component.${it.name}"
+                }
+            }")
+        }
+        return builder.build()
+    }
+
+    private fun remove(
+        properties: List<ProcessableComponentFieldSpec>
+    ): FunSpec {
+        val builder = FunSpec.builder("remove")
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter("index", Int::class)
+            .addParameter("size", Int::class)
+
+        properties.forEach {
+            builder.addStatement("${it.name}[index] = ${it.name}[size]")
+        }
+        return builder.build()
+    }
+
+    private fun writeArrayStorage(fieldSpec: ProcessableComponentFieldSpec): PropertySpec {
+        val arrayClass = when (fieldSpec.type) {
+            Int::class.asTypeName() -> IntArray::class
+            Float::class.asTypeName() -> FloatArray::class
+            Double::class.asTypeName() -> DoubleArray::class
+            Long::class.asTypeName() -> LongArray::class
+            Short::class.asTypeName() -> ShortArray::class
+            Byte::class.asTypeName() -> ByteArray::class
+            EntityId::class.asTypeName() -> IntArray::class
+            PlayerId::class.asTypeName() -> IntArray::class
+            Boolean::class.asTypeName() -> BooleanArray::class
+            else -> throw IllegalArgumentException("Unsupported type ${fieldSpec.type}")
+        }
+        return PropertySpec.builder(
+            name = fieldSpec.name,
+            type = arrayClass,
+            KModifier.INTERNAL
+        )
+            .mutable()
+            .initializer("${arrayClass.simpleName}(8)")
+            .build()
+    }
+
+    private fun writeProxy(component: KSClassDeclaration) {
+        val pkg = component.packageName.asString()
+        val componentName = component.simpleName.asString()
+        val fileSpecBuilder =
+            FileSpec.builder(pkg, "${componentName}Proxy")
+        val properties: List<ProcessableComponentFieldSpec> =
+            getProcessableComponentFieldSpecs(component)
+        fileSpecBuilder.addType(
+            buildProxyType(
+                componentName,
+                component,
+                properties
+            )
+        )
+        fileSpecBuilder.build().writeTo(codeGenerator, false)
+    }
+
+    private fun buildProxyType(
+        componentName: String,
+        component: KSClassDeclaration,
+        properties: List<ProcessableComponentFieldSpec>
+    ): TypeSpec {
+        val builder = TypeSpec.classBuilder("${componentName}Proxy")
+        builder.addProperty(
+            PropertySpec.builder(
+                "storage",
+                ClassName(
+                    component.packageName.asString(),
+                    "${componentName}DataStorage"
+                )
+            )
+                .initializer("storage")
+                .build()
+        )
+        builder.primaryConstructor(
+            FunSpec.constructorBuilder()
+                .addParameter(
+                    ParameterSpec.builder(
+                        name = "storage",
+                        type = ClassName(
+                            component.packageName.asString(),
+                            "${componentName}DataStorage"
+                        )
+                    ).build()
+                )
+                .build()
+        )
+        builder.addSuperinterface(component.asStarProjectedType().toTypeName())
+        builder.addProperty(
+            PropertySpec.builder("pointer", Int::class.asTypeName())
+                .initializer("0")
+                .mutable()
+                .build()
+        )
+        properties.forEach { fieldSpec ->
+            builder.addProperty(writeProxyProperty(fieldSpec))
+        }
+        if (properties.any { it.isMutable }) {
+            builder.addFunction(
+                FunSpec.builder(COPY_METHOD).addStatement("return this")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .returns(
+                        component.asStarProjectedType().toTypeName()
+                    )
+                    .build()
+            )
+        }
+        builder.addProperty(
+            PropertySpec.builder("entities", IntArray::class, KModifier.PRIVATE)
+                .initializer("IntArray(8)")
+                .build()
+        )
+
+        return builder.build()
+    }
+
+    private fun writeProxyProperty(fieldSpec: ProcessableComponentFieldSpec): PropertySpec {
+        val builder = PropertySpec.builder(
+            name = fieldSpec.name,
+            type = fieldSpec.type,
+            KModifier.OVERRIDE
+        )
+        builder
+            .getter(
+                FunSpec.getterBuilder()
+                    .addStatement(
+                        when (fieldSpec.type) {
+                            EntityId::class.asTypeName() -> "return EntityId(storage.${fieldSpec.name}[pointer])"
+                            PlayerId::class.asTypeName() -> "return PlayerId(storage.${fieldSpec.name}[pointer])"
+                            else -> "return storage.${fieldSpec.name}[pointer]"
+                        }
+                    ).build()
+            )
+            .build()
+
+        if (fieldSpec.isMutable) {
+            builder.mutable()
+
+            builder.setter(
+                FunSpec.setterBuilder()
+                    .addParameter("value", fieldSpec.type)
+                    .addStatement("storage.${fieldSpec.name}[pointer] = value")
+                    .build()
+            )
+        }
+        return builder.build()
     }
 
     private fun buildSingletonImplementation(
@@ -77,22 +324,27 @@ class ComponentProcessor(
     ) {
         val name = "${componentName}$IMPL_SUFFIX"
         fileSpecBuilder.addFunction(
-            FunSpec.builder("$FACTORY_METHOD_PREFIX${componentName}").addModifiers(KModifier.PUBLIC)
+            FunSpec.builder("$FACTORY_METHOD_PREFIX${componentName}")
+                .addModifiers(KModifier.PUBLIC)
                 .returns(component.asStarProjectedType().toTypeName())
                 .addStatement("return $name")
                 .build()
         )
             .addType(
                 TypeSpec.objectBuilder(name)
-                    .addSuperinterface(component.asStarProjectedType().toTypeName())
+                    .addSuperinterface(
+                        component.asStarProjectedType().toTypeName()
+                    )
                     .addSuperinterface(ComponentInternal::class.asTypeName())
-                    .addFunction(
+                    /*.addFunction(
                         FunSpec.builder(COPY_METHOD).addStatement("return this")
                             .addModifiers(KModifier.OVERRIDE)
-                            .returns(component.asStarProjectedType().toTypeName())
+                            .returns(
+                                component.asStarProjectedType().toTypeName()
+                            )
                             .build()
                     )
-                    .build()
+*/                    .build()
             )
     }
 
@@ -119,9 +371,13 @@ class ComponentProcessor(
         .primaryConstructor(
             implPrimaryConstructor(properties)
         )
-        .addFunction(
-            copy(properties, component)
-        )
+        .also {
+            if (properties.any { it.isMutable }) {
+                it.addFunction(
+                    copy(properties, component)
+                )
+            }
+        }
         .addProperties(
             properties.map { prop ->
                 PropertySpec.builder(prop.name, prop.type)
@@ -163,14 +419,21 @@ class ComponentProcessor(
         componentName: String,
         component: KSClassDeclaration,
         properties: List<ProcessableComponentFieldSpec>
-    ) = FunSpec.builder("$FACTORY_METHOD_PREFIX$componentName").addModifiers(KModifier.PUBLIC)
+    ) = FunSpec.builder("$FACTORY_METHOD_PREFIX$componentName")
+        .addModifiers(KModifier.PUBLIC)
         .returns(component.asStarProjectedType().toTypeName())
         .addParameters(
             properties.map { spec ->
                 ParameterSpec.builder(spec.name, spec.type).build()
             }
         )
-        .addStatement("return $componentName$IMPL_SUFFIX(${properties.joinToString(", ") { it.name }})")
+        .addStatement(
+            "return $componentName$IMPL_SUFFIX(${
+                properties.joinToString(
+                    ", "
+                ) { it.name }
+            })"
+        )
         .build()
 
     private fun writeRegistry(

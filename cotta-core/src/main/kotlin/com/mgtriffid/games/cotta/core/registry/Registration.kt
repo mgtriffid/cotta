@@ -22,7 +22,7 @@ fun registerComponents(game: CottaGame, componentRegistry: ComponentRegistry) {
         componentRegistry.registerComponent(
             ShortComponentKey(index.toShort()),
             kClass,
-            getImplKClass(kClass) as KClass<out Component<*>>,
+            getImplKClass(kClass) as KClass<out Component>,
             kClass.declaredMemberProperties.any { it is KMutableProperty1 }
         )
     }
@@ -31,12 +31,12 @@ fun registerComponents(game: CottaGame, componentRegistry: ComponentRegistry) {
     }
 }
 
-fun getComponentClasses(game: CottaGame): List<KClass<out Component<*>>> {
+fun getComponentClasses(game: CottaGame): List<KClass<out Component>> {
     val gameClass = game::class
     return getCottaGeneratedClass(gameClass, COMPONENTS_CLASS_SUFFIX).let {
         @Suppress("UNCHECKED_CAST")
         val components = invokeOnNewInstance(it, GET_COMPONENTS_METHOD) as List<KClass<*>>
-        components.map { it as KClass<out Component<*>> }
+        components.map { it as KClass<out Component> }
     }
 }
 

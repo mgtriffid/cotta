@@ -5,7 +5,7 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 
 @com.mgtriffid.games.cotta.core.annotations.Component
-interface BulletComponent: Component<BulletComponent> {
+interface BulletComponent: Component {
     @ComponentData
     val shooterId: EntityId
 }

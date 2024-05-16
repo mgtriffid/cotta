@@ -175,7 +175,7 @@ class CottaClientImpl @Inject constructor(
 
     override fun getDrawableState(
         alphas: InterpolationAlphas,
-        vararg components: KClass<out Component<*>>
+        vararg components: KClass<out Component>
     ): DrawableState {
         return drawableStateProvider.get(alphas, components)
     }

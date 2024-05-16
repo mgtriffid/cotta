@@ -6,9 +6,7 @@ import com.esotericsoftware.kryo.io.Output
 import com.esotericsoftware.kryo.serializers.CollectionSerializer
 import com.esotericsoftware.kryo.serializers.MapSerializer
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.serialization.InputSerialization
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesEntityInputRecipeDto
@@ -33,7 +31,6 @@ class BytesInputSerialization(
         kryo.register(BytesInputComponentRecipeDto::class.java)
         kryo.register(BytesEntityInputRecipeDto::class.java)
         kryo.register(EntityIdDto::class.java)
-        kryo.register(EntityIdDto.Kind::class.java)
         kryo.register(BytesInputRecipeDto::class.java)
         kryo.register(HashMap::class.java, MapSerializer<HashMap<String, Any?>>())
         kryo.register(ArrayList::class.java, CollectionSerializer<ArrayList<Any?>>())
@@ -105,15 +102,6 @@ private fun BytesInputComponentRecipeDto.toRecipe(): BytesInputComponentRecipe {
 }
 
 fun EntityId.toDto(): EntityIdDto {
-    return when (this) {
-        is AuthoritativeEntityId -> EntityIdDto().also {
-            it.id = id
-            it.kind = EntityIdDto.Kind.AUTHORITATIVE
-        }
-        is StaticEntityId -> EntityIdDto().also {
-            it.id = id
-            it.kind = EntityIdDto.Kind.STATIC
-        }
-    }
+    return EntityIdDto().also { it.id = id }
 }
 // </editor-fold>

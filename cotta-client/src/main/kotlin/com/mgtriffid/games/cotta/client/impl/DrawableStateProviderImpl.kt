@@ -37,7 +37,7 @@ class DrawableStateProviderImpl @Inject constructor(
     private val previouslyPredicted = TreeMap<Long, Collection<DrawableEffect>>()
 
     // GROOM what the actual fuck
-    override fun get(alphas: InterpolationAlphas, components: Array<out KClass<out Component<*>>>): DrawableState {
+    override fun get(alphas: InterpolationAlphas, components: Array<out KClass<out Component>>): DrawableState {
         if (globalTickProvider.tick == 0L) return DrawableState.NotReady
         val onlyNeeded: Collection<Entity>.() -> Collection<Entity> = {
             filter { entity ->
@@ -100,7 +100,7 @@ class DrawableStateProviderImpl @Inject constructor(
         previous: Collection<Entity>,
         current: Collection<Entity>,
         alpha: Float,
-        components: List<KClass<out Component<*>>>
+        components: List<KClass<out Component>>
     ): List<Entity> {
         return current.mapNotNull { curr ->
             val prev = previous.find { it.id == curr.id }
@@ -118,7 +118,7 @@ class DrawableStateProviderImpl @Inject constructor(
         prev: Entity,
         curr: Entity,
         interpolated: Entity,
-        component: KClass<out Component<*>>,
+        component: KClass<out Component>,
         alpha: Float
     ) {
         val prevComponent = prev.getComponent(component)
@@ -127,12 +127,12 @@ class DrawableStateProviderImpl @Inject constructor(
         interpolateComponent(prevComponent, currComponent, interpolatedComponent, alpha)
     }
 
-    private fun <C : Component<C>> interpolateComponent(
-        prev: Any,
-        curr: Any,
-        interpolated: Any,
+    private fun interpolateComponent(
+        prev: Component,
+        curr: Component,
+        interpolated: Component,
         alpha: Float
     ) {
-        interpolators.interpolate(prev as C, curr as C, interpolated as C, alpha)
+        interpolators.interpolate(prev, curr, interpolated, alpha)
     }
 }

@@ -4,6 +4,6 @@ import com.mgtriffid.games.cotta.core.annotations.Component
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 @Component
-interface HealthTestComponent : MutableComponent<HealthTestComponent> {
+interface HealthTestComponent : MutableComponent {
     var health: Int
 }

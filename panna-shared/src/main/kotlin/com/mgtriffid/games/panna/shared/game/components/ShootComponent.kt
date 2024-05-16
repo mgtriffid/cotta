@@ -4,7 +4,7 @@ import com.mgtriffid.games.cotta.core.annotations.ComponentData
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 
 @com.mgtriffid.games.cotta.core.annotations.Component
-interface ShootComponent : MutableComponent<ShootComponent> {
+interface ShootComponent : MutableComponent {
     @ComponentData
     var isShooting: Boolean
 }

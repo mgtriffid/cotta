@@ -1,9 +1,6 @@
 package com.mgtriffid.games.cotta.core.serialization.bytes
 
-import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.id.AuthoritativeEntityId
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.entities.id.StaticEntityId
 
 object ConversionUtils {
     fun writeInt(bytes: ByteArray, value: Int, offset: Int) {
@@ -77,12 +74,8 @@ object ConversionUtils {
 
     fun writeEntityId(bytes: ByteArray, entityId: EntityId, offset: Int) {
         when (entityId) {
-            is AuthoritativeEntityId -> {
+            is EntityId -> {
                 writeInt(bytes, -1, offset)
-                writeInt(bytes, entityId.id, offset + 4)
-            }
-            is StaticEntityId -> {
-                writeInt(bytes, -2, offset)
                 writeInt(bytes, entityId.id, offset + 4)
             }
         }
@@ -91,8 +84,7 @@ object ConversionUtils {
     fun readEntityId(byteArray: ByteArray, offset: Int): EntityId {
         val type = readInt(byteArray, offset)
         return when (type) {
-            -1 -> AuthoritativeEntityId(readInt(byteArray, offset + 4))
-            -2 -> StaticEntityId(readInt(byteArray, offset + 4))
+            -1 -> EntityId(readInt(byteArray, offset + 4))
             else -> throw IllegalStateException("Unknown entity id type: $type")
         }
     }

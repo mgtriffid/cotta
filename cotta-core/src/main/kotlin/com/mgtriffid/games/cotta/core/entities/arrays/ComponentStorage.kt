@@ -3,11 +3,13 @@ package com.mgtriffid.games.cotta.core.entities.arrays
 import com.mgtriffid.games.cotta.core.entities.Component
 
 // not thread-safe
-class ComponentStorage<C: Component>(
+class ComponentStorage<C : Component>(
     private val data: Data<C>
-){
+) {
+    var delayRemoval: Boolean = false
     private var entities = IntArray(8)
-    private var size = 0
+    var size = 0
+        private set
 
     private val operations = ArrayList<Operation<C>>()
 
@@ -15,16 +17,20 @@ class ComponentStorage<C: Component>(
         ensureCapacity()
         data[size] = value
         entities[size] = entity
-        size++
-        return size
+        return size++
     }
 
-    fun remove(index: Int) {
+    fun remove(index: Int): Int {
         size--
         data.remove(index, size)
-        entities[index] = entities[size]    }
+        val newEntity = entities[size]
+        entities[index] = newEntity
+        return if (size == 0) -1 else newEntity
+    }
 
     fun get(index: Int) = data[index]
+
+    fun getEntityId(index: Int) = entities[index]
 
     fun addInternal(value: C, entity: Int) {
         ensureCapacity()
@@ -33,10 +39,12 @@ class ComponentStorage<C: Component>(
         size++
     }
 
-    fun removeInternal(index: Int) {
+    fun removeInternal(index: Int): Int {
         size--
         data.remove(index, size)
-        entities[index] = entities[size]
+        val newEntity = entities[size]
+        entities[index] = newEntity
+        return if (size == 0) -1 else newEntity
     }
 
     private fun ensureCapacity() {
@@ -49,7 +57,9 @@ class ComponentStorage<C: Component>(
     }
 
     private sealed interface Operation<C> {
-        data class Add<C: Component>(val value: C, val entity: Int) : Operation<C>
+        data class Add<C : Component>(val value: C, val entity: Int) :
+            Operation<C>
+
         data class Remove<C>(val index: Int) : Operation<C>
     }
 

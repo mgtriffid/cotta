@@ -225,14 +225,22 @@ project(":cotta-core") {
 
 project(":cotta-core-test") {
 
+
+    dependencies {
+        implementation project(":cotta-core")
+        testImplementation project(":cotta-core-test-workload")
+        implementation "com.esotericsoftware:kryo:5.0.0"
+        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+        testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+    }
+}
+
+project(":cotta-core-test-workload") {
     apply plugin: "com.google.devtools.ksp"
 
     dependencies {
         implementation project(":cotta-core")
         ksp project(":cotta-annotations-processor")
-        implementation "com.esotericsoftware:kryo:5.0.0"
-        testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-        testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
     }
 }
 

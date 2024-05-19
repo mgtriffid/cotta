@@ -2,6 +2,7 @@ package com.mgtriffid.games.cotta.core.registry
 
 import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
+import java.util.*
 import kotlin.reflect.KClass
 
 interface ComponentRegistry {
@@ -10,6 +11,7 @@ interface ComponentRegistry {
     fun getComponentClassByKey(key: ShortComponentKey): KClass<out Component>
     fun addRegistrationListener(listener: ComponentRegistrationListener)
     fun addEffectRegistrationListener(listener: EffectRegistrationListener)
+    fun getAllComponents(): SortedMap<ShortComponentKey, KClass<out Component>>
     fun registerComponent(
         key: ShortComponentKey,
         kClass: KClass<out Component>,

@@ -12,6 +12,9 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.DataClassSerializer
 import com.mgtriffid.games.cotta.core.serialization.bytes.ObjectSerializer
 import jakarta.inject.Inject
 import jakarta.inject.Named
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
 class ComponentRegistryImpl @Inject constructor(
@@ -74,6 +77,11 @@ class ComponentRegistryImpl @Inject constructor(
 
     override fun addEffectRegistrationListener(listener: EffectRegistrationListener) {
         effectRegistrationListeners.add(listener)
+    }
+
+    override fun getAllComponents(): SortedMap<ShortComponentKey, KClass<out Component>> {
+        return componentSpecByKey.mapIndexed { index, spec -> ShortComponentKey(index.toShort()) to spec.kClass }.toMap().toSortedMap(
+            Comparator.comparing(ShortComponentKey::key))
     }
 }
 

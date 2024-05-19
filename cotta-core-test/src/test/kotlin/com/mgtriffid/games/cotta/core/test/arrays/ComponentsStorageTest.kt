@@ -1,11 +1,12 @@
 package com.mgtriffid.games.cotta.core.test.arrays
 
 import com.mgtriffid.games.cotta.core.entities.arrays.ComponentStorage
-import com.mgtriffid.games.cotta.core.test.arrays.workload.SimpleComponentDataStorage
-import com.mgtriffid.games.cotta.core.test.arrays.workload.createSimpleComponent
+import com.mgtriffid.games.cotta.core.test.workload.components.SimpleComponentDataStorage
+import com.mgtriffid.games.cotta.core.test.workload.components.createSimpleComponent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+// TODO remove, this tests internals while it probably shouldn't
 class ComponentsStorageTest {
     @Test
     fun `should add component`() {
@@ -31,5 +32,6 @@ class ComponentsStorageTest {
 //        storage.flushOperations()
         // Then
         assertEquals(3, storage.get(0).value)
+        assertEquals(2, storage.getEntityId(0))
     }
 }

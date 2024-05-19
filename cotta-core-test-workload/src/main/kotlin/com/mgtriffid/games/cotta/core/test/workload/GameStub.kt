@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.core.test
+package com.mgtriffid.games.cotta.core.test.workload
 
 import com.mgtriffid.games.cotta.core.annotations.Game
 import com.mgtriffid.games.cotta.core.config.CottaConfig

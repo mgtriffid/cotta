@@ -30,7 +30,7 @@ internal class DynamicEntitiesStorage(
 
     }
 
-    fun createInternal(id: Int) {
+    fun create(id: Int) {
         data.put(id, getEntityComponents())
     }
 

@@ -1,54 +1,191 @@
 package com.mgtriffid.games.cotta.core.entities.arrays
 
-import com.mgtriffid.games.cotta.core.entities.CottaState
-import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
+import com.mgtriffid.games.cotta.core.entities.Component
+import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
+import kotlin.reflect.KClass
 
-class ArraysBasedCottaState(
+class ArraysBasedState(
     private val componentRegistry: ComponentRegistry,
     private val stateHistoryLength: Int = 64
-) : CottaState {
+) {
     private val tick: StateTick = StateTick(0L)
-
+    private var idGenerator = 0
     private val entitiesStorage = DynamicEntitiesStorage(tick)
-    private val componentsStorage = ComponentsStorage(tick)
-    private val entities = ArraysEntities(entitiesStorage, componentsStorage, componentRegistry)
+    val componentsStorage = ComponentsStorage(tick)
+    private val removed = mutableListOf<EntityId>()
+    private val operations = ArrayList<Operation>()
 
-    override fun entities(atTick: Long): EntitiesInternal {
-        if (atTick > tick.tick) {
-            throw RuntimeException("Cannot retrieve entities at tick $atTick: latest stored tick is $tick")
+    private var delayRemoval = false
+
+    fun getEntity(id: EntityId) : Entity? {
+        if (!entitiesStorage.data.containsKey(id.id)) {
+            return null
         }
-        if (atTick < tick.tick - stateHistoryLength) {
-            throw RuntimeException(
-                "Cannot retrieve entities at tick $atTick: latest stored tick is ${tick.tick} while history length is $stateHistoryLength"
-            )
+        return getInternal(id)
+    }
+
+    private fun getInternal(id: EntityId) =
+        object : Entity {
+            override val id: EntityId = id
+            override val ownedBy: Entity.OwnedBy = Entity.OwnedBy.System
+
+            override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
+                val key = componentRegistry.getKey(clazz).key.toInt()
+                return entitiesStorage.data.get(this.id.id).get(key) != -1
+            }
+
+            override fun <T : Component> getComponent(clazz: KClass<T>): T {
+                val key = componentRegistry.getKey(clazz).key.toInt()
+                val index = entitiesStorage.data.get(this.id.id).get(key)
+                if (index == -1) {
+                    throw IllegalStateException("Entity ${this.id.id} does not have component ${clazz.simpleName}")
+                }
+                return (componentsStorage.components.get(key) as ComponentStorage<T>).get(
+                    index
+                )
+            }
+
+            override fun <C : Component> addComponent(component: C) {
+                val key = componentRegistry.getKey(component::class).key.toInt()
+                val index =
+                    (componentsStorage.components.get(key) as ComponentStorage<C>).add(
+                        component,
+                        this.id.id
+                    )
+                entitiesStorage.data.get(this.id.id).addComponent(key, index)
+            }
+
+            override fun <T : Component> removeComponent(clazz: KClass<T>) {
+                val key = componentRegistry.getKey(clazz).key.toInt()
+                val componentStorage = componentsStorage.components[key]
+                if (componentStorage.delayRemoval) {
+                    operations.add(Operation.RemoveComponent(this.id.id, key))
+                } else {
+                    removeComponentInternal(this.id.id, key)
+                }
+            }
+
+            override fun components(): Collection<Component> {
+                TODO("Not yet implemented")
+            }
         }
-        return TODO()
+
+    fun removeEntity(id: EntityId) {
+        if (delayRemoval) {
+            removed.add(id)
+        } else {
+            removeInternal(id)
+        }
     }
 
-    override fun advance(tick: Long) {
-        this.tick.tick = tick + 1
-/*        entities.advance()
-        componentsStorage.advance()*/
+    fun removeComponentInternal(entityId: Int, key: Int) {
+        val componentStorage = componentsStorage.components[key]
+        val index = entitiesStorage.data.get(entityId).get(key)
+        entitiesStorage.data.get(entityId).removeComponent(key)
+        val newEntity = componentStorage.remove(index)
+        if (newEntity == -1) {
+            return
+        }
+        entitiesStorage.data.get(newEntity).set(key, index)
+
     }
 
-    override fun set(tick: Long, entities: EntitiesInternal) {
-        TODO("Not yet implemented")
+    private fun removeInternal(id: EntityId) {
+        val components = entitiesStorage.data.get(id.id)
+        // TODO invent a way to not allocate an iterator
+        components.all().forEach { entry ->
+            val key = entry.key
+            val index = entry.value
+            componentsStorage.components[key].removeInternal(index)
+        }
+        entitiesStorage.data.remove(id.id)
     }
 
-    override fun wipe() {
-        TODO("Not yet implemented")
+    fun createEntity(): Entity {
+        val id = idGenerator++
+        entitiesStorage.create(id)
+        return getInternal(EntityId(id))
     }
 
-    override fun setBlank(entities: EntitiesInternal) {
-        TODO("Not yet implemented")
+    fun queryAndExecute(clazz: KClass<out Component>, block: (EntityId, Component) -> Unit) {
+        delayRemoval = true
+        val key = componentRegistry.getKey(clazz).key.toInt()
+        val storage = componentsStorage.components[key]
+        storage.delayRemoval = true
+        val size = storage.size
+        for (i in 0 until size) {
+            val entityId = storage.getEntityId(i)
+            block(EntityId(entityId), storage.get(i))
+        }
+        storage.flushRemovals()
+        flushRemovals()
     }
 
-    override fun setBlank(tick: Long) {
-        TODO("Not yet implemented")
+    private fun flushRemovals() {
+        delayRemoval = false
+        for (id in removed) {
+            removeInternal(id)
+        }
+        removed.clear()
     }
 
-    override fun copyTo(state: CottaState) {
-        TODO("Not yet implemented")
+    private fun ComponentStorage<*>.flushRemovals() {
+        val iterator = operations.iterator()
+        while (iterator.hasNext()) {
+            val operation = iterator.next()
+            when (operation) {
+                is Operation.RemoveComponent -> {
+                    removeComponentInternal(operation.entity, operation.key)
+                    iterator.remove()
+                }
+            }
+        }
+    }
+
+    // TODO uniform parameter names
+    fun queryAndExecute(
+        clazz1: KClass<out Component>,
+        clazz2: KClass<out Component>,
+        block: (EntityId, Component, Component) -> Unit
+    ) {
+        val key1 = componentRegistry.getKey(clazz1).key.toInt()
+        val key2 = componentRegistry.getKey(clazz2).key.toInt()
+        val storage1 = componentsStorage.components[key1]
+        storage1.delayRemoval = true
+        val storage2 = componentsStorage.components[key2]
+        storage2.delayRemoval = true
+        val storage: ComponentStorage<*>
+        val minStorageKey: Int
+        val size1 = storage1.size
+        val size2 = storage2.size
+        if (size2 < size1) {
+            storage = storage2
+            minStorageKey = key2
+        } else {
+            storage = storage1
+            minStorageKey = key1
+        }
+        for (i in 0 until storage.size) {
+            val entityId = storage.getEntityId(i)
+            // use only those Entities which have both components:
+            val entityComponents = entitiesStorage.data.get(entityId)
+            val c1index = if (minStorageKey == key1) i else entityComponents.get(key1)
+            if (c1index == -1) {
+                continue
+            }
+            val c2index = if (minStorageKey == key2) i else entityComponents.get(key2)
+            if (c2index == -1) {
+                continue
+            }
+            val c1 = storage1.get(c1index)
+            val c2 = storage2.get(c2index)
+            block(EntityId(entityId), c1, c2)
+        }
+    }
+
+    private sealed interface Operation {
+        data class RemoveComponent(val entity: Int, val key: Int) : Operation
     }
 }

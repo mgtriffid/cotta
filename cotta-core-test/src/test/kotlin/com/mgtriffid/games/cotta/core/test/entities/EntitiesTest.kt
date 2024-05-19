@@ -2,12 +2,11 @@ package com.mgtriffid.games.cotta.core.test.entities
 
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.TickProvider
-import com.mgtriffid.games.cotta.core.entities.arrays.ArraysBasedCottaState
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
 import com.mgtriffid.games.cotta.core.registry.registerComponents
-import com.mgtriffid.games.cotta.core.test.GameStub
+import com.mgtriffid.games.cotta.core.test.workload.GameStub
 import com.mgtriffid.games.cotta.core.test.workload.components.PositionTestComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.createPositionTestComponent
 import org.junit.jupiter.api.Assertions.*
@@ -193,11 +192,13 @@ class EntitiesTest {
         }
     }
 
+/*
     private class ArrayBasedCottaStateFactory : CottaStateFactory {
         override fun getInstance(componentRegistry: ComponentRegistry): CottaState {
             return ArraysBasedCottaState(componentRegistry)
         }
     }
+*/
 
     companion object {
         @JvmStatic

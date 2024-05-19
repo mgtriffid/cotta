@@ -29,10 +29,18 @@ internal class EntityComponents {
     }
 
     fun removeComponent(componentType: Int) {
-        regular.remove(componentType, 0)
+        regular.remove(componentType, -1)
     }
 
     fun hasComponent(componentType: Int): Boolean {
         return regular.containsKey(componentType)
+    }
+
+    fun all(): IntIntMap {
+        return regular
+    }
+
+    fun set(key: Int, index: Int) {
+        regular.put(key, index)
     }
 }

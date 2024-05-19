@@ -14,7 +14,7 @@ internal class ArraysEntities(
 
     fun createEntity(): ArraysEntity {
         val id = EntityId(idGenerator.incrementAndGet())
-        entities.createInternal(id.id)
+        entities.create(id.id)
         return ArraysEntity(
             componentRegistry,
             id,

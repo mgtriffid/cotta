@@ -4,6 +4,8 @@ import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
 class ArraysBasedState(
@@ -17,7 +19,7 @@ class ArraysBasedState(
     private val removed = mutableListOf<EntityId>()
     private val operations = ArrayList<Operation>()
 
-    private var delayRemoval = false
+    private var delayRemoval = 0
 
     fun getEntity(id: EntityId) : Entity? {
         if (!entitiesStorage.data.containsKey(id.id)) {
@@ -60,7 +62,7 @@ class ArraysBasedState(
             override fun <T : Component> removeComponent(clazz: KClass<T>) {
                 val key = componentRegistry.getKey(clazz).key.toInt()
                 val componentStorage = componentsStorage.components[key]
-                if (componentStorage.delayRemoval) {
+                if (componentStorage.delayRemoval > 0) {
                     operations.add(Operation.RemoveComponent(this.id.id, key))
                 } else {
                     removeComponentInternal(this.id.id, key)
@@ -73,7 +75,7 @@ class ArraysBasedState(
         }
 
     fun removeEntity(id: EntityId) {
-        if (delayRemoval) {
+        if (delayRemoval > 0) {
             removed.add(id)
         } else {
             removeInternal(id)
@@ -110,10 +112,10 @@ class ArraysBasedState(
     }
 
     fun queryAndExecute(clazz: KClass<out Component>, block: (EntityId, Component) -> Unit) {
-        delayRemoval = true
+        delayRemoval++
         val key = componentRegistry.getKey(clazz).key.toInt()
         val storage = componentsStorage.components[key]
-        storage.delayRemoval = true
+        storage.delayRemoval++
         val size = storage.size
         for (i in 0 until size) {
             val entityId = storage.getEntityId(i)
@@ -124,7 +126,7 @@ class ArraysBasedState(
     }
 
     private fun flushRemovals() {
-        delayRemoval = false
+        if (--delayRemoval > 0) return
         for (id in removed) {
             removeInternal(id)
         }
@@ -132,10 +134,10 @@ class ArraysBasedState(
     }
 
     private fun ComponentStorage<*>.flushRemovals() {
+        if (--delayRemoval > 0) return
         val iterator = operations.iterator()
         while (iterator.hasNext()) {
-            val operation = iterator.next()
-            when (operation) {
+            when (val operation = iterator.next()) {
                 is Operation.RemoveComponent -> {
                     removeComponentInternal(operation.entity, operation.key)
                     iterator.remove()
@@ -145,6 +147,7 @@ class ArraysBasedState(
     }
 
     // TODO uniform parameter names
+    // TODO proper usage of generics
     fun queryAndExecute(
         clazz1: KClass<out Component>,
         clazz2: KClass<out Component>,
@@ -153,9 +156,7 @@ class ArraysBasedState(
         val key1 = componentRegistry.getKey(clazz1).key.toInt()
         val key2 = componentRegistry.getKey(clazz2).key.toInt()
         val storage1 = componentsStorage.components[key1]
-        storage1.delayRemoval = true
         val storage2 = componentsStorage.components[key2]
-        storage2.delayRemoval = true
         val storage: ComponentStorage<*>
         val minStorageKey: Int
         val size1 = storage1.size
@@ -167,6 +168,7 @@ class ArraysBasedState(
             storage = storage1
             minStorageKey = key1
         }
+        storage.delayRemoval
         for (i in 0 until storage.size) {
             val entityId = storage.getEntityId(i)
             // use only those Entities which have both components:
@@ -183,6 +185,8 @@ class ArraysBasedState(
             val c2 = storage2.get(c2index)
             block(EntityId(entityId), c1, c2)
         }
+        storage.flushRemovals()
+        flushRemovals()
     }
 
     private sealed interface Operation {

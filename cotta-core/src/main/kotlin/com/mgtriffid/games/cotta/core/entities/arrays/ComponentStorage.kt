@@ -6,7 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.Component
 class ComponentStorage<C : Component>(
     private val data: Data<C>
 ) {
-    var delayRemoval: Boolean = false
+    var delayRemoval: Int = 0
     private var entities = IntArray(8)
     var size = 0
         private set

@@ -44,7 +44,27 @@ repositories {
 
 Define the version of Cotta in the root `gradle.properties`:
 ```properties
-cottaVersion='0.1.2'
+cottaVersion=0.1.2
+```
+
+Cotta uses KSP, so define versions of KSP and Kotlin as well:
+```properties
+kotlinVersion=1.9.24
+kspVersion=1.0.20
+```
+_Note: you may want to use different version of Kotlin, if you do - check KSP's
+"Releases" [page](https://github.com/google/ksp/releases) and look for a version
+that matches your version of Kotlin_
+
+Now add the dependency on KSP to the `buildscript` section:
+```gradle
+buildscript {
+    // ...
+    dependencies {
+        // ...
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$kotlinVersion-$kspVersion"
+    }
+}
 ```
 
 The submodules in the resulting project need the dependencies as follows:
@@ -90,6 +110,7 @@ All code in this section should be put into the **shared** module.
 #### Game class
 A game using Cotta needs to be defined in a specific way. It must be a class
 that extends `CottaGame` and is annotated with `@Game`. Like this:
+
 ```kotlin
 @Game
 class ShowcaseGame : CottaGame {

@@ -15,7 +15,7 @@ open class ArraysEcsTest {
         val registry = ComponentRegistryImpl(Kryo())
         registerComponents(GameStub, registry)
         state = ArraysBasedState(registry)
-        registry.getAllComponents().forEach { key, kClass ->
+        registry.getAllComponents().forEach { (key, kClass) ->
             state.componentsStorage.register(key, kClass)
         }
     }

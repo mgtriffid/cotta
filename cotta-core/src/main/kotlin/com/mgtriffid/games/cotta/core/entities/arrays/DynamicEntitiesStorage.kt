@@ -26,7 +26,7 @@ internal class DynamicEntitiesStorage(
      */
     val limboEntities = IntMap<EntityComponents>()
 
-    fun advance(tick: Long) {
+    fun advance() {
 
     }
 

@@ -20,6 +20,12 @@ class ComponentStorage<C : Component>(
         return size++
     }
 
+    fun advance() {
+        if (data is HistoricalData) {
+            data.advance()
+        }
+    }
+
     fun remove(index: Int): Int {
         size--
         data.remove(index, size)
@@ -29,6 +35,12 @@ class ComponentStorage<C : Component>(
     }
 
     fun get(index: Int) = data[index]
+
+    fun get(index: Int, tick: Long) = if (data is HistoricalData) {
+        data.get(index, tick)
+    } else {
+        data[index]
+    }
 
     fun getEntityId(index: Int) = entities[index]
 
@@ -69,5 +81,10 @@ class ComponentStorage<C : Component>(
         operator fun set(index: Int, component: C)
         fun remove(index: Int, size: Int)
         operator fun get(index: Int): C
+    }
+
+    interface HistoricalData<C> : Data<C> {
+        fun advance()
+        fun get(index: Int, tick: Long): C
     }
 }

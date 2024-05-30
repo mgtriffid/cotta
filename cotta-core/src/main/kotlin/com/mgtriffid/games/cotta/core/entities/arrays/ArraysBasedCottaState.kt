@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 class ArraysBasedState(
     private val componentRegistry: ComponentRegistry,
     private val stateHistoryLength: Int = 64
-) {
+): StateView {
     private val tick: StateTick = StateTick(0L)
     private var idGenerator = 0
     private val entitiesStorage = DynamicEntitiesStorage(tick)
@@ -21,11 +21,58 @@ class ArraysBasedState(
 
     private var delayRemoval = 0
 
-    fun getEntity(id: EntityId) : Entity? {
+    override fun getEntity(id: EntityId) : Entity? {
         if (!entitiesStorage.data.containsKey(id.id)) {
             return null
         }
         return getInternal(id)
+    }
+
+    fun atTick(tick: Long) : StateView {
+        return object : StateView {
+            override fun getEntity(id: EntityId): Entity? {
+                if (!entitiesStorage.data.containsKey(id.id)) {
+                    return null
+                }
+                return getInternal(id, tick)
+            }
+        }
+    }
+
+    private fun getInternal(id: EntityId, tick: Long): Entity {
+        return object : Entity {
+            override val id: EntityId = id
+            override val ownedBy: Entity.OwnedBy = Entity.OwnedBy.System
+
+            override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
+                val key = componentRegistry.getKey(clazz).key.toInt()
+                return entitiesStorage.data.get(id.id).get(key) != -1
+            }
+
+            override fun <T : Component> getComponent(clazz: KClass<T>): T {
+                val key = componentRegistry.getKey(clazz).key.toInt()
+                val index = entitiesStorage.data.get(id.id).get(key)
+                if (index == -1) {
+                    throw IllegalStateException("Entity ${id.id} does not have component ${clazz.simpleName}")
+                }
+                return (componentsStorage.components.get(key) as ComponentStorage<T>).get(
+                    index,
+                    tick
+                )
+            }
+
+            override fun <C : Component> addComponent(component: C) {
+                TODO()
+            }
+
+            override fun <T : Component> removeComponent(clazz: KClass<T>) {
+                TODO("Not yet implemented")
+            }
+
+            override fun components(): Collection<Component> {
+                TODO("Not yet implemented")
+            }
+        }
     }
 
     private fun getInternal(id: EntityId) =
@@ -187,6 +234,11 @@ class ArraysBasedState(
         }
         storage.flushRemovals()
         flushRemovals()
+    }
+
+    fun advance() {
+        entitiesStorage.advance()
+        componentsStorage.advance()
     }
 
     private sealed interface Operation {

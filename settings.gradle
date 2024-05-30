@@ -3,6 +3,6 @@ include 'desktop', 'core',
         'panna-shared', 'panna-lobby', 'panna-graphics',
         'panna-devutils',
         'cotta-core', 'cotta-server', 'cotta-client',
-        'cotta-core-test', 'cotta-core-test-workload',
+        'cotta-core-test-workload', 'cotta-core-test',
         'cotta-network-api', 'cotta-network-kryonet',
         'cotta-gdx', 'cotta-annotations-processor', 'cotta-utils'

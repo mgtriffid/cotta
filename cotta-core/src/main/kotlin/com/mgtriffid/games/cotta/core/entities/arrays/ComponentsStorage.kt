@@ -16,4 +16,10 @@ class ComponentsStorage(val tick: StateTick) {
         storage as ComponentStorage.Data<Component>
         components.add(key.key.toInt(), ComponentStorage(storage))
     }
+
+    fun advance() {
+        for (i in 0 until components.size) {
+            components[i].advance()
+        }
+    }
 }

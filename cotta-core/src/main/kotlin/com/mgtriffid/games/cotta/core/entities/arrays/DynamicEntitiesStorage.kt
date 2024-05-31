@@ -27,19 +27,22 @@ internal class DynamicEntitiesStorage(
     val limboEntities = IntMap<EntityComponents>()
 
     fun advance() {
-
+        data.values().forEach { it.advance() }
     }
 
     fun create(id: Int) {
         data.put(id, getEntityComponents())
     }
 
-
     /**
      * This is required in cases when an Entity is created while entities are
      * locked because of iteration.
      */
-    fun createTemporary(componentRegistry: ComponentRegistry, id: EntityId, ownedBy: Entity.OwnedBy): EntityImpl {
+    fun createTemporary(
+        componentRegistry: ComponentRegistry,
+        id: EntityId,
+        ownedBy: Entity.OwnedBy
+    ): EntityImpl {
         val ret = EntityImpl(componentRegistry, id, ownedBy)
         justCreated.put(id.id, ret)
         return ret

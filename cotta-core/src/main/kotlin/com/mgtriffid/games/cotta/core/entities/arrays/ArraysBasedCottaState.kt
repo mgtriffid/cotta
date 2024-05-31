@@ -46,7 +46,7 @@ class ArraysBasedState(
 
             override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
                 val key = componentRegistry.getKey(clazz).key.toInt()
-                return entitiesStorage.data.get(id.id).get(key) != -1
+                return entitiesStorage.data.get(id.id).get(key, tick) != -1
             }
 
             override fun <T : Component> getComponent(clazz: KClass<T>): T {
@@ -237,6 +237,7 @@ class ArraysBasedState(
     }
 
     fun advance() {
+        tick.tick++
         entitiesStorage.advance()
         componentsStorage.advance()
     }

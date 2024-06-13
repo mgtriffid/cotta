@@ -4,8 +4,8 @@ import com.mgtriffid.games.cotta.core.test.workload.components.HistoricalMutable
 import com.mgtriffid.games.cotta.core.test.workload.components.SimpleComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.createHistoricalMutableComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.createSimpleComponent
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class BasicHistoricalTests : ArraysEcsTest() {
@@ -42,5 +42,15 @@ class BasicHistoricalTests : ArraysEcsTest() {
         val current = state.getEntity(entity.id)!!.getComponent(SimpleComponent::class)
         assertEquals(43, current.value)
         assertEquals(43, state.atTick(0L).getEntity(entity.id)!!.getComponent(SimpleComponent::class).value)
+    }
+
+    @Test
+    @Disabled("""We don't care much about entity existing or not in the past, as
+        |long as it has no historical components it's not possible to interact
+        |with it anyway.""")
+    fun `when entity is created then it should not be visible in the past`() {
+        state.advance()
+        val entity = state.createEntity()
+        assertNull(state.atTick(0L).getEntity(entity.id))
     }
 }

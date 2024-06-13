@@ -52,6 +52,10 @@ internal class DynamicEntitiesStorage(
         return EntityComponents()
     }
 
+    fun remove(id: EntityId) {
+        data.remove(id.id)
+    }
+
     data class Diff(
         val added: MutableList<Int> = ArrayList(),
         val removed: MutableList<Int> = ArrayList()

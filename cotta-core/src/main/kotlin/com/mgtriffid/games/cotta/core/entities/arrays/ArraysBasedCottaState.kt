@@ -149,7 +149,7 @@ class ArraysBasedState(
             val index = entry.value
             componentsStorage.components[key].removeInternal(index)
         }
-        entitiesStorage.data.remove(id.id)
+        entitiesStorage.remove(id)
     }
 
     fun createEntity(): Entity {

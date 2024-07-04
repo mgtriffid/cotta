@@ -1,18 +1,14 @@
 package com.mgtriffid.games.cotta.core.test.arrays
 
-import com.esotericsoftware.kryo.Kryo
-import com.mgtriffid.games.cotta.core.entities.arrays.ArraysBasedState
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
-import com.mgtriffid.games.cotta.core.registry.registerComponents
-import com.mgtriffid.games.cotta.core.test.workload.GameStub
 import com.mgtriffid.games.cotta.core.test.workload.components.AnotherComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.SimpleComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.createAnotherComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.createSimpleComponent
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.*
+import kotlin.Comparator
 
 class BasicQueryTests : ArraysEcsTest() {
 
@@ -20,16 +16,16 @@ class BasicQueryTests : ArraysEcsTest() {
     fun `iteration should return N entities with a single component`() {
         val entity1 = state.createEntity()
         state.createEntity()
-        val entity3 = state.createEntity()
+        val entity2 = state.createEntity()
         entity1.addComponent(createSimpleComponent(42))
-        entity3.addComponent(createSimpleComponent(43))
+        entity2.addComponent(createSimpleComponent(43))
 
         val processedEntities = mutableSetOf<EntityId>()
         state.queryAndExecute(SimpleComponent::class) { id, _ ->
             processedEntities.add(id)
         }
 
-        assertEquals(setOf(entity1.id, entity3.id), processedEntities)
+        assertEquals(setOf(entity1.id, entity2.id), processedEntities)
     }
 
     /**

@@ -15,7 +15,7 @@ import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
-import com.mgtriffid.games.cotta.core.entities.arrays.ComponentStorage
+import com.mgtriffid.games.cotta.core.entities.arrays.storage.ComponentStorage
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.impl.ComponentInternal
 import com.squareup.kotlinpoet.ClassName
@@ -283,6 +283,7 @@ class ComponentProcessor(
             .addModifiers(KModifier.OVERRIDE)
             .addParameter("index", Int::class)
             .returns(component.asStarProjectedType().toTypeName())
+            // TODO should use pooling instead
             .addStatement("val ret = ${component.simpleName.asString()}Proxy(this)")
             .addStatement("ret.pointer = index")
             .also {

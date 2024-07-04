@@ -1,7 +1,8 @@
-package com.mgtriffid.games.cotta.core.entities.arrays
+package com.mgtriffid.games.cotta.core.entities.arrays.storage
 
 import com.badlogic.gdx.utils.IntMap
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.arrays.StateTick
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.impl.EntityImpl
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry

@@ -1,6 +1,6 @@
 package com.mgtriffid.games.cotta.core.test.arrays
 
-import com.mgtriffid.games.cotta.core.entities.arrays.ComponentStorage
+import com.mgtriffid.games.cotta.core.entities.arrays.storage.ComponentStorage
 import com.mgtriffid.games.cotta.core.test.workload.components.SimpleComponentDataStorage
 import com.mgtriffid.games.cotta.core.test.workload.components.createSimpleComponent
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -20,7 +20,7 @@ class ConcurrentModificationTests : ArraysEcsTest() {
      * And we expect 1, 2, 3, 4 to be processed. Exactly those.
      */
     @Test
-    fun `should be possible to remove Entity whie iterating`() {
+    fun `should be possible to remove Entity while iterating`() {
         val entity1 = state.createEntity()
         entity1.addComponent(createSimpleComponent(42))
         entity1.addComponent(createAnotherComponent(42.0))
@@ -226,5 +226,38 @@ class ConcurrentModificationTests : ArraysEcsTest() {
                 entity6.id
             ), processedEntities
         )
+    }
+
+    /**
+     * id       | 1  | 2  | 3  |
+     * simple   | 1  | 2  | 3  |
+     * another  | 4  | 5  | 6  |
+     * And we iterate over simple, remember Another of entity3, then remove Another
+     * of entity1. Then add Another to entity1 back. We expect Another of entity3
+     * still be correct.
+     */
+    @Test
+    fun `should be possible to keep a reference to a Component and remove another instance of the same component`() {
+        val e1 = state.createEntity()
+        val e2 = state.createEntity()
+        val e3 = state.createEntity()
+        e1.addComponent(createSimpleComponent(1))
+        e1.addComponent(createAnotherComponent(4.0))
+        e2.addComponent(createSimpleComponent(2))
+        e2.addComponent(createAnotherComponent(5.0))
+        e3.addComponent(createSimpleComponent(3))
+        e3.addComponent(createAnotherComponent(6.0))
+        var remembered: AnotherComponent? = null
+
+        state.queryAndExecute(SimpleComponent::class) { id, simple ->
+            simple as SimpleComponent
+            if (simple.value == 1) {
+                remembered = state.getEntity(e3.id)?.getComponent(AnotherComponent::class)
+                state.getEntity(e1.id)?.removeComponent(AnotherComponent::class)
+                state.getEntity(e1.id)?.addComponent(createAnotherComponent(7.0))
+            }
+        }
+
+        assertEquals(6.0, remembered?.value)
     }
 }

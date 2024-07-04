@@ -1,10 +1,10 @@
 package com.mgtriffid.games.cotta.core.entities.arrays
 
-import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
+import com.mgtriffid.games.cotta.core.entities.arrays.storage.ComponentsStorage
+import com.mgtriffid.games.cotta.core.entities.arrays.storage.DynamicEntitiesStorage
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
-import kotlin.reflect.KClass
 
 internal class ArraysEntity(
     private val componentRegistry: ComponentRegistry,

@@ -1,17 +1,18 @@
-package com.mgtriffid.games.cotta.core.entities.arrays
+package com.mgtriffid.games.cotta.core.entities.arrays.storage
 
+import com.badlogic.gdx.utils.Bits
 import com.mgtriffid.games.cotta.core.entities.Component
 
 // not thread-safe
 class ComponentStorage<C : Component>(
     private val data: Data<C>
 ) {
-    var delayRemoval: Int = 0
     private var entities = IntArray(8)
     var size = 0
         private set
 
     private val operations = ArrayList<Operation<C>>()
+    private val removedBits = Bits()
 
     fun add(value: C, entity: Int): Int {
         ensureCapacity()
@@ -31,10 +32,19 @@ class ComponentStorage<C : Component>(
         data.remove(index, size)
         val newEntity = entities[size]
         entities[index] = newEntity
+        removedBits.clear(index)
         return if (size == 0) -1 else newEntity
     }
 
-    fun get(index: Int) = data[index]
+    fun markRemoved(index: Int) {
+        removedBits.set(index)
+    }
+
+    fun isMarkedRemoved(index: Int): Boolean {
+        return removedBits.get(index)
+    }
+
+    fun get(index: Int): C = data[index]
 
     fun get(index: Int, tick: Long) = if (data is HistoricalData) {
         data.get(index, tick)

@@ -1,4 +1,4 @@
-package com.mgtriffid.games.cotta.core.entities.arrays
+package com.mgtriffid.games.cotta.core.entities.arrays.storage
 
 import com.badlogic.gdx.utils.IntIntMap
 

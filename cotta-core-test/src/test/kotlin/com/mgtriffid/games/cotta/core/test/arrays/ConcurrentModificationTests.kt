@@ -39,7 +39,10 @@ class ConcurrentModificationTests : ArraysEcsTest() {
         val processedEntities = mutableSetOf<EntityId>()
 
         state.queryAndExecute(SimpleComponent::class) { id, _ ->
-            processedEntities.add(id)
+            assertTrue(
+                processedEntities.add(id),
+                "Entity with id ${id.id} was processed twice"
+            )
             if (id == entity1.id) {
                 state.removeEntity(entity3.id)
             }
@@ -81,7 +84,10 @@ class ConcurrentModificationTests : ArraysEcsTest() {
         val processedValues = mutableSetOf<Int>()
 
         state.queryAndExecute(SimpleComponent::class) { eId, simple ->
-            processedValues.add((simple as SimpleComponent).value)
+            assertTrue(
+                processedValues.add((simple as SimpleComponent).value),
+                "Entity with id ${eId.id} was processed twice"
+            )
             if (simple.value == 43) {
                 state.getEntity(entity3.id)
                     ?.removeComponent(SimpleComponent::class)
@@ -120,7 +126,10 @@ class ConcurrentModificationTests : ArraysEcsTest() {
             SimpleComponent::class,
             AnotherComponent::class
         ) { id, _, _ ->
-            processedEntities.add(id)
+            assertTrue(
+                processedEntities.add(id),
+                "Entity with id ${id.id} was processed twice"
+            )
             if (id == entity3.id) {
                 state.getEntity(id)!!.removeComponent(SimpleComponent::class)
             }
@@ -168,7 +177,10 @@ class ConcurrentModificationTests : ArraysEcsTest() {
         val processedEntities = mutableSetOf<EntityId>()
 
         state.queryAndExecute(SimpleComponent::class) { id, simple ->
-            processedEntities.add(id)
+            assertTrue(
+                processedEntities.add(id),
+                "Entity with id ${id.id} was processed twice"
+            )
             simple as SimpleComponent
             state.queryAndExecute(AnotherComponent::class) { nestedId, another ->
                 another as AnotherComponent

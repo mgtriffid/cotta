@@ -5,4 +5,5 @@ import com.mgtriffid.games.cotta.core.entities.id.EntityId
 
 interface StateView {
     fun getEntity(id: EntityId): Entity?
+    fun all(): Collection<Entity>
 }

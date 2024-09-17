@@ -10,47 +10,30 @@ import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 internal class DynamicEntitiesStorage(
     val tick: StateTick
 ) {
-    val data = IntMap<EntityComponents>()
-    private val justCreated = IntMap<EntityImpl>()
-
-    /**
-     * Diffs between ticks. These are needed for lag compensation.
-     */
-    val diffs = ArrayList<Diff>(16)
-
-    /**
-     * Do we need to store removals/entities in a diff? I mean iteration over
-     * _all_ entities in a previous tick?.. Alright let's do. May be useful.
-     * At least even if it's not used and even if it doesn't perform particularly
-     * well, we have to not confuse a developer. If they write a LagCompensated
-     * system - it should just work.
-     */
-    val limboEntities = IntMap<EntityComponents>()
+    val data = IntMap<EntityData>()
 
     fun advance() {
-        data.values().forEach { it.advance() }
+        data.values().forEach { it.components.advance() }
     }
 
     fun create(id: Int) {
-        data.put(id, getEntityComponents())
+        data.put(id, getEntityData())
     }
 
-    /**
-     * This is required in cases when an Entity is created while entities are
-     * locked because of iteration.
-     */
-    fun createTemporary(
-        componentRegistry: ComponentRegistry,
-        id: EntityId,
-        ownedBy: Entity.OwnedBy
-    ): EntityImpl {
-        val ret = EntityImpl(componentRegistry, id, ownedBy)
-        justCreated.put(id.id, ret)
-        return ret
+    fun create(id: Int, ownedBy: Entity.OwnedBy) {
+        data.put(id, getEntityData(ownedBy))
     }
 
     private fun getEntityComponents(): EntityComponents {
         return EntityComponents()
+    }
+
+    private fun getEntityData(): EntityData {
+        return EntityData(getEntityComponents(), Entity.OwnedBy.System)
+    }
+
+    private fun getEntityData(ownedBy: Entity.OwnedBy): EntityData {
+        return EntityData(getEntityComponents(), ownedBy)
     }
 
     fun remove(id: EntityId) {

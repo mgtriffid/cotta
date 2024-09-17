@@ -13,6 +13,7 @@ import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.entities.arrays.ArraysCottaState
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.guice.BytesSerializationModule
@@ -45,9 +46,16 @@ import com.mgtriffid.games.cotta.server.*
 import com.mgtriffid.games.cotta.server.impl.*
 
 class CottaServerModule(
-    private val game: CottaGame
+    private val game: CottaGame,
+    private val arraysEnabled: Boolean,
 ) : Module {
     override fun configure(binder: Binder) {
+        val cottaStateClass = if (arraysEnabled) {
+            ArraysCottaState::class.java
+        } else {
+            CottaStateImpl::class.java
+        }
+
         with(binder) {
             bindGameParts()
 
@@ -58,7 +66,7 @@ class CottaServerModule(
             bind(CottaClock::class.java).toInstance(CottaClockImpl(simulationTickProvider, game.config.tickLength))
             bind(Int::class.java).annotatedWith(named("historyLength")).toInstance(8)
             bind(Int::class.java).annotatedWith(named("stateHistoryLength")).toInstance(128)
-            bind(CottaState::class.java).annotatedWith(named("simulation")).to(CottaStateImpl::class.java)
+            bind(CottaState::class.java).annotatedWith(named("simulation")).to(cottaStateClass)
                 .`in`(Scopes.SINGLETON)
 
             bind(Simulation::class.java).to(AuthoritativeSimulationImpl::class.java).`in`(Scopes.SINGLETON)

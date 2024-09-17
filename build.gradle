@@ -166,6 +166,7 @@ project(":cotta-server") {
         implementation project(":cotta-utils")
         implementation project(":cotta-network-api")
         implementation project(":cotta-network-kryonet") // TODO not needed directly
+        testImplementation project(":cotta-server-test-workload")
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
         ksp project(":cotta-annotations-processor")
@@ -225,13 +226,21 @@ project(":cotta-core") {
 
 project(":cotta-core-test") {
 
-
     dependencies {
         implementation project(":cotta-core")
         testImplementation project(":cotta-core-test-workload")
         implementation "com.esotericsoftware:kryo:5.0.0"
         testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
         testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+    }
+}
+
+project(":cotta-server-test-workload") {
+    apply plugin: "com.google.devtools.ksp"
+
+    dependencies {
+        implementation project(":cotta-core")
+        ksp project(":cotta-annotations-processor")
     }
 }
 

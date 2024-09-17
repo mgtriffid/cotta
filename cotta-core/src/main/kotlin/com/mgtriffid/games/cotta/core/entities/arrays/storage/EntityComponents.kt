@@ -14,8 +14,12 @@ internal class EntityComponents {
 
     private val historical = Array(8) { IntIntMap() }
 
-    fun addComponent(componentType: Int, index: Int) {
-        regular.put(componentType, index)
+    fun addComponent(componentType: Int, index: Int, isHistorical: Boolean) {
+        if (isHistorical) {
+            historical[(tick % 8).toInt()].put(componentType, index)
+        } else {
+            regular.put(componentType, index)
+        }
     }
 
     fun get(componentType: Int): Int {

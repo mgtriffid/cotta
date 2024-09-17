@@ -13,6 +13,9 @@ import com.mgtriffid.games.cotta.core.registry.registerComponents
 import com.mgtriffid.games.cotta.core.simulation.Simulation
 import com.mgtriffid.games.cotta.core.systems.CottaSystem
 import mu.KotlinLogging
+import java.io.FileReader
+import java.util.Properties
+import kotlin.math.log
 import kotlin.reflect.KClass
 import kotlin.reflect.full.hasAnnotation
 
@@ -21,7 +24,12 @@ private val logger = KotlinLogging.logger {}
 class CottaClientFactory {
     fun create(game: CottaGame, input: CottaClientInput) : CottaClient {
         logger.info { "Creating Client" }
-        val module = CottaClientModule(game, input)
+        logger.info { "Current working dir is ${java.io.File(".").getCanonicalPath()}" }
+        val properties = Properties()
+        properties.load(FileReader("assets/config/cotta.properties"))
+        val arraysEnabled = properties["cotta.core.debug.arrays"] as Boolean
+        logger.info { "Properties arrays enabled: $arraysEnabled" }
+        val module = CottaClientModule(game, input, arraysEnabled)
         val injector = Guice.createInjector(module)
         val client = injector.getInstance(CottaClient::class.java)
         logger.info { "Client created" }

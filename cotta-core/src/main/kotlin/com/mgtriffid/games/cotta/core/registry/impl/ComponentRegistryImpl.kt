@@ -5,6 +5,7 @@ import com.mgtriffid.games.cotta.core.effects.CottaEffect
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
+import com.mgtriffid.games.cotta.core.registry.ComponentSpec
 import com.mgtriffid.games.cotta.core.registry.EffectRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import com.mgtriffid.games.cotta.core.registry.ShortEffectKey

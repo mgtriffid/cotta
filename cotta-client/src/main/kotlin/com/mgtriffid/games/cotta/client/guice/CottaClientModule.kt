@@ -29,6 +29,7 @@ import com.mgtriffid.games.cotta.core.effects.impl.EffectBusImpl
 import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.Entities
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.entities.arrays.ArraysCottaState
 import com.mgtriffid.games.cotta.core.entities.impl.AtomicLongTickProvider
 import com.mgtriffid.games.cotta.core.entities.impl.CottaStateImpl
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
@@ -62,7 +63,8 @@ import java.util.concurrent.TimeUnit
 
 class CottaClientModule(
     private val game: CottaGame,
-    private val input: CottaClientInput
+    private val input: CottaClientInput,
+    private val arraysEnabled: Boolean,
 ) : AbstractModule() {
     private val metricRegistry = MetricRegistry()
 
@@ -111,11 +113,16 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
         bind(Deltas::class.java).to(DeltasImpl::class.java)
             .`in`(Scopes.SINGLETON)
+        val cottaStateClass = if (arraysEnabled) {
+            ArraysCottaState::class.java
+        } else {
+            CottaStateImpl::class.java
+        }
         bind(CottaState::class.java).annotatedWith(Names.named("simulation"))
-            .to(CottaStateImpl::class.java)
+            .to(cottaStateClass)
             .`in`(Scopes.SINGLETON)
         bind(CottaState::class.java).annotatedWith(Names.named("guessed"))
-            .to(CottaStateImpl::class.java)
+            .to(cottaStateClass)
             .`in`(Scopes.SINGLETON)
         bind(SimulationInputHolder::class.java).to(SimulationInputHolderImpl::class.java)
             .`in`(Scopes.SINGLETON)

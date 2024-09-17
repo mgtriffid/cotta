@@ -1,14 +1,22 @@
 package com.mgtriffid.games.cotta.core.entities.arrays
 
+import com.badlogic.gdx.utils.IntMap
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.arrays.storage.ComponentStorage
 import com.mgtriffid.games.cotta.core.entities.arrays.storage.ComponentsStorage
 import com.mgtriffid.games.cotta.core.entities.arrays.storage.DynamicEntitiesStorage
+import com.mgtriffid.games.cotta.core.entities.arrays.storage.EntityComponents
+import com.mgtriffid.games.cotta.core.entities.arrays.storage.EntityData
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
+import com.mgtriffid.games.cotta.core.registry.ComponentRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
+import com.mgtriffid.games.cotta.core.registry.ComponentSpec
+import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
+import java.security.cert.CRL
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 class ArraysBasedState(
     private val componentRegistry: ComponentRegistry,
@@ -28,7 +36,7 @@ class ArraysBasedState(
         if (!entitiesStorage.data.containsKey(id.id)) {
             return null
         }
-        return getInternal(id)
+        return getInternal(id, tick.tick)
     }
 
     fun atTick(tick: Long): StateView {
@@ -39,6 +47,9 @@ class ArraysBasedState(
                 }
                 return getEntityView(id, tick)
             }
+            override fun all(): Collection<Entity> {
+                return entitiesStorage.data.map { e -> getEntityView(EntityId(e.key), tick) }
+            }
         }
     }
 
@@ -46,20 +57,32 @@ class ArraysBasedState(
         // TODO class, pooling
         return object : Entity {
             override val id: EntityId = id
-            override val ownedBy: Entity.OwnedBy = Entity.OwnedBy.System
+            override val ownedBy: Entity.OwnedBy = entitiesStorage.data.get(this.id.id).ownedBy
 
             override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
-                val key = componentRegistry.getKey(clazz).key.toInt()
-                return entitiesStorage.data.get(id.id).get(key, tick) != -1
+                val key = componentRegistry.getKey(clazz).key
+                val entityData = entitiesStorage.data.get(id.id)
+                val index = if (componentRegistry.isHistorical(ShortComponentKey(key))) {
+                    entityData.components.get(key.toInt(), tick)
+                } else {
+                    entityData.components.get(key.toInt())
+                }
+                return index != -1
             }
 
             override fun <T : Component> getComponent(clazz: KClass<T>): T {
-                val key = componentRegistry.getKey(clazz).key.toInt()
-                val index = entitiesStorage.data.get(id.id).get(key)
+                val key = componentRegistry.getKey(clazz)
+                val intKey = key.key.toInt()
+                val components = entitiesStorage.data.get(id.id).components
+                val index = if (componentRegistry.isHistorical(key)) {
+                    components.get(intKey, tick)
+                } else {
+                    components.get(intKey)
+                }
                 if (index == -1) {
                     throw IllegalStateException("Entity ${id.id} does not have component ${clazz.simpleName}")
                 }
-                return (componentsStorage.components.get(key) as ComponentStorage<T>).get(
+                return (componentsStorage.components.get(key.key.toInt()) as ComponentStorage<T>).get(
                     index,
                     tick
                 )
@@ -79,41 +102,56 @@ class ArraysBasedState(
         }
     }
 
-    private fun getInternal(id: EntityId) =
+    private fun getInternal(id: EntityId, tick: Long) =
         object : Entity {
             override val id: EntityId = id
-            override val ownedBy: Entity.OwnedBy = Entity.OwnedBy.System
+            override val ownedBy: Entity.OwnedBy = entitiesStorage.data.get(this.id.id).ownedBy
 
             override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
-                val key = componentRegistry.getKey(clazz).key.toInt()
-                val index = entitiesStorage.data.get(this.id.id).get(key)
-                return index != -1 && !componentsStorage.components[key].isMarkedRemoved(index)
+                val key = componentRegistry.getKey(clazz)
+                val index = if (componentRegistry.isHistorical(key)) {
+                    entitiesStorage.data.get(this.id.id).components.get(key.key.toInt(), tick)
+                } else {
+                    entitiesStorage.data.get(this.id.id).components.get(key.key.toInt())
+                }
+                return index != -1 && !componentsStorage.components[key.key.toInt()].isMarkedRemoved(index)
             }
 
             override fun <T : Component> getComponent(clazz: KClass<T>): T {
-                val key = componentRegistry.getKey(clazz).key.toInt()
-                val index = entitiesStorage.data.get(this.id.id).get(key)
+                val key = componentRegistry.getKey(clazz)
+                val intKey = key.key.toInt()
+                val index = if (componentRegistry.isHistorical(key)) {
+                    entitiesStorage.data.get(this.id.id).components.get(
+                        intKey,
+                        tick
+                    )
+                } else {
+                    entitiesStorage.data.get(this.id.id).components.get(intKey)
+                }
                 if (index == -1) {
                     throw IllegalStateException("Entity ${this.id.id} does not have component ${clazz.simpleName}")
                 }
-                return (componentsStorage.components[key] as ComponentStorage<T>).get(
+                return (componentsStorage.components[intKey] as ComponentStorage<T>).get(
                     index
                 )
             }
 
             override fun <C : Component> addComponent(component: C) {
-                val key = componentRegistry.getKey(component::class).key.toInt()
+                val key = componentRegistry.getKey(component::class)
+                val intKey = key.key.toInt()
                 val index =
-                    (componentsStorage.components.get(key) as ComponentStorage<C>).add(
+                    (componentsStorage.components[intKey] as ComponentStorage<C>).add(
                         component,
                         this.id.id
                     )
-                entitiesStorage.data.get(this.id.id).addComponent(key, index)
+                val historical = componentRegistry.isHistorical(key)
+                entitiesStorage.data.get(this.id.id).components.addComponent(
+                    intKey, index, historical)
             }
 
             override fun <T : Component> removeComponent(clazz: KClass<T>) {
                 val key = componentRegistry.getKey(clazz).key.toInt()
-                val index = entitiesStorage.data.get(this.id.id).get(key)
+                val index = entitiesStorage.data.get(this.id.id).components.get(key)
                 componentsStorage.components[key].markRemoved(index)
                 operations.add(Operation.RemoveComponent(this.id.id, key))
             }
@@ -133,18 +171,18 @@ class ArraysBasedState(
 
     fun removeComponentInternal(entityId: Int, key: Int) {
         val componentStorage = componentsStorage.components[key]
-        val index = entitiesStorage.data.get(entityId).get(key)
-        entitiesStorage.data.get(entityId).removeComponent(key)
+        val index = entitiesStorage.data.get(entityId).components.get(key)
+        entitiesStorage.data.get(entityId).components.removeComponent(key)
         val newEntity = componentStorage.remove(index)
         if (newEntity == -1) {
             return
         }
-        entitiesStorage.data.get(newEntity).set(key, index)
+        entitiesStorage.data.get(newEntity).components.set(key, index)
 
     }
 
     private fun removeInternal(id: EntityId) {
-        val components = entitiesStorage.data.get(id.id)
+        val components = entitiesStorage.data.get(id.id).components
         // TODO invent a way to not allocate an iterator
         components.all().forEach { entry ->
             val key = entry.key
@@ -157,7 +195,13 @@ class ArraysBasedState(
     fun createEntity(): Entity {
         val id = idGenerator++
         entitiesStorage.create(id)
-        return getInternal(EntityId(id))
+        return getInternal(EntityId(id), tick.tick)
+    }
+
+    fun createEntity(ownedBy: Entity.OwnedBy): Entity {
+        val id = idGenerator++
+        entitiesStorage.create(id, ownedBy)
+        return getInternal(EntityId(id), tick.tick)
     }
 
     /**
@@ -235,7 +279,7 @@ class ArraysBasedState(
         for (i in 0 until storage.size) {
             val entityId = storage.getEntityId(i)
             // use only those Entities which have both components:
-            val entityComponents = entitiesStorage.data.get(entityId)
+            val entityComponents = entitiesStorage.data.get(entityId).components
             val c1index =
                 if (minStorageKey == key1) i else entityComponents.get(key1)
             if (c1index == -1) {
@@ -257,6 +301,12 @@ class ArraysBasedState(
         tick.tick++
         entitiesStorage.advance()
         componentsStorage.advance()
+    }
+
+    override fun all() : Collection<Entity> {
+        return entitiesStorage.data.entries().map { it: IntMap.Entry<EntityData> -> getInternal(
+            EntityId(it.key), tick.tick
+        )}
     }
 
     private sealed interface Operation {

@@ -5,6 +5,9 @@ import com.google.inject.Key
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.*
+import com.mgtriffid.games.cotta.core.entities.arrays.ArraysBasedState
+import com.mgtriffid.games.cotta.core.entities.arrays.ArraysCottaState
+import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
 import com.mgtriffid.games.cotta.core.input.PlayerInput
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
@@ -24,9 +27,12 @@ import com.mgtriffid.games.cotta.server.workload.components.createPlayerControll
 import com.mgtriffid.games.cotta.server.workload.components.createVelocityTestComponent
 import com.mgtriffid.games.cotta.server.workload.effects.createHealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.systems.*
+import org.checkerframework.checker.units.qual.Current
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.io.File
+import java.util.Properties
 
 class SimulationTest {
     private lateinit var tickProvider: TickProvider
@@ -38,7 +44,7 @@ class SimulationTest {
 
     @BeforeEach
     fun setUp() {
-        val injector = Guice.createInjector(CottaServerModule(GameStub()))
+        val injector = Guice.createInjector(CottaServerModule(GameStub(), true))
         tickProvider = injector.getInstance(Key.get(TickProvider::class.java, Names.named(SIMULATION)))
         simulationInputHolder = injector.getInstance(SimulationInputHolder::class.java)
         simulationInputHolder.set(object : SimulationInput {
@@ -57,6 +63,9 @@ class SimulationTest {
         state = injector.getInstance(Key.get(CottaState::class.java, Names.named("simulation")))
         simulation = injector.getInstance(Simulation::class.java)
         registerComponents(GameStub(), injector.getInstance(ComponentRegistry::class.java))
+        state.let {if (it is ArraysCottaState) {
+            it.registerComponents(injector.getInstance(ComponentRegistry::class.java))
+        } }
         dataForClients = injector.getInstance(DataForClients::class.java)
         playersSawTicks = injector.getInstance(PlayersSawTicks::class.java)
     }
@@ -345,7 +354,8 @@ class SimulationTest {
     @Test
     fun `should prepare inputs to be sent to clients`() {
         val playerId = PlayerId(0)
-        val damageDealer = state.entities().create(
+        val entities: EntitiesInternal = state.entities()
+        val damageDealer = entities.create(
             ownedBy = Entity.OwnedBy.Player(playerId)
         )
         damageDealer.addComponent(createPlayerControlledStubComponent(0, false))
@@ -400,5 +410,5 @@ class SimulationTest {
         )
     }
 
-    private fun CottaState.entities() = entities(tickProvider.tick)
+    private fun CottaState.entities(): EntitiesInternal = entities(tickProvider.tick)
 }

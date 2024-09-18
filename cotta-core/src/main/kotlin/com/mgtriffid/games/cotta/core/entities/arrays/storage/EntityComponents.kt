@@ -26,7 +26,7 @@ internal class EntityComponents {
         return regular.get(componentType, -1)
     }
 
-    fun get(componentType: Int, tick: Long): Int {
+    fun getHistorical(componentType: Int, tick: Long): Int {
         return historical[(tick % 8).toInt()].get(componentType, -1)
     }
 

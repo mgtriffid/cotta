@@ -6,17 +6,12 @@ import com.mgtriffid.games.cotta.core.entities.Entity
 import com.mgtriffid.games.cotta.core.entities.arrays.storage.ComponentStorage
 import com.mgtriffid.games.cotta.core.entities.arrays.storage.ComponentsStorage
 import com.mgtriffid.games.cotta.core.entities.arrays.storage.DynamicEntitiesStorage
-import com.mgtriffid.games.cotta.core.entities.arrays.storage.EntityComponents
 import com.mgtriffid.games.cotta.core.entities.arrays.storage.EntityData
 import com.mgtriffid.games.cotta.core.entities.id.EntityId
-import com.mgtriffid.games.cotta.core.registry.ComponentRegistrationListener
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
-import com.mgtriffid.games.cotta.core.registry.ComponentSpec
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
-import java.security.cert.CRL
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 class ArraysBasedState(
     private val componentRegistry: ComponentRegistry,
@@ -61,12 +56,13 @@ class ArraysBasedState(
 
             override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
                 val key = componentRegistry.getKey(clazz).key
-                val entityData = entitiesStorage.data.get(id.id)
-                val index = if (componentRegistry.isHistorical(ShortComponentKey(key))) {
-                    entityData.components.get(key.toInt(), tick)
-                } else {
-                    entityData.components.get(key.toInt())
-                }
+                val components = entitiesStorage.data.get(id.id).components
+                val index =
+                    if (componentRegistry.isHistorical(ShortComponentKey(key))) {
+                        components.getHistorical(key.toInt(), tick)
+                    } else {
+                        components.get(key.toInt())
+                    }
                 return index != -1
             }
 
@@ -75,7 +71,7 @@ class ArraysBasedState(
                 val intKey = key.key.toInt()
                 val components = entitiesStorage.data.get(id.id).components
                 val index = if (componentRegistry.isHistorical(key)) {
-                    components.get(intKey, tick)
+                    components.getHistorical(intKey, tick)
                 } else {
                     components.get(intKey)
                 }
@@ -110,7 +106,7 @@ class ArraysBasedState(
             override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
                 val key = componentRegistry.getKey(clazz)
                 val index = if (componentRegistry.isHistorical(key)) {
-                    entitiesStorage.data.get(this.id.id).components.get(key.key.toInt(), tick)
+                    entitiesStorage.data.get(this.id.id).components.getHistorical(key.key.toInt(), tick)
                 } else {
                     entitiesStorage.data.get(this.id.id).components.get(key.key.toInt())
                 }
@@ -121,7 +117,7 @@ class ArraysBasedState(
                 val key = componentRegistry.getKey(clazz)
                 val intKey = key.key.toInt()
                 val index = if (componentRegistry.isHistorical(key)) {
-                    entitiesStorage.data.get(this.id.id).components.get(
+                    entitiesStorage.data.get(this.id.id).components.getHistorical(
                         intKey,
                         tick
                     )

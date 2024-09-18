@@ -27,7 +27,7 @@ class CottaClientFactory {
         logger.info { "Current working dir is ${java.io.File(".").getCanonicalPath()}" }
         val properties = Properties()
         properties.load(FileReader("assets/config/cotta.properties"))
-        val arraysEnabled = properties["cotta.core.debug.arrays"] as Boolean
+        val arraysEnabled = java.lang.Boolean.valueOf(properties["cotta.core.debug.arrays"] as String)
         logger.info { "Properties arrays enabled: $arraysEnabled" }
         val module = CottaClientModule(game, input, arraysEnabled)
         val injector = Guice.createInjector(module)

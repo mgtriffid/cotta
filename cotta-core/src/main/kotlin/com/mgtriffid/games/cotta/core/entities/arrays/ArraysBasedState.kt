@@ -70,10 +70,7 @@ class ArraysBasedState(
                     throw IllegalStateException("Entity ${id.id} does not have component ${clazz.simpleName}")
                 }
 
-                return (getComponentStorage<T>(key)).get(
-                    index,
-                    tick
-                )
+                return (getComponentStorage<T>(key)).get(index, tick)
             }
 
             private fun <T : Component> getComponentStorage(key: ShortComponentKey): ComponentStorage<T> {

@@ -6,6 +6,7 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.CreatingStaticEntities
 import com.mgtriffid.games.cotta.core.entities.PlayerId
 import com.mgtriffid.games.cotta.core.entities.TickProvider
+import com.mgtriffid.games.cotta.core.entities.arrays.ArraysCottaState
 import com.mgtriffid.games.cotta.core.loop.impl.FixedRateLoopBody
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
 import com.mgtriffid.games.cotta.core.registry.registerComponents
@@ -43,6 +44,9 @@ class CottaGameInstanceImpl<IR: InputRecipe> @Inject constructor(
 
     override fun run() {
         registerComponents(game, componentRegistry)
+        if (state is ArraysCottaState) {
+            state.registerComponents(componentRegistry)
+        }
         initializeState()
         registerSystems()
         logger.debug { "Tick length is ${game.config.tickLength}" }

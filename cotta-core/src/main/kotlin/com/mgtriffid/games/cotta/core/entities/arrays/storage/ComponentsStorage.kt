@@ -1,5 +1,6 @@
 package com.mgtriffid.games.cotta.core.entities.arrays.storage
 
+import com.mgtriffid.games.cotta.core.codegen.Constants.DATA_STORAGE_SUFFIX
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.arrays.StateTick
 import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
@@ -14,9 +15,9 @@ class ComponentsStorage(val tick: StateTick) {
     }
 
     fun register(key: ShortComponentKey, kClass: KClass<out Component>) {
-        val storage = kClass.qualifiedName?.let { Class.forName(it + "DataStorage").getConstructor().newInstance() }
-        storage as ComponentStorage.Data<Component>
-        components.add(key.key.toInt(), ComponentStorage(storage))
+        val data = kClass.qualifiedName?.let { Class.forName(it + DATA_STORAGE_SUFFIX).getConstructor().newInstance() }
+        data as ComponentStorage.Data<Component>
+        components.add(key.key.toInt(), ComponentStorage(data))
     }
 
     fun advance() {

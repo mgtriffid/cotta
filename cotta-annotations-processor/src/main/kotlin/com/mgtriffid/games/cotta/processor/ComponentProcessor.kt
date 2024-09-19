@@ -9,9 +9,11 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.mgtriffid.games.cotta.core.annotations.Historical
 import com.mgtriffid.games.cotta.core.codegen.Constants.COMPONENTS_CLASS_SUFFIX
 import com.mgtriffid.games.cotta.core.codegen.Constants.COPY_METHOD
+import com.mgtriffid.games.cotta.core.codegen.Constants.DATA_STORAGE_SUFFIX
 import com.mgtriffid.games.cotta.core.codegen.Constants.FACTORY_METHOD_PREFIX
 import com.mgtriffid.games.cotta.core.codegen.Constants.GET_COMPONENTS_METHOD
 import com.mgtriffid.games.cotta.core.codegen.Constants.IMPL_SUFFIX
+import com.mgtriffid.games.cotta.core.codegen.Constants.PROXY_SUFFIX
 import com.mgtriffid.games.cotta.core.entities.Component
 import com.mgtriffid.games.cotta.core.entities.MutableComponent
 import com.mgtriffid.games.cotta.core.entities.PlayerId
@@ -113,7 +115,7 @@ class ComponentProcessor(
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
         val fileSpecBuilder =
-            FileSpec.builder(pkg, "${componentName}DataStorage")
+            FileSpec.builder(pkg, "${componentName}${DATA_STORAGE_SUFFIX}")
         val properties: List<ProcessableComponentFieldSpec> =
             getProcessableComponentFieldSpecs(component)
         fileSpecBuilder.addType(
@@ -131,7 +133,7 @@ class ComponentProcessor(
         component: KSClassDeclaration,
         properties: List<ProcessableComponentFieldSpec>
     ): TypeSpec {
-        val builder = TypeSpec.classBuilder("${componentName}DataStorage")
+        val builder = TypeSpec.classBuilder("${componentName}$DATA_STORAGE_SUFFIX")
         properties.forEach { fieldSpec ->
             builder.addProperty(writeHistoricalArrayStorage(fieldSpec))
             builder.addProperty(writeHistoricalArrayAccessors(fieldSpec))
@@ -236,7 +238,7 @@ class ComponentProcessor(
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
         val fileSpecBuilder =
-            FileSpec.builder(pkg, "${componentName}DataStorage")
+            FileSpec.builder(pkg, "${componentName}$DATA_STORAGE_SUFFIX")
         val properties: List<ProcessableComponentFieldSpec> =
             getProcessableComponentFieldSpecs(component)
         fileSpecBuilder.addType(
@@ -259,7 +261,7 @@ class ComponentProcessor(
         component: KSClassDeclaration,
         properties: List<ProcessableComponentFieldSpec>
     ): TypeSpec {
-        val builder = TypeSpec.classBuilder("${componentName}DataStorage")
+        val builder = TypeSpec.classBuilder("${componentName}$DATA_STORAGE_SUFFIX")
         properties.forEach { fieldSpec ->
             builder.addProperty(writeArrayStorage(fieldSpec))
         }
@@ -379,7 +381,7 @@ class ComponentProcessor(
         val pkg = component.packageName.asString()
         val componentName = component.simpleName.asString()
         val fileSpecBuilder =
-            FileSpec.builder(pkg, "${componentName}Proxy")
+            FileSpec.builder(pkg, "$componentName$PROXY_SUFFIX")
         val properties: List<ProcessableComponentFieldSpec> =
             getProcessableComponentFieldSpecs(component)
         fileSpecBuilder.addType(
@@ -405,13 +407,13 @@ class ComponentProcessor(
         component: KSClassDeclaration,
         properties: List<ProcessableComponentFieldSpec>
     ): TypeSpec {
-        val builder = TypeSpec.classBuilder("${componentName}Proxy")
+        val builder = TypeSpec.classBuilder("${componentName}$PROXY_SUFFIX")
         builder.addProperty(
             PropertySpec.builder(
                 "storage",
                 ClassName(
                     component.packageName.asString(),
-                    "${componentName}DataStorage"
+                    "${componentName}$DATA_STORAGE_SUFFIX"
                 )
             )
                 .initializer("storage")
@@ -424,7 +426,7 @@ class ComponentProcessor(
                         name = "storage",
                         type = ClassName(
                             component.packageName.asString(),
-                            "${componentName}DataStorage"
+                            "${componentName}$DATA_STORAGE_SUFFIX"
                         )
                     ).build()
                 )
@@ -464,13 +466,13 @@ class ComponentProcessor(
         component: KSClassDeclaration,
         properties: List<ProcessableComponentFieldSpec>
     ): TypeSpec {
-        val builder = TypeSpec.classBuilder("${componentName}Proxy")
+        val builder = TypeSpec.classBuilder("${componentName}$PROXY_SUFFIX")
         builder.addProperty(
             PropertySpec.builder(
                 "storage",
                 ClassName(
                     component.packageName.asString(),
-                    "${componentName}DataStorage"
+                    "${componentName}$DATA_STORAGE_SUFFIX"
                 )
             )
                 .initializer("storage")
@@ -483,7 +485,7 @@ class ComponentProcessor(
                         name = "storage",
                         type = ClassName(
                             component.packageName.asString(),
-                            "${componentName}DataStorage"
+                            "${componentName}$DATA_STORAGE_SUFFIX"
                         )
                     ).build()
                 )

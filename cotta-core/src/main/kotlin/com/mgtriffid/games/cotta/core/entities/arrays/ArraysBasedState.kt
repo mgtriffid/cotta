@@ -42,6 +42,7 @@ class ArraysBasedState(
                 }
                 return getEntityView(id, tick)
             }
+
             override fun all(): Collection<Entity> {
                 return entitiesStorage.data.map { e -> getEntityView(EntityId(e.key), tick) }
             }
@@ -52,36 +53,45 @@ class ArraysBasedState(
         // TODO class, pooling
         return object : Entity {
             override val id: EntityId = id
-            override val ownedBy: Entity.OwnedBy = entitiesStorage.data.get(this.id.id).ownedBy
+            private val entityData = entitiesStorage.data.get(this.id.id)
+            override val ownedBy: Entity.OwnedBy
+                get() = entityData.ownedBy
 
             override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
-                val key = componentRegistry.getKey(clazz).key
-                val components = entitiesStorage.data.get(id.id).components
-                val index =
-                    if (componentRegistry.isHistorical(ShortComponentKey(key))) {
-                        components.getHistorical(key.toInt(), tick)
-                    } else {
-                        components.get(key.toInt())
-                    }
+                val key = componentRegistry.getKey(clazz)
+                val index = getIndex(key)
                 return index != -1
             }
 
             override fun <T : Component> getComponent(clazz: KClass<T>): T {
                 val key = componentRegistry.getKey(clazz)
+                val index = getIndex(key)
+                if (index == -1) {
+                    throw IllegalStateException("Entity ${id.id} does not have component ${clazz.simpleName}")
+                }
+
+                return (getComponentStorage<T>(key)).get(
+                    index,
+                    tick
+                )
+            }
+
+            private fun <T : Component> getComponentStorage(key: ShortComponentKey): ComponentStorage<T> {
+                @Suppress("UNCHECKED_CAST")
+                return componentsStorage.components[key.key.toInt()] as ComponentStorage<T>
+            }
+
+            private fun getIndex(
+                key: ShortComponentKey
+            ): Int {
                 val intKey = key.key.toInt()
-                val components = entitiesStorage.data.get(id.id).components
+                val components = entityData.components
                 val index = if (componentRegistry.isHistorical(key)) {
                     components.getHistorical(intKey, tick)
                 } else {
                     components.get(intKey)
                 }
-                if (index == -1) {
-                    throw IllegalStateException("Entity ${id.id} does not have component ${clazz.simpleName}")
-                }
-                return (componentsStorage.components.get(key.key.toInt()) as ComponentStorage<T>).get(
-                    index,
-                    tick
-                )
+                return index
             }
 
             override fun <C : Component> addComponent(component: C) {
@@ -101,55 +111,54 @@ class ArraysBasedState(
     private fun getInternal(id: EntityId, tick: Long) =
         object : Entity {
             override val id: EntityId = id
-            override val ownedBy: Entity.OwnedBy = entitiesStorage.data.get(this.id.id).ownedBy
+            private val entityData = entitiesStorage.data.get(this.id.id)
+            override val ownedBy: Entity.OwnedBy
+                get() = entityData.ownedBy
 
             override fun <T : Component> hasComponent(clazz: KClass<T>): Boolean {
                 val key = componentRegistry.getKey(clazz)
-                val index = if (componentRegistry.isHistorical(key)) {
-                    entitiesStorage.data.get(this.id.id).components.getHistorical(key.key.toInt(), tick)
-                } else {
-                    entitiesStorage.data.get(this.id.id).components.get(key.key.toInt())
-                }
+                val index = getIndex(key)
                 return index != -1 && !componentsStorage.components[key.key.toInt()].isMarkedRemoved(index)
+            }
+
+            private fun getIndex(key: ShortComponentKey): Int {
+                val intKey = key.key.toInt()
+                val components = entityData.components
+                val index = if (componentRegistry.isHistorical(key)) {
+                    components.getHistorical(intKey, tick)
+                } else {
+                    components.get(intKey)
+                }
+                return index
             }
 
             override fun <T : Component> getComponent(clazz: KClass<T>): T {
                 val key = componentRegistry.getKey(clazz)
-                val intKey = key.key.toInt()
-                val index = if (componentRegistry.isHistorical(key)) {
-                    entitiesStorage.data.get(this.id.id).components.getHistorical(
-                        intKey,
-                        tick
-                    )
-                } else {
-                    entitiesStorage.data.get(this.id.id).components.get(intKey)
-                }
+                val index = getIndex(key)
                 if (index == -1) {
                     throw IllegalStateException("Entity ${this.id.id} does not have component ${clazz.simpleName}")
                 }
-                return (componentsStorage.components[intKey] as ComponentStorage<T>).get(
-                    index
-                )
+                return getComponentStorage<T>(key).get(index)
             }
 
             override fun <C : Component> addComponent(component: C) {
                 val key = componentRegistry.getKey(component::class)
                 val intKey = key.key.toInt()
-                val index =
-                    (componentsStorage.components[intKey] as ComponentStorage<C>).add(
-                        component,
-                        this.id.id
-                    )
+                val index = getComponentStorage<C>(key).add(component, this.id.id)
                 val historical = componentRegistry.isHistorical(key)
-                entitiesStorage.data.get(this.id.id).components.addComponent(
-                    intKey, index, historical)
+                entityData.components.addComponent(intKey, index, historical)
             }
 
             override fun <T : Component> removeComponent(clazz: KClass<T>) {
-                val key = componentRegistry.getKey(clazz).key.toInt()
-                val index = entitiesStorage.data.get(this.id.id).components.get(key)
-                componentsStorage.components[key].markRemoved(index)
-                operations.add(Operation.RemoveComponent(this.id.id, key))
+                val key = componentRegistry.getKey(clazz)
+                val index = entityData.components.get(key.key.toInt())
+                getComponentStorage<T>(key).markRemoved(index)
+                operations.add(Operation.RemoveComponent(this.id.id, key.key.toInt()))
+            }
+
+            private fun <T : Component> getComponentStorage(key: ShortComponentKey): ComponentStorage<T> {
+                @Suppress("UNCHECKED_CAST")
+                return componentsStorage.components[key.key.toInt()] as ComponentStorage<T>
             }
 
             override fun components(): Collection<Component> {

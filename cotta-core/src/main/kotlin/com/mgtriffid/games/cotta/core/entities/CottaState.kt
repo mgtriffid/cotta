@@ -21,6 +21,13 @@ interface CottaState {
 
     fun setBlank(entities: EntitiesInternal)
 
+    /**
+     * "Blank" means the state without any dynamic entities. "Static" then?
+     * Why do we have static/blank terms ambiguity? Also function overload is
+     * super weird: when accepts `tick: Long` then it's "set state to blank",
+     * when it's setBlank(entities) then it's "define what blank is for this
+     * simulation".
+     */
     fun setBlank(tick: Long)
 
     fun copyTo(state: CottaState)

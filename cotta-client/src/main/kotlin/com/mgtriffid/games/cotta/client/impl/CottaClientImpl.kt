@@ -8,7 +8,6 @@ import com.mgtriffid.games.cotta.core.CottaGame
 import com.mgtriffid.games.cotta.core.GLOBAL
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.input.ClientInputId
 import jakarta.inject.Named
 import mu.KotlinLogging
 import kotlin.reflect.KClass
@@ -26,7 +25,6 @@ class CottaClientImpl @Inject constructor(
     @Named(GLOBAL) private val globalTickProvider: TickProvider,
     private val predictionSimulation: PredictionSimulation,
     @Named(SIMULATION) private val simulationTickProvider: TickProvider,
-    override val localPlayer: LocalPlayer,
     @Named("simulation") private val state: CottaState,
     @Named("guessed") private val guessedState: CottaState,
     private val drawableStateProvider: DrawableStateProvider,
@@ -42,8 +40,14 @@ class CottaClientImpl @Inject constructor(
     private var tickLength: Long = -1
 
     override fun initialize() {
-        game.initializeStaticState(CreatingStaticEntities(state.entities(getCurrentTick())))
-        state.setBlank(state.entities(getCurrentTick()))
+        game.initializeStaticState(
+            CreatingStaticEntities(
+                state.entities(
+                    getGlobalTick()
+                )
+            )
+        )
+        state.setBlank(state.entities(getGlobalTick()))
         tickLength = game.config.tickLength
     }
 
@@ -93,7 +97,7 @@ class CottaClientImpl @Inject constructor(
                                 simulationTickProvider,
                                 globalTickProvider
                             )
-                            clientState = ClientState.Running(getCurrentTick())
+                            clientState = ClientState.Running(getGlobalTick())
                             nextSimulationTickAt = now
                             nextLocalTickAt = now
                         }
@@ -136,39 +140,42 @@ class CottaClientImpl @Inject constructor(
         if (nextSimulationTickAt <= now) {
             logger.debug { "run called" }
             integrate()
-            nextSimulationTickAt += paceRegulator.simulationTickLength(
-                tickLength,
-                debugMetrics
-            )
+            updateNextSimulationTick()
         }
         if (nextLocalTickAt <= now) {
             logger.debug { "local tick called" }
             processLocalInput()
-            predict(
-                simulations.getLastConfirmedInput(),
-                simulations.getLastSimulationKind()
-            )
-            nextLocalTickAt += paceRegulator.localTickLength(
-                tickLength,
-                debugMetrics
-            )
+            predict()
+            updateNextTickAt()
             sendDataToServer()
         }
     }
 
-    private fun predict(
-        lastConfirmedInput: ClientInputId,
-        takeStateFrom: Simulations.SimulationKind
-    ) {
+    private fun updateNextSimulationTick() {
+        nextSimulationTickAt += paceRegulator.simulationTickLength(
+            tickLength,
+            debugMetrics
+        )
+    }
+
+    private fun updateNextTickAt() {
+        nextLocalTickAt += paceRegulator.localTickLength(
+            tickLength,
+            debugMetrics
+        )
+    }
+
+    private fun predict() {
         logger.debug { "Predicting" }
-        val currentTick = getCurrentTick()
-//        logger.debug { "Setting initial predictions state with tick $currentTick" }
+        val currentTick = getGlobalTick()
+        //        logger.debug { "Setting initial predictions state with tick $currentTick" }
         predictionSimulation.predict(
-            when (takeStateFrom) {
+            when (simulations.getLastSimulationKind()
+            ) {
                 Simulations.SimulationKind.AUTHORITATIVE -> state
                 Simulations.SimulationKind.GUESSED -> guessedState
             }.entities(currentTick),
-            lastConfirmedInput,
+            simulations.getLastConfirmedInput(),
             currentTick
         )
     }
@@ -180,7 +187,7 @@ class CottaClientImpl @Inject constructor(
         return drawableStateProvider.get(alphas, components)
     }
 
-    private fun getCurrentTick(): Long {
+    private fun getGlobalTick(): Long {
         return globalTickProvider.tick
     }
 

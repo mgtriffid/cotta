@@ -25,12 +25,10 @@ import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesInputRecip
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesStateRecipe
 import com.mgtriffid.games.cotta.core.serialization.bytes.recipe.BytesPlayersDeltaRecipe
 import com.mgtriffid.games.cotta.core.simulation.Simulation
-import com.mgtriffid.games.cotta.core.simulation.EntityOwnerSawTickProvider
 import com.mgtriffid.games.cotta.core.simulation.Players
 import com.mgtriffid.games.cotta.core.simulation.PlayersSawTicks
 import com.mgtriffid.games.cotta.core.simulation.SimulationInputHolder
 import com.mgtriffid.games.cotta.core.simulation.impl.AuthoritativeSimulationImpl
-import com.mgtriffid.games.cotta.core.simulation.impl.EntityOwnerSawTickProviderImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.PlayersSawTickImpl
 import com.mgtriffid.games.cotta.core.simulation.impl.SimulationInputHolderImpl
@@ -81,8 +79,6 @@ class CottaServerModule(
 
             bind(EffectBus::class.java).to(EffectBusImpl::class.java).`in`(Scopes.SINGLETON)
 
-            bind(EntityOwnerSawTickProvider::class.java).to(EntityOwnerSawTickProviderImpl::class.java)
-                .`in`(Scopes.SINGLETON)
             bind(Entities::class.java).annotatedWith(named("latest")).to(LatestEntities::class.java)
 
             bind(EntityProcessingContext::class.java).to(EntityProcessingContextImpl::class.java).`in`(Scopes.SINGLETON)

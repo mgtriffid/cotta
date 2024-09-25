@@ -47,6 +47,11 @@ class SimulationsImpl @Inject constructor(
         return lastSimulationKind
     }
 
+    override fun getState(): CottaState = when (lastSimulationKind) {
+        Simulations.SimulationKind.AUTHORITATIVE -> state
+        Simulations.SimulationKind.GUESSED -> guessedState
+    }
+
     override fun hopeless(): Boolean {
         return (tickProvider.tick - authoritativeTickProvider.tick) * game.config.tickLength > 5000
     }

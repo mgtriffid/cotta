@@ -26,7 +26,6 @@ class CottaClientImpl @Inject constructor(
     private val predictionSimulation: PredictionSimulation,
     @Named(SIMULATION) private val simulationTickProvider: TickProvider,
     @Named("simulation") private val state: CottaState,
-    @Named("guessed") private val guessedState: CottaState,
     private val drawableStateProvider: DrawableStateProvider,
     private val incomingDataBufferMonitor: IncomingDataBufferMonitor,
     override val debugMetrics: MetricRegistry,
@@ -170,11 +169,7 @@ class CottaClientImpl @Inject constructor(
         val currentTick = getGlobalTick()
         //        logger.debug { "Setting initial predictions state with tick $currentTick" }
         predictionSimulation.predict(
-            when (simulations.getLastSimulationKind()
-            ) {
-                Simulations.SimulationKind.AUTHORITATIVE -> state
-                Simulations.SimulationKind.GUESSED -> guessedState
-            }.entities(currentTick),
+            simulations.getState().entities(currentTick),
             simulations.getLastConfirmedInput(),
             currentTick
         )

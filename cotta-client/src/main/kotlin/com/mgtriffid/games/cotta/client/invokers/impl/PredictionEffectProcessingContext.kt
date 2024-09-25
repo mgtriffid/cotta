@@ -10,7 +10,7 @@ import com.mgtriffid.games.cotta.core.simulation.invokers.context.EffectProcessi
 import jakarta.inject.Inject
 import jakarta.inject.Named
 
-class PredictionTracingEffectProcessingContext @Inject constructor(
+class PredictionEffectProcessingContext @Inject constructor(
     @Named("prediction") private val createEntityStrategy: CreateEntityStrategy,
     @Named("prediction") private val entities: Entities,
     @Named("prediction") private val clock: CottaClock,

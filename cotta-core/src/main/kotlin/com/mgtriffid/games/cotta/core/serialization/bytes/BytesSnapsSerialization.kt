@@ -13,13 +13,7 @@ import com.mgtriffid.games.cotta.core.serialization.SnapsSerialization
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesChangedEntityRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesComponentDeltaRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesComponentRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesCottaTraceDto
-import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesCottaTraceElementDto
-import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesCreateEntityTraceDto
-import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesCreateEntityTracesDto
-import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesCreatedEntitiesWithTracesRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesDeltaRecipeDto
-import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesEffectRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesEntityRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesMetaEntitiesDeltaRecipeDto
 import com.mgtriffid.games.cotta.core.serialization.bytes.dto.BytesStateRecipeDto
@@ -63,14 +57,8 @@ class BytesSnapsSerialization : SnapsSerialization<
         kryo.register(LinkedHashMap::class.java, MapSerializer<LinkedHashMap<String, Any?>>())
         kryo.register(EntityIdDto::class.java)
         kryo.register(PlayerIdDto::class.java)
-        kryo.register(BytesCreateEntityTraceDto::class.java)
-        kryo.register(BytesCreateEntityTracesDto::class.java)
-        kryo.register(BytesCreatedEntitiesWithTracesRecipeDto::class.java)
         kryo.register(PlayersSawTicksDto::class.java)
-        kryo.register(BytesCottaTraceDto::class.java)
-        kryo.register(BytesCottaTraceElementDto::class.java)
         kryo.register(TraceElementDtoKind::class.java)
-        kryo.register(BytesEffectRecipeDto::class.java)
         kryo.register(BytesMetaEntitiesDeltaRecipeDto::class.java)
     }
 

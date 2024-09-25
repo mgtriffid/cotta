@@ -189,7 +189,7 @@ class CottaClientModule(
             .`in`(Scopes.SINGLETON)
         bind(EffectProcessingContext::class.java)
             .annotatedWith(Names.named("prediction"))
-            .to(PredictionTracingEffectProcessingContext::class.java)
+            .to(PredictionEffectProcessingContext::class.java)
             .`in`(Scopes.SINGLETON)
 
         bind(LocalPlayerInputs::class.java).to(LocalPlayerInputsImpl::class.java)

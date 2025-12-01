@@ -4,6 +4,8 @@ import com.badlogic.gdx.utils.IntIntMap
 
 internal class EntityComponents {
     private val regular = IntIntMap()
+    private val historical = Array(8) { IntIntMap() }
+
     private var index: Int = 0
 
     var tick: Long = 0
@@ -11,8 +13,6 @@ internal class EntityComponents {
             field = value
             index = (value % 8).toInt()
         }
-
-    private val historical = Array(8) { IntIntMap() }
 
     fun addComponent(componentType: Int, index: Int, isHistorical: Boolean) {
         if (isHistorical) {

@@ -1,16 +1,10 @@
 package com.mgtriffid.games.cotta.core.test.arrays
 
-import com.esotericsoftware.kryo.Kryo
-import com.mgtriffid.games.cotta.core.entities.arrays.ArraysBasedState
-import com.mgtriffid.games.cotta.core.registry.impl.ComponentRegistryImpl
-import com.mgtriffid.games.cotta.core.registry.registerComponents
-import com.mgtriffid.games.cotta.core.test.workload.GameStub
 import com.mgtriffid.games.cotta.core.test.workload.components.AnotherComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.SimpleComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.createAnotherComponent
 import com.mgtriffid.games.cotta.core.test.workload.components.createSimpleComponent
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class BasicArraysEntitiesTest : ArraysEcsTest() {

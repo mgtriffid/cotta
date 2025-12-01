@@ -13,14 +13,14 @@ import com.mgtriffid.games.cotta.core.registry.ShortComponentKey
 import kotlin.collections.ArrayList
 import kotlin.reflect.KClass
 
-class ArraysBasedState(
+class ArraysDatabase(
     private val componentRegistry: ComponentRegistry,
     private val stateHistoryLength: Int = 64
 ) : StateView {
     private val tick: StateTick = StateTick(0L)
     private var idGenerator = 0
-    private val entitiesStorage = DynamicEntitiesStorage(tick)
-    val componentsStorage = ComponentsStorage(tick)
+    private val entitiesStorage = DynamicEntitiesStorage(tick) // data gose here
+    val componentsStorage = ComponentsStorage(tick) // and here
     private val removed = mutableListOf<EntityId>()
     private val operations = ArrayList<Operation>()
 

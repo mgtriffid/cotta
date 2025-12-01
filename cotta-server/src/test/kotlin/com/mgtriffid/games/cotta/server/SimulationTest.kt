@@ -5,7 +5,6 @@ import com.google.inject.Key
 import com.google.inject.name.Names
 import com.mgtriffid.games.cotta.core.SIMULATION
 import com.mgtriffid.games.cotta.core.entities.*
-import com.mgtriffid.games.cotta.core.entities.arrays.ArraysBasedState
 import com.mgtriffid.games.cotta.core.entities.arrays.ArraysCottaState
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import com.mgtriffid.games.cotta.core.input.NonPlayerInput
@@ -25,14 +24,10 @@ import com.mgtriffid.games.cotta.server.workload.components.createHealthTestComp
 import com.mgtriffid.games.cotta.server.workload.components.createLinearPositionTestComponent
 import com.mgtriffid.games.cotta.server.workload.components.createPlayerControlledStubComponent
 import com.mgtriffid.games.cotta.server.workload.components.createVelocityTestComponent
-import com.mgtriffid.games.cotta.server.workload.effects.createHealthRegenerationTestEffect
 import com.mgtriffid.games.cotta.server.workload.systems.*
-import org.checkerframework.checker.units.qual.Current
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.io.File
-import java.util.Properties
 
 class SimulationTest {
     private lateinit var tickProvider: TickProvider

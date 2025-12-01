@@ -5,14 +5,20 @@ import com.mgtriffid.games.cotta.core.entities.id.EntityId
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 
 class ArraysEntitiesInternal(
-    private val internal: ArraysBasedState,
+    private val internal: ArraysDatabase,
     private val tick: Long
 ) : EntitiesInternal {
     override fun currentId(): Int {
         TODO("Not yet implemented")
     }
 
-    override fun create(id: EntityId,  ownedBy: Entity.OwnedBy): Entity {
+    // Used in PredictionCreationStrategy (why?)
+    // Used in BytesSnapper - should be done differently, we're going to pass
+    // nearly raw data over network, then we'll push arrays into arrays and be
+    // happy
+    // Used in PredictedLatestEntities - why?
+    // It's not completely clear why do we have special IDs of Entities in prediction.
+    override fun create(id: EntityId, ownedBy: Entity.OwnedBy): Entity {
         TODO("Not yet implemented")
     }
 

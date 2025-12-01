@@ -4,11 +4,14 @@ import com.mgtriffid.games.cotta.core.entities.CottaState
 import com.mgtriffid.games.cotta.core.entities.impl.EntitiesInternal
 import com.google.inject.Inject
 import com.mgtriffid.games.cotta.core.registry.ComponentRegistry
+import kotlin.math.max
 
 class ArraysCottaState @Inject constructor(
     private val componentRegistry: ComponentRegistry
 ) : CottaState {
-    private val internal = ArraysBasedState(componentRegistry)
+    private val internal = ArraysDatabase(componentRegistry)
+
+    private var latestTickSet = 0L
 
     override fun entities(atTick: Long): EntitiesInternal {
         return ArraysEntitiesInternal(internal, atTick)
@@ -19,7 +22,13 @@ class ArraysCottaState @Inject constructor(
     }
 
     override fun set(tick: Long, entities: EntitiesInternal) {
-        TODO("Not yet implemented")
+        latestTickSet = max(latestTickSet, tick)
+        // what is that then: entities are stored in EntitiesStorage and
+        // ComponentsStorage.
+        // Need to copy arrays.
+        // Also need to reach for arrays directly in serialization anyway
+        // So perhaps it makes sense to first expose raw data getters?
+        TODO()
     }
 
     override fun wipe() {

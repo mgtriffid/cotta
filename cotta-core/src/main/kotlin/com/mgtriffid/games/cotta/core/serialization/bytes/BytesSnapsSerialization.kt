@@ -28,7 +28,6 @@ import com.mgtriffid.games.cotta.core.serialization.dto.EntityIdDto
 import com.mgtriffid.games.cotta.core.serialization.dto.EntityOwnedByDto
 import com.mgtriffid.games.cotta.core.serialization.dto.PlayerIdDto
 import com.mgtriffid.games.cotta.core.serialization.dto.PlayersSawTicksDto
-import com.mgtriffid.games.cotta.core.serialization.dto.TraceElementDtoKind
 import com.mgtriffid.games.cotta.core.serialization.toDto
 import com.mgtriffid.games.cotta.core.serialization.toEntityId
 import com.mgtriffid.games.cotta.core.serialization.toOwnedBy
@@ -58,7 +57,6 @@ class BytesSnapsSerialization : SnapsSerialization<
         kryo.register(EntityIdDto::class.java)
         kryo.register(PlayerIdDto::class.java)
         kryo.register(PlayersSawTicksDto::class.java)
-        kryo.register(TraceElementDtoKind::class.java)
         kryo.register(BytesMetaEntitiesDeltaRecipeDto::class.java)
     }
 
